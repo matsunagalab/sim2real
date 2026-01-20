@@ -1,0 +1,8 @@
+fep4idlにはK1Qの変異がない
+
+fepの1melはvhh/PLM/csvにあるデータの配列が欠損しているためvhh/data/ddGにあるデータから作成した
+
+どちらもglnscanについてはpartialではなくallの方を使用している
+
+
+
