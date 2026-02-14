@@ -1,0 +1,90 @@
+{
+  "workbench.editorAssociations": {
+    "*.pdf": "latex-workshop-pdf-hook"
+  },
+  // LaTeX Workshop 基本設定
+  "latex-workshop.latex.autoBuild.run": "onSave",
+  "latex-workshop.latex.autoClean.run": "onBuilt",
+
+  // ビルドレシピ（pdflatex + bibtex + エラー解析）
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "pdflatex -> bibtex -> pdflatex x2 -> parse errors",
+      "tools": ["pdflatex", "bibtex", "pdflatex", "pdflatex", "parse_errors"]
+    },
+    {
+      "name": "pdflatex (quick)",
+      "tools": ["pdflatex", "parse_errors"]
+    }
+  ],
+
+  // ビルドツール定義
+  "latex-workshop.latex.tools": [
+    {
+      "name": "pdflatex",
+      "command": "pdflatex",
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "%DOC%"
+      ]
+    },
+    {
+      "name": "bibtex",
+      "command": "bibtex",
+      "args": ["%DOCFILE%"]
+    },
+    {
+      "name": "parse_errors",
+      "command": "bash",
+      "args": ["scripts/parse_latex_errors.sh", "%DOCFILE%.log"]
+    }
+  ],
+
+  // ルートファイル設定（どの.texを編集してもmain.texをビルド）
+  "latex-workshop.latex.rootFile.doNotPrompt": true,
+  "latex-workshop.latex.rootFile.useSubFile": false,
+  "latex-workshop.latex.search.rootFiles.include": ["tex/main.tex"],
+  "latex-workshop.latex.watch.files.ignore": ["**/*.bbl", "**/*.aux"],
+
+  // PDF プレビュー設定
+  "latex-workshop.view.pdf.viewer": "tab",
+  "latex-workshop.view.pdf.zoom": "page-width",
+
+  // chktex による構文チェック
+  "latex-workshop.linting.chktex.enabled": true,
+
+  // SyncTeX（ソース↔PDF 同期）
+  "latex-workshop.synctex.afterBuild.enabled": true,
+
+  // 出力ディレクトリ（tex/ 内でビルド）
+  "latex-workshop.latex.outDir": "%DIR%",
+
+  // クリーンアップ対象ファイル（logは残す）
+  "latex-workshop.latex.clean.fileTypes": [
+    "*.aux",
+    "*.bbl",
+    "*.blg",
+    "*.idx",
+    "*.ind",
+    "*.lof",
+    "*.lot",
+    "*.out",
+    "*.toc",
+    "*.acn",
+    "*.acr",
+    "*.alg",
+    "*.glg",
+    "*.glo",
+    "*.gls",
+    "*.fls",
+    "*.fdb_latexmk",
+    "*.snm",
+    "*.nav",
+    "*.synctex.gz"
+  ],
+
+  // エラー時もPDFを表示
+  "latex-workshop.latex.autoBuild.cleanAndRetry.enabled": true
+}

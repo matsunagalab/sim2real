@@ -1,0 +1,54 @@
+% main.tex - Interactive Paper Writing System
+% Based on HenriquesLab bioRxiv template
+% Template: https://www.overleaf.com/latex/templates/henriqueslab-biorxiv-template/nyprsybwffws
+
+\documentclass[times, twoside]{zHenriquesLab-StyleBioRxiv}
+\usepackage{blindtext}
+
+% ===== SETTINGS =====
+\graphicspath{{figures/}}
+
+% Lead author for running footer
+% TODO: Update lead author surname
+\leadauthor{Matsunaga}
+
+\begin{document}
+
+% ===== TITLE =====
+% TODO: Placeholder for template users; replace when preparing a real submission
+\title{TODO: Paper Title}
+\shorttitle{TODO: Short Title}
+
+% ===== AUTHORS =====
+% Use letters for affiliations, numbers for equal authorship, \Letter for corresponding
+\author[1]{Tsuyoshi Kawai}
+\author[1,2,\Letter]{Yasuhiro Matsunaga}
+
+\affil[1]{Graduate School of Science and Engineering, Saitama University}
+\affil[2]{RIKEN Center for Computational Science}
+
+\maketitle
+
+% ===== SECTION ORDER (EDITABLE BY CLAUDE) =====
+% NOTE: The section order is defined in AUTHOR_GUIDELINES.md (SECTION_ORDER: ...).
+% Claude Code should only edit the order of \input lines inside this block.
+\input{sections/abstract}
+\input{sections/introduction}
+\input{sections/methods}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/acknowledgments}
+% ===== END SECTION ORDER =====
+
+% ===== REFERENCES =====
+\section*{Bibliography}
+\bibliography{refs}
+
+% ===== SUPPLEMENTARY (after references) =====
+%TC:ignore
+\onecolumn
+\newpage
+\input{sections/supplementary}
+%TC:endignore
+
+\end{document}
