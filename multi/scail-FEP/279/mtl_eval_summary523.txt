@@ -1,0 +1,15 @@
+=== Mean & 90% Bootstrap CI (percentile) ===
+MSE        mean =  89.211772   90% CI = [ 86.801498,  91.791119]
+RMSE       mean =  9.415281   90% CI = [ 9.294415,  9.542633]
+R2         mean =  0.114232   90% CI = [ 0.089060,  0.138123]
+MAE        mean =  7.503583   90% CI = [ 7.404459,  7.605893]
+Spearman   mean =  0.447654   90% CI = [ 0.428654,  0.465604]
+Pearson    mean =  0.453629   90% CI = [ 0.435096,  0.471148]
+
+=== Sample Std (across runs) ===
+MSE        std  =  15.173405
+RMSE       std  =  0.754956
+R2         std  =  0.149048
+MAE        std  =  0.612855
+Spearman   std  =  0.111818
+Pearson    std  =  0.108576
