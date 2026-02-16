@@ -1,0 +1,4 @@
+ESM.pyは44個のデータで学習させるプログラム
+pLM.pyは検証用プログラム(testデータの数は12)出力がmtl_eval_per_run.csv,mtl_eval_summary.txt
+pLM523.pyはテストデータ523個で検証するためのプログラム。出力がmtl_eval_per_run_523.csv,mtl_eval_summary523.txt
+pLM2-2.pyは結果csvファイルから特定のrun（例1-100）などでデータをまとめるためのプログラム
