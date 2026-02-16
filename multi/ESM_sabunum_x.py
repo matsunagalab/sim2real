@@ -84,6 +84,8 @@ def format_time(seconds: float) -> str:
 
 def load_and_prepare_datasets(seed: int):
     DATA_PATH_TM = "/data2/ssk/ESM2/splitdata/Tm10/splitdata/train2-"+ str(seed)+".csv"      # TmデータCSV
+    #DATA_PATH_DDG_1mel = "/data2/ssk/DATA/ro_1mel/dataset_st_yj.csv"   #ΔΔGデータCSV
+    #DATA_PATH_DDG_4idl = "/data2/ssk/DATA/ro_4idl/dataset_st_yj.csv"   #ΔΔGデータCSV
     DATA_PATH_DDG_1mel = "/data2/ssk/githubtest/sim2real/data/foldX/1mel_all-var_ddg_with_rosettaddg_with_foldx_processed.csv"   #ΔΔGデータCSV
     DATA_PATH_DDG_4idl = "/data2/ssk/githubtest/sim2real/data/foldX/4idl_all-var_ddg_with_rosettaddg_with_foldx_processed.csv"   #ΔΔGデータCSV
 
@@ -100,8 +102,15 @@ def load_and_prepare_datasets(seed: int):
     train_ds_tm = split_tm['train']
     val_ds_tm = split_tm['test']
 
+
+    # ← ここで直前に決める（例：1000件使う）
+    n_ddg = 10
+    seed_ddg = seed
+
     # 1mel
     df_ddg1 = pd.read_csv(DATA_PATH_DDG_1mel)
+    #random
+    df_ddg1 = df_ddg1.sample(n= n_ddg , random_state = seed_ddg).reset_index(drop=True)
     df_ddg1 = pd.DataFrame({
         'text': df_ddg1['seq'].tolist(),
         'label': df_ddg1['ddg_scaled01'].tolist(),
@@ -114,6 +123,7 @@ def load_and_prepare_datasets(seed: int):
 
     # 4idl
     df_ddg2 = pd.read_csv(DATA_PATH_DDG_4idl)
+    df_ddg2 = df_ddg2.sample(n= n_ddg , random_state = seed_ddg).reset_index(drop=True)
     df_ddg2 = pd.DataFrame({
         'text': df_ddg2['seq'].tolist(),
         'label': df_ddg2['ddg_scaled01'].tolist(),
