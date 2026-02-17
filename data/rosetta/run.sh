@@ -2,7 +2,7 @@
 #SBATCH -p all
 #SBATCH -J r_1mel
 #SBATCH -n 1
-#SBATCH -c 8
+#SBATCH -c 1
 #SBATCH -o run.log
 set -euo pipefail
 
@@ -27,8 +27,8 @@ export LD_LIBRARY_PATH="${ROSETTA_EXT_LIB}:${ROSETTA_SRC_LIB}:/lib/x86_64-linux-
 "${ROSETTA_ROOT}/tools/protein_tools/scripts/clean_pdb.py" --keepzeroocc "${PDB_ID}.pdb" "${CHAIN_ID}"
 
 # Generate mutation list and sequences
-/usr/bin/python3 ../sequence_to_rosetta_mutations.py \
-  --csv_file 1mel_all-var_ddg.csv \
+/usr/bin/python3 sequence_to_rosetta_mutations.py \
+  --csv_file 1mel_all-var_ddg_v2.csv \
   --wildtype "VQLQASGGGSVQAGGSLRLSCAASGYTIGPYCMGWFRQAPGKEREGVAAINMGGGITYYADSVKGRFTISQDNAKNTVYLLMNSLEPEDTAIYYCAADSTIYASYYECGHGLSTGGYGYDSWGQGTQVTVSS" \
   --variant_column "mutant_sequence" \
   --output_file muts.txt \

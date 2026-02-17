@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -p all
-#SBATCH -J rosetta_1mel_re
+#SBATCH -J rosetta_1mel
 #SBATCH -n 1
 #SBATCH -c 1
 #SBATCH -o run.log
