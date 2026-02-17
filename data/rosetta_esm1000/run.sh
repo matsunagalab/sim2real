@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -p all
-#SBATCH -J r_1mel_2muts_plm_re
+#SBATCH -J r_1mel_2muts_plm
 #SBATCH -n 1
 #SBATCH -c 1
 #SBATCH -o run.log
