@@ -107,3 +107,45 @@ foldx --command=BuildModel --pdb=yourfile_Repair.pdb --mutant-file=individual_li
 | Raw_1mel_Repair.fxout | WT/変異体それぞれの生データ |
 | PdbList_1mel_Repair.fxout | 生成 PDB の名前一覧 |
 | 1mel_Repair_0_ST.fxout | 入力構造のエネルギー情報 |
+
+### 4. foldx_to_csv.py で変異体配列・ddG の CSV を出力
+
+**foldx_to_csv.py** は、`individual_list` と `Dif_*_Repair.fxout` および**入力配列（野生型）**から、変異体ごとの配列と FoldX の ddG を 1 行にまとめた CSV を出力します。`make_individual_list.py` で individual_list を作成したときと同じ配列と `--start-residue` を指定してください。
+
+**コマンドライン**
+
+```bash
+python foldx_to_csv.py --individual-list <individual_list> --fxout <Dif_*_Repair.fxout> --sequence "<アミノ酸配列>" [--output <CSV>] [--start-residue N]
+```
+
+| オプション | 短縮 | 必須 | 説明 |
+|------------|------|------|------|
+| `--individual-list` | `-i` | ○ | individual_list ファイル（例: individual_list_1mel_all.txt） |
+| `--fxout` | `-f` | ○ | FoldX の Dif_*_Repair.fxout ファイル |
+| `--sequence` | `-s` | ○ | 野生型アミノ酸配列（individual_list 作成時と同じもの） |
+| `--output` | `-o` | - | 出力 CSV パス（既定: foldx_ddg.csv） |
+| `--start-residue` | - | - | 配列の先頭の PDB 残基番号（make_individual_list と同一、既定: 1） |
+
+**出力 CSV の列**
+
+| 列 | 説明 |
+|----|------|
+| position | PDB 残基番号（1-based） |
+| wt_aa | 野生型アミノ酸 |
+| mut_aa | 変異先アミノ酸 |
+| mutation | 変異ラベル（例: V2A） |
+| variant_sequence | 変異体のアミノ酸配列 |
+| ddG | FoldX の total energy（変異の安定性変化） |
+
+**実行例（1MEL 全単変異）**
+
+```bash
+python foldx_to_csv.py \
+  --individual-list individual_list_1mel_all.txt \
+  --fxout Dif_1MEL-all_Repair.fxout \
+  --sequence "VQLQASGGGSVQAGGSLRLSCAASG..." \
+  --output 1mel_all_foldx_ddg.csv \
+  --start-residue 2
+```
+
+`--start-residue` は、その配列で individual_list を作ったときに `make_individual_list.py` に渡した値と揃えてください。
