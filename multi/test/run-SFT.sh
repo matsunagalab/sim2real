@@ -5,7 +5,7 @@
 #SBATCH -c 1                     # threads per MPI process
 #SBATCH --mail-type=ALL
 #SBATCH -o run_%A_%a.log         # %A=ジョブID, %a=タスクID
-#SBATCH --array=101-500%7           # タスクIDを 1～10, 同時に最大5ジョブ
+#SBATCH --array=1-5%5           # タスクIDを 1～10, 同時に最大5ジョブ
 
 # set GPU ID if needed
 # export CUDA_VISIBLE_DEVICES="3"
