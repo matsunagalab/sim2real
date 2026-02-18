@@ -83,7 +83,7 @@ def format_time(seconds: float) -> str:
 
 
 def load_and_prepare_datasets(seed: int):
-    DATA_PATH_TM = "/data2/ssk/ESM2/splitdata/Tm10/splitdata/train2-"+ str(seed)+".csv"      # TmデータCSV
+    DATA_PATH_TM = "/data2/ssk/githubtest/sim2real/data/Tm/Tm10per/train2-"+ str(seed)+".csv"      # TmデータCSV
     #DATA_PATH_DDG_1mel = "/data2/ssk/DATA/ro_1mel/dataset_st_yj.csv"   #ΔΔGデータCSV
     #DATA_PATH_DDG_4idl = "/data2/ssk/DATA/ro_4idl/dataset_st_yj.csv"   #ΔΔGデータCSV
     DATA_PATH_DDG_1mel = "/data2/ssk/githubtest/sim2real/data/foldX/1mel_all-var_ddg_with_rosettaddg_with_foldx_processed.csv"   #ΔΔGデータCSV
