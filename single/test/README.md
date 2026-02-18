@@ -1,3 +1,6 @@
+とりあえずsbatch --gres=gpu:a6000:1 -w floyd run.shで流れます seedを変えて流す回数はrun-SFT.shの#SBATCH --array=n-m%7を変更してください seed1-100を流す場合#SBATCH --array=1-100%7 デフォルトは1-5にしました
+
+
 ESM.pyがマルチタスク学習を行うプログラム
 Tm,ΔΔG(1mel),ΔΔG(4dil)の3つのheadを1/2,1/4,1/4の割合で学習している
 
@@ -13,6 +16,11 @@ seed1-100を流す場合#SBATCH --array=1-100%7
 
 pLM523.pyは検証用プログラム
 同じフォルダにあればそのままpython3 pLM523.pyで使える
+
+pLM523.pyでseedを変えた回数 metricss = [] for i in range(n): # ---- Paths (adjust as needed) ---- nの数字を変更してください
+
+
+
 mtl_eval_summary523.txtを出力する
 例
 === Mean & 90% Bootstrap CI (percentile) ===
