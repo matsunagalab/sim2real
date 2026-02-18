@@ -24,8 +24,9 @@ run-SFTはバッチファイルであり
 seed1-100を流す場合#SBATCH --array=1-100%7
 
 
-test.pyについて
-同じフォルダにあればそのままpython3 test.pyで使える
+pLM523.pyは検証用プログラム 同じフォルダにあればそのままpython3 pLM523.pyで使える
+
+
 mtl_eval_summary523.txtを出力する
 例
 === Mean & 90% Bootstrap CI (percentile) ===
