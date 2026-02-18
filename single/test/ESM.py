@@ -34,16 +34,16 @@ import json
 # ---- Environment variables ----
 os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:512'
 os.environ['WANDB_DISABLED'] = 'true'
-#os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+#os.environ['CUDA_VISIBLE_DEVICES'] = '2'
 
 # ---- Constants (adjust paths) ----
 MODEL_NAME = "facebook/esm2_t6_8M_UR50D"
 SELF_SUPERVISED_MODEL_PATH = "facebook/esm2_t6_8M_UR50D"
-
 DATA_PATH_TM = None      # TmデータCSV
-DATA_PATH_DDG_1mel = None  # ΔΔGデータCSV
-DATA_PATH_DDG_4idl = None  # ΔΔGデータCSV
+DATA_PATH_DDG = None            # ΔΔGデータCSV
+
 DATA_PATH_TM_TEST = None  # TmデータCSV
+DATA_PATH_DDG_TEST = None           # ΔΔGデータCSV
 
 
 HPARAMS = {
@@ -59,7 +59,7 @@ HPARAMS = {
 }
 
 
-    
+
 
 
 # ---- Utils ----
@@ -83,71 +83,33 @@ def format_time(seconds: float) -> str:
 
 
 def load_and_prepare_datasets(seed: int):
-    DATA_PATH_TM = "/data2/ssk/ESM2/splitdata/Tm10/splitdata/train2-"+ str(seed)+".csv"      # TmデータCSV
-    DATA_PATH_DDG_1mel = "/data2/ssk/githubtest/sim2real/data/foldX/1mel_all-var_ddg_with_rosettaddg_with_foldx_processed.csv"   #ΔΔGデータCSV
-    DATA_PATH_DDG_4idl = "/data2/ssk/githubtest/sim2real/data/foldX/4idl_all-var_ddg_with_rosettaddg_with_foldx_processed.csv"   #ΔΔGデータCSV
+    DATA_PATH_TM = "/data2/ssk/githubtest/sim2real/data/Tm/Tm10per/train2-"+ str(seed)+".csv"      # TmデータCSV
+    #DATA_PATH_DDG = "/data2/ssk/ESM2/splitdata/FEP/splitdata/train2-"+ str(seed)+".csv"            # ΔΔGデータCSV
 
-    # Tm
+
+    #DATA_PATH_TM_TEST = "/data2/ssk/ESM2/splitdata/Tm10/splitdata/test2-"+ str(seed)+".csv"      # TmデータCSV
+    #DATA_PATH_DDG_TEST = "/data2/ssk/ESM2/splitdata/FEP/splitdata/test2-"+ str(seed)+".csv"            # ΔΔGデータCSV
+
+
+    #train
+    #Tm dataset
     df_tm = pd.read_csv(DATA_PATH_TM)
-    df_tm = pd.DataFrame({
-        'text': df_tm['text'].tolist(),
-        'label': df_tm['label'].tolist(),
-        'task': [0] * len(df_tm)  # Tm の task_id = 0
-    })
-    ds_tm = Dataset.from_pandas(df_tm)
-
-    split_tm = ds_tm.train_test_split(test_size=0.2, seed=seed)
-    train_ds_tm = split_tm['train']
-    val_ds_tm = split_tm['test']
-
-    # 1mel
-    df_ddg1 = pd.read_csv(DATA_PATH_DDG_1mel)
-    df_ddg1 = pd.DataFrame({
-        'text': df_ddg1['seq'].tolist(),
-        'label': df_ddg1['ddg_scaled01'].tolist(),
-        'task': [1] * len(df_ddg1)   # 1mel の task_id = 1
-    })
-    ds_ddg1 = Dataset.from_pandas(df_ddg1)
-    split_ddg1 = ds_ddg1.train_test_split(test_size=0.2, seed=seed)
-    train_ds_ddg1 = split_ddg1['train']
-    val_ds_ddg1 = split_ddg1['test']
-
-    # 4idl
-    df_ddg2 = pd.read_csv(DATA_PATH_DDG_4idl)
-    df_ddg2 = pd.DataFrame({
-        'text': df_ddg2['seq'].tolist(),
-        'label': df_ddg2['ddg_scaled01'].tolist(),
-        'task': [2] * len(df_ddg2)   # 4idl の task_id = 2
-    })
-    ds_ddg2 = Dataset.from_pandas(df_ddg2)
-    split_ddg2 = ds_ddg2.train_test_split(test_size=0.2, seed=seed)
-    train_ds_ddg2 = split_ddg2['train']
-    val_ds_ddg2 = split_ddg2['test']
-
-
-    df_train_combined = pd.concat(
-        [
-            train_ds_tm.to_pandas(),
-            train_ds_ddg1.to_pandas(),
-            train_ds_ddg2.to_pandas(),
-        ],
-        ignore_index=True
-    )
-    df_val_combined = pd.concat(
-        [
-            val_ds_tm.to_pandas(),
-            val_ds_ddg1.to_pandas(),
-            val_ds_ddg2.to_pandas(),
-        ],
-        ignore_index=True
-    )
-
-    train_ds = Dataset.from_pandas(df_train_combined)
-    val_ds = Dataset.from_pandas(df_val_combined)
-
+    texts_tm = df_tm['text'].tolist()
+    labels_tm = df_tm['label'].tolist()
+    tasks_tm = [0] * len(labels_tm)
+    
+    # combine
+    texts = texts_tm
+    labels = labels_tm
+    tasks = tasks_tm
+    df = pd.DataFrame({'text': texts, 'label': labels, 'task': tasks})
+    ds = Dataset.from_pandas(df)
+    # 学習データを8:2に分割（val_size=0.2を直書き）
+    split = ds.train_test_split(test_size=0.2, seed=seed)
+    train_ds = split['train']
+    val_ds   = split['test']
 
     return train_ds, val_ds
-
 
 
 
@@ -178,9 +140,6 @@ class MultiTaskModel(nn.Module):
         )
 
         self.tm_head = nn.Linear(32, 1)
-        self.ddg_head = nn.Linear(32, 1)
-        self.ddg_head2 = nn.Linear(32, 1)
-
         self.loss_fn = nn.MSELoss()
         
 
@@ -192,38 +151,14 @@ class MultiTaskModel(nn.Module):
         feats = self.shared(pooled)
 
         tm_logits = self.tm_head(feats).view(-1)
-        ddg_logits = self.ddg_head(feats).view(-1)
-        ddg_logits2 = self.ddg_head2(feats).view(-1)
 
         if task_ids is not None:
-            logits = torch.zeros_like(tm_logits)
-            mask_tm = task_ids == 0
-            mask_ddg = task_ids == 1
-            mask_ddg2 = task_ids == 2
-            logits[mask_tm] = tm_logits[mask_tm]
-            logits[mask_ddg] = ddg_logits[mask_ddg]
-            logits[mask_ddg2] = ddg_logits2[mask_ddg2]
-
-            loss = None
-            if labels is not None:
-                losses = []
-                # Tm 損失に重み
-                if mask_tm.any():
-                    losses.append((1/2)*self.loss_fn(tm_logits[mask_tm], labels[mask_tm]))
-                # ΔΔG 損失に重み
-                if mask_ddg.any():
-                    losses.append((1/4) * self.loss_fn(ddg_logits[mask_ddg], labels[mask_ddg]))
-                if mask_ddg2.any():
-                    losses.append((1/4) * self.loss_fn(ddg_logits2[mask_ddg2], labels[mask_ddg2]))
-                # どちらのマスクも空ならゼロテンソルを返す
-                if losses:
-                    loss = sum(losses)
-                else:
-                    loss = torch.tensor(0.0, device=tm_logits.device)
-                
+            # task_ids は受け取るが、単一ヘッドのみで学習・推論
+            logits = tm_logits
+            loss = self.loss_fn(logits, labels) if labels is not None else None
             return SequenceClassifierOutput(loss=loss, logits=logits)
 
-        return {'tm': tm_logits, 'ddg': ddg_logits , 'ddg2': ddg_logits2}
+        return {'tm': tm_logits}
 
 # ---- Metrics ----
 def compute_metrics(pred):
@@ -286,7 +221,7 @@ def main():
         logging_steps=10,
 
         load_best_model_at_end=True,         # ベストモデルを最後に自動読み込み
-        metric_for_best_model="eval_mse",        # 指標に mse を使う
+        metric_for_best_model="eval_loss",        # 指標に mse を使う
         greater_is_better=False,             # mse は小さいほうが良い
         save_total_limit=1,                  # 最大１つだけチェックポイントを残す
         warmup_steps=100,
@@ -295,7 +230,7 @@ def main():
         report_to="none",
         fp16=torch.cuda.is_available(),
     )
-
+    
     #early_cb = EarlyStoppingCallback(
     #early_stopping_patience=HPARAMS["early_stopping_patience"],
     #early_stopping_threshold=HPARAMS["early_stopping_threshold"],
