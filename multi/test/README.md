@@ -1,3 +1,8 @@
+とりあえずsbatch --gres=gpu:a6000:1 -w floyd run.shで流れます
+seedを変えて流す回数はrun-SFT.shの#SBATCH --array=n-m%7を変更してください
+seed1-100を流す場合#SBATCH --array=1-100%7
+デフォルトは1-5にしました
+
 ESM.pyがマルチタスク学習を行うプログラム
 Tm,ΔΔG(1mel),ΔΔG(4dil)の3つのheadを1/2,1/4,1/4の割合で学習している
 
