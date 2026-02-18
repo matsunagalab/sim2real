@@ -26,6 +26,11 @@ seed1-100を流す場合#SBATCH --array=1-100%7
 
 pLM523.pyは検証用プログラム 同じフォルダにあればそのままpython3 pLM523.pyで使える
 
+pLM523.pyでseedを変えた回数
+metricss = []
+for i in range(n):
+    # ---- Paths (adjust as needed) ----
+nの数字を変更してください
 
 mtl_eval_summary523.txtを出力する
 例
