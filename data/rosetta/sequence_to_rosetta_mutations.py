@@ -1,22 +1,63 @@
 import csv
-import json
 import os
 import math
 from argparse import ArgumentParser
 
 
-def csv_to_rosetta_mutations(csv_file: str, output_file: str, num_files: int = 1):
+def compare_sequences(wildtype: str, variant: str) -> list:
     """
-    Reads a CSV file with mutation information and generates Rosetta-formatted
-    mutation list file(s). Supports multiple mutations per variant and splitting
-    output into multiple files.
+    Compare wildtype and variant sequences to detect mutations.
     
     Args:
-        csv_file: Path to input CSV file with columns: sequence, num_mutations, mutations
+        wildtype: Wildtype amino acid sequence
+        variant: Variant amino acid sequence
+        
+    Returns:
+        List of mutations, each as a dict with keys: position, original_aa, mutated_aa
+    """
+    mutations = []
+    
+    # Check sequence lengths
+    if len(wildtype) != len(variant):
+        raise ValueError(
+            f"Sequence length mismatch: wildtype has {len(wildtype)} residues, "
+            f"variant has {len(variant)} residues"
+        )
+    
+    # Compare position by position (1-based indexing for Rosetta)
+    for pos in range(len(wildtype)):
+        wt_aa = wildtype[pos]
+        var_aa = variant[pos]
+        
+        if wt_aa != var_aa:
+            mutations.append({
+                'position': pos + 1,  # 1-based for Rosetta
+                'original_aa': wt_aa,
+                'mutated_aa': var_aa
+            })
+    
+    return mutations
+
+
+def sequence_to_rosetta_mutations(csv_file: str, wildtype: str, output_file: str, variant_column: str = "mutant_sequence", num_files: int = 1):
+    """
+    Reads a CSV file with variant sequences and generates Rosetta-formatted
+    mutation list file(s) by comparing each variant against a wildtype sequence.
+    Supports splitting output into multiple files.
+    
+    Note: The CSV file should contain ONLY variant sequences (not the wildtype).
+    The wildtype sequence must be provided separately via the --wildtype argument.
+    
+    Args:
+        csv_file: Path to input CSV file with variant sequences.
+                  All rows contain variant sequences (wildtype is not included).
+        wildtype: Wildtype amino acid sequence (provided separately, not from CSV)
         output_file: Path pattern for output files (e.g., "path/to/muts.txt" -> "path/to/muts_1.txt", ...)
+        variant_column: Name of the column containing variant sequences (default: "mutant_sequence")
         num_files: Number of files to split the output into (default: 1, no splitting)
     """
     print(f"1. Reading CSV file: {csv_file}")
+    print(f"   Wildtype sequence length: {len(wildtype)} residues")
     
     all_mutant_variants = []
     
@@ -24,27 +65,48 @@ def csv_to_rosetta_mutations(csv_file: str, output_file: str, num_files: int = 1
         with open(csv_file, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             
+            # Get the variant column name
+            fieldnames = reader.fieldnames
+            if not fieldnames:
+                print("Error: CSV file has no columns")
+                return
+            
+            # Check if the specified column exists
+            if variant_column not in fieldnames:
+                print(f"Error: Column '{variant_column}' not found in CSV file")
+                print(f"Available columns: {', '.join(fieldnames)}")
+                return
+            
+            print(f"   Using variant column: {variant_column}")
+            
             for row_num, row in enumerate(reader, start=2):  # start=2 because header is row 1
                 try:
-                    mutations_str = row['mutations']
-                    # Parse JSON string
-                    mutations = json.loads(mutations_str)
+                    variant_seq = row[variant_column].strip()
                     
-                    if not isinstance(mutations, list):
-                        print(f"Warning: Row {row_num}: mutations is not a list, skipping")
+                    if not variant_seq:
+                        print(f"Warning: Row {row_num}: empty variant sequence, skipping")
                         continue
                     
+                    # Compare variant with wildtype to detect mutations
+                    # All rows in CSV are variants (wildtype is provided separately)
+                    mutations = compare_sequences(wildtype, variant_seq)
+                    
                     if len(mutations) == 0:
-                        print(f"Warning: Row {row_num}: empty mutations list, skipping")
+                        # No mutations detected (variant is identical to wildtype)
+                        # This should be rare if CSV contains only variants
+                        print(f"Warning: Row {row_num}: variant is identical to wildtype, skipping")
                         continue
                     
                     all_mutant_variants.append(mutations)
                     
-                except json.JSONDecodeError as e:
-                    print(f"Error: Row {row_num}: Failed to parse JSON in mutations column: {e}")
+                except ValueError as e:
+                    print(f"Error: Row {row_num}: {e}")
                     continue
                 except KeyError as e:
                     print(f"Error: Row {row_num}: Missing column in CSV: {e}")
+                    continue
+                except Exception as e:
+                    print(f"Error: Row {row_num}: Unexpected error: {e}")
                     continue
     
     except FileNotFoundError:
@@ -126,31 +188,49 @@ def csv_to_rosetta_mutations(csv_file: str, output_file: str, num_files: int = 1
 
 if __name__ == '__main__':
     parser = ArgumentParser(
-        description="Converts CSV file with mutation information to Rosetta-formatted mutation list file(s)."
+        description="Converts CSV file with variant sequences to Rosetta-formatted mutation list file(s) "
+                    "by comparing each variant against a wildtype sequence."
     )
     parser.add_argument(
         "--csv_file",
         type=str,
         required=True,
-        help="Path to the input CSV file with columns: sequence, num_mutations, mutations"
+        help="Path to the input CSV file containing variant sequences. "
+             "All rows contain variant sequences (wildtype is not included in CSV)."
+    )
+    parser.add_argument(
+        "--wildtype",
+        type=str,
+        required=True,
+        help="Wildtype amino acid sequence (provided separately, not from CSV file)"
+    )
+    parser.add_argument(
+        "--variant_column",
+        type=str,
+        default="mutant_sequence",
+        help="Name of the column containing variant sequences (default: 'mutant_sequence')"
     )
     parser.add_argument(
         "--output_file",
         type=str,
         required=True,
-        help="Path pattern for output file(s). If num_files > 1, files will be named muts_1.txt, muts_2.txt, etc."
+        help="Path to output file (e.g. muts.txt). If --num_files > 1, files are named muts_1.txt, muts_2.txt, ..."
     )
     parser.add_argument(
         "--num_files",
         type=int,
         default=1,
-        help="Number of files to split the output into (default: 1, no splitting)"
+        metavar="N",
+        help="Split output into N files: muts_1.txt, muts_2.txt, ..., muts_N.txt (default: 1 = single muts.txt)"
     )
     
     args = parser.parse_args()
     
-    csv_to_rosetta_mutations(
+    sequence_to_rosetta_mutations(
         csv_file=args.csv_file,
+        wildtype=args.wildtype,
         output_file=args.output_file,
+        variant_column=args.variant_column,
         num_files=args.num_files
     )
+
