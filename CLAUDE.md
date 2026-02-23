@@ -48,20 +48,20 @@ Contains ddG prediction data from multiple simulation tools, plus the Tm experim
 
 Data columns convention: processed CSVs use `seq` (amino acid sequence) and `ddg_scaled01` (0-1 scaled ddG). Training CSVs use `text` (sequence) and `label` (target value).
 
-### `single/` - Single-task learning experiments (Tm only, baseline)
+### `single/` - Single-task learning (Tm only, baseline)
 
-- `test/` - Template for single-task experiments
+- `test/` - Template for single-task runs
 - `Tm10per/` - Single-task training with 10% Tm data (44 train, 12 test, 523 full test)
 
-### `multi/` - Multi-task learning experiments (Tm + ddG)
+### `multi/` - Multi-task learning (Tm + ddG)
 
-- `test/` - Template for multi-task experiments
-- `scail-FEP/` - Scaling experiments with FEP ddG data (subdirs: 10, 15, 23, 35, 53, 80, 121, 184, 279, 435_409 = number of ddG samples)
-- `scail-FoldX/` - Scaling experiments with FoldX ddG data
-- `scail-rosetta/` - Scaling experiments with Rosetta ddG data
-- `scail-thermoMPNN/` - Scaling experiments with ThermoMPNN ddG data
+- `test/` - Template for multi-task runs
+- `scail-FEP/` - Scaling analysis with FEP ddG data (subdirs: 10, 15, 23, 35, 53, 80, 121, 184, 279, 435_409 = number of ddG samples)
+- `scail-FoldX/` - Scaling analysis with FoldX ddG data
+- `scail-rosetta/` - Scaling analysis with Rosetta ddG data
+- `scail-thermoMPNN/` - Scaling analysis with ThermoMPNN ddG data
 
-Each numbered subdirectory under `scail-*` represents an experiment with that many ddG training samples, allowing analysis of how ddG data quantity affects Tm prediction.
+Each numbered subdirectory under `scail-*` represents a configuration with that many ddG training samples, allowing analysis of how ddG data quantity affects Tm prediction.
 
 ### `plot/` - Visualization
 
@@ -87,7 +87,7 @@ cd paper/tex && pdflatex main.tex && bibtex main && pdflatex main.tex && pdflate
 
 ## Key Patterns
 
-- Each experiment directory is self-contained with `ESM.py` (training), `pLM523.py` (evaluation), `run-SFT.sh` (SLURM submission)
+- Each directory is self-contained with `ESM.py` (training), `pLM523.py` (evaluation), `run-SFT.sh` (SLURM submission)
 - The `ESM.py` scripts have hardcoded data paths pointing to `/data2/ssk/...` on the cluster
 - Seed is passed as command-line argument; `--array=1-100%7` runs seeds 1-100
 - `supervised/mtl_run{seed}/` stores model checkpoints (model.safetensors)
