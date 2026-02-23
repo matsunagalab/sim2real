@@ -2,7 +2,7 @@
 
 **Sim2Real Transfer Learning for Nanobody Thermal Stability Prediction**
 
-ナノボディの熱安定性（Tm）予測を改善するために、シミュレーション由来の ddG データをマルチタスク学習で活用する研究プロジェクトです。タンパク質言語モデル ESM-2 を Tm データ（実験値）で fine-tuning する際に、計算科学ツール（FEP, FoldX, Rosetta, ThermoMPNN）で得た ddG データを補助タスクとして同時に学習させ、シミュレーションから実験への転移学習（sim-to-real）の効果を検証します。
+ナノボディの熱安定性（Tm）予測を改善するために、シミュレーション由来の ddG データをマルチタスク学習で活用する研究プロジェクトです。タンパク質言語モデル ESM-2 を Tm 実験データで fine-tuning する際に、計算科学ツール（FEP, FoldX, Rosetta, ThermoMPNN）で得た ddG データを補助タスクとして同時に学習させ、シミュレーションから現実への転移学習（sim-to-real）の効果を検証します。
 
 ## 手法の概要
 
@@ -33,14 +33,14 @@ sim2real/
 │
 ├── single/                 # シングルタスク学習（Tm のみ、ベースライン）
 │   ├── test/               #   テンプレート
-│   └── Tm10per/            #   10% Tm データでの実験結果
+│   └── Tm10per/            #   10% Tm データでの学習結果
 │
 ├── multi/                  # マルチタスク学習（Tm + ddG）
 │   ├── test/               #   テンプレート
-│   ├── scail-FEP/          #   FEP データでのスケーリング実験
-│   ├── scail-FoldX/        #   FoldX データでのスケーリング実験
-│   ├── scail-rosetta/      #   Rosetta データでのスケーリング実験
-│   └── scail-thermoMPNN/   #   ThermoMPNN データでのスケーリング実験
+│   ├── scail-FEP/          #   FEP データでのスケーリング検証
+│   ├── scail-FoldX/        #   FoldX データでのスケーリング検証
+│   ├── scail-rosetta/      #   Rosetta データでのスケーリング検証
+│   └── scail-thermoMPNN/   #   ThermoMPNN データでのスケーリング検証
 │
 ├── plot/                   # 可視化
 │   └── simscail.ipynb      #   スケーリング解析プロット
@@ -56,7 +56,7 @@ sim2real/
 
 ### 2. 学習の実行
 
-各実験ディレクトリ（例: `multi/scail-FEP/10/`）に移動して SLURM ジョブを投入します。
+各ディレクトリ（例: `multi/scail-FEP/10/`）に移動して SLURM ジョブを投入します。
 
 ```bash
 cd multi/scail-FEP/10/
@@ -84,9 +84,9 @@ python3 pLM523.py
 
 `plot/simscail.ipynb` でスケーリング解析の結果をプロットします。
 
-## 実験ディレクトリの構成
+## ディレクトリの構成
 
-各実験ディレクトリ（`single/Tm10per/`, `multi/scail-FEP/10/` など）は同じ構成を持ちます:
+各ディレクトリ（`single/Tm10per/`, `multi/scail-FEP/10/` など）は同じ構成を持ちます:
 
 | ファイル | 説明 |
 |---------|------|
