@@ -56,7 +56,24 @@ sim2real/
 
 ### 2. 学習の実行
 
-各ディレクトリ（例: `multi/scail-FEP/10/`）に移動して SLURM ジョブを投入します。
+各ディレクトリ（例: `multi/scail-FEP/10/`）に移動して学習を実行します。
+
+#### インタラクティブ実行（GPU マシン上で直接）
+
+```bash
+cd multi/scail-FEP/10/
+python ESM.py 1          # seed=1 で 1 回実行
+```
+
+複数 seed をまとめて流す場合:
+
+```bash
+for seed in $(seq 1 5); do
+  python ESM.py $seed
+done
+```
+
+#### SLURM 経由
 
 ```bash
 cd multi/scail-FEP/10/
@@ -65,7 +82,8 @@ sbatch --gres=gpu:a6000:1 -w floyd run-SFT.sh
 
 - `run-SFT.sh` 内の `#SBATCH --array=n-m%7` で seed の範囲と同時実行数を指定します
   - 例: `--array=1-100%7` → seed 1〜100 を最大 7 並列で実行
-- 各 seed で `python ESM.py <seed>` が実行され、`supervised/mtl_run<seed>/` にモデルが保存されます
+
+いずれの方法でも、各 seed で `supervised/mtl_run<seed>/` にモデルが保存されます
 
 ### 3. 評価
 
