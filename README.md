@@ -21,6 +21,10 @@
 
 ```
 sim2real/
+├── ESM.py                  # 学習スクリプト（マルチタスク Tm + ddG）
+├── pLM523.py               # 評価スクリプト（523 件テストデータ）
+├── run_train.sh            # SLURM 用学習ジョブ投入スクリプト（直下の ESM.py を実行）
+│
 ├── data/                   # 入力データとデータ準備ツール
 │   ├── Tm/                 #   Tm 実験データ（567 件、10% 分割）
 │   ├── fep/                #   FEP ddG データ（1MEL: 435, 4IDL: 409 バリアント）
@@ -56,45 +60,80 @@ sim2real/
 
 ### 2. 学習の実行
 
-各ディレクトリ（例: `multi/scail-FEP/10/`）に移動して学習を実行します。
+#### sim2real 直下で実行（推奨）
 
-#### インタラクティブ実行（GPU マシン上で直接）
+学習スクリプト `ESM.py` と SLURM 用 `run_train.sh` は **sim2real 直下**にあります。`run_train.sh` は実行時にスクリプト自身のディレクトリ（sim2real）に移動するため、どこから投入しても **sim2real 直下の ESM.py** が実行されます。
+
+**結果の保存先は環境変数 `RESULT_DIR` で指定することを推奨します。** 指定しないと結果は sim2real 直下の `supervised/` に保存され、どの実験の結果か分かりにくくなります。
+
+**SLURM 経由（基本）:**
 
 ```bash
-cd multi/scail-FEP/10/
-python ESM.py 1          # seed=1 で 1 回実行
+cd sim2real
+# 結果を保存するディレクトリを指定して投入（推奨）
+RESULT_DIR=/path/to/your_experiment sbatch run_train.sh
 ```
 
-複数 seed をまとめて流す場合:
+- 上記のとき、モデルなどは **`/path/to/your_experiment/supervised/mtl_run<seed>/`** に保存されます。
+- GPU を使う場合: `RESULT_DIR=/path/to/your_experiment sbatch --gres=gpu:a6000:1 -w floyd run_train.sh`
+- `run_train.sh` 内の `#SBATCH --array=1-5%5` で seed の範囲（1〜5）と同時実行数（5）を変更できます。
+- `RESULT_DIR` を指定しない場合も動作しますが、そのときは sim2real 直下の `supervised/` に保存され、実験ごとの区別が付きにくいため非推奨です。
+
+**インタラクティブ実行（1 seed）:**
 
 ```bash
+cd sim2real
+RESULT_DIR=/path/to/your_experiment python ESM.py 1    # seed=1、結果は RESULT_DIR へ
+```
+
+**インタラクティブ実行（複数 seed）:**
+
+```bash
+cd sim2real
+export RESULT_DIR=/path/to/your_experiment
 for seed in $(seq 1 5); do
   python ESM.py $seed
 done
 ```
 
-#### SLURM 経由
+#### サブディレクトリ（multi/scail-FEP/10/ など）で実行する場合
+
+各ディレクトリに移動して、そのディレクトリ内の `ESM.py` と `run-SFT.sh` を使う方法もあります。
 
 ```bash
 cd multi/scail-FEP/10/
+python ESM.py 1
+# または
 sbatch --gres=gpu:a6000:1 -w floyd run-SFT.sh
 ```
 
-- `run-SFT.sh` 内の `#SBATCH --array=n-m%7` で seed の範囲と同時実行数を指定します
-  - 例: `--array=1-100%7` → seed 1〜100 を最大 7 並列で実行
-
-いずれの方法でも、各 seed で `supervised/mtl_run<seed>/` にモデルが保存されます
+いずれの方法でも、各 seed で `supervised/mtl_run<seed>/` にモデルが保存されます（sim2real 直下で実行した場合は **sim2real/supervised/** に保存）。
 
 ### 3. 評価
 
-学習完了後、同じディレクトリで評価スクリプトを実行します。
+学習完了後、**学習で結果を保存したディレクトリ**で評価スクリプトを実行します。`RESULT_DIR` を指定して学習した場合は、そのディレクトリに移動してから `pLM523.py` を実行してください。
 
 ```bash
+cd sim2real
+# 学習時に RESULT_DIR=/path/to/your_experiment で保存した場合
+cd /path/to/your_experiment
 python3 pLM523.py
 ```
 
-- `pLM523.py` 内の `for i in range(n)` の `n` を実行した seed 数に合わせてください
-- 出力:
+**SLURM で評価する場合**（sim2real 直下の `run_eval.sh` を使用）:
+
+```bash
+cd sim2real
+# 評価対象ディレクトリを EVAL_DIR で指定（supervised/mtl_run* が存在するディレクトリ）
+EVAL_DIR=/path/to/your_experiment sbatch run_eval.sh
+# 未指定時は sim2real 直下を評価
+sbatch run_eval.sh
+```
+
+ログは `EVAL_DIR/eval_<ジョブID>.log` に出力されます。
+
+- `pLM523.py` はカレントディレクトリの `supervised/mtl_run*/` を参照します。`pLM523.py` 内の `for i in range(n)` の `n` を実行した seed 数に合わせてください。
+- 出力（実行したディレクトリに作成）:
   - `mtl_eval_summary523.txt` — 各指標の平均値と 90% ブートストラップ信頼区間
   - `mtl_eval_per_run_523.csv` — seed ごとの評価指標（MSE, RMSE, R2, MAE, Spearman, Pearson）
 
@@ -104,13 +143,21 @@ python3 pLM523.py
 
 ## ディレクトリの構成
 
-各ディレクトリ（`single/Tm10per/`, `multi/scail-FEP/10/` など）は同じ構成を持ちます:
+**sim2real 直下**には次のファイルがあります:
 
 | ファイル | 説明 |
 |---------|------|
 | `ESM.py` | 学習プログラム。seed をコマンドライン引数で受け取る |
 | `pLM523.py` | テストデータ 523 件での評価プログラム |
-| `pLM.py` | テストデータ 12 件での評価プログラム（存在する場合） |
+| `run_train.sh` | SLURM 用学習ジョブ投入スクリプト。直下の ESM.py を実行。**結果の保存先は環境変数 `RESULT_DIR` で指定することを推奨**（未指定時は sim2real 直下の `supervised/` に保存され、実験の区別が付きにくい） |
+| `run_eval.sh` | SLURM 用評価ジョブ投入スクリプト。`EVAL_DIR` で評価対象ディレクトリ（`supervised/mtl_run*` があるディレクトリ）を指定して pLM523.py を実行する。未指定時は sim2real 直下を評価 |
+
+サブディレクトリ（`single/Tm10per/`, `multi/scail-FEP/10/` など）も同様の構成を持ちます:
+
+| ファイル | 説明 |
+|---------|------|
+| `ESM.py` | 学習プログラム |
+| `pLM523.py` | 評価プログラム |
 | `run-SFT.sh` | SLURM ジョブ投入用バッチスクリプト |
 | `mtl_eval_summary523.txt` | 評価結果サマリー（存在する場合） |
 | `mtl_eval_per_run_523.csv` | seed ごとの評価結果（存在する場合） |
