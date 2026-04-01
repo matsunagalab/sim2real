@@ -30,10 +30,10 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 # ---- Hyperparameters (エージェントが調整) ----
 HPARAMS = {
     "num_train_epochs": 400,
-    "batch_size": 32,
+    "batch_size": 16,
     "learning_rate": 5e-4,
-    "weight_decay": 0.02,
-    "dropout_rate": 0.15,
+    "weight_decay": 0.01,
+    "dropout_rate": 0.1,
     "early_stopping_patience": 15,
     "early_stopping_threshold": 0.0,
     "warmup_steps": 100,
@@ -192,6 +192,7 @@ def train(train_ds, eval_ds, device, run, result_dir, multi_task):
         greater_is_better=False,
         save_total_limit=1,
         warmup_steps=HPARAMS['warmup_steps'],
+        lr_scheduler_type="cosine",
         optim="adamw_torch",
         report_to="none",
         fp16=(device.type == "cuda"),
