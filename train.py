@@ -33,7 +33,7 @@ HPARAMS = {
     "batch_size": 8,
     "learning_rate": 5e-4,
     "weight_decay": 0.01,
-    "dropout_rate": 0.1,
+    "dropout_rate": 0.15,
     "early_stopping_patience": 10,
     "early_stopping_threshold": 0.0,
     "warmup_steps": 100,
