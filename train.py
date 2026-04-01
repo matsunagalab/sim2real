@@ -30,7 +30,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 # ---- Hyperparameters (エージェントが調整) ----
 HPARAMS = {
     "num_train_epochs": 400,
-    "batch_size": 8,
+    "batch_size": 16,
     "learning_rate": 5e-4,
     "weight_decay": 0.01,
     "dropout_rate": 0.1,
