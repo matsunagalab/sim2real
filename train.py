@@ -33,8 +33,8 @@ HPARAMS = {
     "batch_size": 16,
     "learning_rate": 5e-4,
     "weight_decay": 0.01,
-    "dropout_rate": 0.12,
-    "early_stopping_patience": 15,
+    "dropout_rate": 0.1,
+    "early_stopping_patience": 10,
     "early_stopping_threshold": 0.0,
     "warmup_steps": 100,
     "loss_weights": {"tm": 0.3, "ddg1": 0.35, "ddg2": 0.35},
@@ -56,21 +56,21 @@ class MultiTaskModel(nn.Module):
         hs = self.encoder.config.hidden_size
         p = hidden_dropout_prob
         self.shared = nn.Sequential(
-            nn.Linear(hs, 512),
+            nn.Linear(hs, 256),
             nn.ReLU(),
             nn.Dropout(p),
 
-            nn.Linear(512, 256),
+            nn.Linear(256, 128),
             nn.ReLU(),
             nn.Dropout(p),
 
-            nn.Linear(256, 64),
+            nn.Linear(128, 32),
             nn.ReLU(),
         )
 
-        self.tm_head = nn.Linear(64, 1)
-        self.ddg_head = nn.Linear(64, 1)
-        self.ddg_head2 = nn.Linear(64, 1)
+        self.tm_head = nn.Linear(32, 1)
+        self.ddg_head = nn.Linear(32, 1)
+        self.ddg_head2 = nn.Linear(32, 1)
 
         self.multi_task = multi_task
         self.loss_fn = nn.MSELoss()
