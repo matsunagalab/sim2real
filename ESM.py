@@ -76,6 +76,14 @@ HPARAMS = {
 
 
 # ---- Utils ----
+def get_device() -> torch.device:
+    """CUDA > MPS > CPU の優先順でデバイスを選択"""
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    if torch.backends.mps.is_available():
+        return torch.device("mps")
+    return torch.device("cpu")
+
 def set_seed(seed: int):
     random.seed(seed)
     np.random.seed(seed)
@@ -367,7 +375,7 @@ def main():
         multi_task=is_multi_task,
     )
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = get_device()
     model.to(device)
     print(f"      device: {device}", flush=True)
 
@@ -415,7 +423,7 @@ def main():
         optim="adamw_torch",
 
         report_to="none",
-        fp16=torch.cuda.is_available(),
+        fp16=(device.type == "cuda"),
     )
 
     trainer = Trainer(
