@@ -34,7 +34,7 @@ HPARAMS = {
     "learning_rate": 5e-4,
     "weight_decay": 0.01,
     "dropout_rate": 0.1,
-    "early_stopping_patience": 10,
+    "early_stopping_patience": 15,
     "early_stopping_threshold": 0.0,
     "warmup_steps": 100,
     "loss_weights": {"tm": 0.3, "ddg1": 0.35, "ddg2": 0.35},
@@ -56,24 +56,30 @@ class MultiTaskModel(nn.Module):
         hs = self.encoder.config.hidden_size
         p = hidden_dropout_prob
         self.shared = nn.Sequential(
-            nn.Linear(hs, 256),
+            nn.Linear(hs, 128),
+            nn.LayerNorm(128),
             nn.ReLU(),
             nn.Dropout(p),
-
-            nn.Linear(256, 128),
-            nn.ReLU(),
-            nn.Dropout(p),
-
-            nn.Linear(128, 32),
-            nn.ReLU(),
         )
 
-        self.tm_head = nn.Linear(32, 1)
-        self.ddg_head = nn.Linear(32, 1)
-        self.ddg_head2 = nn.Linear(32, 1)
+        self.tm_head = nn.Sequential(
+            nn.Linear(128, 32),
+            nn.ReLU(),
+            nn.Linear(32, 1),
+        )
+        self.ddg_head = nn.Sequential(
+            nn.Linear(128, 32),
+            nn.ReLU(),
+            nn.Linear(32, 1),
+        )
+        self.ddg_head2 = nn.Sequential(
+            nn.Linear(128, 32),
+            nn.ReLU(),
+            nn.Linear(32, 1),
+        )
 
         self.multi_task = multi_task
-        self.loss_fn = nn.MSELoss()
+        self.loss_fn = nn.HuberLoss(delta=1.0)
 
     def forward(self, input_ids=None, attention_mask=None,
                 labels=None, task_ids=None, embedding=None, **kwargs):
