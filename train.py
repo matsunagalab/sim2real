@@ -31,12 +31,12 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 HPARAMS = {
     "num_train_epochs": 400,
     "batch_size": 16,
-    "learning_rate": 5e-4,
+    "learning_rate": 3e-4,
     "weight_decay": 0.01,
     "dropout_rate": 0.1,
     "early_stopping_patience": 15,
     "early_stopping_threshold": 0.0,
-    "warmup_steps": 100,
+    "warmup_steps": 200,
     "loss_weights": {"tm": 0.3, "ddg1": 0.35, "ddg2": 0.35},
 }
 
@@ -193,6 +193,7 @@ def train(train_ds, eval_ds, device, run, result_dir, multi_task):
         save_total_limit=1,
         warmup_steps=HPARAMS['warmup_steps'],
         lr_scheduler_type="cosine",
+        max_grad_norm=1.0,
         optim="adamw_torch",
         report_to="none",
         fp16=(device.type == "cuda"),
