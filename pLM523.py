@@ -20,7 +20,7 @@ from pathlib import Path
 
 # MultiTaskModel を ESM.py からインポート
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ESM import MultiTaskModel
+from ESM import MultiTaskModel, get_device
 
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
 HUGGINGFACE_BACKBONE = "facebook/esm2_t6_8M_UR50D"
@@ -67,7 +67,7 @@ def main():
             n_runs = 5
     print(f"Evaluating {n_runs} runs from {model_dir}", flush=True)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = get_device()
     tokenizer = AutoTokenizer.from_pretrained(HUGGINGFACE_BACKBONE)
 
     metricss = []
