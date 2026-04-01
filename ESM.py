@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import argparse
 import os
 import sys
 import random
@@ -32,20 +33,31 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 import json
 
-# ---- Environment variables ----
-os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:512'
-os.environ['WANDB_DISABLED'] = 'true'
-#os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-
-# ---- Constants (adjust paths) ----
+# ---- Constants ----
 MODEL_NAME = "facebook/esm2_t6_8M_UR50D"
 SELF_SUPERVISED_MODEL_PATH = "facebook/esm2_t6_8M_UR50D"
 
-DATA_PATH_TM = None      # TmデータCSV
-DATA_PATH_DDG_1mel = None  # ΔΔGデータCSV
-DATA_PATH_DDG_4idl = None  # ΔΔGデータCSV
-DATA_PATH_TM_TEST = None  # TmデータCSV
+REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
 
+# DDGデータソースごとのCSVパス（リポジトリ相対）
+DDG_PATHS = {
+    "FEP": (
+        "data/fep/fep1mel_435_processed.csv",
+        "data/fep/fep4idl_409_processed.csv",
+    ),
+    "FoldX": (
+        "data/foldX/1mel_all-var_ddg_with_rosettaddg_with_foldx_processed.csv",
+        "data/foldX/4idl_all-var_ddg_with_rosettaddg_with_foldx_processed.csv",
+    ),
+    "rosetta": (
+        "data/rosetta/1mel_rosettaddg_processed.csv",
+        "data/rosetta/4idl_rosettaddg_processed.csv",
+    ),
+    "thermoMPNN": (
+        "data/mpnn/1melMPNN2_processed.csv",
+        "data/mpnn/4idlMPNN2_processed.csv",
+    ),
+}
 
 HPARAMS = {
     "num_train_epochs": 400,
@@ -58,11 +70,9 @@ HPARAMS = {
     "early_stopping_patience": 10,
     "early_stopping_threshold": 0.0,
 
-    "n_ddg": None,  # 訓練に使うddgデータ数（1mel/4idlそれぞれ）。Noneのときは全件使用
+    "n_ddg": None,
+    "ddg_source": None,
 }
-
-
-    
 
 
 # ---- Utils ----
@@ -85,10 +95,8 @@ def format_time(seconds: float) -> str:
     return f"{mins}分 {secs}秒"
 
 
-def load_and_prepare_datasets(seed: int, n_ddg: int | None = None):
-    DATA_PATH_TM = "/data2/ssk/githubtest/sim2real/data/Tm/Tm10per/train2-"+ str(seed)+".csv"      # TmデータCSV
-    DATA_PATH_DDG_1mel = "/data2/ssk/githubtest/sim2real/data/foldX/1mel_all-var_ddg_with_rosettaddg_with_foldx_processed.csv"   #ΔΔGデータCSV
-    DATA_PATH_DDG_4idl = "/data2/ssk/githubtest/sim2real/data/foldX/4idl_all-var_ddg_with_rosettaddg_with_foldx_processed.csv"   #ΔΔGデータCSV
+def load_and_prepare_datasets(seed: int, n_ddg: int | None = None, ddg_source: str | None = None):
+    DATA_PATH_TM = os.path.join(REPO_ROOT, "data", "Tm", "Tm10per", f"train2-{seed}.csv")
 
     # Tm
     df_tm = pd.read_csv(DATA_PATH_TM)
@@ -102,6 +110,17 @@ def load_and_prepare_datasets(seed: int, n_ddg: int | None = None):
     split_tm = ds_tm.train_test_split(test_size=0.2, seed=seed)
     train_ds_tm = split_tm['train']
     val_ds_tm = split_tm['test']
+
+    # Single-task mode: DDGデータなし
+    if ddg_source is None or ddg_source == "none":
+        train_ds = Dataset.from_pandas(train_ds_tm.to_pandas())
+        val_ds = Dataset.from_pandas(val_ds_tm.to_pandas())
+        return train_ds, val_ds
+
+    # Multi-task mode: DDGデータを読み込み
+    ddg_1mel_path, ddg_4idl_path = DDG_PATHS[ddg_source]
+    DATA_PATH_DDG_1mel = os.path.join(REPO_ROOT, ddg_1mel_path)
+    DATA_PATH_DDG_4idl = os.path.join(REPO_ROOT, ddg_4idl_path)
 
     # 1mel（n_ddg指定時はサンプリング、未指定時は全件）
     df_ddg1 = pd.read_csv(DATA_PATH_DDG_1mel)
@@ -133,7 +152,6 @@ def load_and_prepare_datasets(seed: int, n_ddg: int | None = None):
     train_ds_ddg2 = split_ddg2['train']
     val_ds_ddg2 = split_ddg2['test']
 
-
     df_train_combined = pd.concat(
         [
             train_ds_tm.to_pandas(),
@@ -153,7 +171,6 @@ def load_and_prepare_datasets(seed: int, n_ddg: int | None = None):
 
     train_ds = Dataset.from_pandas(df_train_combined)
     val_ds = Dataset.from_pandas(df_val_combined)
-
 
     return train_ds, val_ds
 
@@ -184,9 +201,9 @@ def precompute_embeddings(model, dataset, device, batch_size: int):
 
 
 class MultiTaskModel(nn.Module):
-    
 
-    def __init__(self, base_model_name: str, hidden_dropout_prob: float = 0.195):
+    def __init__(self, base_model_name: str, hidden_dropout_prob: float = 0.195,
+                 multi_task: bool = True):
         super().__init__()
         cfg = AutoConfig.from_pretrained(base_model_name)
         cfg.output_hidden_states = False
@@ -213,8 +230,9 @@ class MultiTaskModel(nn.Module):
         self.ddg_head = nn.Linear(32, 1)
         self.ddg_head2 = nn.Linear(32, 1)
 
+        self.multi_task = multi_task
         self.loss_fn = nn.MSELoss()
-        
+
 
     def forward(self, input_ids=None, attention_mask=None,
                 labels=None, task_ids=None, embedding=None, **kwargs):
@@ -227,6 +245,13 @@ class MultiTaskModel(nn.Module):
         feats = self.shared(pooled)
 
         tm_logits = self.tm_head(feats).view(-1)
+
+        if not self.multi_task:
+            # Single-task: Tmヘッドのみ使用
+            logits = tm_logits
+            loss = self.loss_fn(logits, labels) if labels is not None else None
+            return SequenceClassifierOutput(loss=loss, logits=logits)
+
         ddg_logits = self.ddg_head(feats).view(-1)
         ddg_logits2 = self.ddg_head2(feats).view(-1)
 
@@ -250,12 +275,11 @@ class MultiTaskModel(nn.Module):
                     losses.append((1/4) * self.loss_fn(ddg_logits[mask_ddg], labels[mask_ddg]))
                 if mask_ddg2.any():
                     losses.append((1/4) * self.loss_fn(ddg_logits2[mask_ddg2], labels[mask_ddg2]))
-                # どちらのマスクも空ならゼロテンソルを返す
                 if losses:
                     loss = sum(losses)
                 else:
                     loss = torch.tensor(0.0, device=tm_logits.device)
-                
+
             return SequenceClassifierOutput(loss=loss, logits=logits)
 
         return {'tm': tm_logits, 'ddg': ddg_logits , 'ddg2': ddg_logits2}
@@ -291,20 +315,34 @@ def compute_metrics(pred):
 
 # ---- Main ----
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python ESM.py <run_num> [n_ddg]")
-        print("  run_num: 実行番号（シード等に使用）")
-        print("  n_ddg:   訓練に使うddgデータ数（1mel/4idlそれぞれ）。省略時は全件使用")
-        sys.exit(1)
-    run = int(sys.argv[1])
-    n_ddg = int(sys.argv[2]) if len(sys.argv) >= 3 else HPARAMS.get("n_ddg")
+    os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:512'
+    os.environ['WANDB_DISABLED'] = 'true'
+
+    parser = argparse.ArgumentParser(description="ESM-2 multi-task / single-task training")
+    parser.add_argument("run_num", type=int, help="実行番号（シード等に使用）")
+    parser.add_argument("n_ddg_positional", nargs="?", type=int, default=None,
+                        help="(後方互換) n_ddg を位置引数で指定")
+    parser.add_argument("--n-ddg", type=int, default=None,
+                        help="訓練に使うddgデータ数（1mel/4idlそれぞれ）。省略時は全件使用")
+    parser.add_argument("--ddg-source", type=str, default=None,
+                        choices=["FEP", "FoldX", "rosetta", "thermoMPNN", "none"],
+                        help="DDGデータソース。none=single-task（Tmのみ）")
+    args = parser.parse_args()
+
+    # 引数解決: CLI flag > positional > env var > default
+    n_ddg = args.n_ddg or args.n_ddg_positional or (int(os.environ["N_DDG"]) if "N_DDG" in os.environ else None)
+    ddg_source = args.ddg_source or os.environ.get("DDG_SOURCE", "FoldX")
+    is_multi_task = ddg_source != "none"
+
+    run = args.run_num
     HPARAMS['seed'] = run
     HPARAMS['n_ddg'] = n_ddg
+    HPARAMS['ddg_source'] = ddg_source
     set_seed(run)
 
     # load & split
-    print("[1/6] Loading and splitting datasets...", flush=True)
-    train_ds, eval_ds = load_and_prepare_datasets(run, n_ddg=n_ddg)
+    print(f"[1/6] Loading datasets (ddg_source={ddg_source}, n_ddg={n_ddg})...", flush=True)
+    train_ds, eval_ds = load_and_prepare_datasets(run, n_ddg=n_ddg, ddg_source=ddg_source if is_multi_task else None)
     print(f"      train: {len(train_ds)} samples, eval: {len(eval_ds)} samples", flush=True)
 
     # tokenize
@@ -325,7 +363,8 @@ def main():
     print("[3/6] Building model and moving to device...", flush=True)
     model = MultiTaskModel(
         base_model_name=SELF_SUPERVISED_MODEL_PATH,
-        hidden_dropout_prob=HPARAMS['dropout_rate']
+        hidden_dropout_prob=HPARAMS['dropout_rate'],
+        multi_task=is_multi_task,
     )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -352,6 +391,9 @@ def main():
     os.makedirs(ckpt_dir, exist_ok=True)
     logging_dir = os.path.join(result_base, "supervised", "logs")
 
+    # Single-task は eval_loss、multi-task は eval_mse を使用
+    metric_for_best = "eval_loss" if not is_multi_task else "eval_mse"
+
     targs = TrainingArguments(
         output_dir=ckpt_dir,
         num_train_epochs=HPARAMS['num_train_epochs'],
@@ -366,20 +408,15 @@ def main():
         logging_steps=10,
 
         load_best_model_at_end=True,         # ベストモデルを最後に自動読み込み
-        metric_for_best_model="eval_mse",        # 指標に mse を使う
+        metric_for_best_model=metric_for_best,
         greater_is_better=False,             # mse は小さいほうが良い
         save_total_limit=1,                  # 最大１つだけチェックポイントを残す
         warmup_steps=100,
         optim="adamw_torch",
-        
+
         report_to="none",
         fp16=torch.cuda.is_available(),
     )
-
-    #early_cb = EarlyStoppingCallback(
-    #early_stopping_patience=HPARAMS["early_stopping_patience"],
-    #early_stopping_threshold=HPARAMS["early_stopping_threshold"],
-    #)
 
     trainer = Trainer(
         model=model,
@@ -401,6 +438,7 @@ def main():
            "dropout_rate": HPARAMS["dropout_rate"],
            "activate_fnc":   HPARAMS.get("activate_fnc", "ReLU"),
            "seed":           HPARAMS["seed"],
+           "ddg_source":     HPARAMS.get("ddg_source"),
            "n_ddg":          HPARAMS.get("n_ddg"),
            "learning_rate":  HPARAMS["learning_rate"],
            "batch_size":     HPARAMS["batch_size"],
