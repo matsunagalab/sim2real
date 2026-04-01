@@ -21,6 +21,10 @@ cd "$SCRIPT_DIR"
 # 指定する場合: RESULT_DIR=/path/to/output sbatch run_train.sh
 export RESULT_DIR="${RESULT_DIR:-$SCRIPT_DIR}"
 
+# DDGデータソース（FEP, FoldX, rosetta, thermoMPNN, none）。デフォルト: FoldX
+# 指定する場合: DDG_SOURCE=FEP sbatch run_train.sh
+DDG_SOURCE="${DDG_SOURCE:-FoldX}"
+
 # 訓練に使うddgデータ数（1mel/4idlそれぞれ）。未指定時は全件使用
 # 指定する場合: N_DDG=10 sbatch run_train.sh
 N_DDG="${N_DDG:-}"
@@ -28,18 +32,15 @@ N_DDG="${N_DDG:-}"
 # GPU を使う場合は export を削除。CPU のみの場合は空にする
 export CUDA_VISIBLE_DEVICES=""
 
-# 実行例（sim2real から）:
+# 実行例:
 #   cd sim2real && sbatch run_train.sh
-# 結果・ログを別ディレクトリに保存（RESULT_DIR は存在するパスを指定すること）:
-#   cd sim2real && RESULT_DIR=/path/to/results sbatch run_train.sh
-# ddgデータ数を指定（1mel/4idlそれぞれの件数）:
-#   cd sim2real && N_DDG=10 sbatch run_train.sh
-# GPU 指定時:
+#   cd sim2real && DDG_SOURCE=FEP N_DDG=10 RESULT_DIR=/path/to/results sbatch run_train.sh
+#   cd sim2real && DDG_SOURCE=none RESULT_DIR=/path/to/single sbatch run_train.sh  # single-task
 #   cd sim2real && sbatch --gres=gpu:a6000:1 -w floyd run_train.sh
+# スケーリング実験の一括投入:
+#   for n in 10 15 23 35 53 80 121 184 279; do
+#     DDG_SOURCE=FEP N_DDG=$n RESULT_DIR=results/FEP/$n sbatch run_train.sh
+#   done
+#   DDG_SOURCE=FEP RESULT_DIR=results/FEP/all sbatch run_train.sh  # 全件
 
-if [ -n "$N_DDG" ]; then
-  python ESM.py ${SLURM_ARRAY_TASK_ID} "$N_DDG"
-else
-  python ESM.py ${SLURM_ARRAY_TASK_ID}
-fi
-
+python ESM.py ${SLURM_ARRAY_TASK_ID} --ddg-source "$DDG_SOURCE" ${N_DDG:+--n-ddg $N_DDG}
