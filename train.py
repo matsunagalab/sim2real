@@ -30,7 +30,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 # ---- Hyperparameters (エージェントが調整) ----
 HPARAMS = {
     "num_train_epochs": 400,
-    "batch_size": 32,
+    "batch_size": 16,
     "learning_rate": 3e-4,
     "weight_decay": 0.04,
     "dropout_rate": 0.1,
@@ -182,6 +182,7 @@ def train(train_ds, eval_ds, device, run, result_dir, multi_task):
         num_train_epochs=HPARAMS['num_train_epochs'],
         per_device_train_batch_size=HPARAMS['batch_size'],
         per_device_eval_batch_size=HPARAMS['batch_size'],
+        gradient_accumulation_steps=2,
         eval_strategy="epoch",
         save_strategy="epoch",
         learning_rate=HPARAMS['learning_rate'],
