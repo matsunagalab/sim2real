@@ -55,6 +55,8 @@ class MultiTaskModel(nn.Module):
 
         hs = self.encoder.config.hidden_size
         p = hidden_dropout_prob
+
+        # Thin shared projection (general protein features)
         self.shared = nn.Sequential(
             nn.Linear(hs, 128),
             nn.LayerNorm(128),
@@ -62,28 +64,25 @@ class MultiTaskModel(nn.Module):
             nn.Dropout(p),
         )
 
+        # Deep task-specific paths (each protein type has own energy landscape)
         self.tm_head = nn.Sequential(
-            nn.Linear(128, 32),
-            nn.ReLU(),
-            nn.Linear(32, 1),
+            nn.Linear(128, 64), nn.ReLU(), nn.Dropout(p),
+            nn.Linear(64, 1),
         )
-        self.ddg_head = nn.Sequential(
-            nn.Linear(128, 32),
-            nn.ReLU(),
-            nn.Linear(32, 1),
+        self.ddg_head = nn.Sequential(  # 1mel-specific
+            nn.Linear(128, 64), nn.ReLU(), nn.Dropout(p),
+            nn.Linear(64, 1),
         )
-        self.ddg_head2 = nn.Sequential(
-            nn.Linear(128, 32),
-            nn.ReLU(),
-            nn.Linear(32, 1),
+        self.ddg_head2 = nn.Sequential(  # 4idl-specific
+            nn.Linear(128, 64), nn.ReLU(), nn.Dropout(p),
+            nn.Linear(64, 1),
         )
 
         # Xavier initialization for stability
-        for m in [self.shared, self.tm_head, self.ddg_head, self.ddg_head2]:
-            for layer in m:
-                if isinstance(layer, nn.Linear):
-                    nn.init.xavier_uniform_(layer.weight)
-                    nn.init.zeros_(layer.bias)
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                nn.init.zeros_(m.bias)
 
         self.multi_task = multi_task
         self.loss_fn = nn.MSELoss()
