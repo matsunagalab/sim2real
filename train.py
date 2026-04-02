@@ -57,10 +57,12 @@ class MultiTaskModel(nn.Module):
 
         self.shared = nn.Sequential(
             nn.Linear(hs, 256),
+            nn.LayerNorm(256),
             nn.ReLU(),
             nn.Dropout(p),
 
             nn.Linear(256, 128),
+            nn.LayerNorm(128),
             nn.ReLU(),
             nn.Dropout(p),
 
