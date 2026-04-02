@@ -37,7 +37,6 @@ HPARAMS = {
     "early_stopping_patience": 15,
     "early_stopping_threshold": 0.0,
     "warmup_steps": 100,
-    "loss_weights": {"tm": 0.3, "ddg1": 0.35, "ddg2": 0.35},
 }
 
 
@@ -56,15 +55,12 @@ class MultiTaskModel(nn.Module):
         hs = self.encoder.config.hidden_size
         p = hidden_dropout_prob
 
-        # Deep shared layers with LayerNorm for stable gradient flow
         self.shared = nn.Sequential(
             nn.Linear(hs, 256),
-            nn.LayerNorm(256),
             nn.ReLU(),
             nn.Dropout(p),
 
             nn.Linear(256, 128),
-            nn.LayerNorm(128),
             nn.ReLU(),
             nn.Dropout(p),
 
@@ -72,14 +68,18 @@ class MultiTaskModel(nn.Module):
             nn.ReLU(),
         )
 
-        # Protein-specific heads (different energy landscapes)
         self.tm_head = nn.Linear(32, 1)
-        self.ddg_head = nn.Linear(32, 1)   # 1mel
-        self.ddg_head2 = nn.Linear(32, 1)  # 4idl
+        self.ddg_head = nn.Linear(32, 1)
+        self.ddg_head2 = nn.Linear(32, 1)
 
         self.multi_task = multi_task
         self.loss_fn = nn.MSELoss()
-        self.noise_std = 0.01  # embedding noise for regularization
+
+        # Learnable task uncertainty (Kendall et al. 2018)
+        # log_sigma initialized to 0 → initial weight = 1/(2*1) = 0.5 per task
+        self.log_sigma_tm = nn.Parameter(torch.tensor(0.0))
+        self.log_sigma_ddg1 = nn.Parameter(torch.tensor(0.0))
+        self.log_sigma_ddg2 = nn.Parameter(torch.tensor(0.0))
 
     def forward(self, input_ids=None, attention_mask=None,
                 labels=None, task_ids=None, embedding=None, **kwargs):
@@ -88,10 +88,6 @@ class MultiTaskModel(nn.Module):
         else:
             hidden = self.encoder(input_ids=input_ids, attention_mask=attention_mask)[0]
             pooled = hidden[:, 0, :]
-
-        # Inject noise during training for regularization
-        if self.training and self.noise_std > 0:
-            pooled = pooled + torch.randn_like(pooled) * self.noise_std
 
         feats = self.shared(pooled)
         tm_logits = self.tm_head(feats).view(-1)
@@ -115,14 +111,16 @@ class MultiTaskModel(nn.Module):
 
             loss = None
             if labels is not None:
-                w = HPARAMS["loss_weights"]
                 losses = []
                 if mask_tm.any():
-                    losses.append(w["tm"] * self.loss_fn(tm_logits[mask_tm], labels[mask_tm]))
+                    l = self.loss_fn(tm_logits[mask_tm], labels[mask_tm])
+                    losses.append(l / (2 * torch.exp(2 * self.log_sigma_tm)) + self.log_sigma_tm)
                 if mask_ddg.any():
-                    losses.append(w["ddg1"] * self.loss_fn(ddg_logits[mask_ddg], labels[mask_ddg]))
+                    l = self.loss_fn(ddg_logits[mask_ddg], labels[mask_ddg])
+                    losses.append(l / (2 * torch.exp(2 * self.log_sigma_ddg1)) + self.log_sigma_ddg1)
                 if mask_ddg2.any():
-                    losses.append(w["ddg2"] * self.loss_fn(ddg_logits2[mask_ddg2], labels[mask_ddg2]))
+                    l = self.loss_fn(ddg_logits2[mask_ddg2], labels[mask_ddg2])
+                    losses.append(l / (2 * torch.exp(2 * self.log_sigma_ddg2)) + self.log_sigma_ddg2)
                 loss = sum(losses) if losses else torch.tensor(0.0, device=tm_logits.device)
 
             return SequenceClassifierOutput(loss=loss, logits=logits)
