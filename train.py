@@ -78,8 +78,15 @@ class MultiTaskModel(nn.Module):
             nn.Linear(32, 1),
         )
 
+        # Xavier initialization for stability
+        for m in [self.shared, self.tm_head, self.ddg_head, self.ddg_head2]:
+            for layer in m:
+                if isinstance(layer, nn.Linear):
+                    nn.init.xavier_uniform_(layer.weight)
+                    nn.init.zeros_(layer.bias)
+
         self.multi_task = multi_task
-        self.loss_fn = nn.HuberLoss(delta=1.0)
+        self.loss_fn = nn.MSELoss()
 
     def forward(self, input_ids=None, attention_mask=None,
                 labels=None, task_ids=None, embedding=None, **kwargs):
