@@ -36,7 +36,7 @@ HPARAMS = {
     "dropout_rate": 0.1,
     "early_stopping_patience": 15,
     "early_stopping_threshold": 0.0,
-    "warmup_steps": 200,
+    "warmup_steps": 100,
     "loss_weights": {"tm": 0.3, "ddg1": 0.35, "ddg2": 0.35},
 }
 
