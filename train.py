@@ -56,36 +56,30 @@ class MultiTaskModel(nn.Module):
         hs = self.encoder.config.hidden_size
         p = hidden_dropout_prob
 
-        # Thin shared projection (general protein features)
+        # Deep shared layers with LayerNorm for stable gradient flow
         self.shared = nn.Sequential(
-            nn.Linear(hs, 128),
+            nn.Linear(hs, 256),
+            nn.LayerNorm(256),
+            nn.ReLU(),
+            nn.Dropout(p),
+
+            nn.Linear(256, 128),
             nn.LayerNorm(128),
             nn.ReLU(),
             nn.Dropout(p),
+
+            nn.Linear(128, 32),
+            nn.ReLU(),
         )
 
-        # Deep task-specific paths (each protein type has own energy landscape)
-        self.tm_head = nn.Sequential(
-            nn.Linear(128, 64), nn.ReLU(),
-            nn.Linear(64, 1),
-        )
-        self.ddg_head = nn.Sequential(  # 1mel-specific
-            nn.Linear(128, 64), nn.ReLU(),
-            nn.Linear(64, 1),
-        )
-        self.ddg_head2 = nn.Sequential(  # 4idl-specific
-            nn.Linear(128, 64), nn.ReLU(),
-            nn.Linear(64, 1),
-        )
-
-        # Xavier initialization for stability
-        for m in self.modules():
-            if isinstance(m, nn.Linear):
-                nn.init.xavier_uniform_(m.weight)
-                nn.init.zeros_(m.bias)
+        # Protein-specific heads (different energy landscapes)
+        self.tm_head = nn.Linear(32, 1)
+        self.ddg_head = nn.Linear(32, 1)   # 1mel
+        self.ddg_head2 = nn.Linear(32, 1)  # 4idl
 
         self.multi_task = multi_task
         self.loss_fn = nn.MSELoss()
+        self.noise_std = 0.01  # embedding noise for regularization
 
     def forward(self, input_ids=None, attention_mask=None,
                 labels=None, task_ids=None, embedding=None, **kwargs):
@@ -94,6 +88,10 @@ class MultiTaskModel(nn.Module):
         else:
             hidden = self.encoder(input_ids=input_ids, attention_mask=attention_mask)[0]
             pooled = hidden[:, 0, :]
+
+        # Inject noise during training for regularization
+        if self.training and self.noise_std > 0:
+            pooled = pooled + torch.randn_like(pooled) * self.noise_std
 
         feats = self.shared(pooled)
         tm_logits = self.tm_head(feats).view(-1)
