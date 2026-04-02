@@ -76,10 +76,10 @@ class MultiTaskModel(nn.Module):
         self.loss_fn = nn.MSELoss()
 
         # Learnable task uncertainty (Kendall et al. 2018)
-        # log_sigma initialized to 0 → initial weight = 1/(2*1) = 0.5 per task
-        self.log_sigma_tm = nn.Parameter(torch.tensor(0.0))
-        self.log_sigma_ddg1 = nn.Parameter(torch.tensor(0.0))
-        self.log_sigma_ddg2 = nn.Parameter(torch.tensor(0.0))
+        # Tm starts with lower uncertainty (higher weight) to compensate for data imbalance
+        self.log_sigma_tm = nn.Parameter(torch.tensor(-0.5))
+        self.log_sigma_ddg1 = nn.Parameter(torch.tensor(0.5))
+        self.log_sigma_ddg2 = nn.Parameter(torch.tensor(0.5))
 
     def forward(self, input_ids=None, attention_mask=None,
                 labels=None, task_ids=None, embedding=None, **kwargs):
