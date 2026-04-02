@@ -66,15 +66,15 @@ class MultiTaskModel(nn.Module):
 
         # Deep task-specific paths (each protein type has own energy landscape)
         self.tm_head = nn.Sequential(
-            nn.Linear(128, 64), nn.ReLU(), nn.Dropout(p),
+            nn.Linear(128, 64), nn.ReLU(),
             nn.Linear(64, 1),
         )
         self.ddg_head = nn.Sequential(  # 1mel-specific
-            nn.Linear(128, 64), nn.ReLU(), nn.Dropout(p),
+            nn.Linear(128, 64), nn.ReLU(),
             nn.Linear(64, 1),
         )
         self.ddg_head2 = nn.Sequential(  # 4idl-specific
-            nn.Linear(128, 64), nn.ReLU(), nn.Dropout(p),
+            nn.Linear(128, 64), nn.ReLU(),
             nn.Linear(64, 1),
         )
 
