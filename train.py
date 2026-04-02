@@ -32,7 +32,7 @@ HPARAMS = {
     "num_train_epochs": 400,
     "batch_size": 16,
     "learning_rate": 5e-4,
-    "weight_decay": 0.03,
+    "weight_decay": 0.04,
     "dropout_rate": 0.1,
     "early_stopping_patience": 15,
     "early_stopping_threshold": 0.0,
