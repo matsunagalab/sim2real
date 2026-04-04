@@ -57,6 +57,14 @@ DDG_PATHS = {
         "data/mpnn/1melMPNN2_processed.csv",
         "data/mpnn/4idlMPNN2_processed.csv",
     ),
+    "rosetta_esm": (
+        "data/rosetta_esm1000/esm2_650M_2muts_1mel_100000_top1pct_with_ddg_processed.csv",
+        "data/rosetta_esm1000/esm2_650M_2muts_4idl_100000_top1pct_with_ddg_processed.csv",
+    ),
+    "rosetta_random": (
+        "data/rosetta_random1000/random_2mut_1mel_1000_with_ddg_processed.csv",
+        "data/rosetta_random1000/random_2mut_4idl_1000_with_ddg_processed.csv",
+    ),
 }
 
 
@@ -254,7 +262,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Run experiment: train → evaluate → scaling metrics")
     parser.add_argument("--ddg-source", type=str, default="FEP",
-                        choices=["FEP", "FoldX", "rosetta", "thermoMPNN"])
+                        choices=["FEP", "FoldX", "rosetta", "thermoMPNN", "rosetta_esm", "rosetta_random"])
     parser.add_argument("--n-ddg-list", type=str, default="20,80,280",
                         help="カンマ区切りの n_ddg 値（例: 20,80,280）")
     parser.add_argument("--n-runs", type=int, default=3, help="各 n_ddg での seed 数")
