@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Sim2Real Transfer Learning for Nanobody Thermal Stability Prediction. A protein language model (ESM-2) is fine-tuned on experimental Tm data while simultaneously training on simulation-derived ddG data (FEP, FoldX, Rosetta, ThermoMPNN) as auxiliary tasks.
+Sim2Real Transfer Learning for Nanobody Thermal Stability Prediction. A protein language model (ESM-2) is fine-tuned on experimental Tm data (NbBench thermo-tm: train 396, val 57, test 114) while simultaneously training on simulation-derived ddG data (FEP, FoldX, Rosetta, ThermoMPNN) as auxiliary tasks. Evaluation uses ensemble averaging across model seeds.
 
 ## autoresearch Structure
 
@@ -13,7 +13,7 @@ This repo follows the [karpathy/autoresearch](https://github.com/karpathy/autore
 | File | Owner | Role |
 |------|-------|------|
 | `train.py` | Agent | Model architecture, hyperparameters, training loop. **Freely editable.** |
-| `prepare.py` | Human | Data loading, evaluation, scaling metrics. **Do not modify.** |
+| `prepare.py` | Human | Data loading, evaluation, scaling metrics. |
 | `program.md` | Human | Research goals and constraints. **Do not modify.** |
 | `results.tsv` | Auto | Experiment log (auto-appended by prepare.py) |
 
@@ -49,13 +49,14 @@ RESULT: slope=-0.234000 ci_width=1.450000 mae_mean=7.120000
 - **Encoder**: Frozen ESM-2 (`facebook/esm2_t6_8M_UR50D`, 8M params)
 - **Shared layers**: Linear→ReLU→Dropout (configurable in train.py)
 - **Task heads**: `tm_head` (task_id=0), `ddg_head` (task_id=1), `ddg_head2` (task_id=2)
-- **Loss weights**: Configurable via `HPARAMS["loss_weights"]`
+- **Loss**: Uncertainty-weighted MTL (Kendall et al. 2018, learnable per-task weights)
 - **Early stopping**: Enabled (patience configurable)
 
 ## Repository Structure
 
 - `train.py` / `prepare.py` / `program.md` — autoresearch core
-- `data/` — input datasets: `Tm/Tm10per/`, `fep/`, `foldX/`, `rosetta/`, `mpnn/`
+- `data/nbbench/` — NbBench thermo-tm Tm data (train/val/test CSVs)
+- `data/` — DDG datasets: `fep/`, `foldX/`, `rosetta/`, `mpnn/`, `rosetta_esm1000/`, `rosetta_random1000/`
 - `results/` — historical evaluation results
 - `results.tsv` — experiment log
 - `plot/simscail.ipynb` — scaling analysis visualization
