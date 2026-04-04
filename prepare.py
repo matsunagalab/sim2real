@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
 """
-prepare.py — 変更不可
+prepare.py — データ読込・トークナイズ・評価・スケーリング解析
 
-データ読込・トークナイズ・評価・スケーリング解析を担当する。
-train.py の train() を呼んで学習を実行し、結果を評価してメトリクスを出力する。
+NbBench thermo-tm データセット (train 396, val 57, test 114) を使用。
+train.py の train() を呼んで学習を実行し、アンサンブル評価でメトリクスを出力する。
 
 使い方:
     uv run python prepare.py --ddg-source FEP --n-ddg-list 20,80,280 --n-runs 3
@@ -13,14 +13,11 @@ train.py の train() を呼んで学習を実行し、結果を評価してメ�
 
 import argparse
 import os
-import re
 import random
 import subprocess
-import sys
 import tempfile
 import time
 from datetime import datetime
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -34,11 +31,11 @@ from sklearn.preprocessing import RobustScaler, MinMaxScaler
 from sklearn.pipeline import make_pipeline
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
-from tqdm import tqdm
 
 # ---- Constants ----
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
 MODEL_NAME = "facebook/esm2_t6_8M_UR50D"
+MAX_LENGTH = 160
 
 DDG_PATHS = {
     "FEP": (
@@ -85,27 +82,43 @@ def set_seed(seed: int):
         torch.cuda.manual_seed_all(seed)
 
 
+def get_tm_scaler():
+    """Fit scaler on NbBench train labels (°C -> [0,1])."""
+    train_csv = os.path.join(REPO_ROOT, "data", "nbbench", "train.csv")
+    train_vals = pd.read_csv(train_csv)["label"].values.reshape(-1, 1)
+    scaler = make_pipeline(RobustScaler(), MinMaxScaler(feature_range=(0, 1)))
+    scaler.fit(train_vals)
+    return scaler
+
+
 # ---- Data loading ----
 def load_and_prepare_datasets(seed: int, n_ddg: int | None = None, ddg_source: str | None = None):
-    DATA_PATH_TM = os.path.join(REPO_ROOT, "data", "Tm", "Tm10per", f"train2-{seed}.csv")
+    """Load NbBench Tm data (fixed split) + optional DDG data (seed-sampled)."""
+    train_csv = os.path.join(REPO_ROOT, "data", "nbbench", "train.csv")
+    val_csv = os.path.join(REPO_ROOT, "data", "nbbench", "val.csv")
 
-    df_tm = pd.read_csv(DATA_PATH_TM)
-    df_tm = pd.DataFrame({
-        'text': df_tm['text'].tolist(),
-        'label': df_tm['label'].tolist(),
-        'task': [0] * len(df_tm)
-    })
-    ds_tm = Dataset.from_pandas(df_tm)
-    split_tm = ds_tm.train_test_split(test_size=0.2, seed=seed)
-    train_ds_tm = split_tm['train']
-    val_ds_tm = split_tm['test']
+    df_train = pd.read_csv(train_csv)
+    df_val = pd.read_csv(val_csv)
+
+    # Scale labels to [0,1]
+    scaler = get_tm_scaler()
+    df_train["label"] = scaler.transform(df_train["label"].values.reshape(-1, 1)).flatten()
+    df_val["label"] = scaler.transform(df_val["label"].values.reshape(-1, 1)).flatten()
+
+    # Add task column
+    df_train["task"] = 0
+    df_val["task"] = 0
 
     if ddg_source is None or ddg_source == "none":
-        return Dataset.from_pandas(train_ds_tm.to_pandas()), Dataset.from_pandas(val_ds_tm.to_pandas())
+        return (
+            Dataset.from_pandas(df_train[["text", "label", "task"]]),
+            Dataset.from_pandas(df_val[["text", "label", "task"]]),
+        )
 
     ddg_1mel_path, ddg_4idl_path = DDG_PATHS[ddg_source]
 
-    dfs_train, dfs_val = [train_ds_tm.to_pandas()], [val_ds_tm.to_pandas()]
+    dfs_train = [df_train[["text", "label", "task"]]]
+    dfs_val = [df_val[["text", "label", "task"]]]
     for task_id, rel_path in [(1, ddg_1mel_path), (2, ddg_4idl_path)]:
         df = pd.read_csv(os.path.join(REPO_ROOT, rel_path))
         if n_ddg is not None:
@@ -149,10 +162,11 @@ def precompute_embeddings(model, dataset, device, batch_size: int):
 
 # ---- Evaluation ----
 def evaluate_runs(model_dir: str, n_runs: int, device: torch.device):
+    """Ensemble evaluation: all models predict on single test set, average predictions."""
     from train import MultiTaskModel
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
-    # Phase 1: Load all models and collect raw [0,1] predictions per model per test set
+    # Load all models
     models = []
     for i in range(n_runs):
         safetensors_path = os.path.join(model_dir, "supervised", f"mtl_run{i+1}", "model.safetensors")
@@ -171,51 +185,51 @@ def evaluate_runs(model_dir: str, n_runs: int, device: torch.device):
                 batch_seqs = sequences[j:j+32]
                 batch_tasks = torch.tensor(tasks[j:j+32], dtype=torch.long, device=device)
                 enc = tokenizer(batch_seqs, padding=True, truncation=True,
-                                max_length=150, return_tensors="pt").to(device)
+                                max_length=MAX_LENGTH, return_tensors="pt").to(device)
                 out = model(enc["input_ids"], enc["attention_mask"], task_ids=batch_tasks)
                 logits = out.logits if hasattr(out, 'logits') else out['tm']
                 preds.extend(logits.cpu().tolist())
         return np.array(preds)
 
-    # Phase 2: For each test set, ensemble all models' predictions
-    metricss = []
-    for i in range(n_runs):
-        test_csv = os.path.join(REPO_ROOT, "data", "Tm", "Tm10per", f"test523_{i+1}.csv")
-        train_csv = os.path.join(REPO_ROOT, "data", "Tm", "Tm10per", f"train1-{i+1}.csv")
+    # Load single test set and scaler
+    test_csv = os.path.join(REPO_ROOT, "data", "nbbench", "test.csv")
+    df = pd.read_csv(test_csv)
+    sequences = df["text"].tolist()
+    labels = np.array(df["label"].tolist())  # °C
 
-        df = pd.read_csv(test_csv)
-        sequences = df["text"].tolist()
-        labels = df["label"].tolist()
+    scaler = get_tm_scaler()
 
-        # Collect predictions from all models and average in [0,1] space
-        all_preds = np.stack([predict_raw(m, sequences) for m in models])
-        ensemble_preds = all_preds.mean(axis=0)
+    # Ensemble: average all models' [0,1] predictions, then inverse transform
+    all_preds = np.stack([predict_raw(m, sequences) for m in models])
+    ensemble_preds = all_preds.mean(axis=0)
+    y_pred = scaler.inverse_transform(ensemble_preds.reshape(-1, 1)).flatten()
 
-        # Inverse scaling
-        train_vals = np.array(pd.read_csv(train_csv)["label"].tolist()).reshape(-1, 1)
-        pipe = make_pipeline(RobustScaler(), MinMaxScaler(feature_range=(0, 1)))
-        pipe.fit(train_vals)
-        y_pred = pipe.inverse_transform(ensemble_preds.reshape(-1, 1)).flatten()
+    # Compute metrics on ensemble prediction
+    residuals = np.abs(y_pred - labels)
+    mae = float(np.mean(residuals))
+    mse = float(mean_squared_error(labels, y_pred))
+    rmse = float(np.sqrt(mse))
+    r2 = float(r2_score(labels, y_pred))
+    sp = float(spearmanr(labels, y_pred).correlation)
+    pr = float(pearsonr(labels, y_pred)[0])
 
-        mse = mean_squared_error(labels, y_pred)
-        rmse = np.sqrt(mse)
-        mae = mean_absolute_error(labels, y_pred)
-        r2 = r2_score(labels, y_pred)
-        sp = spearmanr(labels, y_pred).correlation
-        pr = pearsonr(labels, y_pred)[0]
-        metricss.append([mse, rmse, r2, mae, sp, pr])
-
-    return np.array(metricss, dtype=float)
+    # Return as (1, 6) array for compatibility, plus residuals for bootstrap
+    metrics = np.array([[mse, rmse, r2, mae, sp, pr]])
+    return metrics, residuals
 
 
-def bootstrap_ci(x, n_boot=10000, alpha=0.10, seed=42):
-    x = np.asarray(x)
-    x = x[~np.isnan(x)]
-    if x.size == 0:
+def bootstrap_ci(residuals, n_boot=10000, alpha=0.10, seed=42):
+    """Bootstrap CI over test sample residuals (not over runs)."""
+    residuals = np.asarray(residuals)
+    residuals = residuals[~np.isnan(residuals)]
+    if residuals.size == 0:
         return np.nan, np.nan, np.nan
     rng = np.random.default_rng(seed)
-    stats = np.array([np.mean(rng.choice(x, size=len(x), replace=True)) for _ in range(n_boot)])
-    return np.mean(x), np.percentile(stats, 100 * alpha / 2), np.percentile(stats, 100 * (1 - alpha / 2))
+    mae_samples = np.array([
+        np.mean(rng.choice(residuals, size=len(residuals), replace=True))
+        for _ in range(n_boot)
+    ])
+    return np.mean(residuals), np.percentile(mae_samples, 100 * alpha / 2), np.percentile(mae_samples, 100 * (1 - alpha / 2))
 
 
 # ---- Scaling law fit ----
@@ -236,7 +250,6 @@ def fit_scaling_law(n_ddg_values, mae_means):
         popt, _ = curve_fit(power_law, x, y, p0=[a0, b0, c0], bounds=bounds, maxfev=20000)
         return popt[0], popt[1], popt[2]
     except Exception:
-        # Fallback: log-linear grid search
         c_grid = np.linspace(np.min(y) - 0.3, np.min(y) - 1e-3, 600)
         logx = np.log(x)
         best_sse, best_params = np.inf, None
@@ -255,7 +268,7 @@ def fit_scaling_law(n_ddg_values, mae_means):
         return best_params
 
 
-# ---- Main: orchestrate train → eval → scaling metrics ----
+# ---- Main ----
 def main():
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:512'
     os.environ['WANDB_DISABLED'] = 'true'
@@ -264,9 +277,9 @@ def main():
     parser.add_argument("--ddg-source", type=str, default="FEP",
                         choices=["FEP", "FoldX", "rosetta", "thermoMPNN", "rosetta_esm", "rosetta_random"])
     parser.add_argument("--n-ddg-list", type=str, default="20,80,280",
-                        help="カンマ区切りの n_ddg 値（例: 20,80,280）")
-    parser.add_argument("--n-runs", type=int, default=3, help="各 n_ddg での seed 数")
-    parser.add_argument("--result-dir", type=str, default=None, help="結果保存先（デフォルト: 一時ディレクトリ）")
+                        help="Comma-separated n_ddg values")
+    parser.add_argument("--n-runs", type=int, default=3, help="Number of runs (model seeds)")
+    parser.add_argument("--result-dir", type=str, default=None)
     args = parser.parse_args()
 
     n_ddg_list = [int(x) for x in args.n_ddg_list.split(",")]
@@ -276,7 +289,6 @@ def main():
     print(f"Scaling points: {n_ddg_list}, Runs per point: {args.n_runs}", flush=True)
 
     from train import train as train_fn
-
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
     result_base = args.result_dir or tempfile.mkdtemp(prefix="sim2real_")
@@ -294,7 +306,7 @@ def main():
 
         point_dir = os.path.join(result_base, f"n_ddg_{n_ddg}")
 
-        # Train
+        # Train n_runs models (different init seeds, same Tm data, different DDG samples)
         for run in range(1, args.n_runs + 1):
             set_seed(run)
             print(f"\n  [Train] seed={run}, n_ddg={n_ddg}", flush=True)
@@ -303,7 +315,7 @@ def main():
             print(f"    train: {len(train_ds)}, eval: {len(eval_ds)}", flush=True)
 
             def tokenize_fn(ex):
-                return tokenizer(ex['text'], padding='max_length', truncation=True, max_length=150)
+                return tokenizer(ex['text'], padding='max_length', truncation=True, max_length=MAX_LENGTH)
             train_ds = train_ds.map(tokenize_fn, batched=True, num_proc=4)
             eval_ds = eval_ds.map(tokenize_fn, batched=True, num_proc=4)
             train_ds = train_ds.rename_column("task", "task_ids")
@@ -313,11 +325,10 @@ def main():
 
             train_fn(train_ds, eval_ds, device, run, point_dir, multi_task=True)
 
-        # Evaluate
+        # Evaluate (ensemble of all runs on single test set)
         print(f"\n  [Eval] n_ddg={n_ddg}", flush=True)
-        metrics = evaluate_runs(point_dir, args.n_runs, device)
-        mae_col = metrics[:, 3]  # MAE is column 3
-        mean_mae, lo, hi = bootstrap_ci(mae_col)
+        metrics, residuals = evaluate_runs(point_dir, args.n_runs, device)
+        mean_mae, lo, hi = bootstrap_ci(residuals)
         ci_w = hi - lo
 
         mae_means.append(mean_mae)
@@ -346,7 +357,6 @@ def main():
     elapsed = time.time() - total_start
     print(f"  total_time = {elapsed:.0f}s")
 
-    # Machine-readable result line (agent parses this)
     print(f"\nRESULT: slope={slope:.6f} ci_width={avg_ci_width:.6f} mae_mean={avg_mae:.6f}")
 
     # Append to results.tsv
