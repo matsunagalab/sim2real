@@ -144,22 +144,19 @@ def evaluate_runs(model_dir: str, n_runs: int, device: torch.device):
     from train import MultiTaskModel
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
-    metricss = []
+    # Phase 1: Load all models and collect raw [0,1] predictions per model per test set
+    models = []
     for i in range(n_runs):
         safetensors_path = os.path.join(model_dir, "supervised", f"mtl_run{i+1}", "model.safetensors")
-        test_csv = os.path.join(REPO_ROOT, "data", "Tm", "Tm10per", f"test523_{i+1}.csv")
-        train_csv = os.path.join(REPO_ROOT, "data", "Tm", "Tm10per", f"train1-{i+1}.csv")
-
         state_dict = load_file(safetensors_path, device="cpu")
         model = MultiTaskModel(MODEL_NAME).to(device)
         model.load_state_dict(state_dict, strict=False)
         model.eval()
+        models.append(model)
 
-        df = pd.read_csv(test_csv)
-        sequences = df["text"].tolist()
-        labels = df["label"].tolist()
-        tasks = [0] * len(df)
-
+    def predict_raw(model, sequences):
+        """Get raw [0,1] predictions from a model."""
+        tasks = [0] * len(sequences)
         preds = []
         with torch.no_grad():
             for j in range(0, len(sequences), 32):
@@ -170,12 +167,27 @@ def evaluate_runs(model_dir: str, n_runs: int, device: torch.device):
                 out = model(enc["input_ids"], enc["attention_mask"], task_ids=batch_tasks)
                 logits = out.logits if hasattr(out, 'logits') else out['tm']
                 preds.extend(logits.cpu().tolist())
+        return np.array(preds)
+
+    # Phase 2: For each test set, ensemble all models' predictions
+    metricss = []
+    for i in range(n_runs):
+        test_csv = os.path.join(REPO_ROOT, "data", "Tm", "Tm10per", f"test523_{i+1}.csv")
+        train_csv = os.path.join(REPO_ROOT, "data", "Tm", "Tm10per", f"train1-{i+1}.csv")
+
+        df = pd.read_csv(test_csv)
+        sequences = df["text"].tolist()
+        labels = df["label"].tolist()
+
+        # Collect predictions from all models and average in [0,1] space
+        all_preds = np.stack([predict_raw(m, sequences) for m in models])
+        ensemble_preds = all_preds.mean(axis=0)
 
         # Inverse scaling
         train_vals = np.array(pd.read_csv(train_csv)["label"].tolist()).reshape(-1, 1)
         pipe = make_pipeline(RobustScaler(), MinMaxScaler(feature_range=(0, 1)))
         pipe.fit(train_vals)
-        y_pred = pipe.inverse_transform(np.array(preds).reshape(-1, 1)).flatten()
+        y_pred = pipe.inverse_transform(ensemble_preds.reshape(-1, 1)).flatten()
 
         mse = mean_squared_error(labels, y_pred)
         rmse = np.sqrt(mse)
