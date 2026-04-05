@@ -128,7 +128,7 @@ for idx, (name, d) in enumerate(data.items()):
     # Axes
     ax.set_xscale('log')
     ax.set_xlim(15, 800)
-    ax.set_ylim(6.5, 8.2)
+    ax.set_ylim(6.8, 8.2)
     ax.grid(True, alpha=0.25, linewidth=0.5)
 
     # X ticks
