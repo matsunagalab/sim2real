@@ -73,7 +73,7 @@ class MultiTaskModel(nn.Module):
         self.ddg_head2 = nn.Linear(32, 1)
 
         self.multi_task = multi_task
-        self.loss_fn = nn.HuberLoss(delta=1.0)
+        self.loss_fn = nn.HuberLoss(delta=0.5)
 
         # Learnable task uncertainty (Kendall et al. 2018)
         self.log_sigma_tm = nn.Parameter(torch.tensor(0.0))
