@@ -31,9 +31,9 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 HPARAMS = {
     "num_train_epochs": 400,
     "batch_size": 16,
-    "learning_rate": 4e-4,
+    "learning_rate": 3e-4,
     "weight_decay": 0.04,
-    "dropout_rate": 0.15,
+    "dropout_rate": 0.2,
     "early_stopping_patience": 15,
     "early_stopping_threshold": 0.0,
     "warmup_steps": 100,
