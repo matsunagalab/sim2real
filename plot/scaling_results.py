@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib.ticker import ScalarFormatter
+import matplotlib.ticker
 from scipy.optimize import curve_fit
 
 plt.rcParams.update({
@@ -127,14 +127,13 @@ for idx, (name, d) in enumerate(data.items()):
 
     # Axes
     ax.set_xscale('log')
-    ax.set_xlim(15, 800)
+    ax.set_xlim(10, 1000)
     ax.set_ylim(6.5, 8.2)
     ax.grid(True, alpha=0.25, linewidth=0.5)
 
-    # X ticks
-    ax.set_xticks([20, 40, 80, 160, 320, 640])
-    ax.get_xaxis().set_major_formatter(ScalarFormatter())
-    ax.tick_params(axis='both', which='minor', length=0)
+    # X ticks — log scale with 10^n labels
+    ax.xaxis.set_major_formatter(matplotlib.ticker.LogFormatterSciNotation())
+    ax.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
 
     # Y label only on left column
     if idx % 3 == 0:
