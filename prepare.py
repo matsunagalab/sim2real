@@ -148,10 +148,7 @@ def precompute_embeddings(model, dataset, device, batch_size: int):
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             hidden = model.encoder(input_ids=input_ids, attention_mask=attention_mask)[0]
-            # Mean pooling over non-padding tokens
-            mask = attention_mask.unsqueeze(-1).float()
-            pooled = (hidden * mask).sum(dim=1) / mask.sum(dim=1)
-            pooled = pooled.cpu()
+            pooled = hidden[:, 0, :].cpu()
             embeddings_list.append(pooled)
     all_emb = torch.cat(embeddings_list, dim=0)
     emb_ds = Dataset.from_dict({
