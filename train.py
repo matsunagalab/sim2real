@@ -86,7 +86,9 @@ class MultiTaskModel(nn.Module):
             pooled = embedding
         else:
             hidden = self.encoder(input_ids=input_ids, attention_mask=attention_mask)[0]
-            pooled = hidden[:, 0, :]
+            # Mean pooling over non-padding tokens
+            mask = attention_mask.unsqueeze(-1).float()
+            pooled = (hidden * mask).sum(dim=1) / mask.sum(dim=1)
 
         feats = self.shared(pooled)
         tm_logits = self.tm_head(feats).view(-1)
