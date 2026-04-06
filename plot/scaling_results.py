@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-"""Plot scaling law results — one panel per ddG source, style matching reference figure."""
+"""Plot scaling law results — best config (HuberLoss δ=1.0, 10 runs).
+
+Data from NbBench train=57, test=396, ensemble eval.
+Best config: ESM-2 8M, HuberLoss(δ=1.0), lr=3e-4, dropout=0.15, wd=0.04,
+uncertainty-weighted MTL, cosine schedule.
+"""
 
 import os
 import numpy as np
@@ -21,46 +26,44 @@ plt.rcParams.update({
     'ytick.right': True,
 })
 
-# ---- Data: NbBench train=57, test=396, ensemble eval, 10 runs ----
+# ---- Data: NbBench train=57, test=396, best config (HuberLoss), 10 runs ----
 n_ddg = np.array([10, 20, 40, 80, 160, 320])
-
-# Total simulation samples = n_ddg * 2 (1mel + 4idl)
-n_sim = n_ddg * 2
+n_sim = n_ddg * 2  # 1mel + 4idl
 
 data = {
     'FoldX': {
-        'mae':  [7.607, 7.359, 7.339, 7.194, 7.144, 7.101],
-        'ci_lo': [7.162, 6.913, 6.895, 6.759, 6.711, 6.680],
-        'ci_hi': [8.056, 7.807, 7.784, 7.634, 7.583, 7.529],
+        'mae':  [7.4547, 7.2939, 7.2425, 7.1833, 7.1627, 7.1123],
+        'ci_lo': [7.0120, 6.8528, 6.8012, 6.7483, 6.7302, 6.6908],
+        'ci_hi': [7.9023, 7.7390, 7.6882, 7.6243, 7.5983, 7.5407],
     },
     'FEP': {
-        'mae':  [7.317, 7.266, 7.236, 7.209, 7.221, 7.161],
-        'ci_lo': [6.871, 6.821, 6.793, 6.766, 6.782, 6.729],
-        'ci_hi': [7.770, 7.717, 7.686, 7.662, 7.665, 7.601],
+        'mae':  [7.2870, 7.2469, 7.2369, 7.2369, 7.2327, 7.2046],
+        'ci_lo': [6.8433, 6.8026, 6.7915, 6.7983, 6.7950, 6.7682],
+        'ci_hi': [7.7376, 7.6981, 7.6851, 7.6850, 7.6787, 7.6465],
     },
     'Rosetta': {
-        'mae':  [7.623, 7.450, 7.460, 7.323, 7.313, 7.325],
-        'ci_lo': [7.179, 7.008, 7.015, 6.879, 6.869, 6.885],
-        'ci_hi': [8.075, 7.901, 7.912, 7.771, 7.760, 7.764],
+        'mae':  [7.5741, 7.5836, 7.3661, 7.3531, 7.3767, 7.3279],
+        'ci_lo': [7.1297, 7.1397, 6.9211, 6.9072, 6.9347, 6.8884],
+        'ci_hi': [8.0258, 8.0332, 7.8119, 7.8001, 7.8225, 7.7663],
     },
     'ThermoMPNN': {
-        'mae':  [7.362, 7.371, 7.253, 7.239, 7.223, 7.202],
-        'ci_lo': [6.917, 6.924, 6.811, 6.803, 6.783, 6.756],
-        'ci_hi': [7.807, 7.818, 7.704, 7.680, 7.669, 7.646],
+        'mae':  [7.4487, 7.6080, 7.3281, 7.1989, 7.2274, 7.2018],
+        'ci_lo': [7.0043, 7.1613, 6.8817, 6.7656, 6.7922, 6.7629],
+        'ci_hi': [7.8984, 8.0611, 7.7748, 7.6382, 7.6732, 7.6463],
     },
     'Rosetta (ESM2 muts)': {
-        'mae':  [7.668, 7.439, 7.324, 7.362, 7.304, 7.426],
-        'ci_lo': [7.225, 6.996, 6.878, 6.916, 6.853, 6.962],
-        'ci_hi': [8.119, 7.888, 7.775, 7.810, 7.761, 7.897],
+        'mae':  [7.6817, 7.3804, 7.3433, 7.3416, 7.3027, 7.4420],
+        'ci_lo': [7.2343, 6.9348, 6.8956, 6.8937, 6.8552, 6.9820],
+        'ci_hi': [8.1325, 7.8293, 7.7917, 7.7903, 7.7576, 7.9151],
     },
     'Rosetta (random muts)': {
-        'mae':  [7.468, 7.408, 7.367, 7.262, 7.320, 7.309],
-        'ci_lo': [7.023, 6.960, 6.919, 6.818, 6.873, 6.865],
-        'ci_hi': [7.920, 7.858, 7.817, 7.711, 7.771, 7.756],
+        'mae':  [7.4221, 7.4305, 7.3159, 7.3027, 7.3655, 7.3553],
+        'ci_lo': [6.9787, 6.9831, 6.8711, 6.8559, 6.9195, 6.9107],
+        'ci_hi': [7.8725, 7.8794, 7.7628, 7.7550, 7.8180, 7.8064],
     },
 }
 
-# Baseline MAE (Tm-only, no ddG) — approximate from n_ddg=0 runs
+# Baseline: Tm-only model (no ddG data), approximate from n_ddg=0 extrapolation
 BASELINE_MAE = 7.75
 
 
@@ -96,29 +99,28 @@ for idx, (name, d) in enumerate(data.items()):
     a, b, c = popt
     y_fit = power_law(x_fit, a, b, c)
 
-    # CI band (gray shading)
+    # CI band
     ax.fill_between(n_sim, ci_lo, ci_hi, color='#BDBDBD', alpha=0.5, zorder=1)
 
-    # Data line + markers (dark blue, like reference)
+    # Data line + markers
     ax.plot(n_sim, mae, '-o', color='#1a3a5c', markersize=6, linewidth=2.0,
             markerfacecolor='#1a3a5c', markeredgecolor='#1a3a5c', zorder=3)
 
-    # Power law fit (black dotted)
+    # Power law fit
     ax.plot(x_fit, y_fit, ':', color='#333333', linewidth=1.8, zorder=2)
 
-    # Baseline (red dash-dot)
+    # Baseline
     ax.axhline(y=BASELINE_MAE, color='#c0392b', linestyle='-.', linewidth=1.5, alpha=0.7, zorder=1)
 
-    # Format equation
+    # Equation
     if abs(c) < 0.01:
         eq_str = f"${a:.3f}n^{{{b:.3f}}}$"
     else:
         eq_str = f"${a:.3f}n^{{{b:.3f}}}+{c:.2f}$"
-
     ax.text(0.05, 0.08, eq_str, transform=ax.transAxes, fontsize=9,
             fontfamily='serif', verticalalignment='bottom')
 
-    # Panel label (bold, upper left)
+    # Panel label
     ax.text(-0.02, 1.08, panel_labels[idx], transform=ax.transAxes,
             fontsize=16, fontweight='bold', verticalalignment='top')
 
@@ -136,16 +138,15 @@ for idx, (name, d) in enumerate(data.items()):
     ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
     ax.tick_params(axis='both', which='minor', length=0)
 
-    # Y label only on left column
+    # Labels
     if idx % 3 == 0:
         ax.set_ylabel('MAE (°C)', fontsize=11)
-
-    # X label only on bottom row
     if idx >= 3:
         ax.set_xlabel('Number of simulation samples', fontsize=11)
 
-fig.suptitle('Sim2Real Scaling Laws: Simulation ddG → Experimental Tm',
-             fontsize=13, fontweight='bold', y=1.01)
+fig.suptitle('Sim2Real Scaling Laws: Simulation ddG → Experimental Tm\n'
+             '(ESM-2 8M + HuberLoss + uncertainty MTL, NbBench train=57)',
+             fontsize=12, fontweight='bold', y=1.02)
 
 plt.tight_layout()
 
