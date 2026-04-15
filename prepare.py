@@ -34,7 +34,7 @@ from transformers import AutoTokenizer
 
 # ---- Constants ----
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
-MODEL_NAME = os.path.join(REPO_ROOT, "models", "esm2_t6_8M_vhh")
+MODEL_NAME = "facebook/esm2_t6_8M_UR50D"
 MAX_LENGTH = 160
 
 DDG_PATHS = {
