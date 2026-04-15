@@ -157,7 +157,7 @@ def format_time(seconds: float) -> str:
 def train(train_ds, eval_ds, device, run, result_dir, multi_task):
     """学習を実行し、モデルを保存する。prepare.py から呼ばれる。"""
     model = MultiTaskModel(
-        base_model_name="facebook/esm2_t6_8M_UR50D",
+        base_model_name=os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "esm2_t6_8M_vhh"),
         hidden_dropout_prob=HPARAMS['dropout_rate'],
         multi_task=multi_task,
     )
