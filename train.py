@@ -41,7 +41,7 @@ HPARAMS = {
     "warmup_steps": 100,
     "lora_r": 8,
     "lora_alpha": 16,
-    "use_lora": True,
+    "use_lora": False,
 }
 
 

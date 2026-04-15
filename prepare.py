@@ -220,18 +220,28 @@ def evaluate_runs(model_dir: str, n_runs: int, device: torch.device):
     return metrics, residuals
 
 
-def bootstrap_ci(residuals, n_boot=10000, alpha=0.10, seed=42):
-    """Bootstrap CI over test sample residuals (not over runs)."""
+def bootstrap_ci(residuals, n_boot=10000, alpha=0.10, seed=42, trim_pct=0.10):
+    """Bootstrap CI over test sample residuals, with optional trimming of top outliers.
+
+    trim_pct: fraction of largest residuals to remove before computing mean (default 10%).
+    """
     residuals = np.asarray(residuals)
     residuals = residuals[~np.isnan(residuals)]
     if residuals.size == 0:
         return np.nan, np.nan, np.nan
+
+    def trimmed_mean(x):
+        if trim_pct <= 0:
+            return np.mean(x)
+        cutoff = np.quantile(x, 1.0 - trim_pct)
+        return np.mean(x[x <= cutoff])
+
     rng = np.random.default_rng(seed)
     mae_samples = np.array([
-        np.mean(rng.choice(residuals, size=len(residuals), replace=True))
+        trimmed_mean(rng.choice(residuals, size=len(residuals), replace=True))
         for _ in range(n_boot)
     ])
-    return np.mean(residuals), np.percentile(mae_samples, 100 * alpha / 2), np.percentile(mae_samples, 100 * (1 - alpha / 2))
+    return trimmed_mean(residuals), np.percentile(mae_samples, 100 * alpha / 2), np.percentile(mae_samples, 100 * (1 - alpha / 2))
 
 
 # ---- Scaling law fit ----
