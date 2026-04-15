@@ -14,6 +14,7 @@ import json
 import numpy as np
 import torch
 import torch.nn as nn
+from peft import LoraConfig, get_peft_model
 from transformers import (
     Trainer,
     TrainingArguments,
@@ -32,11 +33,15 @@ HPARAMS = {
     "num_train_epochs": 400,
     "batch_size": 16,
     "learning_rate": 3e-4,
+    "encoder_lr": 1e-4,
     "weight_decay": 0.04,
     "dropout_rate": 0.15,
     "early_stopping_patience": 15,
     "early_stopping_threshold": 0.0,
     "warmup_steps": 100,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "use_lora": True,
 }
 
 
@@ -44,15 +49,29 @@ HPARAMS = {
 class MultiTaskModel(nn.Module):
 
     def __init__(self, base_model_name: str, hidden_dropout_prob: float = 0.195,
-                 multi_task: bool = True):
+                 multi_task: bool = True, use_lora: bool = False):
         super().__init__()
         cfg = AutoConfig.from_pretrained(base_model_name)
         cfg.output_hidden_states = False
         self.encoder = AutoModel.from_pretrained(base_model_name, config=cfg)
-        for p in self.encoder.parameters():
-            p.requires_grad = False
 
-        hs = self.encoder.config.hidden_size
+        if use_lora:
+            # LoRA: only small adapter matrices are trainable
+            lora_config = LoraConfig(
+                r=HPARAMS["lora_r"],
+                lora_alpha=HPARAMS["lora_alpha"],
+                target_modules=["query", "value"],
+                lora_dropout=0.05,
+                bias="none",
+            )
+            self.encoder = get_peft_model(self.encoder, lora_config)
+            self.encoder.print_trainable_parameters()
+        else:
+            # Freeze all encoder params
+            for p in self.encoder.parameters():
+                p.requires_grad = False
+
+        hs = cfg.hidden_size
         p = hidden_dropout_prob
 
         self.shared = nn.Sequential(
@@ -79,6 +98,8 @@ class MultiTaskModel(nn.Module):
         self.log_sigma_tm = nn.Parameter(torch.tensor(0.0))
         self.log_sigma_ddg1 = nn.Parameter(torch.tensor(0.0))
         self.log_sigma_ddg2 = nn.Parameter(torch.tensor(0.0))
+
+        self._use_lora = use_lora
 
     def forward(self, input_ids=None, attention_mask=None,
                 labels=None, task_ids=None, embedding=None, **kwargs):
@@ -156,20 +177,24 @@ def format_time(seconds: float) -> str:
 # ---- Train function (prepare.py から呼ばれる) ----
 def train(train_ds, eval_ds, device, run, result_dir, multi_task):
     """学習を実行し、モデルを保存する。prepare.py から呼ばれる。"""
+    use_lora = HPARAMS.get("use_lora", False)
+
     model = MultiTaskModel(
         base_model_name="facebook/esm2_t6_8M_UR50D",
         hidden_dropout_prob=HPARAMS['dropout_rate'],
         multi_task=multi_task,
+        use_lora=use_lora,
     )
     model.to(device)
 
-    # Precompute embeddings (encoder is frozen)
-    from prepare import precompute_embeddings
-    print("    Precomputing embeddings...", flush=True)
-    t0 = time.time()
-    train_ds = precompute_embeddings(model, train_ds, device, HPARAMS["batch_size"])
-    eval_ds = precompute_embeddings(model, eval_ds, device, HPARAMS["batch_size"])
-    print(f"    done in {format_time(time.time() - t0)}", flush=True)
+    if not use_lora:
+        # Precompute embeddings (encoder is frozen)
+        from prepare import precompute_embeddings
+        print("    Precomputing embeddings...", flush=True)
+        t0 = time.time()
+        train_ds = precompute_embeddings(model, train_ds, device, HPARAMS["batch_size"])
+        eval_ds = precompute_embeddings(model, eval_ds, device, HPARAMS["batch_size"])
+        print(f"    done in {format_time(time.time() - t0)}", flush=True)
 
     ckpt_dir = os.path.join(result_dir, "supervised", f"mtl_run{run}")
     os.makedirs(ckpt_dir, exist_ok=True)
@@ -216,7 +241,7 @@ def train(train_ds, eval_ds, device, run, result_dir, multi_task):
         callbacks=callbacks,
     )
 
-    print(f"    Training run {run}...", flush=True)
+    print(f"    Training run {run} (LoRA={use_lora})...", flush=True)
     start = time.time()
     trainer.train()
     trainer.save_model(ckpt_dir)

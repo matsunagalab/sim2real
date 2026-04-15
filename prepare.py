@@ -167,11 +167,13 @@ def evaluate_runs(model_dir: str, n_runs: int, device: torch.device):
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
     # Load all models
+    from train import HPARAMS as train_hparams
+    use_lora = train_hparams.get("use_lora", False)
     models = []
     for i in range(n_runs):
         safetensors_path = os.path.join(model_dir, "supervised", f"mtl_run{i+1}", "model.safetensors")
         state_dict = load_file(safetensors_path, device="cpu")
-        model = MultiTaskModel(MODEL_NAME).to(device)
+        model = MultiTaskModel(MODEL_NAME, use_lora=use_lora).to(device)
         model.load_state_dict(state_dict, strict=False)
         model.eval()
         models.append(model)
