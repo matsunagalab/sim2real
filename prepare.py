@@ -220,7 +220,7 @@ def evaluate_runs(model_dir: str, n_runs: int, device: torch.device):
     return metrics, residuals
 
 
-def bootstrap_ci(residuals, n_boot=10000, alpha=0.10, seed=42, trim_pct=0.10):
+def bootstrap_ci(residuals, n_boot=10000, alpha=0.10, seed=42, trim_pct=0.0):
     """Bootstrap CI over test sample residuals, with optional trimming of top outliers.
 
     trim_pct: fraction of largest residuals to remove before computing mean (default 10%).
@@ -308,6 +308,7 @@ def main():
 
     mae_means = []
     ci_widths = []
+    all_residuals = {}  # n_ddg -> residuals array (for paired bootstrap)
 
     total_start = time.time()
 
@@ -345,6 +346,7 @@ def main():
 
         mae_means.append(mean_mae)
         ci_widths.append(ci_w)
+        all_residuals[n_ddg] = residuals
         print(f"    MAE: {mean_mae:.4f}  90% CI: [{lo:.4f}, {hi:.4f}]  width={ci_w:.4f}", flush=True)
 
     # Scaling law fit
@@ -368,6 +370,47 @@ def main():
     print(f"  avg_mae = {avg_mae:.4f}")
     elapsed = time.time() - total_start
     print(f"  total_time = {elapsed:.0f}s")
+
+    # ---- Paired bootstrap: ΔMAE with shared sample indices ----
+    if len(n_ddg_list) >= 2:
+        print(f"\n{'='*60}", flush=True)
+        print("Paired bootstrap: ΔMAE significance", flush=True)
+        print(f"{'='*60}", flush=True)
+
+        n_boot = 10000
+        rng = np.random.default_rng(42)
+        n_samples = len(all_residuals[n_ddg_list[0]])
+        boot_idx = rng.integers(0, n_samples, size=(n_boot, n_samples))
+
+        # Bootstrap MAE at each n_ddg using SAME indices
+        boot_maes = {}
+        for n in n_ddg_list:
+            r = all_residuals[n]
+            boot_maes[n] = np.array([np.mean(r[idx]) for idx in boot_idx])
+
+        # Pairwise ΔMAE (n_ddg[i] - n_ddg[0]), testing if significantly < 0
+        print(f"  ΔMAE vs n_ddg={n_ddg_list[0]} (paired bootstrap):")
+        print(f"  {'n_ddg':>8s}  {'ΔMAE':>8s}  {'90% CI':>20s}  {'p(Δ>0)':>8s}")
+        ref = boot_maes[n_ddg_list[0]]
+        for n in n_ddg_list[1:]:
+            delta = boot_maes[n] - ref
+            lo, hi = np.percentile(delta, [5, 95])
+            p_positive = float(np.mean(delta > 0))  # one-sided p: P(no improvement)
+            print(f"  {n:>8d}  {np.mean(delta):>+8.4f}  [{lo:>+7.4f}, {hi:>+7.4f}]  {p_positive:>8.4f}")
+
+        # Full range comparison
+        delta_full = boot_maes[n_ddg_list[-1]] - boot_maes[n_ddg_list[0]]
+        lo, hi = np.percentile(delta_full, [5, 95])
+        p = float(np.mean(delta_full > 0))
+        print(f"\n  Full range (n_ddg={n_ddg_list[0]}→{n_ddg_list[-1]}):")
+        print(f"    ΔMAE = {np.mean(delta_full):+.4f}°C  90% CI=[{lo:+.4f}, {hi:+.4f}]")
+        print(f"    p(ΔMAE > 0) = {p:.4f}  (one-sided test of no-improvement)")
+        if p < 0.05:
+            print(f"    → 有意 (p < 0.05)")
+        elif p < 0.10:
+            print(f"    → 限界的有意 (p < 0.10)")
+        else:
+            print(f"    → 有意でない")
 
     print(f"\nRESULT: slope={slope:.6f} ci_width={avg_ci_width:.6f} mae_mean={avg_mae:.6f}")
 
