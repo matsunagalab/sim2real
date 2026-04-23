@@ -66,7 +66,8 @@ DDG_PATHS = {
 
 # MD auxiliary task: single file (1 sequence per nanobody, task_id=3)
 MD_PATHS = {
-    "MD_Q": "data/md/nanobody_qvalue.csv",  # Q-value mean from NPT 300K MD
+    "MD_Q": "data/md/nanobody_qvalue.csv",              # all-all Q (115 seqs)
+    "MD_Q_HPHIL": "data/md/nanobody_qvalue_hphil.csv",  # hydrophilic-all Q (Kamiya best, 153 seqs)
 }
 
 
@@ -310,7 +311,7 @@ def main():
     parser.add_argument("--n-ddg-list", type=str, default="20,80,280",
                         help="Comma-separated n_ddg values (ignored if ddg-source=none)")
     parser.add_argument("--md-source", type=str, default="none",
-                        choices=["none", "MD_Q"],
+                        choices=["none", "MD_Q", "MD_Q_HPHIL"],
                         help="MD auxiliary task source (task_id=3)")
     parser.add_argument("--n-md-list", type=str, default="",
                         help="Comma-separated n_md values; if set, iterates over these")

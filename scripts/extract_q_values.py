@@ -23,7 +23,7 @@ import mdtraj as md
 
 MDCLAW_ROOT = "/home/yasu/tmp/mdclaw"
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT_CSV = os.path.join(REPO_ROOT, "data", "md", "nanobody_qvalue.csv")
+OUT_CSV = os.path.join(REPO_ROOT, "data", "md", "nanobody_qvalue_hphil.csv")
 
 # Q-value parameters (Best-Hummer, following Kamiya et al. and mdclaw defaults)
 SELECTION = "backbone and not element H"
@@ -32,6 +32,10 @@ LAMBDA = 1.8
 NATIVE_CUTOFF_NM = 0.45
 MIN_RESID_GAP = 3
 LAST_NS = 30.0  # average over final 30 ns
+
+# Kamiya et al. hydrophilic residues (Asp, Glu, Gln, Asn, Arg, Lys, His)
+HPHIL_RESNAMES = {'ASP', 'GLU', 'GLN', 'ASN', 'ARG', 'LYS', 'HIS',
+                  'ASH', 'GLH', 'LYN', 'HID', 'HIE', 'HIP'}  # ff19SB variants
 
 THREE_TO_ONE = {
     'ALA': 'A', 'ARG': 'R', 'ASN': 'N', 'ASP': 'D', 'CYS': 'C',
@@ -97,11 +101,24 @@ def compute_q_mean(trajectory_file: str, prmtop: str,
     coords_native = first.xyz[0, sel_idx, :]  # (N, 3) in nm
     res_idx = np.array([topology.atom(a).residue.index for a in sel_idx])
 
+    # Hydrophilic mask per atom (Kamiya: hydrophilic = {D, E, Q, N, R, K, H})
+    resname_per_atom = np.array([
+        topology.atom(a).residue.name.upper() for a in sel_idx
+    ])
+    hphil_per_atom = np.isin(resname_per_atom, list(HPHIL_RESNAMES))
+
     # Contact list from native coords
     diff = coords_native[:, None, :] - coords_native[None, :, :]
     dist = np.sqrt((diff ** 2).sum(axis=-1))
     res_gap = np.abs(res_idx[:, None] - res_idx[None, :])
-    mask = (dist < NATIVE_CUTOFF_NM) & (res_gap > MIN_RESID_GAP) & np.triu(np.ones_like(dist, dtype=bool), k=1)
+    # "Hydrophilic-all" pair: at least one atom must be on a hydrophilic residue
+    hphil_pair = hphil_per_atom[:, None] | hphil_per_atom[None, :]
+    mask = (
+        (dist < NATIVE_CUTOFF_NM)
+        & (res_gap > MIN_RESID_GAP)
+        & np.triu(np.ones_like(dist, dtype=bool), k=1)
+        & hphil_pair
+    )
     ii, jj = np.where(mask)
     if len(ii) == 0:
         raise ValueError("no native contacts found in frame 0")
