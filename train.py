@@ -90,6 +90,7 @@ class MultiTaskModel(nn.Module):
         self.tm_head = nn.Linear(32, 1)
         self.ddg_head = nn.Linear(32, 1)
         self.ddg_head2 = nn.Linear(32, 1)
+        self.md_head = nn.Linear(32, 1)  # task_id=3: MD Q-value
 
         self.multi_task = multi_task
         self.loss_fn = nn.HuberLoss(delta=1.0)
@@ -98,6 +99,7 @@ class MultiTaskModel(nn.Module):
         self.log_sigma_tm = nn.Parameter(torch.tensor(0.0))
         self.log_sigma_ddg1 = nn.Parameter(torch.tensor(0.0))
         self.log_sigma_ddg2 = nn.Parameter(torch.tensor(0.0))
+        self.log_sigma_md = nn.Parameter(torch.tensor(0.0))
 
         self._use_lora = use_lora
 
@@ -119,15 +121,18 @@ class MultiTaskModel(nn.Module):
 
         ddg_logits = self.ddg_head(feats).view(-1)
         ddg_logits2 = self.ddg_head2(feats).view(-1)
+        md_logits = self.md_head(feats).view(-1)
 
         if task_ids is not None:
             logits = torch.zeros_like(tm_logits)
             mask_tm = task_ids == 0
             mask_ddg = task_ids == 1
             mask_ddg2 = task_ids == 2
+            mask_md = task_ids == 3
             logits[mask_tm] = tm_logits[mask_tm]
             logits[mask_ddg] = ddg_logits[mask_ddg]
             logits[mask_ddg2] = ddg_logits2[mask_ddg2]
+            logits[mask_md] = md_logits[mask_md]
 
             loss = None
             if labels is not None:
@@ -141,11 +146,14 @@ class MultiTaskModel(nn.Module):
                 if mask_ddg2.any():
                     l = self.loss_fn(ddg_logits2[mask_ddg2], labels[mask_ddg2])
                     losses.append(l / (2 * torch.exp(2 * self.log_sigma_ddg2)) + self.log_sigma_ddg2)
+                if mask_md.any():
+                    l = self.loss_fn(md_logits[mask_md], labels[mask_md])
+                    losses.append(l / (2 * torch.exp(2 * self.log_sigma_md)) + self.log_sigma_md)
                 loss = sum(losses) if losses else torch.tensor(0.0, device=tm_logits.device)
 
             return SequenceClassifierOutput(loss=loss, logits=logits)
 
-        return {'tm': tm_logits, 'ddg': ddg_logits, 'ddg2': ddg_logits2}
+        return {'tm': tm_logits, 'ddg': ddg_logits, 'ddg2': ddg_logits2, 'md': md_logits}
 
 
 # ---- Callback ----
