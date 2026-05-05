@@ -4,6 +4,19 @@ models/esm2_t6_8M_vhh/checkpoint-*
 models/esm2_t6_8M_vhh/*.safetensors
 models/esm2_t6_8M_vhh/training_args.bin
 outputs/
-run_*.log
-rosetta_backrub.log
-mlm_finetune.log
+*.log
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Stray local outputs
+*.pdb
+plot/*.png
+logs/
+results/
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/

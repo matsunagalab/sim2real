@@ -13,6 +13,7 @@ Reference structure = merged.pdb from the matching job_nano_*/prep_001/.
 import os
 import glob
 import time
+import multiprocessing as mp
 import numpy as np
 import pandas as pd
 import mdtraj as md
@@ -125,6 +126,32 @@ def compute_q_mean_rosetta(traj_pdb: str) -> tuple[float, int, int]:
     return float(q_tail.mean()), len(q_tail), len(ii)
 
 
+def _process_one(traj_pdb):
+    base = os.path.basename(traj_pdb)
+    pdb_id = base.replace("_traj.pdb.gz", "").replace("_traj.pdb", "")
+    native = os.path.join(
+        MDCLAW_ROOT, f"job_nano_{pdb_id}", "nodes", "prep_001",
+        "artifacts", "merge", "merged.pdb",
+    )
+    if not os.path.exists(native):
+        return (pdb_id, None, "no merged.pdb")
+    try:
+        seq = extract_sequence(native)
+        if len(seq) < 50:
+            return (pdb_id, None, f"seq too short ({len(seq)})")
+        q_mean, n_frames, n_contacts = compute_q_mean_rosetta(traj_pdb)
+    except Exception as e:
+        return (pdb_id, None, f"{type(e).__name__}: {e}")
+    return (pdb_id, {
+        "pdb_id": pdb_id,
+        "seq": seq,
+        "q_value_raw": q_mean,
+        "n_frames_used": n_frames,
+        "n_contacts": n_contacts,
+        "seq_len": len(seq),
+    }, f"ok {n_frames}f/{n_contacts}c")
+
+
 def main():
     traj_files = sorted(
         glob.glob(os.path.join(TRAJ_DIR, "*_traj.pdb"))
@@ -139,43 +166,20 @@ def main():
     skipped = []
     t_start = time.time()
 
-    for i, traj_pdb in enumerate(traj_files):
-        base = os.path.basename(traj_pdb)
-        pdb_id = base.replace("_traj.pdb.gz", "").replace("_traj.pdb", "")
-        native = os.path.join(
-            MDCLAW_ROOT, f"job_nano_{pdb_id}", "nodes", "prep_001",
-            "artifacts", "merge", "merged.pdb",
-        )
-        if not os.path.exists(native):
-            skipped.append((pdb_id, "no merged.pdb"))
-            continue
+    n_workers = 8
+    print(f"Parallel workers: {n_workers}", flush=True)
 
-        t0 = time.time()
-        try:
-            seq = extract_sequence(native)
-            if len(seq) < 50:
-                skipped.append((pdb_id, f"seq too short ({len(seq)})"))
+    with mp.Pool(n_workers) as pool:
+        for i, (pdb_id, row, msg) in enumerate(pool.imap_unordered(_process_one, traj_files)):
+            if row is None:
+                skipped.append((pdb_id, msg))
                 continue
-            q_mean, n_frames, n_contacts = compute_q_mean_rosetta(traj_pdb)
-        except Exception as e:
-            skipped.append((pdb_id, f"{type(e).__name__}: {e}"))
-            continue
-
-        rows.append({
-            "pdb_id": pdb_id,
-            "seq": seq,
-            "q_value_raw": q_mean,
-            "n_frames_used": n_frames,
-            "n_contacts": n_contacts,
-            "seq_len": len(seq),
-        })
-        if (i + 1) % 50 == 0 or i < 10:
-            print(
-                f"[{len(rows):4d}/{i+1}] {pdb_id}: len={len(seq)}, "
-                f"Q={q_mean:.4f} ({n_frames} frames, {n_contacts} contacts) "
-                f"[{time.time()-t0:.1f}s]",
-                flush=True,
-            )
+            rows.append(row)
+            if (i + 1) % 100 == 0:
+                elapsed = time.time() - t_start
+                rate = (i + 1) / elapsed
+                eta = (len(traj_files) - i - 1) / rate
+                print(f"[{i+1:4d}/{len(traj_files)}] rate={rate:.1f}/s, eta={eta/60:.1f}min", flush=True)
 
     print(f"\nDone: {len(rows)} processed, {len(skipped)} skipped in {time.time()-t_start:.0f}s")
     if skipped:

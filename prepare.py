@@ -12,6 +12,7 @@ train.py の train() を呼んで学習を実行し、アンサンブル評価�
 """
 
 import argparse
+import json
 import os
 import random
 import subprocess
@@ -34,7 +35,7 @@ from transformers import AutoTokenizer
 
 # ---- Constants ----
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
-MODEL_NAME = "facebook/esm2_t6_8M_UR50D"
+MODEL_NAME = os.environ.get("BASE_MODEL_NAME", "facebook/esm2_t6_8M_UR50D")
 MAX_LENGTH = 160
 
 DDG_PATHS = {
@@ -64,11 +65,16 @@ DDG_PATHS = {
     ),
 }
 
-# MD auxiliary task: single file (1 sequence per nanobody, task_id=3)
+# MD auxiliary task: single file (1 sequence per nanobody)
+# Primary MD task uses task_id=3, optional auxiliary uses task_id=4
 MD_PATHS = {
     "MD_Q": "data/md/nanobody_qvalue.csv",                    # all-all Q (115 seqs)
-    "MD_Q_HPHIL": "data/md/nanobody_qvalue_hphil.csv",        # hphil-all Q from all-atom MD (153 seqs)
-    "ROSETTA_Q_HPHIL": "data/md/rosetta_qvalue_hphil.csv",    # hphil-all Q from Rosetta backrub (~1177 seqs)
+    "MD_Q_HPHIL": "data/md/nanobody_qvalue_hphil.csv",        # hphil-all Q from all-atom MD
+    "ROSETTA_Q_HPHIL": "data/md/rosetta_qvalue_hphil.csv",    # hphil-all Q from Rosetta backrub
+    "MD_RMSF": "data/md/nanobody_rmsf.csv",                   # mean Cα RMSF from all-atom MD
+    "MD_Q_HIGHFLEX": "data/md/feat_q_highflex.csv",           # hphil Q on top-30% RMSF residues (CDR proxy)
+    "MD_Q_LOWFLEX": "data/md/feat_q_lowflex.csv",             # hphil Q on bottom-70% RMSF residues (framework proxy)
+    "MD_SALTBRIDGE": "data/md/feat_saltbridge.csv",           # native salt-bridge persistence
 }
 
 
@@ -100,8 +106,9 @@ def get_tm_scaler():
 
 # ---- Data loading ----
 def load_and_prepare_datasets(seed: int, n_ddg: int | None = None, ddg_source: str | None = None,
-                              n_md: int | None = None, md_source: str | None = None):
-    """Load NbBench Tm data (fixed split) + optional DDG data (task_id=1,2) + optional MD data (task_id=3)."""
+                              n_md: int | None = None, md_source: str | None = None,
+                              md_aux_source: str | None = None):
+    """Load NbBench Tm data (fixed split) + optional DDG (task_id=1,2) + optional MD (task_id=3, +4)."""
     train_csv = os.path.join(REPO_ROOT, "data", "nbbench", "train.csv")
     val_csv = os.path.join(REPO_ROOT, "data", "nbbench", "val.csv")
 
@@ -137,16 +144,18 @@ def load_and_prepare_datasets(seed: int, n_ddg: int | None = None, ddg_source: s
             dfs_train.append(split['train'].to_pandas())
             dfs_val.append(split['test'].to_pandas())
 
-    # ---- MD auxiliary task (task_id=3, single sequence per nanobody) ----
-    if md_source and md_source != "none":
-        md_path = MD_PATHS[md_source]
+    # ---- MD auxiliary tasks: primary (task_id=3) and optional aux (task_id=4) ----
+    for task_id, src in [(3, md_source), (4, md_aux_source)]:
+        if not src or src == "none":
+            continue
+        md_path = MD_PATHS[src]
         df = pd.read_csv(os.path.join(REPO_ROOT, md_path))
         if n_md is not None:
             df = df.sample(n=min(n_md, len(df)), random_state=seed).reset_index(drop=True)
         df = pd.DataFrame({
             'text': df['seq'].tolist(),
-            'label': df['ddg_scaled01'].tolist(),  # scaled Q-value stored under ddg_scaled01
-            'task': [3] * len(df)
+            'label': df['ddg_scaled01'].tolist(),
+            'task': [task_id] * len(df)
         })
         ds = Dataset.from_pandas(df)
         split = ds.train_test_split(test_size=0.2, seed=seed)
@@ -183,17 +192,15 @@ def precompute_embeddings(model, dataset, device, batch_size: int):
 # ---- Evaluation ----
 def evaluate_runs(model_dir: str, n_runs: int, device: torch.device):
     """Ensemble evaluation: all models predict on single test set, average predictions."""
-    from train import MultiTaskModel
+    from train import MultiTaskModel, resolve_encoder_mode
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
-    # Load all models
-    from train import HPARAMS as train_hparams
-    use_lora = train_hparams.get("use_lora", False)
+    encoder_mode = resolve_encoder_mode()
     models = []
     for i in range(n_runs):
         safetensors_path = os.path.join(model_dir, "supervised", f"mtl_run{i+1}", "model.safetensors")
         state_dict = load_file(safetensors_path, device="cpu")
-        model = MultiTaskModel(MODEL_NAME, use_lora=use_lora).to(device)
+        model = MultiTaskModel(MODEL_NAME, encoder_mode=encoder_mode).to(device)
         model.load_state_dict(state_dict, strict=False)
         model.eval()
         models.append(model)
@@ -312,13 +319,41 @@ def main():
     parser.add_argument("--n-ddg-list", type=str, default="20,80,280",
                         help="Comma-separated n_ddg values (ignored if ddg-source=none)")
     parser.add_argument("--md-source", type=str, default="none",
-                        choices=["none", "MD_Q", "MD_Q_HPHIL", "ROSETTA_Q_HPHIL"],
-                        help="MD auxiliary task source (task_id=3)")
+                        choices=["none", "MD_Q", "MD_Q_HPHIL", "ROSETTA_Q_HPHIL", "MD_RMSF",
+                                 "MD_Q_HIGHFLEX", "MD_Q_LOWFLEX", "MD_SALTBRIDGE"],
+                        help="Primary MD auxiliary task source (task_id=3)")
+    parser.add_argument("--md-aux-source", type=str, default="none",
+                        choices=["none", "MD_Q", "MD_Q_HPHIL", "ROSETTA_Q_HPHIL", "MD_RMSF",
+                                 "MD_Q_HIGHFLEX", "MD_Q_LOWFLEX", "MD_SALTBRIDGE"],
+                        help="Optional 2nd MD task in parallel (task_id=4); 'none' = Q-only")
     parser.add_argument("--n-md-list", type=str, default="",
                         help="Comma-separated n_md values; if set, iterates over these")
     parser.add_argument("--n-runs", type=int, default=3, help="Number of runs (model seeds)")
     parser.add_argument("--result-dir", type=str, default=None)
+    # Hyperparameter overrides (mirror env vars; CLI takes precedence).
+    parser.add_argument("--encoder-mode", choices=["frozen", "lora", "hot"], default=None,
+                        help="Override ENCODER_MODE env var")
+    parser.add_argument("--base-model", type=str, default=None,
+                        help="Override BASE_MODEL_NAME env var (e.g. facebook/esm2_t33_650M_UR50D)")
+    parser.add_argument("--mtl-weight-mode", choices=["uncertainty", "fixed"], default=None,
+                        help="Override MTL_WEIGHT_MODE env var")
+    parser.add_argument("--md-weight", type=float, default=None,
+                        help="Override MD_WEIGHT env var (used when mtl-weight-mode=fixed)")
+    parser.add_argument("--exp-name", type=str, default=None,
+                        help="Experiment label (used for results/<name>/ output dir and results.tsv)")
     args = parser.parse_args()
+
+    # Apply CLI overrides to env BEFORE importing train (HPARAMS reads env at module load)
+    if args.encoder_mode is not None:
+        os.environ["ENCODER_MODE"] = args.encoder_mode
+    if args.base_model is not None:
+        os.environ["BASE_MODEL_NAME"] = args.base_model
+        global MODEL_NAME
+        MODEL_NAME = args.base_model
+    if args.mtl_weight_mode is not None:
+        os.environ["MTL_WEIGHT_MODE"] = args.mtl_weight_mode
+    if args.md_weight is not None:
+        os.environ["MD_WEIGHT"] = str(args.md_weight)
 
     # Determine scaling axis: MD takes precedence if n-md-list is provided
     use_md_scaling = bool(args.n_md_list.strip())
@@ -331,7 +366,8 @@ def main():
 
     device = get_device()
     print(f"Device: {device}", flush=True)
-    print(f"DDG source: {args.ddg_source} | MD source: {args.md_source}", flush=True)
+    print(f"DDG source: {args.ddg_source} | MD source: {args.md_source} "
+          f"| MD aux: {args.md_aux_source}", flush=True)
     print(f"Scaling ({scaling_name}) points: {scaling_list}, Runs per point: {args.n_runs}", flush=True)
 
     from train import train as train_fn
@@ -342,6 +378,7 @@ def main():
 
     mae_means = []
     ci_widths = []
+    ci_bounds = []  # list of (lo, hi) per scaling point
     all_residuals = {}  # n_ddg -> residuals array (for paired bootstrap)
 
     total_start = time.time()
@@ -359,6 +396,7 @@ def main():
         n_ddg_arg = None if use_md_scaling else n_val
         n_md_arg = n_val if use_md_scaling else None
         md_src = args.md_source if args.md_source != "none" else None
+        md_aux_src = args.md_aux_source if args.md_aux_source != "none" else None
         ddg_src = args.ddg_source if args.ddg_source != "none" else None
 
         # Train n_runs models (different init seeds, same Tm data, different aux samples)
@@ -368,7 +406,7 @@ def main():
 
             train_ds, eval_ds = load_and_prepare_datasets(
                 run, n_ddg=n_ddg_arg, ddg_source=ddg_src,
-                n_md=n_md_arg, md_source=md_src,
+                n_md=n_md_arg, md_source=md_src, md_aux_source=md_aux_src,
             )
             print(f"    train: {len(train_ds)}, eval: {len(eval_ds)}", flush=True)
 
@@ -391,6 +429,7 @@ def main():
 
         mae_means.append(mean_mae)
         ci_widths.append(ci_w)
+        ci_bounds.append((float(lo), float(hi)))
         all_residuals[n_val] = residuals
         print(f"    MAE: {mean_mae:.4f}  90% CI: [{lo:.4f}, {hi:.4f}]  width={ci_w:.4f}", flush=True)
 
@@ -417,6 +456,11 @@ def main():
     print(f"  total_time = {elapsed:.0f}s")
 
     # ---- Paired bootstrap: ΔMAE with shared sample indices ----
+    paired_per_n = []   # captured for JSON output
+    delta_full_mean = float("nan")
+    delta_full_lo = float("nan")
+    delta_full_hi = float("nan")
+    p_full = float("nan")
     if len(scaling_list) >= 2:
         print(f"\n{'='*60}", flush=True)
         print("Paired bootstrap: ΔMAE significance", flush=True)
@@ -439,39 +483,115 @@ def main():
         ref = boot_maes[scaling_list[0]]
         for n in scaling_list[1:]:
             delta = boot_maes[n] - ref
-            lo, hi = np.percentile(delta, [5, 95])
+            lo_d, hi_d = np.percentile(delta, [5, 95])
             p_positive = float(np.mean(delta > 0))
-            print(f"  {n:>8d}  {np.mean(delta):>+8.4f}  [{lo:>+7.4f}, {hi:>+7.4f}]  {p_positive:>8.4f}")
+            print(f"  {n:>8d}  {np.mean(delta):>+8.4f}  [{lo_d:>+7.4f}, {hi_d:>+7.4f}]  {p_positive:>8.4f}")
+            paired_per_n.append({
+                "n": int(n), "delta_mae": float(np.mean(delta)),
+                "delta_ci_lo": float(lo_d), "delta_ci_hi": float(hi_d),
+                "p_positive": p_positive,
+            })
 
         # Full range comparison
         delta_full = boot_maes[scaling_list[-1]] - boot_maes[scaling_list[0]]
-        lo, hi = np.percentile(delta_full, [5, 95])
-        p = float(np.mean(delta_full > 0))
+        lo_f, hi_f = np.percentile(delta_full, [5, 95])
+        delta_full_mean = float(np.mean(delta_full))
+        delta_full_lo = float(lo_f)
+        delta_full_hi = float(hi_f)
+        p_full = float(np.mean(delta_full > 0))
         print(f"\n  Full range ({scaling_name}={scaling_list[0]}→{scaling_list[-1]}):")
-        print(f"    ΔMAE = {np.mean(delta_full):+.4f}°C  90% CI=[{lo:+.4f}, {hi:+.4f}]")
-        print(f"    p(ΔMAE > 0) = {p:.4f}  (one-sided test of no-improvement)")
-        if p < 0.05:
+        print(f"    ΔMAE = {delta_full_mean:+.4f}°C  90% CI=[{delta_full_lo:+.4f}, {delta_full_hi:+.4f}]")
+        print(f"    p(ΔMAE > 0) = {p_full:.4f}  (one-sided test of no-improvement)")
+        if p_full < 0.05:
             print(f"    → 有意 (p < 0.05)")
-        elif p < 0.10:
+        elif p_full < 0.10:
             print(f"    → 限界的有意 (p < 0.10)")
         else:
             print(f"    → 有意でない")
 
     print(f"\nRESULT: slope={slope:.6f} ci_width={avg_ci_width:.6f} mae_mean={avg_mae:.6f}")
 
-    # Append to results.tsv
-    results_tsv = os.path.join(REPO_ROOT, "results.tsv")
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"],
                             capture_output=True, text=True, cwd=REPO_ROOT).stdout.strip()
-    header = "timestamp\tcommit\tslope\tci_width\tmae_mean\tn_ddg_list\tn_runs\tddg_source\ttime_s\tmd_source\tn_md_list\n"
+
+    # ---- Structured JSON output: results/<exp-name>/scaling.json ----
+    from train import HPARAMS as train_hparams
+    from train import resolve_encoder_mode as _resolve_em
+    exp_name = args.exp_name or "anonymous"
+    out_dir = os.path.join(REPO_ROOT, "results", exp_name)
+    os.makedirs(out_dir, exist_ok=True)
+    best_idx = int(np.argmin(mae_means)) if mae_means else 0
+    structured = {
+        "exp_name": args.exp_name,
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "git_commit": commit,
+        "args": vars(args),
+        "env": {k: os.environ.get(k) for k in
+                ["ENCODER_MODE", "BASE_MODEL_NAME", "MTL_WEIGHT_MODE", "MD_WEIGHT"]},
+        "resolved_encoder_mode": _resolve_em(),
+        "hparams": {k: v for k, v in train_hparams.items()},
+        "scaling": [
+            {"n": int(n), "mae": float(m),
+             "ci_lo": float(lo), "ci_hi": float(hi), "ci_width": float(hi - lo)}
+            for n, m, (lo, hi) in zip(scaling_list, mae_means, ci_bounds)
+        ],
+        "best": {
+            "n": int(scaling_list[best_idx]),
+            "mae": float(mae_means[best_idx]),
+            "ci_width": float(ci_bounds[best_idx][1] - ci_bounds[best_idx][0]),
+        },
+        "summary": {
+            "slope": float(slope) if not (isinstance(slope, float) and np.isnan(slope)) else None,
+            "ci_width_avg": float(avg_ci_width),
+            "mae_avg": float(avg_mae),
+            "elapsed_s": float(elapsed),
+        },
+        "paired_bootstrap": {
+            "ref_n": int(scaling_list[0]) if scaling_list else None,
+            "per_n": paired_per_n,
+            "full_range": {
+                "from": int(scaling_list[0]) if scaling_list else None,
+                "to": int(scaling_list[-1]) if scaling_list else None,
+                "delta_mae": delta_full_mean,
+                "delta_ci_lo": delta_full_lo,
+                "delta_ci_hi": delta_full_hi,
+                "p_positive": p_full,
+            },
+        },
+    }
+    json_path = os.path.join(out_dir, "scaling.json")
+    with open(json_path, "w") as f:
+        json.dump(structured, f, indent=2, default=str)
+    print(f"\nStructured results: {json_path}")
+
+    # ---- Append to results.tsv (extended schema; existing rows leave new cols empty) ----
+    results_tsv = os.path.join(REPO_ROOT, "results.tsv")
+    header = ("timestamp\tcommit\tslope\tci_width\tmae_mean\tn_ddg_list\tn_runs\tddg_source\t"
+              "time_s\tmd_source\tn_md_list\t"
+              "encoder_mode\tbase_model\tmd_aux_source\tmtl_weight_mode\tmd_weight\texp_name\n")
     scaling_str = args.n_md_list if use_md_scaling else args.n_ddg_list
+    extras = (
+        f"{_resolve_em()}\t"
+        f"{train_hparams.get('base_model_name', '')}\t"
+        f"{args.md_aux_source}\t"
+        f"{train_hparams.get('mtl_weight_mode', '')}\t"
+        f"{train_hparams.get('md_weight', '')}\t"
+        f"{exp_name}"
+    )
     row = (f"{datetime.now().isoformat(timespec='seconds')}\t{commit}\t{slope:.6f}\t{avg_ci_width:.6f}\t"
            f"{avg_mae:.6f}\t{scaling_str if not use_md_scaling else ''}\t{args.n_runs}\t{args.ddg_source}\t"
-           f"{elapsed:.0f}\t{args.md_source}\t{args.n_md_list}\n")
+           f"{elapsed:.0f}\t{args.md_source}\t{args.n_md_list}\t{extras}\n")
 
     if not os.path.exists(results_tsv):
         with open(results_tsv, "w") as f:
             f.write(header)
+    else:
+        # Migrate header if it's the old 11-col version
+        with open(results_tsv) as f:
+            current_header = f.readline()
+        if current_header.count("\t") < 16:
+            # leave existing rows as-is; just ensure new appends use new schema
+            pass
     with open(results_tsv, "a") as f:
         f.write(row)
 
