@@ -125,3 +125,15 @@ timestamp	commit	slope	ci_width	mae_mean	n_ddg_list	n_runs	ddg_source	time_s
 2026-05-05T17:54:25	5441929	-0.431498	0.855004	6.834012		10	none	2144	MD_Q_LOWFLEX	10,40,160,640
 2026-05-05T21:33:05	5441929	nan	0.893248	7.035795		5	none	3440	MD_Q_LOWFLEX	640
 2026-05-05T23:07:30	5441929	nan	0.889903	6.782510		5	none	5539	MD_Q_LOWFLEX	640
+2026-05-06T02:19:52	3a505b1	-2.470781	0.900206	7.426429		10	none	1966	MD_Q_HPHIL	10,20,40,80,160,320,640	frozen	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	frozen_q_hphil_full
+2026-05-06T02:42:34	3a505b1	-2.935172	0.900707	7.501357		10	none	1341	MD_Q_LOWFLEX	10,40,160,320,640	frozen	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	frozen_q_lowflex_full
+2026-05-06T03:02:36	3a505b1	-2.708897	0.898887	7.516056		10	none	1180	MD_Q_HIGHFLEX	10,40,160,320,640	frozen	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	frozen_q_highflex_full
+2026-05-06T03:23:42	3a505b1	-3.000000	0.898300	7.533165		10	none	1244	MD_SALTBRIDGE	10,40,160,320,640	frozen	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	frozen_saltbridge_full
+2026-05-06T04:07:55	3a505b1	-3.000000	0.901544	7.394187		10	none	2631	ROSETTA_Q_HPHIL	10,20,40,80,160,320,640,960	frozen	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	rosetta_full
+2026-05-06T04:43:10	3a505b1	-0.114671	0.899523	7.634282		10	none	2094	MD_Q_LOWFLEX	10,40,160,320,640	frozen	facebook/esm2_t6_8M_UR50D	MD_Q_HIGHFLEX	uncertainty	1.0	combo_lowflex_highflex_frozen
+2026-05-06T04:49:35	3a505b1	nan	0.838651	6.929597		5	none	364	MD_Q_HPHIL	640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	hot_qhphil_alone_640
+2026-05-06T05:26:04	3a505b1	-0.431498	0.855004	6.834012		10	none	2167	MD_Q_LOWFLEX	10,40,160,640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	hot_lowflex_sweep
+2026-05-06T06:36:04	3a505b1	nan	0.895861	6.963350		5	none	4179	MD_Q_LOWFLEX	640	lora	facebook/esm2_t33_650M_UR50D	none	uncertainty	1.0	lora_650m_lowflex_640
+2026-05-06T08:06:29	3a505b1	nan	0.889903	6.782510		5	none	5403	MD_Q_LOWFLEX	640	hot	facebook/esm2_t33_650M_UR50D	none	uncertainty	1.0	hot_650m_lowflex_640
+2026-05-06T08:08:57	3a505b1	nan	0.901780	7.372636		5	none	126	MD_Q_HPHIL	320	frozen	facebook/esm2_t6_8M_UR50D	none	fixed	1.0	md_weight_w1.0
+2026-05-06T08:11:49	3a505b1	nan	0.900832	7.475021		5	none	150	MD_Q_HPHIL	320	frozen	facebook/esm2_t6_8M_UR50D	none	fixed	8.0	md_weight_w8.0

@@ -1,0 +1,175 @@
+{
+  "exp_name": "rosetta_full",
+  "timestamp": "2026-05-06T04:07:55",
+  "git_commit": "3a505b1",
+  "args": {
+    "ddg_source": "none",
+    "n_ddg_list": "20,80,280",
+    "md_source": "ROSETTA_Q_HPHIL",
+    "md_aux_source": "none",
+    "n_md_list": "10,20,40,80,160,320,640,960",
+    "n_runs": 10,
+    "result_dir": null,
+    "encoder_mode": null,
+    "base_model": null,
+    "mtl_weight_mode": null,
+    "md_weight": null,
+    "exp_name": "rosetta_full"
+  },
+  "env": {
+    "ENCODER_MODE": "frozen",
+    "BASE_MODEL_NAME": null,
+    "MTL_WEIGHT_MODE": null,
+    "MD_WEIGHT": null
+  },
+  "resolved_encoder_mode": "frozen",
+  "hparams": {
+    "num_train_epochs": 400,
+    "batch_size": 16,
+    "learning_rate": 0.0003,
+    "encoder_lr": 0.0001,
+    "weight_decay": 0.04,
+    "dropout_rate": 0.15,
+    "early_stopping_patience": 15,
+    "early_stopping_threshold": 0.0,
+    "warmup_steps": 100,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "use_lora": false,
+    "encoder_mode": "frozen",
+    "base_model_name": "facebook/esm2_t6_8M_UR50D",
+    "mtl_weight_mode": "uncertainty",
+    "md_weight": 1.0
+  },
+  "scaling": [
+    {
+      "n": 10,
+      "mae": 7.608423779756663,
+      "ci_lo": 7.16122603162521,
+      "ci_hi": 8.06445383625248,
+      "ci_width": 0.903227804627269
+    },
+    {
+      "n": 20,
+      "mae": 7.394875661307046,
+      "ci_lo": 6.945248759044607,
+      "ci_hi": 7.845008763302487,
+      "ci_width": 0.8997600042578799
+    },
+    {
+      "n": 40,
+      "mae": 7.344971176035875,
+      "ci_lo": 6.895289931614543,
+      "ci_hi": 7.794752677794353,
+      "ci_width": 0.8994627461798101
+    },
+    {
+      "n": 80,
+      "mae": 7.330247342239467,
+      "ci_lo": 6.880456313499647,
+      "ci_hi": 7.781668979410786,
+      "ci_width": 0.9012126659111388
+    },
+    {
+      "n": 160,
+      "mae": 7.316384555500494,
+      "ci_lo": 6.866691773285229,
+      "ci_hi": 7.7703431063334545,
+      "ci_width": 0.9036513330482254
+    },
+    {
+      "n": 320,
+      "mae": 7.383479396069914,
+      "ci_lo": 6.931812929538416,
+      "ci_hi": 7.835661902376678,
+      "ci_width": 0.9038489728382624
+    },
+    {
+      "n": 640,
+      "mae": 7.380278885070237,
+      "ci_lo": 6.931602150955777,
+      "ci_hi": 7.8309046902581105,
+      "ci_width": 0.899302539302334
+    },
+    {
+      "n": 960,
+      "mae": 7.394831206538765,
+      "ci_lo": 6.944155180470044,
+      "ci_hi": 7.846042484091167,
+      "ci_width": 0.9018873036211232
+    }
+  ],
+  "best": {
+    "n": 160,
+    "mae": 7.316384555500494,
+    "ci_width": 0.9036513330482254
+  },
+  "summary": {
+    "slope": -2.999999999999821,
+    "ci_width_avg": 0.9015441712232554,
+    "mae_avg": 7.394186500314808,
+    "elapsed_s": 2631.461011648178
+  },
+  "paired_bootstrap": {
+    "ref_n": 10,
+    "per_n": [
+      {
+        "n": 20,
+        "delta_mae": -0.214285674114998,
+        "delta_ci_lo": -0.3316491924426919,
+        "delta_ci_hi": -0.09500553731517193,
+        "p_positive": 0.0021
+      },
+      {
+        "n": 40,
+        "delta_mae": -0.2642120022372956,
+        "delta_ci_lo": -0.40646561050957347,
+        "delta_ci_hi": -0.1200719449370458,
+        "p_positive": 0.0017
+      },
+      {
+        "n": 80,
+        "delta_mae": -0.27870184826476296,
+        "delta_ci_lo": -0.43963852641153406,
+        "delta_ci_hi": -0.11679811036136616,
+        "p_positive": 0.0026
+      },
+      {
+        "n": 160,
+        "delta_mae": -0.2929432204261857,
+        "delta_ci_lo": -0.4638217093072381,
+        "delta_ci_hi": -0.12354345921059894,
+        "p_positive": 0.0032
+      },
+      {
+        "n": 320,
+        "delta_mae": -0.22583725871999633,
+        "delta_ci_lo": -0.34533601375324174,
+        "delta_ci_hi": -0.10521269115778618,
+        "p_positive": 0.0009
+      },
+      {
+        "n": 640,
+        "delta_mae": -0.2283884007667752,
+        "delta_ci_lo": -0.3512162643780702,
+        "delta_ci_hi": -0.10802961517022337,
+        "p_positive": 0.0013
+      },
+      {
+        "n": 960,
+        "delta_mae": -0.2138118003318947,
+        "delta_ci_lo": -0.31387121175467125,
+        "delta_ci_hi": -0.11610217260045104,
+        "p_positive": 0.0001
+      }
+    ],
+    "full_range": {
+      "from": 10,
+      "to": 960,
+      "delta_mae": -0.2138118003318947,
+      "delta_ci_lo": -0.31387121175467125,
+      "delta_ci_hi": -0.11610217260045104,
+      "p_positive": 0.0001
+    }
+  }
+}

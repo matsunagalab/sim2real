@@ -13,10 +13,17 @@ __pycache__/
 # Stray local outputs
 *.pdb
 plot/*.png
+plot/*.pdf
+!plot/fig_*.png
+!plot/fig_*.pdf
 logs/
-results/
+# results/ contains structured per-experiment JSON sidecars (small, reproducibility-valuable);
+# we keep scaling.json but exclude bulky checkpoints if any drop here.
+results/*/checkpoints/
+results/*/supervised/
 
 # Editor / OS
 .DS_Store
 .vscode/
 .idea/
+.claude/

@@ -1,0 +1,76 @@
+{
+  "exp_name": "lora_650m_lowflex_640",
+  "timestamp": "2026-05-06T06:36:04",
+  "git_commit": "3a505b1",
+  "args": {
+    "ddg_source": "none",
+    "n_ddg_list": "20,80,280",
+    "md_source": "MD_Q_LOWFLEX",
+    "md_aux_source": "none",
+    "n_md_list": "640",
+    "n_runs": 5,
+    "result_dir": null,
+    "encoder_mode": null,
+    "base_model": null,
+    "mtl_weight_mode": null,
+    "md_weight": null,
+    "exp_name": "lora_650m_lowflex_640"
+  },
+  "env": {
+    "ENCODER_MODE": "lora",
+    "BASE_MODEL_NAME": "facebook/esm2_t33_650M_UR50D",
+    "MTL_WEIGHT_MODE": null,
+    "MD_WEIGHT": null
+  },
+  "resolved_encoder_mode": "lora",
+  "hparams": {
+    "num_train_epochs": 400,
+    "batch_size": 16,
+    "learning_rate": 0.0003,
+    "encoder_lr": 0.0001,
+    "weight_decay": 0.04,
+    "dropout_rate": 0.15,
+    "early_stopping_patience": 15,
+    "early_stopping_threshold": 0.0,
+    "warmup_steps": 100,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "use_lora": false,
+    "encoder_mode": "lora",
+    "base_model_name": "facebook/esm2_t33_650M_UR50D",
+    "mtl_weight_mode": "uncertainty",
+    "md_weight": 1.0
+  },
+  "scaling": [
+    {
+      "n": 640,
+      "mae": 6.9633501966255045,
+      "ci_lo": 6.521821761797287,
+      "ci_hi": 7.417683153898242,
+      "ci_width": 0.8958613921009553
+    }
+  ],
+  "best": {
+    "n": 640,
+    "mae": 6.9633501966255045,
+    "ci_width": 0.8958613921009553
+  },
+  "summary": {
+    "slope": null,
+    "ci_width_avg": 0.8958613921009553,
+    "mae_avg": 6.9633501966255045,
+    "elapsed_s": 4178.906603574753
+  },
+  "paired_bootstrap": {
+    "ref_n": 640,
+    "per_n": [],
+    "full_range": {
+      "from": 640,
+      "to": 640,
+      "delta_mae": NaN,
+      "delta_ci_lo": NaN,
+      "delta_ci_hi": NaN,
+      "p_positive": NaN
+    }
+  }
+}
