@@ -1,0 +1,13 @@
+name	encoder	base	md_source	md_aux	ddg_source	n_runs	best_n	best_mae	best_ci_width	delta_mae	p_value
+frozen_q_hphil_full	frozen	esm2_t6_8M_UR50D	MD_Q_HPHIL	none	none	10	640	7.3178	0.8991	-0.47575429379542084	0.0
+frozen_q_lowflex_full	frozen	esm2_t6_8M_UR50D	MD_Q_LOWFLEX	none	none	10	160	7.3167	0.9055	-0.7298924877194687	0.0
+frozen_q_highflex_full	frozen	esm2_t6_8M_UR50D	MD_Q_HIGHFLEX	none	none	10	640	7.3341	0.8981	-0.7102102784458478	0.0
+frozen_saltbridge_full	frozen	esm2_t6_8M_UR50D	MD_SALTBRIDGE	none	none	10	40	7.3871	0.8947	-0.4543373512613929	0.0
+rosetta_full	frozen	esm2_t6_8M_UR50D	ROSETTA_Q_HPHIL	none	none	10	160	7.3164	0.9037	-0.2138118003318947	0.0001
+combo_lowflex_highflex_frozen	frozen	esm2_t6_8M_UR50D	MD_Q_LOWFLEX	MD_Q_HIGHFLEX	none	10	640	7.2197	0.8980	-0.8134002722709863	0.0
+hot_lowflex_sweep	hot	esm2_t6_8M_UR50D	MD_Q_LOWFLEX	none	none	10	640	6.7606	0.8581	-0.17438921712392838	0.0142
+hot_qhphil_alone_640	hot	esm2_t6_8M_UR50D	MD_Q_HPHIL	none	none	5	640	6.9296	0.8387	nan	nan
+lora_650m_lowflex_640	lora	esm2_t33_650M_UR50D	MD_Q_LOWFLEX	none	none	5	640	6.9634	0.8959	nan	nan
+hot_650m_lowflex_640	hot	esm2_t33_650M_UR50D	MD_Q_LOWFLEX	none	none	5	640	6.7825	0.8899	nan	nan
+md_weight_w1.0	frozen	esm2_t6_8M_UR50D	MD_Q_HPHIL	none	none	5	320	7.3726	0.9018	nan	nan
+md_weight_w8.0	frozen	esm2_t6_8M_UR50D	MD_Q_HPHIL	none	none	5	320	7.4750	0.9008	nan	nan
