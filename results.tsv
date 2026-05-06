@@ -137,3 +137,13 @@ timestamp	commit	slope	ci_width	mae_mean	n_ddg_list	n_runs	ddg_source	time_s
 2026-05-06T08:06:29	3a505b1	nan	0.889903	6.782510		5	none	5403	MD_Q_LOWFLEX	640	hot	facebook/esm2_t33_650M_UR50D	none	uncertainty	1.0	hot_650m_lowflex_640
 2026-05-06T08:08:57	3a505b1	nan	0.901780	7.372636		5	none	126	MD_Q_HPHIL	320	frozen	facebook/esm2_t6_8M_UR50D	none	fixed	1.0	md_weight_w1.0
 2026-05-06T08:11:49	3a505b1	nan	0.900832	7.475021		5	none	150	MD_Q_HPHIL	320	frozen	facebook/esm2_t6_8M_UR50D	none	fixed	8.0	md_weight_w8.0
+2026-05-07T04:11:08	2d2faf7	-1.041125	0.899086	7.474401		10	none	1227	MD_Q_MIN	10,40,160,640	frozen	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	frozen_q_min
+2026-05-07T04:27:41	2d2faf7	-1.474725	0.903461	7.577909		10	none	968	MD_Q_STD	10,40,160,640	frozen	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	frozen_q_std
+2026-05-07T04:47:41	2d2faf7	-1.612271	0.895768	7.390097		10	none	1178	MD_Q_SLOPE	10,40,160,640	frozen	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	frozen_q_slope
+2026-05-07T05:06:58	2d2faf7	-0.927214	0.885815	7.455810		10	none	1135	MD_RMSF_MAX	10,40,160,640	frozen	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	frozen_rmsf_max
+2026-05-07T05:23:35	2d2faf7	-1.430059	0.904130	7.633683		10	none	975	MD_RG_STD	10,40,160,640	frozen	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	frozen_rg_std
+2026-05-07T05:58:56	2d2faf7	-1.057921	0.863429	6.829145		10	none	2100	MD_Q_MIN	10,40,160,640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	hot_q_min
+2026-05-07T06:33:47	2d2faf7	-0.001000	0.858050	6.757641		10	none	2069	MD_Q_STD	10,40,160,640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	hot_q_std
+2026-05-07T07:07:20	2d2faf7	-0.001000	0.852528	6.783224		10	none	1992	MD_Q_SLOPE	10,40,160,640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	hot_q_slope
+2026-05-07T07:39:43	2d2faf7	-3.000000	0.877401	6.847526		10	none	1920	MD_RMSF_MAX	10,40,160,640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	hot_rmsf_max
+2026-05-07T08:07:52	2d2faf7	-0.001000	0.852597	6.819738		10	none	1668	MD_RG_STD	10,40,160,640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	hot_rg_std
