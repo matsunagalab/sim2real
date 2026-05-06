@@ -268,6 +268,44 @@ def fig_md_weight_grid(results: dict[str, dict]):
     print(f"  wrote {out}.png/pdf")
 
 
+def fig_v2_features(results: dict[str, dict]):
+    """Compare v2 lightweight features under frozen and hot encoder."""
+    feats = ["q_min", "q_std", "q_slope", "rmsf_max", "rg_std"]
+    frozen_mae, hot_mae, frozen_ci, hot_ci = [], [], [], []
+    for f in feats:
+        fz = results.get(f"frozen_{f}")
+        ht = results.get(f"hot_{f}")
+        if not fz or not ht:
+            return
+        frozen_mae.append(fz["best"]["mae"])
+        hot_mae.append(ht["best"]["mae"])
+        frozen_ci.append(fz["best"]["ci_width"] / 2)
+        hot_ci.append(ht["best"]["ci_width"] / 2)
+
+    x = np.arange(len(feats))
+    w = 0.38
+    fig, ax = plt.subplots(figsize=(6, 4))
+    b1 = ax.bar(x - w / 2, frozen_mae, w, yerr=frozen_ci,
+                color=PALETTE["frozen"], label="Frozen", capsize=3)
+    b2 = ax.bar(x + w / 2, hot_mae, w, yerr=hot_ci,
+                color=PALETTE["hot"], label="Hot", capsize=3)
+    for bars, vals in [(b1, frozen_mae), (b2, hot_mae)]:
+        for bar, v in zip(bars, vals):
+            ax.text(bar.get_x() + bar.get_width() / 2, v + 0.02, f"{v:.2f}",
+                    ha="center", va="bottom", fontsize=8)
+    ax.set_xticks(x)
+    ax.set_xticklabels(feats)
+    ax.set_ylabel("Best Tm MAE (°C)")
+    ax.set_title("Round-2 features × encoder mode (n_md best per cell)")
+    ax.set_ylim(min(hot_mae) - 0.3, max(frozen_mae) + 0.4)
+    ax.legend(loc="upper right")
+    ax.grid(axis="y", alpha=0.2)
+    out = os.path.join(PLOT_DIR, "fig_v2_features")
+    fig.savefig(out + ".png"); fig.savefig(out + ".pdf")
+    plt.close(fig)
+    print(f"  wrote {out}.png/pdf")
+
+
 def fig_overall_summary(results: dict[str, dict], registry: dict):
     """Horizontal bar chart: every loaded experiment, sorted by best MAE."""
     items = []
@@ -322,6 +360,7 @@ def main():
     fig_scaling_combo(results)
     fig_encoder_mode(results)
     fig_md_weight_grid(results)
+    fig_v2_features(results)
     fig_overall_summary(results, registry)
     print("done.")
 

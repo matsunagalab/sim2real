@@ -75,6 +75,12 @@ MD_PATHS = {
     "MD_Q_HIGHFLEX": "data/md/feat_q_highflex.csv",           # hphil Q on top-30% RMSF residues (CDR proxy)
     "MD_Q_LOWFLEX": "data/md/feat_q_lowflex.csv",             # hphil Q on bottom-70% RMSF residues (framework proxy)
     "MD_SALTBRIDGE": "data/md/feat_saltbridge.csv",           # native salt-bridge persistence
+    # v2 lightweight features (autoresearch round 2):
+    "MD_Q_MIN": "data/md/feat_q_min.csv",                     # min frame-wise Q (worst-case unfolding)
+    "MD_Q_STD": "data/md/feat_q_std.csv",                     # std of Q over time (fluctuation)
+    "MD_Q_SLOPE": "data/md/feat_q_slope.csv",                 # linear slope of Q vs frame index (kinetic)
+    "MD_RMSF_MAX": "data/md/feat_rmsf_max.csv",               # max per-Cα RMSF (worst residue's flexibility)
+    "MD_RG_STD": "data/md/feat_rg_std.csv",                   # std of radius of gyration (compactness fluctuation)
 }
 
 
@@ -320,11 +326,13 @@ def main():
                         help="Comma-separated n_ddg values (ignored if ddg-source=none)")
     parser.add_argument("--md-source", type=str, default="none",
                         choices=["none", "MD_Q", "MD_Q_HPHIL", "ROSETTA_Q_HPHIL", "MD_RMSF",
-                                 "MD_Q_HIGHFLEX", "MD_Q_LOWFLEX", "MD_SALTBRIDGE"],
+                                 "MD_Q_HIGHFLEX", "MD_Q_LOWFLEX", "MD_SALTBRIDGE",
+                                 "MD_Q_MIN", "MD_Q_STD", "MD_Q_SLOPE", "MD_RMSF_MAX", "MD_RG_STD"],
                         help="Primary MD auxiliary task source (task_id=3)")
     parser.add_argument("--md-aux-source", type=str, default="none",
                         choices=["none", "MD_Q", "MD_Q_HPHIL", "ROSETTA_Q_HPHIL", "MD_RMSF",
-                                 "MD_Q_HIGHFLEX", "MD_Q_LOWFLEX", "MD_SALTBRIDGE"],
+                                 "MD_Q_HIGHFLEX", "MD_Q_LOWFLEX", "MD_SALTBRIDGE",
+                                 "MD_Q_MIN", "MD_Q_STD", "MD_Q_SLOPE", "MD_RMSF_MAX", "MD_RG_STD"],
                         help="Optional 2nd MD task in parallel (task_id=4); 'none' = Q-only")
     parser.add_argument("--n-md-list", type=str, default="",
                         help="Comma-separated n_md values; if set, iterates over these")

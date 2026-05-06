@@ -11,3 +11,13 @@ lora_650m_lowflex_640	lora	esm2_t33_650M_UR50D	MD_Q_LOWFLEX	none	none	5	640	6.96
 hot_650m_lowflex_640	hot	esm2_t33_650M_UR50D	MD_Q_LOWFLEX	none	none	5	640	6.7825	0.8899	nan	nan
 md_weight_w1.0	frozen	esm2_t6_8M_UR50D	MD_Q_HPHIL	none	none	5	320	7.3726	0.9018	nan	nan
 md_weight_w8.0	frozen	esm2_t6_8M_UR50D	MD_Q_HPHIL	none	none	5	320	7.4750	0.9008	nan	nan
+frozen_q_min	frozen	esm2_t6_8M_UR50D	MD_Q_MIN	none	none	10	640	7.2618	0.8954	-0.6672108308136814	0.0
+hot_q_min	hot	esm2_t6_8M_UR50D	MD_Q_MIN	none	none	10	160	6.7351	0.8639	-0.27376122337917724	0.0011
+frozen_q_std	frozen	esm2_t6_8M_UR50D	MD_Q_STD	none	none	10	160	7.3165	0.8994	-0.7711940857630089	0.0
+hot_q_std	hot	esm2_t6_8M_UR50D	MD_Q_STD	none	none	10	40	6.6928	0.8656	0.018446686488411183	0.5875
+frozen_q_slope	frozen	esm2_t6_8M_UR50D	MD_Q_SLOPE	none	none	10	640	7.2446	0.8896	-0.4393934368265761	0.0
+hot_q_slope	hot	esm2_t6_8M_UR50D	MD_Q_SLOPE	none	none	10	40	6.6657	0.8631	0.24230938604518942	0.9997
+frozen_rmsf_max	frozen	esm2_t6_8M_UR50D	MD_RMSF_MAX	none	none	10	160	7.2497	0.8839	-0.40905664822283794	0.0
+hot_rmsf_max	hot	esm2_t6_8M_UR50D	MD_RMSF_MAX	none	none	10	40	6.7339	0.8723	-0.03787328642860246	0.3639
+frozen_rg_std	frozen	esm2_t6_8M_UR50D	MD_RG_STD	none	none	10	160	7.3619	0.9021	-0.743810265417138	0.0
+hot_rg_std	hot	esm2_t6_8M_UR50D	MD_RG_STD	none	none	10	40	6.6690	0.8645	0.1298976852227492	0.8944

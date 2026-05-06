@@ -14,3 +14,13 @@
 | `hot_650m_lowflex_640` | hot | esm2_t33_650M_UR50D | MD_Q_LOWFLEX | none | 640 | **6.783** | 0.890 | +nan | nan |
 | `md_weight_w1.0` | frozen | esm2_t6_8M_UR50D | MD_Q_HPHIL | none | 320 | **7.373** | 0.902 | +nan | nan |
 | `md_weight_w8.0` | frozen | esm2_t6_8M_UR50D | MD_Q_HPHIL | none | 320 | **7.475** | 0.901 | +nan | nan |
+| `frozen_q_min` | frozen | esm2_t6_8M_UR50D | MD_Q_MIN | none | 640 | **7.262** | 0.895 | -0.667 | 0.0000 |
+| `hot_q_min` | hot | esm2_t6_8M_UR50D | MD_Q_MIN | none | 160 | **6.735** | 0.864 | -0.274 | 0.0011 |
+| `frozen_q_std` | frozen | esm2_t6_8M_UR50D | MD_Q_STD | none | 160 | **7.316** | 0.899 | -0.771 | 0.0000 |
+| `hot_q_std` | hot | esm2_t6_8M_UR50D | MD_Q_STD | none | 40 | **6.693** | 0.866 | +0.018 | 0.5875 |
+| `frozen_q_slope` | frozen | esm2_t6_8M_UR50D | MD_Q_SLOPE | none | 640 | **7.245** | 0.890 | -0.439 | 0.0000 |
+| `hot_q_slope` | hot | esm2_t6_8M_UR50D | MD_Q_SLOPE | none | 40 | **6.666** | 0.863 | +0.242 | 0.9997 |
+| `frozen_rmsf_max` | frozen | esm2_t6_8M_UR50D | MD_RMSF_MAX | none | 160 | **7.250** | 0.884 | -0.409 | 0.0000 |
+| `hot_rmsf_max` | hot | esm2_t6_8M_UR50D | MD_RMSF_MAX | none | 40 | **6.734** | 0.872 | -0.038 | 0.3639 |
+| `frozen_rg_std` | frozen | esm2_t6_8M_UR50D | MD_RG_STD | none | 160 | **7.362** | 0.902 | -0.744 | 0.0000 |
+| `hot_rg_std` | hot | esm2_t6_8M_UR50D | MD_RG_STD | none | 40 | **6.669** | 0.865 | +0.130 | 0.8944 |

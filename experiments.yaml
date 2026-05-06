@@ -293,7 +293,62 @@ experiments:
       best_mae: 7.72
 
   # =========================================================================
-  # 6) DDG-source baselines (paired-mutant ddG as auxiliary task; no MD)
+  # 6) Autoresearch round 2 — Q-value 以外のスカラー特徴量
+  #    (frozen + hot for each; n_md sweep 10→640 with 10 runs)
+  # =========================================================================
+
+  frozen_q_min:
+    description: "Frozen 8M + Q_min (worst-case unfolding)"
+    args: { ddg-source: none, md-source: MD_Q_MIN, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: frozen }
+
+  hot_q_min:
+    description: "Hot 8M + Q_min"
+    args: { ddg-source: none, md-source: MD_Q_MIN, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: hot }
+
+  frozen_q_std:
+    description: "Frozen 8M + Q_std (temporal fluctuation)"
+    args: { ddg-source: none, md-source: MD_Q_STD, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: frozen }
+
+  hot_q_std:
+    description: "Hot 8M + Q_std"
+    args: { ddg-source: none, md-source: MD_Q_STD, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: hot }
+
+  frozen_q_slope:
+    description: "Frozen 8M + Q_slope (kinetic decay)"
+    args: { ddg-source: none, md-source: MD_Q_SLOPE, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: frozen }
+
+  hot_q_slope:
+    description: "Hot 8M + Q_slope"
+    args: { ddg-source: none, md-source: MD_Q_SLOPE, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: hot }
+
+  frozen_rmsf_max:
+    description: "Frozen 8M + RMSF_max (worst residue flexibility)"
+    args: { ddg-source: none, md-source: MD_RMSF_MAX, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: frozen }
+
+  hot_rmsf_max:
+    description: "Hot 8M + RMSF_max"
+    args: { ddg-source: none, md-source: MD_RMSF_MAX, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: hot }
+
+  frozen_rg_std:
+    description: "Frozen 8M + Rg_std (compactness fluctuation)"
+    args: { ddg-source: none, md-source: MD_RG_STD, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: frozen }
+
+  hot_rg_std:
+    description: "Hot 8M + Rg_std"
+    args: { ddg-source: none, md-source: MD_RG_STD, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: hot }
+
+  # =========================================================================
+  # 7) DDG-source baselines (paired-mutant ddG as auxiliary task; no MD)
   # =========================================================================
 
   ddg_FEP_full:
