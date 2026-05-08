@@ -1,0 +1,105 @@
+{
+  "exp_name": "hot_q_400k",
+  "timestamp": "2026-05-08T20:31:47",
+  "git_commit": "e00da7d",
+  "args": {
+    "ddg_source": "none",
+    "n_ddg_list": "20,80,280",
+    "md_source": "MD_Q_HPHIL_400K",
+    "md_aux_source": "none",
+    "n_md_list": "10,40,80",
+    "n_runs": 10,
+    "result_dir": null,
+    "encoder_mode": "hot",
+    "base_model": null,
+    "mtl_weight_mode": null,
+    "md_weight": null,
+    "exp_name": "hot_q_400k"
+  },
+  "env": {
+    "ENCODER_MODE": "hot",
+    "BASE_MODEL_NAME": null,
+    "MTL_WEIGHT_MODE": null,
+    "MD_WEIGHT": null
+  },
+  "resolved_encoder_mode": "hot",
+  "hparams": {
+    "num_train_epochs": 400,
+    "batch_size": 16,
+    "learning_rate": 0.0003,
+    "encoder_lr": 0.0001,
+    "weight_decay": 0.04,
+    "dropout_rate": 0.15,
+    "early_stopping_patience": 15,
+    "early_stopping_threshold": 0.0,
+    "warmup_steps": 100,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "use_lora": false,
+    "encoder_mode": "hot",
+    "base_model_name": "facebook/esm2_t6_8M_UR50D",
+    "mtl_weight_mode": "uncertainty",
+    "md_weight": 1.0
+  },
+  "scaling": [
+    {
+      "n": 10,
+      "mae": 6.867980623974317,
+      "ci_lo": 6.4519444620524204,
+      "ci_hi": 7.290408558052531,
+      "ci_width": 0.8384640960001102
+    },
+    {
+      "n": 40,
+      "mae": 6.664524699577264,
+      "ci_lo": 6.2341361655373575,
+      "ci_hi": 7.096958318256196,
+      "ci_width": 0.8628221527188389
+    },
+    {
+      "n": 80,
+      "mae": 6.791394504208553,
+      "ci_lo": 6.36475109859038,
+      "ci_hi": 7.226097873309336,
+      "ci_width": 0.8613467747189558
+    }
+  ],
+  "best": {
+    "n": 40,
+    "mae": 6.664524699577264,
+    "ci_width": 0.8628221527188389
+  },
+  "summary": {
+    "slope": -2.999999999999997,
+    "ci_width_avg": 0.8542110078126349,
+    "mae_avg": 6.774633275920045,
+    "elapsed_s": 1008.2478172779083
+  },
+  "paired_bootstrap": {
+    "ref_n": 10,
+    "per_n": [
+      {
+        "n": 40,
+        "delta_mae": -0.20406552130827715,
+        "delta_ci_lo": -0.3441112131491309,
+        "delta_ci_hi": -0.06561081910089094,
+        "p_positive": 0.0091
+      },
+      {
+        "n": 80,
+        "delta_mae": -0.07635870312305913,
+        "delta_ci_lo": -0.1937095800800305,
+        "delta_ci_hi": 0.0415585414169451,
+        "p_positive": 0.1474
+      }
+    ],
+    "full_range": {
+      "from": 10,
+      "to": 80,
+      "delta_mae": -0.07635870312305913,
+      "delta_ci_lo": -0.1937095800800305,
+      "delta_ci_hi": 0.0415585414169451,
+      "p_positive": 0.1474
+    }
+  }
+}

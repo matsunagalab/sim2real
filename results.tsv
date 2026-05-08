@@ -147,3 +147,5 @@ timestamp	commit	slope	ci_width	mae_mean	n_ddg_list	n_runs	ddg_source	time_s
 2026-05-07T07:07:20	2d2faf7	-0.001000	0.852528	6.783224		10	none	1992	MD_Q_SLOPE	10,40,160,640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	hot_q_slope
 2026-05-07T07:39:43	2d2faf7	-3.000000	0.877401	6.847526		10	none	1920	MD_RMSF_MAX	10,40,160,640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	hot_rmsf_max
 2026-05-07T08:07:52	2d2faf7	-0.001000	0.852597	6.819738		10	none	1668	MD_RG_STD	10,40,160,640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	hot_rg_std
+2026-05-08T20:14:34	e00da7d	-1.121926	0.893870	7.512271		10	none	677	MD_Q_HPHIL_400K	10,40,80	frozen	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	frozen_q_400k
+2026-05-08T20:31:47	e00da7d	-3.000000	0.854211	6.774633		10	none	1008	MD_Q_HPHIL_400K	10,40,80	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	hot_q_400k
