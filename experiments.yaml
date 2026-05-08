@@ -348,7 +348,26 @@ experiments:
     env: { ENCODER_MODE: hot }
 
   # =========================================================================
-  # 7) DDG-source baselines (paired-mutant ddG as auxiliary task; no MD)
+  # 7) 400K MD trajectories (prod_002) — wider Q dynamic range, kinetic regime
+  #    Update n-md-list as more 400K trajectories complete.
+  # =========================================================================
+
+  frozen_q_400k:
+    description: "Frozen 8M + 400K Q (Tm-relevant temperature, kinetic regime)"
+    args: { ddg-source: none, md-source: MD_Q_HPHIL_400K, n-md-list: "10,40,80", n-runs: 10 }
+    env: { ENCODER_MODE: frozen }
+    expected:
+      best_mae: 7.30
+
+  hot_q_400k:
+    description: "Hot 8M + 400K Q — matches 300K best (6.66) with 1/10 the data"
+    args: { ddg-source: none, md-source: MD_Q_HPHIL_400K, n-md-list: "10,40,80", n-runs: 10 }
+    env: { ENCODER_MODE: hot }
+    expected:
+      best_mae: 6.66
+
+  # =========================================================================
+  # 8) DDG-source baselines (paired-mutant ddG as auxiliary task; no MD)
   # =========================================================================
 
   ddg_FEP_full:

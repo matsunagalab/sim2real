@@ -23,7 +23,12 @@ import mdtraj as md
 
 MDCLAW_ROOT = "/home/yasu/tmp/mdclaw"
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT_CSV = os.path.join(REPO_ROOT, "data", "md", "nanobody_qvalue_hphil.csv")
+# Switch the production node via env var:
+#   PROD_NODE=prod_001 (default; 300K trajectories)
+#   PROD_NODE=prod_002 (400K trajectories)
+PROD_NODE = os.environ.get("PROD_NODE", "prod_001")
+OUT_NAME = os.environ.get("OUT_NAME", "nanobody_qvalue_hphil.csv")
+OUT_CSV = os.path.join(REPO_ROOT, "data", "md", OUT_NAME)
 
 # Q-value parameters (Best-Hummer, following Kamiya et al. and mdclaw defaults)
 SELECTION = "backbone and not element H"
@@ -159,7 +164,7 @@ def main():
 
     for i, job in enumerate(job_dirs):
         pdb_id = os.path.basename(job).replace("job_nano_", "")
-        traj = os.path.join(job, "nodes", "prod_001", "artifacts", "trajectory.dcd")
+        traj = os.path.join(job, "nodes", PROD_NODE, "artifacts", "trajectory.dcd")
         native = os.path.join(job, "nodes", "prep_001", "artifacts", "merge", "merged.pdb")
         prmtop = os.path.join(job, "nodes", "topo_001", "artifacts", "system.parm7")
 

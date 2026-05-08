@@ -1,0 +1,105 @@
+{
+  "exp_name": "frozen_q_400k",
+  "timestamp": "2026-05-08T20:14:34",
+  "git_commit": "e00da7d",
+  "args": {
+    "ddg_source": "none",
+    "n_ddg_list": "20,80,280",
+    "md_source": "MD_Q_HPHIL_400K",
+    "md_aux_source": "none",
+    "n_md_list": "10,40,80",
+    "n_runs": 10,
+    "result_dir": null,
+    "encoder_mode": "frozen",
+    "base_model": null,
+    "mtl_weight_mode": null,
+    "md_weight": null,
+    "exp_name": "frozen_q_400k"
+  },
+  "env": {
+    "ENCODER_MODE": "frozen",
+    "BASE_MODEL_NAME": null,
+    "MTL_WEIGHT_MODE": null,
+    "MD_WEIGHT": null
+  },
+  "resolved_encoder_mode": "frozen",
+  "hparams": {
+    "num_train_epochs": 400,
+    "batch_size": 16,
+    "learning_rate": 0.0003,
+    "encoder_lr": 0.0001,
+    "weight_decay": 0.04,
+    "dropout_rate": 0.15,
+    "early_stopping_patience": 15,
+    "early_stopping_threshold": 0.0,
+    "warmup_steps": 100,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "use_lora": false,
+    "encoder_mode": "frozen",
+    "base_model_name": "facebook/esm2_t6_8M_UR50D",
+    "mtl_weight_mode": "uncertainty",
+    "md_weight": 1.0
+  },
+  "scaling": [
+    {
+      "n": 10,
+      "mae": 7.862902435704882,
+      "ci_lo": 7.413546005578824,
+      "ci_hi": 8.317523612573595,
+      "ci_width": 0.9039776069947711
+    },
+    {
+      "n": 40,
+      "mae": 7.372429940310772,
+      "ci_lo": 6.930541684592341,
+      "ci_hi": 7.819294129620911,
+      "ci_width": 0.8887524450285698
+    },
+    {
+      "n": 80,
+      "mae": 7.3014803397734545,
+      "ci_lo": 6.857218139473661,
+      "ci_hi": 7.746096817623517,
+      "ci_width": 0.8888786781498563
+    }
+  ],
+  "best": {
+    "n": 80,
+    "mae": 7.3014803397734545,
+    "ci_width": 0.8888786781498563
+  },
+  "summary": {
+    "slope": -1.121925595766621,
+    "ci_width_avg": 0.893869576724399,
+    "mae_avg": 7.512270905263036,
+    "elapsed_s": 677.3388798236847
+  },
+  "paired_bootstrap": {
+    "ref_n": 10,
+    "per_n": [
+      {
+        "n": 40,
+        "delta_mae": -0.49152096489068164,
+        "delta_ci_lo": -0.6655438512597079,
+        "delta_ci_hi": -0.31689979276863667,
+        "p_positive": 0.0
+      },
+      {
+        "n": 80,
+        "delta_mae": -0.5624123241442232,
+        "delta_ci_lo": -0.762068635626039,
+        "delta_ci_hi": -0.36231359931396534,
+        "p_positive": 0.0
+      }
+    ],
+    "full_range": {
+      "from": 10,
+      "to": 80,
+      "delta_mae": -0.5624123241442232,
+      "delta_ci_lo": -0.762068635626039,
+      "delta_ci_hi": -0.36231359931396534,
+      "p_positive": 0.0
+    }
+  }
+}
