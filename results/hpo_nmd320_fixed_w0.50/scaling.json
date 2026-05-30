@@ -1,0 +1,96 @@
+{
+  "exp_name": "hpo_nmd320_fixed_w0.50",
+  "timestamp": "2026-05-30T18:09:45",
+  "git_commit": "27cb3e6",
+  "args": {
+    "ddg_source": "none",
+    "n_ddg_list": "20,80,280",
+    "md_source": "MD_Q_HPHIL_400K",
+    "md_aux_source": "none",
+    "n_md_list": "320",
+    "n_tm_list": "",
+    "n_runs": 3,
+    "result_dir": "/home/yasu/tmp/sim2real/results/hparam_search/hpo_nmd320_fixed_w0.50",
+    "train_mode": "mtl",
+    "selection_scope": "tm",
+    "encoder_mode": "hot",
+    "base_model": null,
+    "mtl_weight_mode": "fixed",
+    "md_weight": 0.5,
+    "learning_rate": null,
+    "encoder_lr": null,
+    "weight_decay": null,
+    "dropout_rate": null,
+    "batch_size": null,
+    "warmup_steps": null,
+    "num_train_epochs": null,
+    "early_stopping_patience": null,
+    "final_eval_split": "val",
+    "exp_name": "hpo_nmd320_fixed_w0.50"
+  },
+  "env": {
+    "ENCODER_MODE": "hot",
+    "BASE_MODEL_NAME": null,
+    "MTL_WEIGHT_MODE": "fixed",
+    "MD_WEIGHT": "0.5",
+    "LEARNING_RATE": null,
+    "ENCODER_LR": null,
+    "WEIGHT_DECAY": null,
+    "DROPOUT_RATE": null,
+    "BATCH_SIZE": null,
+    "WARMUP_STEPS": null,
+    "NUM_TRAIN_EPOCHS": null,
+    "EARLY_STOPPING_PATIENCE": null
+  },
+  "resolved_encoder_mode": "hot",
+  "hparams": {
+    "num_train_epochs": 400,
+    "batch_size": 16,
+    "learning_rate": 0.0003,
+    "encoder_lr": 0.0001,
+    "weight_decay": 0.04,
+    "dropout_rate": 0.15,
+    "early_stopping_patience": 15,
+    "early_stopping_threshold": 0.0,
+    "warmup_steps": 100,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "use_lora": false,
+    "encoder_mode": "hot",
+    "base_model_name": "facebook/esm2_t6_8M_UR50D",
+    "mtl_weight_mode": "fixed",
+    "md_weight": 0.5
+  },
+  "scaling": [
+    {
+      "n": 320,
+      "mae": 6.466418016043263,
+      "ci_lo": 5.72989891051594,
+      "ci_hi": 7.2255823954107905,
+      "ci_width": 1.4956834848948501
+    }
+  ],
+  "best": {
+    "n": 320,
+    "mae": 6.466418016043263,
+    "ci_width": 1.4956834848948501
+  },
+  "summary": {
+    "slope": null,
+    "ci_width_avg": 1.4956834848948501,
+    "mae_avg": 6.466418016043263,
+    "elapsed_s": 179.06196856498718
+  },
+  "paired_bootstrap": {
+    "ref_n": 320,
+    "per_n": [],
+    "full_range": {
+      "from": 320,
+      "to": 320,
+      "delta_mae": NaN,
+      "delta_ci_lo": NaN,
+      "delta_ci_hi": NaN,
+      "p_positive": NaN
+    }
+  }
+}
