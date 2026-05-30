@@ -206,8 +206,8 @@ def precompute_embeddings(model, dataset, device, batch_size: int):
 
 
 # ---- Evaluation ----
-def evaluate_runs(model_dir: str, n_runs: int, device: torch.device):
-    """Ensemble evaluation: all models predict on single test set, average predictions."""
+def evaluate_runs(model_dir: str, n_runs: int, device: torch.device, split: str = "test"):
+    """Ensemble evaluation: all models predict on one NbBench split, average predictions."""
     from train import MultiTaskModel, resolve_encoder_mode
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
@@ -236,9 +236,12 @@ def evaluate_runs(model_dir: str, n_runs: int, device: torch.device):
                 preds.extend(logits.cpu().tolist())
         return np.array(preds)
 
-    # Load single test set and scaler
-    test_csv = os.path.join(REPO_ROOT, "data", "nbbench", "test.csv")
-    df = pd.read_csv(test_csv)
+    # Load one NbBench split and scaler. Use val for hyperparameter search, test only
+    # for final reporting after the search decision is fixed.
+    if split not in {"val", "test"}:
+        raise ValueError(f"Unknown eval split: {split}")
+    split_csv = os.path.join(REPO_ROOT, "data", "nbbench", f"{split}.csv")
+    df = pd.read_csv(split_csv)
     sequences = df["text"].tolist()
     labels = np.array(df["label"].tolist())  # °C
 
@@ -369,6 +372,24 @@ def main():
                         help="Override MTL_WEIGHT_MODE env var")
     parser.add_argument("--md-weight", type=float, default=None,
                         help="Override MD_WEIGHT env var (used when mtl-weight-mode=fixed)")
+    parser.add_argument("--learning-rate", type=float, default=None,
+                        help="Override LEARNING_RATE env var for non-encoder params")
+    parser.add_argument("--encoder-lr", type=float, default=None,
+                        help="Override ENCODER_LR env var for hot-mode encoder params")
+    parser.add_argument("--weight-decay", type=float, default=None,
+                        help="Override WEIGHT_DECAY env var")
+    parser.add_argument("--dropout-rate", type=float, default=None,
+                        help="Override DROPOUT_RATE env var")
+    parser.add_argument("--batch-size", type=int, default=None,
+                        help="Override BATCH_SIZE env var")
+    parser.add_argument("--warmup-steps", type=int, default=None,
+                        help="Override WARMUP_STEPS env var")
+    parser.add_argument("--num-train-epochs", type=int, default=None,
+                        help="Override NUM_TRAIN_EPOCHS env var")
+    parser.add_argument("--early-stopping-patience", type=int, default=None,
+                        help="Override EARLY_STOPPING_PATIENCE env var")
+    parser.add_argument("--final-eval-split", choices=["val", "test"], default="test",
+                        help="Split used by the final ensemble evaluation. Use val for HPO, test for final reporting.")
     parser.add_argument("--exp-name", type=str, default=None,
                         help="Experiment label (used for results/<name>/ output dir and results.tsv)")
     args = parser.parse_args()
@@ -384,6 +405,19 @@ def main():
         os.environ["MTL_WEIGHT_MODE"] = args.mtl_weight_mode
     if args.md_weight is not None:
         os.environ["MD_WEIGHT"] = str(args.md_weight)
+    hparam_env_overrides = {
+        "LEARNING_RATE": args.learning_rate,
+        "ENCODER_LR": args.encoder_lr,
+        "WEIGHT_DECAY": args.weight_decay,
+        "DROPOUT_RATE": args.dropout_rate,
+        "BATCH_SIZE": args.batch_size,
+        "WARMUP_STEPS": args.warmup_steps,
+        "NUM_TRAIN_EPOCHS": args.num_train_epochs,
+        "EARLY_STOPPING_PATIENCE": args.early_stopping_patience,
+    }
+    for env_name, value in hparam_env_overrides.items():
+        if value is not None:
+            os.environ[env_name] = str(value)
 
     has_aux_requested = (
         args.ddg_source != "none" or
@@ -479,8 +513,8 @@ def main():
                      multi_task=(args.train_mode == "mtl"))
 
         # Evaluate (ensemble of all runs on single test set)
-        print(f"\n  [Eval] {scaling_name}={n_val}", flush=True)
-        metrics, residuals = evaluate_runs(point_dir, args.n_runs, device)
+        print(f"\n  [Eval:{args.final_eval_split}] {scaling_name}={n_val}", flush=True)
+        metrics, residuals = evaluate_runs(point_dir, args.n_runs, device, split=args.final_eval_split)
         mean_mae, lo, hi = bootstrap_ci(residuals)
         ci_w = hi - lo
 
@@ -584,7 +618,10 @@ def main():
         "git_commit": commit,
         "args": vars(args),
         "env": {k: os.environ.get(k) for k in
-                ["ENCODER_MODE", "BASE_MODEL_NAME", "MTL_WEIGHT_MODE", "MD_WEIGHT"]},
+                ["ENCODER_MODE", "BASE_MODEL_NAME", "MTL_WEIGHT_MODE", "MD_WEIGHT",
+                 "LEARNING_RATE", "ENCODER_LR", "WEIGHT_DECAY", "DROPOUT_RATE",
+                 "BATCH_SIZE", "WARMUP_STEPS", "NUM_TRAIN_EPOCHS",
+                 "EARLY_STOPPING_PATIENCE"]},
         "resolved_encoder_mode": _resolve_em(),
         "hparams": {k: v for k, v in train_hparams.items()},
         "scaling": [
