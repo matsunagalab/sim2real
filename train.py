@@ -29,19 +29,27 @@ from transformers import (
 from transformers.modeling_outputs import SequenceClassifierOutput
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
+def _env_int(name: str, default: int) -> int:
+    return int(os.environ.get(name, default))
+
+
+def _env_float(name: str, default: float) -> float:
+    return float(os.environ.get(name, default))
+
+
 # ---- Hyperparameters (エージェントが調整) ----
 HPARAMS = {
-    "num_train_epochs": 400,
-    "batch_size": 16,
-    "learning_rate": 3e-4,
-    "encoder_lr": 1e-4,
-    "weight_decay": 0.04,
-    "dropout_rate": 0.15,
-    "early_stopping_patience": 15,
-    "early_stopping_threshold": 0.0,
-    "warmup_steps": 100,
-    "lora_r": 8,
-    "lora_alpha": 16,
+    "num_train_epochs": _env_int("NUM_TRAIN_EPOCHS", 400),
+    "batch_size": _env_int("BATCH_SIZE", 16),
+    "learning_rate": _env_float("LEARNING_RATE", 3e-4),
+    "encoder_lr": _env_float("ENCODER_LR", 1e-4),
+    "weight_decay": _env_float("WEIGHT_DECAY", 0.04),
+    "dropout_rate": _env_float("DROPOUT_RATE", 0.15),
+    "early_stopping_patience": _env_int("EARLY_STOPPING_PATIENCE", 15),
+    "early_stopping_threshold": _env_float("EARLY_STOPPING_THRESHOLD", 0.0),
+    "warmup_steps": _env_int("WARMUP_STEPS", 100),
+    "lora_r": _env_int("LORA_R", 8),
+    "lora_alpha": _env_int("LORA_ALPHA", 16),
     "use_lora": False,
     # Encoder training mode (overrides use_lora when set explicitly):
     #   "frozen" → encoder weights frozen, embeddings precomputed (fastest, current default)
