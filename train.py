@@ -80,6 +80,13 @@ HPARAMS = {
     #   "latent"   -> Tm base path + MD-latent residual from concatenated features
     #   "moe"      -> mixture of Tm-only and MD-informed experts
     "model_arch": os.environ.get("MODEL_ARCH", "shared"),
+    # ddG auxiliary head:
+    #   "separate"   -> current 1mel/4idl-specific heads
+    #   "shared"     -> one ddG head shared by 1mel and 4idl
+    #   "context"    -> shared ddG head conditioned on source embedding
+    #   "calibrated" -> shared base ddG head with source-specific affine calibration
+    "ddg_head_mode": os.environ.get("DDG_HEAD_MODE", "separate"),
+    "ddg_context_dim": _env_int("DDG_CONTEXT_DIM", 4),
     # For non-shared architectures, keep auxiliary losses from directly updating
     # the encoder by default. Tm loss can still update the encoder and fusion path.
     "detach_aux_encoder": _env_bool("DETACH_AUX_ENCODER", True),
@@ -155,8 +162,6 @@ class MultiTaskModel(nn.Module):
         if self._model_arch == "shared":
             self.shared = _make_trunk(hs, p)
             self.tm_head = nn.Linear(32, 1)
-            self.ddg_head = nn.Linear(32, 1)
-            self.ddg_head2 = nn.Linear(32, 1)
             self.md_head = nn.Linear(32, 1)   # task_id=3: primary MD (e.g. Q-value)
             self.md_head2 = nn.Linear(32, 1)  # task_id=4: aux MD (e.g. RMSF)
         else:
@@ -170,8 +175,6 @@ class MultiTaskModel(nn.Module):
             self.md_tm_head = nn.Linear(32, 1)
             self.moe_gate_head = nn.Linear(64, 1)
 
-            self.ddg_head = nn.Linear(32, 1)
-            self.ddg_head2 = nn.Linear(32, 1)
             self.md_head = nn.Linear(32, 1)
             self.md_head2 = nn.Linear(32, 1)
 
@@ -181,6 +184,8 @@ class MultiTaskModel(nn.Module):
             nn.init.constant_(self.tm_gate_head.bias, -4.0)
             nn.init.zeros_(self.moe_gate_head.weight)
             nn.init.constant_(self.moe_gate_head.bias, -4.0)
+
+        self._init_ddg_heads(feature_dim=32)
 
         self.multi_task = multi_task
         self.loss_fn = nn.HuberLoss(delta=1.0)
@@ -200,6 +205,46 @@ class MultiTaskModel(nn.Module):
             self._model_arch != "shared" and HPARAMS.get("detach_aux_encoder", True)
         )
 
+    def _init_ddg_heads(self, feature_dim: int) -> None:
+        self._ddg_head_mode = HPARAMS.get("ddg_head_mode", "separate")
+        assert self._ddg_head_mode in ("separate", "shared", "context", "calibrated"), (
+            f"bad ddg_head_mode={self._ddg_head_mode}"
+        )
+
+        if self._ddg_head_mode == "separate":
+            self.ddg_head = nn.Linear(feature_dim, 1)
+            self.ddg_head2 = nn.Linear(feature_dim, 1)
+        elif self._ddg_head_mode == "shared":
+            self.ddg_head = nn.Linear(feature_dim, 1)
+        elif self._ddg_head_mode == "context":
+            ctx_dim = HPARAMS.get("ddg_context_dim", 4)
+            self.ddg_context = nn.Embedding(2, ctx_dim)
+            self.ddg_context_head = nn.Linear(feature_dim + ctx_dim, 1)
+        else:
+            self.ddg_base_head = nn.Linear(feature_dim, 1)
+            self.ddg_calib_scale = nn.Parameter(torch.ones(2))
+            self.ddg_calib_bias = nn.Parameter(torch.zeros(2))
+
+    def _ddg_pair_logits(self, feats: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        if self._ddg_head_mode == "separate":
+            return self.ddg_head(feats).view(-1), self.ddg_head2(feats).view(-1)
+
+        if self._ddg_head_mode == "shared":
+            logits = self.ddg_head(feats).view(-1)
+            return logits, logits
+
+        if self._ddg_head_mode == "context":
+            idx1 = torch.zeros(feats.size(0), dtype=torch.long, device=feats.device)
+            idx2 = torch.ones(feats.size(0), dtype=torch.long, device=feats.device)
+            logits1 = self.ddg_context_head(torch.cat([feats, self.ddg_context(idx1)], dim=-1)).view(-1)
+            logits2 = self.ddg_context_head(torch.cat([feats, self.ddg_context(idx2)], dim=-1)).view(-1)
+            return logits1, logits2
+
+        base = self.ddg_base_head(feats).view(-1)
+        logits1 = self.ddg_calib_scale[0] * base + self.ddg_calib_bias[0]
+        logits2 = self.ddg_calib_scale[1] * base + self.ddg_calib_bias[1]
+        return logits1, logits2
+
     def forward(self, input_ids=None, attention_mask=None,
                 labels=None, task_ids=None, embedding=None, **kwargs):
         if embedding is not None:
@@ -217,8 +262,7 @@ class MultiTaskModel(nn.Module):
                 loss = self.loss_fn(logits, labels) if labels is not None else None
                 return SequenceClassifierOutput(loss=loss, logits=logits)
 
-            ddg_logits = self.ddg_head(feats).view(-1)
-            ddg_logits2 = self.ddg_head2(feats).view(-1)
+            ddg_logits, ddg_logits2 = self._ddg_pair_logits(feats)
             md_logits = self.md_head(feats).view(-1)
             md_logits2 = self.md_head2(feats).view(-1)
         else:
@@ -248,8 +292,7 @@ class MultiTaskModel(nn.Module):
                 loss = self.loss_fn(logits, labels) if labels is not None else None
                 return SequenceClassifierOutput(loss=loss, logits=logits)
 
-            ddg_logits = self.ddg_head(aux_feats).view(-1)
-            ddg_logits2 = self.ddg_head2(aux_feats).view(-1)
+            ddg_logits, ddg_logits2 = self._ddg_pair_logits(aux_feats)
             md_logits = self.md_head(aux_feats).view(-1)
             md_logits2 = self.md_head2(aux_feats).view(-1)
 
@@ -426,6 +469,7 @@ def train(train_ds, eval_ds, device, run, result_dir, multi_task):
     trainer.remove_callback(PrinterCallback)
 
     print(f"    Training run {run} (arch={HPARAMS['model_arch']}, encoder={encoder_mode}, "
+          f"ddg_head={HPARAMS['ddg_head_mode']}, "
           f"mtl_weight={HPARAMS['mtl_weight_mode']}, md_w={HPARAMS['md_weight']})...",
           flush=True)
     start = time.time()
