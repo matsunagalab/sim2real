@@ -1,0 +1,99 @@
+{
+  "note": "A-D final test summary with the validation-selected D/RMSF condition and an additional D/Q-HPhil check. D/Q-HPhil was the second-best D condition in validation HPO.",
+  "rows": [
+    {
+      "condition": "A_Tm",
+      "exp": "abcdfinal_A_tm_latent_drop0.30",
+      "arch": "latent",
+      "md_source": "none",
+      "test_mae": 6.598215445231169,
+      "ci_width": 0.8490202286460438
+    },
+    {
+      "condition": "B_ddG",
+      "exp": "abcdfinal_B_ddg320_shared_lr1e-4_enc3e-5",
+      "arch": "shared",
+      "ddg_source": "FEP",
+      "n_ddg": 320,
+      "test_mae": 6.407683427659544,
+      "ci_width": 0.8497431096298662
+    },
+    {
+      "condition": "C_MD",
+      "exp": "abcdfinal_C_md_q-hphil-400k_residual_enc3e-5",
+      "arch": "residual",
+      "md_source": "MD_Q_HPHIL_400K",
+      "n_md": 640,
+      "test_mae": 6.5136256563016985,
+      "ci_width": 0.8511932297664684
+    },
+    {
+      "condition": "D_ddG_MD_validation_selected",
+      "exp": "abcdfinal_D_ddg320_md640_rmsf-max_latent_lr1e-4_enc3e-5",
+      "arch": "latent",
+      "ddg_source": "FEP",
+      "n_ddg": 320,
+      "md_source": "MD_RMSF_MAX",
+      "n_md": 640,
+      "selected_val_mae": 5.825992752702599,
+      "test_mae": 6.661829657535072,
+      "ci_width": 0.8644641126352584
+    },
+    {
+      "condition": "D_ddG_MD_extra_q_hphil",
+      "exp": "abcdfinal_D_ddg320_md640_q-hphil-400k_latent_lr1e-4_enc3e-5",
+      "arch": "latent",
+      "ddg_source": "FEP",
+      "n_ddg": 320,
+      "md_source": "MD_Q_HPHIL_400K",
+      "n_md": 640,
+      "selected_val_mae": 5.927731911172847,
+      "test_mae": 6.6220631226141,
+      "ci_width": 0.8392970010623841
+    }
+  ],
+  "paired_comparisons": {
+    "B_minus_A": {
+      "delta_mae": -0.18962096410323384,
+      "delta_ci_lo": -0.30551909374045916,
+      "delta_ci_hi": -0.07224438324758223,
+      "p_delta_gt_0": 0.0044
+    },
+    "C_minus_A": {
+      "delta_mae": -0.08510057565175146,
+      "delta_ci_lo": -0.15519361710447552,
+      "delta_ci_hi": -0.013167789757242037,
+      "p_delta_gt_0": 0.0255
+    },
+    "D_RMSF_minus_A": {
+      "delta_mae": 0.06373444213131417,
+      "delta_ci_lo": -0.021925870327543957,
+      "delta_ci_hi": 0.14805419633837133,
+      "p_delta_gt_0": 0.8946
+    },
+    "D_RMSF_minus_B": {
+      "delta_mae": 0.253355406234548,
+      "delta_ci_lo": 0.14624428165511477,
+      "delta_ci_hi": 0.3607035253201775,
+      "p_delta_gt_0": 1.0
+    },
+    "D_Q_minus_A": {
+      "delta_mae": 0.023859245731598866,
+      "delta_ci_lo": -0.05743545223055406,
+      "delta_ci_hi": 0.1048833909252026,
+      "p_delta_gt_0": 0.6893
+    },
+    "D_Q_minus_B": {
+      "delta_mae": 0.2134802098348327,
+      "delta_ci_lo": 0.08926153152226837,
+      "delta_ci_hi": 0.33568293359083984,
+      "p_delta_gt_0": 0.9982
+    },
+    "D_Q_minus_C": {
+      "delta_mae": 0.10895982138335032,
+      "delta_ci_lo": 0.02860219262078894,
+      "delta_ci_hi": 0.189034551131687,
+      "p_delta_gt_0": 0.9874
+    }
+  }
+}
