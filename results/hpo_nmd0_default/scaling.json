@@ -1,0 +1,96 @@
+{
+  "exp_name": "hpo_nmd0_default",
+  "timestamp": "2026-05-30T17:08:17",
+  "git_commit": "27cb3e6",
+  "args": {
+    "ddg_source": "none",
+    "n_ddg_list": "20,80,280",
+    "md_source": "none",
+    "md_aux_source": "none",
+    "n_md_list": "",
+    "n_tm_list": "57",
+    "n_runs": 3,
+    "result_dir": "/home/yasu/tmp/sim2real/results/hparam_search/hpo_nmd0_default",
+    "train_mode": "mtl",
+    "selection_scope": "tm",
+    "encoder_mode": "hot",
+    "base_model": null,
+    "mtl_weight_mode": null,
+    "md_weight": null,
+    "learning_rate": null,
+    "encoder_lr": null,
+    "weight_decay": null,
+    "dropout_rate": null,
+    "batch_size": null,
+    "warmup_steps": null,
+    "num_train_epochs": null,
+    "early_stopping_patience": null,
+    "final_eval_split": "val",
+    "exp_name": "hpo_nmd0_default"
+  },
+  "env": {
+    "ENCODER_MODE": "hot",
+    "BASE_MODEL_NAME": null,
+    "MTL_WEIGHT_MODE": null,
+    "MD_WEIGHT": null,
+    "LEARNING_RATE": null,
+    "ENCODER_LR": null,
+    "WEIGHT_DECAY": null,
+    "DROPOUT_RATE": null,
+    "BATCH_SIZE": null,
+    "WARMUP_STEPS": null,
+    "NUM_TRAIN_EPOCHS": null,
+    "EARLY_STOPPING_PATIENCE": null
+  },
+  "resolved_encoder_mode": "hot",
+  "hparams": {
+    "num_train_epochs": 400,
+    "batch_size": 16,
+    "learning_rate": 0.0003,
+    "encoder_lr": 0.0001,
+    "weight_decay": 0.04,
+    "dropout_rate": 0.15,
+    "early_stopping_patience": 15,
+    "early_stopping_threshold": 0.0,
+    "warmup_steps": 100,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "use_lora": false,
+    "encoder_mode": "hot",
+    "base_model_name": "facebook/esm2_t6_8M_UR50D",
+    "mtl_weight_mode": "uncertainty",
+    "md_weight": 1.0
+  },
+  "scaling": [
+    {
+      "n": 57,
+      "mae": 6.298761604407492,
+      "ci_lo": 5.582733028017634,
+      "ci_hi": 7.052086599653454,
+      "ci_width": 1.4693535716358204
+    }
+  ],
+  "best": {
+    "n": 57,
+    "mae": 6.298761604407492,
+    "ci_width": 1.4693535716358204
+  },
+  "summary": {
+    "slope": null,
+    "ci_width_avg": 1.4693535716358204,
+    "mae_avg": 6.298761604407492,
+    "elapsed_s": 117.02052092552185
+  },
+  "paired_bootstrap": {
+    "ref_n": 57,
+    "per_n": [],
+    "full_range": {
+      "from": 57,
+      "to": 57,
+      "delta_mae": NaN,
+      "delta_ci_lo": NaN,
+      "delta_ci_hi": NaN,
+      "p_positive": NaN
+    }
+  }
+}
