@@ -412,6 +412,10 @@ def main():
                         help="Override BASE_MODEL_NAME env var (e.g. facebook/esm2_t33_650M_UR50D)")
     parser.add_argument("--model-arch", choices=["shared", "residual", "dual", "latent", "moe"],
                         default=None, help="Override MODEL_ARCH env var")
+    parser.add_argument("--ddg-head-mode", choices=["separate", "shared", "context", "calibrated"],
+                        default=None, help="Override DDG_HEAD_MODE env var")
+    parser.add_argument("--ddg-context-dim", type=int, default=None,
+                        help="Override DDG_CONTEXT_DIM env var (used by ddg-head-mode=context)")
     parser.add_argument("--mtl-weight-mode", choices=["uncertainty", "fixed"], default=None,
                         help="Override MTL_WEIGHT_MODE env var")
     parser.add_argument("--md-weight", type=float, default=None,
@@ -447,6 +451,10 @@ def main():
         MODEL_NAME = args.base_model
     if args.model_arch is not None:
         os.environ["MODEL_ARCH"] = args.model_arch
+    if args.ddg_head_mode is not None:
+        os.environ["DDG_HEAD_MODE"] = args.ddg_head_mode
+    if args.ddg_context_dim is not None:
+        os.environ["DDG_CONTEXT_DIM"] = str(args.ddg_context_dim)
     if args.mtl_weight_mode is not None:
         os.environ["MTL_WEIGHT_MODE"] = args.mtl_weight_mode
     if args.md_weight is not None:
@@ -669,7 +677,7 @@ def main():
         "args": vars(args),
         "env": {k: os.environ.get(k) for k in
                 ["ENCODER_MODE", "BASE_MODEL_NAME", "MTL_WEIGHT_MODE", "MD_WEIGHT",
-                 "MODEL_ARCH", "DETACH_AUX_ENCODER",
+                 "MODEL_ARCH", "DDG_HEAD_MODE", "DDG_CONTEXT_DIM", "DETACH_AUX_ENCODER",
                  "LEARNING_RATE", "ENCODER_LR", "WEIGHT_DECAY", "DROPOUT_RATE",
                  "BATCH_SIZE", "WARMUP_STEPS", "NUM_TRAIN_EPOCHS",
                  "EARLY_STOPPING_PATIENCE"]},
