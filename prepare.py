@@ -393,6 +393,10 @@ def main():
                         help="Comma-separated n_tm (experimental Tm count) values; if set, "
                              "scales the real training set (MRS reference axis). Takes precedence "
                              "over --n-md-list/--n-ddg-list.")
+    parser.add_argument("--fixed-n-ddg", type=int, default=None,
+                        help="Use this many ddG samples per ddG task while scaling another axis.")
+    parser.add_argument("--fixed-n-md", type=int, default=None,
+                        help="Use this many MD samples per MD task while scaling another axis.")
     parser.add_argument("--n-runs", type=int, default=3, help="Number of runs (model seeds)")
     parser.add_argument("--result-dir", type=str, default=None)
     parser.add_argument("--train-mode", choices=["mtl", "single"], default="mtl",
@@ -514,8 +518,12 @@ def main():
         point_dir = os.path.join(result_base, f"{scaling_name}_{n_val}")
 
         # Per-scaling-point n_ddg / n_md / n_tm
-        n_ddg_arg = n_val if (not use_tm_scaling and not use_md_scaling) else None
-        n_md_arg = n_val if use_md_scaling else None
+        n_ddg_arg = args.fixed_n_ddg if args.fixed_n_ddg is not None else (
+            n_val if (not use_tm_scaling and not use_md_scaling) else None
+        )
+        n_md_arg = args.fixed_n_md if args.fixed_n_md is not None else (
+            n_val if use_md_scaling else None
+        )
         n_tm_arg = n_val if use_tm_scaling else None
         md_src = args.md_source if args.md_source != "none" else None
         md_aux_src = args.md_aux_source if args.md_aux_source != "none" else None
@@ -669,7 +677,8 @@ def main():
         "hparams": {k: v for k, v in train_hparams.items()},
         "scaling": [
             {"n": int(n), "mae": float(m),
-             "ci_lo": float(lo), "ci_hi": float(hi), "ci_width": float(hi - lo)}
+             "ci_lo": float(lo), "ci_hi": float(hi), "ci_width": float(hi - lo),
+             "abs_errors": [float(x) for x in all_residuals[n]]}
             for n, m, (lo, hi) in zip(scaling_list, mae_means, ci_bounds)
         ],
         "best": {
