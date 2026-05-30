@@ -115,13 +115,21 @@ def get_tm_scaler():
 # ---- Data loading ----
 def load_and_prepare_datasets(seed: int, n_ddg: int | None = None, ddg_source: str | None = None,
                               n_md: int | None = None, md_source: str | None = None,
-                              md_aux_source: str | None = None):
-    """Load NbBench Tm data (fixed split) + optional DDG (task_id=1,2) + optional MD (task_id=3, +4)."""
+                              md_aux_source: str | None = None, n_tm: int | None = None):
+    """Load NbBench Tm data (fixed split) + optional DDG (task_id=1,2) + optional MD (task_id=3, +4).
+
+    n_tm: if set, subsample the experimental Tm (task_id=0) training set to this many
+    sequences (reference axis for marginal-rate-of-substitution; val/test untouched).
+    """
     train_csv = os.path.join(REPO_ROOT, "data", "nbbench", "train.csv")
     val_csv = os.path.join(REPO_ROOT, "data", "nbbench", "val.csv")
 
     df_train = pd.read_csv(train_csv)
     df_val = pd.read_csv(val_csv)
+
+    # Experimental Tm data scaling (reference for MRS): subsample real training labels.
+    if n_tm is not None:
+        df_train = df_train.sample(n=min(n_tm, len(df_train)), random_state=seed).reset_index(drop=True)
 
     # Scale labels to [0,1]
     scaler = get_tm_scaler()
@@ -340,8 +348,18 @@ def main():
                         help="Optional 2nd MD task in parallel (task_id=4); 'none' = Q-only")
     parser.add_argument("--n-md-list", type=str, default="",
                         help="Comma-separated n_md values; if set, iterates over these")
+    parser.add_argument("--n-tm-list", type=str, default="",
+                        help="Comma-separated n_tm (experimental Tm count) values; if set, "
+                             "scales the real training set (MRS reference axis). Takes precedence "
+                             "over --n-md-list/--n-ddg-list.")
     parser.add_argument("--n-runs", type=int, default=3, help="Number of runs (model seeds)")
     parser.add_argument("--result-dir", type=str, default=None)
+    parser.add_argument("--train-mode", choices=["mtl", "single"], default="mtl",
+                        help="mtl: task-aware MultiTaskModel loss; single: Tm-only loss path "
+                             "(only valid without auxiliary data)")
+    parser.add_argument("--selection-scope", choices=["mixed", "tm"], default="mixed",
+                        help="Validation subset used for best checkpoint / early stopping. "
+                             "'tm' uses only task_id=0 rows.")
     # Hyperparameter overrides (mirror env vars; CLI takes precedence).
     parser.add_argument("--encoder-mode", choices=["frozen", "lora", "hot"], default=None,
                         help="Override ENCODER_MODE env var")
@@ -367,9 +385,22 @@ def main():
     if args.md_weight is not None:
         os.environ["MD_WEIGHT"] = str(args.md_weight)
 
-    # Determine scaling axis: MD takes precedence if n-md-list is provided
-    use_md_scaling = bool(args.n_md_list.strip())
-    if use_md_scaling:
+    has_aux_requested = (
+        args.ddg_source != "none" or
+        args.md_source != "none" or
+        args.md_aux_source != "none"
+    )
+    if args.train_mode == "single" and has_aux_requested:
+        raise ValueError("--train-mode single is only valid when ddg-source=none, "
+                         "md-source=none, and md-aux-source=none")
+
+    # Determine scaling axis: Tm (real-data reference) > MD > ddG.
+    use_tm_scaling = bool(args.n_tm_list.strip())
+    use_md_scaling = (not use_tm_scaling) and bool(args.n_md_list.strip())
+    if use_tm_scaling:
+        scaling_list = [int(x) for x in args.n_tm_list.split(",") if x.strip()]
+        scaling_name = "n_tm"
+    elif use_md_scaling:
         scaling_list = [int(x) for x in args.n_md_list.split(",") if x.strip()]
         scaling_name = "n_md"
     else:
@@ -380,6 +411,8 @@ def main():
     print(f"Device: {device}", flush=True)
     print(f"DDG source: {args.ddg_source} | MD source: {args.md_source} "
           f"| MD aux: {args.md_aux_source}", flush=True)
+    print(f"Train mode: {args.train_mode} | checkpoint selection: {args.selection_scope}",
+          flush=True)
     print(f"Scaling ({scaling_name}) points: {scaling_list}, Runs per point: {args.n_runs}", flush=True)
 
     from train import train as train_fn
@@ -404,9 +437,10 @@ def main():
 
         point_dir = os.path.join(result_base, f"{scaling_name}_{n_val}")
 
-        # Per-scaling-point n_ddg / n_md
-        n_ddg_arg = None if use_md_scaling else n_val
+        # Per-scaling-point n_ddg / n_md / n_tm
+        n_ddg_arg = n_val if (not use_tm_scaling and not use_md_scaling) else None
         n_md_arg = n_val if use_md_scaling else None
+        n_tm_arg = n_val if use_tm_scaling else None
         md_src = args.md_source if args.md_source != "none" else None
         md_aux_src = args.md_aux_source if args.md_aux_source != "none" else None
         ddg_src = args.ddg_source if args.ddg_source != "none" else None
@@ -419,6 +453,7 @@ def main():
             train_ds, eval_ds = load_and_prepare_datasets(
                 run, n_ddg=n_ddg_arg, ddg_source=ddg_src,
                 n_md=n_md_arg, md_source=md_src, md_aux_source=md_aux_src,
+                n_tm=n_tm_arg,
             )
             print(f"    train: {len(train_ds)}, eval: {len(eval_ds)}", flush=True)
 
@@ -428,10 +463,20 @@ def main():
             eval_ds = eval_ds.map(tokenize_fn, batched=True, num_proc=4)
             train_ds = train_ds.rename_column("task", "task_ids")
             eval_ds = eval_ds.rename_column("task", "task_ids")
-            train_ds.set_format(type='torch', columns=['input_ids', 'attention_mask', 'label', 'task_ids'])
-            eval_ds.set_format(type='torch', columns=['input_ids', 'attention_mask', 'label', 'task_ids'])
 
-            train_fn(train_ds, eval_ds, device, run, point_dir, multi_task=True)
+            trainer_eval_ds = eval_ds
+            if args.selection_scope == "tm":
+                trainer_eval_ds = eval_ds.filter(lambda ex: int(ex["task_ids"]) == 0)
+                print(f"    trainer_eval(selection=tm): {len(trainer_eval_ds)} / raw eval {len(eval_ds)}",
+                      flush=True)
+            else:
+                print(f"    trainer_eval(selection=mixed): {len(trainer_eval_ds)}", flush=True)
+
+            train_ds.set_format(type='torch', columns=['input_ids', 'attention_mask', 'label', 'task_ids'])
+            trainer_eval_ds.set_format(type='torch', columns=['input_ids', 'attention_mask', 'label', 'task_ids'])
+
+            train_fn(train_ds, trainer_eval_ds, device, run, point_dir,
+                     multi_task=(args.train_mode == "mtl"))
 
         # Evaluate (ensemble of all runs on single test set)
         print(f"\n  [Eval] {scaling_name}={n_val}", flush=True)
@@ -581,7 +626,12 @@ def main():
     header = ("timestamp\tcommit\tslope\tci_width\tmae_mean\tn_ddg_list\tn_runs\tddg_source\t"
               "time_s\tmd_source\tn_md_list\t"
               "encoder_mode\tbase_model\tmd_aux_source\tmtl_weight_mode\tmd_weight\texp_name\n")
-    scaling_str = args.n_md_list if use_md_scaling else args.n_ddg_list
+    if use_tm_scaling:
+        scaling_str = args.n_tm_list
+    elif use_md_scaling:
+        scaling_str = args.n_md_list
+    else:
+        scaling_str = args.n_ddg_list
     extras = (
         f"{_resolve_em()}\t"
         f"{train_hparams.get('base_model_name', '')}\t"

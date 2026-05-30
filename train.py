@@ -24,6 +24,7 @@ from transformers import (
     TrainerState,
     TrainerControl,
     EarlyStoppingCallback,
+    PrinterCallback,
 )
 from transformers.modeling_outputs import SequenceClassifierOutput
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
@@ -214,7 +215,8 @@ class MultiTaskModel(nn.Module):
 # ---- Callback ----
 class ProgressLoggingCallback(TrainerCallback):
     def on_epoch_end(self, args, state: TrainerState, control: TrainerControl, **kwargs):
-        print(f"      Epoch {int(state.epoch)}/{int(args.num_train_epochs)} finished.", flush=True)
+        if os.environ.get("TRAIN_EPOCH_LOGS") == "1":
+            print(f"      Epoch {int(state.epoch)}/{int(args.num_train_epochs)} finished.", flush=True)
         return control
 
 
@@ -263,7 +265,7 @@ def train(train_ds, eval_ds, device, run, result_dir, multi_task):
     os.makedirs(ckpt_dir, exist_ok=True)
     logging_dir = os.path.join(result_dir, "supervised", "logs")
 
-    metric_for_best = "eval_loss" if not multi_task else "eval_mse"
+    metric_for_best = "eval_mse"
 
     targs = TrainingArguments(
         output_dir=ckpt_dir,
@@ -276,6 +278,8 @@ def train(train_ds, eval_ds, device, run, result_dir, multi_task):
         weight_decay=HPARAMS['weight_decay'],
         logging_dir=logging_dir,
         logging_steps=10,
+        logging_strategy="no",
+        disable_tqdm=True,
         load_best_model_at_end=True,
         metric_for_best_model=metric_for_best,
         greater_is_better=False,
@@ -324,6 +328,7 @@ def train(train_ds, eval_ds, device, run, result_dir, multi_task):
         compute_metrics=compute_metrics,
         callbacks=callbacks,
     )
+    trainer.remove_callback(PrinterCallback)
 
     print(f"    Training run {run} (encoder={encoder_mode}, "
           f"mtl_weight={HPARAMS['mtl_weight_mode']}, md_w={HPARAMS['md_weight']})...",
