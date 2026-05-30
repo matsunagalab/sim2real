@@ -32,6 +32,11 @@ import mdtraj as md
 MDCLAW_ROOT = "/home/yasu/tmp/mdclaw"
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_DIR = os.path.join(REPO_ROOT, "data", "md")
+# Switch the production node and output filename suffix via env vars:
+#   PROD_NODE=prod_001 (default; 300K)   → feat_<name>.csv
+#   PROD_NODE=prod_002 (400K)            → feat_<name>_400K.csv (FEAT_SUFFIX=_400K)
+PROD_NODE = os.environ.get("PROD_NODE", "prod_001")
+FEAT_SUFFIX = os.environ.get("FEAT_SUFFIX", "")
 
 LAST_FRAC = 0.30
 
@@ -162,7 +167,7 @@ def compute_features(traj_path: str, prmtop: str) -> dict:
 
 def _process_one(job: str):
     pdb_id = os.path.basename(job).replace("job_nano_", "")
-    traj = os.path.join(job, "nodes", "prod_001", "artifacts", "trajectory.dcd")
+    traj = os.path.join(job, "nodes", PROD_NODE, "artifacts", "trajectory.dcd")
     native = os.path.join(job, "nodes", "prep_001", "artifacts", "merge", "merged.pdb")
     prmtop = os.path.join(job, "nodes", "topo_001", "artifacts", "system.parm7")
     if not (os.path.exists(traj) and os.path.exists(native) and os.path.exists(prmtop)):
@@ -199,7 +204,7 @@ def write_feature_csv(df: pd.DataFrame, feature: str):
         norm = pd.Series([0.5] * len(sub), index=sub.index)
     direction = FEATURE_DIRECTIONS.get(feature, "high")
     sub["ddg_scaled01"] = norm if direction == "high" else (1.0 - norm)
-    out = os.path.join(OUT_DIR, f"feat_{feature}.csv")
+    out = os.path.join(OUT_DIR, f"feat_{feature}{FEAT_SUFFIX}.csv")
     sub.to_csv(out, index=False)
     print(f"  Saved: {out} ({len(sub)} rows, range [{vmin:.4f}, {vmax:.4f}], dir={direction})", flush=True)
 

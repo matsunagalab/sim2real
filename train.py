@@ -37,6 +37,13 @@ def _env_float(name: str, default: float) -> float:
     return float(os.environ.get(name, default))
 
 
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
 # ---- Hyperparameters (エージェントが調整) ----
 HPARAMS = {
     "num_train_epochs": _env_int("NUM_TRAIN_EPOCHS", 400),
@@ -66,6 +73,16 @@ HPARAMS = {
     #   "fixed"       → static weights tm:1.0, ddg1/ddg2:1.0, md:MD_WEIGHT
     "mtl_weight_mode": os.environ.get("MTL_WEIGHT_MODE", "uncertainty"),
     "md_weight": float(os.environ.get("MD_WEIGHT", "1.0")),
+    # Architecture mode:
+    #   "shared"   -> original shared trunk and task heads
+    #   "residual" -> Tm base path + gated MD-informed residual correction
+    #   "dual"     -> separate Tm/aux trunks without Tm fusion
+    #   "latent"   -> Tm base path + MD-latent residual from concatenated features
+    #   "moe"      -> mixture of Tm-only and MD-informed experts
+    "model_arch": os.environ.get("MODEL_ARCH", "shared"),
+    # For non-shared architectures, keep auxiliary losses from directly updating
+    # the encoder by default. Tm loss can still update the encoder and fusion path.
+    "detach_aux_encoder": _env_bool("DETACH_AUX_ENCODER", True),
 }
 
 
@@ -78,6 +95,26 @@ def resolve_encoder_mode() -> str:
 
 
 # ---- Model (エージェントがアーキテクチャを変更可能) ----
+def _make_trunk(input_dim: int, dropout: float) -> nn.Sequential:
+    return nn.Sequential(
+        nn.Linear(input_dim, 256),
+        nn.ReLU(),
+        nn.Dropout(dropout),
+
+        nn.Linear(256, 128),
+        nn.ReLU(),
+        nn.Dropout(dropout),
+
+        nn.Linear(128, 32),
+        nn.ReLU(),
+    )
+
+
+def _zero_linear(layer: nn.Linear) -> None:
+    nn.init.zeros_(layer.weight)
+    nn.init.zeros_(layer.bias)
+
+
 class MultiTaskModel(nn.Module):
 
     def __init__(self, base_model_name: str, hidden_dropout_prob: float = 0.195,
@@ -110,25 +147,40 @@ class MultiTaskModel(nn.Module):
 
         hs = cfg.hidden_size
         p = hidden_dropout_prob
-
-        self.shared = nn.Sequential(
-            nn.Linear(hs, 256),
-            nn.ReLU(),
-            nn.Dropout(p),
-
-            nn.Linear(256, 128),
-            nn.ReLU(),
-            nn.Dropout(p),
-
-            nn.Linear(128, 32),
-            nn.ReLU(),
+        self._model_arch = HPARAMS.get("model_arch", "shared")
+        assert self._model_arch in ("shared", "residual", "dual", "latent", "moe"), (
+            f"bad model_arch={self._model_arch}"
         )
 
-        self.tm_head = nn.Linear(32, 1)
-        self.ddg_head = nn.Linear(32, 1)
-        self.ddg_head2 = nn.Linear(32, 1)
-        self.md_head = nn.Linear(32, 1)   # task_id=3: primary MD (e.g. Q-value)
-        self.md_head2 = nn.Linear(32, 1)  # task_id=4: aux MD (e.g. RMSF)
+        if self._model_arch == "shared":
+            self.shared = _make_trunk(hs, p)
+            self.tm_head = nn.Linear(32, 1)
+            self.ddg_head = nn.Linear(32, 1)
+            self.ddg_head2 = nn.Linear(32, 1)
+            self.md_head = nn.Linear(32, 1)   # task_id=3: primary MD (e.g. Q-value)
+            self.md_head2 = nn.Linear(32, 1)  # task_id=4: aux MD (e.g. RMSF)
+        else:
+            self.tm_trunk = _make_trunk(hs, p)
+            self.md_trunk = _make_trunk(hs, p)
+
+            self.tm_head = nn.Linear(32, 1)
+            self.tm_delta_head = nn.Linear(32, 1)
+            self.tm_gate_head = nn.Linear(32, 1)
+            self.tm_latent_delta_head = nn.Linear(96, 1)
+            self.md_tm_head = nn.Linear(32, 1)
+            self.moe_gate_head = nn.Linear(64, 1)
+
+            self.ddg_head = nn.Linear(32, 1)
+            self.ddg_head2 = nn.Linear(32, 1)
+            self.md_head = nn.Linear(32, 1)
+            self.md_head2 = nn.Linear(32, 1)
+
+            _zero_linear(self.tm_delta_head)
+            _zero_linear(self.tm_latent_delta_head)
+            nn.init.zeros_(self.tm_gate_head.weight)
+            nn.init.constant_(self.tm_gate_head.bias, -4.0)
+            nn.init.zeros_(self.moe_gate_head.weight)
+            nn.init.constant_(self.moe_gate_head.bias, -4.0)
 
         self.multi_task = multi_task
         self.loss_fn = nn.HuberLoss(delta=1.0)
@@ -144,6 +196,9 @@ class MultiTaskModel(nn.Module):
         self._encoder_mode = encoder_mode
         self._weight_mode = HPARAMS.get("mtl_weight_mode", "uncertainty")
         self._md_weight = HPARAMS.get("md_weight", 1.0)
+        self._detach_aux_encoder = (
+            self._model_arch != "shared" and HPARAMS.get("detach_aux_encoder", True)
+        )
 
     def forward(self, input_ids=None, attention_mask=None,
                 labels=None, task_ids=None, embedding=None, **kwargs):
@@ -153,18 +208,50 @@ class MultiTaskModel(nn.Module):
             hidden = self.encoder(input_ids=input_ids, attention_mask=attention_mask)[0]
             pooled = hidden[:, 0, :]
 
-        feats = self.shared(pooled)
-        tm_logits = self.tm_head(feats).view(-1)
+        if self._model_arch == "shared":
+            feats = self.shared(pooled)
+            tm_logits = self.tm_head(feats).view(-1)
 
-        if not self.multi_task:
-            logits = tm_logits
-            loss = self.loss_fn(logits, labels) if labels is not None else None
-            return SequenceClassifierOutput(loss=loss, logits=logits)
+            if not self.multi_task:
+                logits = tm_logits
+                loss = self.loss_fn(logits, labels) if labels is not None else None
+                return SequenceClassifierOutput(loss=loss, logits=logits)
 
-        ddg_logits = self.ddg_head(feats).view(-1)
-        ddg_logits2 = self.ddg_head2(feats).view(-1)
-        md_logits = self.md_head(feats).view(-1)
-        md_logits2 = self.md_head2(feats).view(-1)
+            ddg_logits = self.ddg_head(feats).view(-1)
+            ddg_logits2 = self.ddg_head2(feats).view(-1)
+            md_logits = self.md_head(feats).view(-1)
+            md_logits2 = self.md_head2(feats).view(-1)
+        else:
+            aux_pooled = pooled.detach() if self._detach_aux_encoder else pooled
+            tm_feats = self.tm_trunk(pooled)
+            md_feats_for_tm = self.md_trunk(pooled)
+            aux_feats = self.md_trunk(aux_pooled)
+
+            tm_base = self.tm_head(tm_feats).view(-1)
+            if self._model_arch == "residual":
+                delta = self.tm_delta_head(md_feats_for_tm).view(-1)
+                gate = torch.sigmoid(self.tm_gate_head(md_feats_for_tm).view(-1))
+                tm_logits = tm_base + gate * delta
+            elif self._model_arch == "dual":
+                tm_logits = tm_base
+            elif self._model_arch == "latent":
+                latent = torch.cat([tm_feats, md_feats_for_tm, tm_feats * md_feats_for_tm], dim=-1)
+                delta = self.tm_latent_delta_head(latent).view(-1)
+                tm_logits = tm_base + delta
+            else:  # moe
+                md_tm = self.md_tm_head(md_feats_for_tm).view(-1)
+                gate = torch.sigmoid(self.moe_gate_head(torch.cat([tm_feats, md_feats_for_tm], dim=-1)).view(-1))
+                tm_logits = (1.0 - gate) * tm_base + gate * md_tm
+
+            if not self.multi_task:
+                logits = tm_logits
+                loss = self.loss_fn(logits, labels) if labels is not None else None
+                return SequenceClassifierOutput(loss=loss, logits=logits)
+
+            ddg_logits = self.ddg_head(aux_feats).view(-1)
+            ddg_logits2 = self.ddg_head2(aux_feats).view(-1)
+            md_logits = self.md_head(aux_feats).view(-1)
+            md_logits2 = self.md_head2(aux_feats).view(-1)
 
         if task_ids is not None:
             logits = torch.zeros_like(tm_logits)
@@ -338,7 +425,7 @@ def train(train_ds, eval_ds, device, run, result_dir, multi_task):
     )
     trainer.remove_callback(PrinterCallback)
 
-    print(f"    Training run {run} (encoder={encoder_mode}, "
+    print(f"    Training run {run} (arch={HPARAMS['model_arch']}, encoder={encoder_mode}, "
           f"mtl_weight={HPARAMS['mtl_weight_mode']}, md_w={HPARAMS['md_weight']})...",
           flush=True)
     start = time.time()
