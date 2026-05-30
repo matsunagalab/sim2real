@@ -83,6 +83,28 @@ MD_PATHS = {
     "MD_RG_STD": "data/md/feat_rg_std.csv",                   # std of radius of gyration (compactness fluctuation)
     # 400K trajectories (prod_002) — wider Q dynamic range
     "MD_Q_HPHIL_400K": "data/md/nanobody_qvalue_hphil_400K.csv",
+    # Negative control: same Q distribution, seq->Q mapping shuffled (signal destroyed)
+    "MD_Q_HPHIL_400K_SHUF": "data/md/feat_q_hphil_400K_shuffled.csv",
+    # Short-trajectory Q (cost analysis): Q from only the first T ns of the 400K run
+    "MD_Q_HPHIL_400K_T5":   "data/md/feat_q_hphil_400K_t5ns.csv",
+    "MD_Q_HPHIL_400K_T10":  "data/md/feat_q_hphil_400K_t10ns.csv",
+    "MD_Q_HPHIL_400K_T17":  "data/md/feat_q_hphil_400K_t17ns.csv",
+    "MD_Q_HPHIL_400K_T30":  "data/md/feat_q_hphil_400K_t30ns.csv",
+    "MD_Q_HPHIL_400K_T50":  "data/md/feat_q_hphil_400K_t50ns.csv",
+    "MD_Q_HPHIL_400K_T100": "data/md/feat_q_hphil_400K_t100ns.csv",
+    "MD_Q_MIN_400K": "data/md/feat_q_min_400K.csv",
+    "MD_Q_STD_400K": "data/md/feat_q_std_400K.csv",
+    "MD_Q_SLOPE_400K": "data/md/feat_q_slope_400K.csv",
+    "MD_RMSF_MAX_400K": "data/md/feat_rmsf_max_400K.csv",
+    "MD_RG_STD_400K": "data/md/feat_rg_std_400K.csv",
+    # Nanobody-specific features (300K)
+    "MD_Q_CDR3":         "data/md/feat_q_cdr3.csv",
+    "MD_Q_FRAMEWORK":    "data/md/feat_q_framework.csv",
+    "MD_RMSF_CDR3":      "data/md/feat_rmsf_cdr3.csv",
+    "MD_RMSF_FRAMEWORK": "data/md/feat_rmsf_framework.csv",
+    "MD_SS_DIST_MEAN":   "data/md/feat_ss_dist_mean.csv",
+    "MD_SS_DIST_STD":    "data/md/feat_ss_dist_std.csv",
+    "MD_CDR3_LEN":       "data/md/feat_cdr3_len.csv",
 }
 
 
@@ -341,13 +363,29 @@ def main():
                         choices=["none", "MD_Q", "MD_Q_HPHIL", "ROSETTA_Q_HPHIL", "MD_RMSF",
                                  "MD_Q_HIGHFLEX", "MD_Q_LOWFLEX", "MD_SALTBRIDGE",
                                  "MD_Q_MIN", "MD_Q_STD", "MD_Q_SLOPE", "MD_RMSF_MAX", "MD_RG_STD",
-                                 "MD_Q_HPHIL_400K"],
+                                 "MD_Q_HPHIL_400K", "MD_Q_HPHIL_400K_SHUF",
+                                 "MD_Q_HPHIL_400K_T5", "MD_Q_HPHIL_400K_T10",
+                                 "MD_Q_HPHIL_400K_T17", "MD_Q_HPHIL_400K_T30",
+                                 "MD_Q_HPHIL_400K_T50", "MD_Q_HPHIL_400K_T100",
+                                 "MD_Q_MIN_400K", "MD_Q_STD_400K", "MD_Q_SLOPE_400K",
+                                 "MD_RMSF_MAX_400K", "MD_RG_STD_400K",
+                                 "MD_Q_CDR3", "MD_Q_FRAMEWORK",
+                                 "MD_RMSF_CDR3", "MD_RMSF_FRAMEWORK",
+                                 "MD_SS_DIST_MEAN", "MD_SS_DIST_STD", "MD_CDR3_LEN"],
                         help="Primary MD auxiliary task source (task_id=3)")
     parser.add_argument("--md-aux-source", type=str, default="none",
                         choices=["none", "MD_Q", "MD_Q_HPHIL", "ROSETTA_Q_HPHIL", "MD_RMSF",
                                  "MD_Q_HIGHFLEX", "MD_Q_LOWFLEX", "MD_SALTBRIDGE",
                                  "MD_Q_MIN", "MD_Q_STD", "MD_Q_SLOPE", "MD_RMSF_MAX", "MD_RG_STD",
-                                 "MD_Q_HPHIL_400K"],
+                                 "MD_Q_HPHIL_400K", "MD_Q_HPHIL_400K_SHUF",
+                                 "MD_Q_HPHIL_400K_T5", "MD_Q_HPHIL_400K_T10",
+                                 "MD_Q_HPHIL_400K_T17", "MD_Q_HPHIL_400K_T30",
+                                 "MD_Q_HPHIL_400K_T50", "MD_Q_HPHIL_400K_T100",
+                                 "MD_Q_MIN_400K", "MD_Q_STD_400K", "MD_Q_SLOPE_400K",
+                                 "MD_RMSF_MAX_400K", "MD_RG_STD_400K",
+                                 "MD_Q_CDR3", "MD_Q_FRAMEWORK",
+                                 "MD_RMSF_CDR3", "MD_RMSF_FRAMEWORK",
+                                 "MD_SS_DIST_MEAN", "MD_SS_DIST_STD", "MD_CDR3_LEN"],
                         help="Optional 2nd MD task in parallel (task_id=4); 'none' = Q-only")
     parser.add_argument("--n-md-list", type=str, default="",
                         help="Comma-separated n_md values; if set, iterates over these")
@@ -368,6 +406,8 @@ def main():
                         help="Override ENCODER_MODE env var")
     parser.add_argument("--base-model", type=str, default=None,
                         help="Override BASE_MODEL_NAME env var (e.g. facebook/esm2_t33_650M_UR50D)")
+    parser.add_argument("--model-arch", choices=["shared", "residual", "dual", "latent", "moe"],
+                        default=None, help="Override MODEL_ARCH env var")
     parser.add_argument("--mtl-weight-mode", choices=["uncertainty", "fixed"], default=None,
                         help="Override MTL_WEIGHT_MODE env var")
     parser.add_argument("--md-weight", type=float, default=None,
@@ -401,6 +441,8 @@ def main():
         os.environ["BASE_MODEL_NAME"] = args.base_model
         global MODEL_NAME
         MODEL_NAME = args.base_model
+    if args.model_arch is not None:
+        os.environ["MODEL_ARCH"] = args.model_arch
     if args.mtl_weight_mode is not None:
         os.environ["MTL_WEIGHT_MODE"] = args.mtl_weight_mode
     if args.md_weight is not None:
@@ -619,6 +661,7 @@ def main():
         "args": vars(args),
         "env": {k: os.environ.get(k) for k in
                 ["ENCODER_MODE", "BASE_MODEL_NAME", "MTL_WEIGHT_MODE", "MD_WEIGHT",
+                 "MODEL_ARCH", "DETACH_AUX_ENCODER",
                  "LEARNING_RATE", "ENCODER_LR", "WEIGHT_DECAY", "DROPOUT_RATE",
                  "BATCH_SIZE", "WARMUP_STEPS", "NUM_TRAIN_EPOCHS",
                  "EARLY_STOPPING_PATIENCE"]},
