@@ -44,7 +44,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \RequirePackage{xcolor}
 \RequirePackage{authblk}
-\RequirePackage[latin1,utf8]{inputenc}
+\RequirePackage{iftex}
+\ifPDFTeX
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc}
+\fi
 \RequirePackage[english]{babel}
 \RequirePackage{lmodern}
 \RequirePackage{siunitx}
@@ -54,10 +58,10 @@
 \RequirePackage{textcomp}
 \RequirePackage[version=4]{mhchem}
 \RequirePackage[scaled]{helvet}
-\RequirePackage[T1]{fontenc}
 \RequirePackage{lettrine} % For dropped capitals
 \RequirePackage[rightcaption]{sidecap} % For sidecaptions
-\RequirePackage[misc]{ifsym} % For the \Letter symbol
+% Avoid the legacy ifsym font dependency under modern engines.
+\providecommand{\Letter}{\textsuperscript{*}}
 \RequirePackage{bbding} % For the \Envelope symbol
 \RequirePackage[twoside,%
 				letterpaper,includeheadfoot,%
@@ -75,7 +79,9 @@
                 labelsep=period,%
                 figurename=Fig.]{caption}
 
+\ifPDFTeX
 \DeclareUnicodeCharacter{00B0}{\degree}
+\fi
 
 %% Hyperlinking
 \RequirePackage[colorlinks=true, allcolors=blue]{hyperref}
@@ -261,12 +267,12 @@
 \captionsetup*{format=smallformat}
 
 % %% Watermark 
-\usepackage[printwatermark]{xwatermark}
+\ifwatermark
+\RequirePackage[printwatermark]{xwatermark}
 \AtBeginDocument{%
-  \ifwatermark%
   \newwatermark[allpages,color=gray!20,angle=45,scale=3,xpos=0,ypos=0]{DRAFT}
-  \fi
 }
+\fi
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Henriques lab parts adapted from PNAS - END %%
@@ -420,15 +426,15 @@
 \pagestyle{fancy}		  % Enables the custom headers/footers
 
 \def\aBioRXiv{{\footnotesize
-    \footerfont \@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}bio\textcolor{red}{R}$\chi$iv\hspace{7pt}|\hspace{7pt}\today\hspace{7pt}|\hspace{7pt}\thepage\textendash\pageref{LastPage}
+    \footerfont \@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}CSBJ draft\hspace{7pt}|\hspace{7pt}\today\hspace{7pt}|\hspace{7pt}\thepage\textendash\pageref{LastPage}
   }}
 
 \def\bBioRXiv{{\footnotesize
-    \footerfont \thepage\hspace{7pt}|\hspace{7pt}bio\textcolor{red}{R}$\chi$iv
+    \footerfont \thepage\hspace{7pt}|\hspace{7pt}CSBJ draft
   }}
   
 \def\cBioRXiv{{\footnotesize
-    \footerfont bio\textcolor{red}{R}$\chi$iv\hspace{7pt}|\hspace{7pt}\thepage
+    \footerfont CSBJ draft\hspace{7pt}|\hspace{7pt}\thepage
   }}
    
 \def\dBioRXiv{{\footnotesize
@@ -454,4 +460,3 @@
 
 \parindent=0pt
 \endinput
-

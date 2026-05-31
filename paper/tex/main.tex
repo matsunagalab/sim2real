@@ -1,53 +1,60 @@
-% main.tex - Interactive Paper Writing System
-% Based on HenriquesLab bioRxiv template
-% Template: https://www.overleaf.com/latex/templates/henriqueslab-biorxiv-template/nyprsybwffws
+% CSBJ submission draft
+% Target journal: Computational and Structural Biotechnology Journal
+% Article type: Research Article
+% Local template base: HenriquesLab bioRxiv LaTeX class
 
 \documentclass[times, twoside]{zHenriquesLab-StyleBioRxiv}
-\usepackage{blindtext}
 
-% ===== SETTINGS =====
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds,shapes.geometric,calc}
+
+% ===== CSBJ DRAFT SETTINGS =====
 \graphicspath{{figures/}}
 
 % Lead author for running footer
-% TODO: Update lead author surname
-\leadauthor{Matsunaga}
+\leadauthor{Murakami}
 
 \begin{document}
 
 % ===== TITLE =====
-% TODO: Placeholder for template users; replace when preparing a real submission
-\title{TODO: Paper Title}
-\shorttitle{TODO: Short Title}
+\title{Simulation-informed auxiliary learning improves low-data nanobody thermal stability prediction}
+\shorttitle{Simulation-informed Tm prediction}
 
 % ===== AUTHORS =====
 % Use letters for affiliations, numbers for equal authorship, \Letter for corresponding
-\author[1]{Tsuyoshi Kawai}
-\author[1,2,\Letter]{Yasuhiro Matsunaga}
+\author[1]{Taihei Murakami}
+\author[1]{Kentaro Sasaki}
+\author[1,2]{Yasuhiro Matsunaga\textsuperscript{*}}
 
-\affil[1]{Graduate School of Science and Engineering, Saitama University}
-\affil[2]{RIKEN Center for Computational Science}
+% ORCID for submission metadata:
+% Yasuhiro Matsunaga: 0000-0003-2872-3908
+\affil[1]{Saitama University, Saitama, Japan}
+\affil[2]{RIKEN Center for Computational Science, Kobe, Japan}
 
 \maketitle
 
-% ===== SECTION ORDER (EDITABLE BY CLAUDE) =====
-% NOTE: The section order is defined in AUTHOR_GUIDELINES.md (SECTION_ORDER: ...).
-% Claude Code should only edit the order of \input lines inside this block.
+% ===== CSBJ MAIN TEXT =====
+% SECTION_ORDER is defined in ../AUTHOR_GUIDELINES.md:
+% abstract -> introduction -> methods -> results -> discussion -> acknowledgments
 \input{sections/abstract}
 \input{sections/introduction}
 \input{sections/methods}
 \input{sections/results}
 \input{sections/discussion}
+% Includes acknowledgments plus CSBJ-required statements:
+% funding, author contributions, competing interests, data availability,
+% code availability, and AI-use disclosure placeholders.
 \input{sections/acknowledgments}
-% ===== END SECTION ORDER =====
+% ===== END CSBJ MAIN TEXT =====
 
 % ===== REFERENCES =====
-\section*{Bibliography}
+\section*{References}
 \bibliography{refs}
 
-% ===== SUPPLEMENTARY (after references) =====
+% ===== SUPPLEMENTARY MATERIALS =====
 %TC:ignore
 \onecolumn
-\newpage
+\clearpage
 \input{sections/supplementary}
 %TC:endignore
 

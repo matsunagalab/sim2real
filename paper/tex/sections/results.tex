@@ -2,127 +2,178 @@
 
 \section*{Results}
 
-\subsection*{A transfer-learning architecture for using computational labels in Tm prediction}
+\subsection*{A target-centered framework for using simulation labels in Tm prediction}
 
-We used a transfer-learning architecture to incorporate simulation or
-physics-based labels into Tm prediction when experimental Tm measurements are
-scarce. The target task is Tm prediction, while the computational labels measure
-related but non-identical quantities. Models share a sequence encoder between a
-Tm prediction head and an auxiliary computational-label head. Model settings
-were selected using the experimental development set, and all final claims were
-evaluated on the same held-out Tm test examples
+We first established an evaluation framework for asking whether
+simulation-derived labels improve experimental Tm prediction. The target task
+was nanobody Tm regression from sequence. Computational labels were treated as
+auxiliary source tasks rather than as substitutes for experimental Tm. Each model
+shared an ESM2 sequence encoder between a Tm prediction head and an auxiliary
+source-label head, allowing the source task to shape the representation while
+keeping the final objective anchored to experimental Tm prediction
 (Fig.~\ref{fig:learning_framework}).
+
+The comparison was deliberately target-centered. All candidate settings were
+selected using an experimental Tm development set, and the final numbers were
+computed only on a held-out experimental Tm test set. Improvements were assessed
+by paired differences in absolute error on the same test examples. This design
+addresses a common ambiguity in simulation-to-experiment learning: a source task
+can be learnable and physically meaningful without improving the target
+experimental phenotype.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline01_concept_protocol}
-\caption{\textbf{Transfer-learning architecture for low-data Tm prediction.}
-\textbf{(A)} Measured Tm labels define the target task, and computational labels
-define source tasks that provide additional supervised signal.
-\textbf{(B)} The architecture shares a sequence encoder between the Tm task and
-a computational-label task. Model settings are selected using the experimental
-development set.
-\textbf{(C)} Candidate auxiliary sources include mutation-effect labels,
-generated-variant labels, and an MD-derived contact-Q label.
-\textbf{(D)} Final comparisons use held-out Tm test errors and paired bootstrap
-statistics.}
+\caption{\textbf{Auxiliary-learning framework for using simulation data in
+experimental Tm prediction.}
+\textbf{(a)} Experimental Tm labels are scarce, whereas simulation and
+physics-based calculations can provide larger source-label pools.
+\textbf{(b)} Nanobody Tm prediction is used as a concrete case in which the
+source labels are related to, but not identical with, the experimental target.
+\textbf{(c)} The model shares an ESM2 sequence encoder between the Tm target
+head and an auxiliary source-label head.
+\textbf{(d)} Model settings are selected on an experimental development set,
+and final claims are evaluated on held-out experimental Tm test examples using
+paired error statistics.}
 \label{fig:learning_framework}
 \end{figure*}
 
-\subsection*{FEP labels scale differently from structural MD labels}
+\subsection*{Auxiliary-label scaling depends on the physical source label}
 
-We next evaluated how prediction accuracy changes as the number of training
-labels increases. Experimental Tm labels show the expected low-data scaling.
-FEP mutation-effect labels also improved the best held-out Tm MAE as the
-auxiliary label set increased, with the full FEP label set giving the best
-result. The curve was not perfectly smooth, but its best point separated from
-the Tm-only and MD contact-Q curves. In contrast, the MD contact-Q curve did
-not provide a robust improvement over Tm-only training (Fig.~\ref{fig:scaling}).
-Thus, the gain is not explained by adding more computational labels generically;
-it depends on the physical content of the auxiliary label and on allowing the
-sequence representation to adapt.
+We next varied the number of experimental and computational labels to determine
+whether more source data translated into better Tm prediction. As expected,
+increasing the number of experimental Tm labels improved Tm-only performance
+(Fig.~\ref{fig:scaling}). FEP mutation free-energy labels also showed a
+beneficial trend: the full FEP label set gave the best held-out Tm error among
+the FEP label-count settings. The curve was not strictly monotonic, so we do not
+interpret it as a clean power law. Instead, we interpret it as evidence that
+additional FEP labels can improve the target task when they are selected and
+evaluated through the experimental Tm endpoint.
+
+The MD-derived contact-persistence label behaved differently. Increasing the
+number of these labels did not yield a robust improvement over Tm-only learning,
+even though the source labels were also generated from simulations. Thus, the
+label-count experiment already suggested the central result of the paper:
+auxiliary data quantity is not sufficient. The transferable physical content of
+the source label matters.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline02_source_screen}
-\caption{\textbf{Scaling with experimental and computational labels.}
-\textbf{(A)} Tm-only learning improves as more experimental labels are used.
-\textbf{(B)} FEP mutation-effect labels give their best held-out Tm error at
-the full label set, although the curve is not perfectly smooth.
-\textbf{(C)} MD contact-Q labels likewise do not show a robust improvement over
-Tm-only training.
-\textbf{(D)} Best points from the label-count sweeps separate FEP from the
-Tm-only and MD contact-Q references.}
+\caption{\textbf{Label-count scaling of experimental and computational
+supervision.}
+\textbf{(a)} Tm-only learning improves as more experimental Tm labels are used.
+\textbf{(b)} FEP mutation free-energy labels reach their best held-out Tm error
+at the full source-label set, although the curve is not strictly monotonic.
+\textbf{(c)} The MD-derived contact-persistence label does not show a robust
+improvement over Tm-only learning.
+\textbf{(d)} Best points from the label-count sweeps separate FEP from the
+Tm-only and MD-derived contact-persistence references.}
 \label{fig:scaling}
 \end{figure*}
 
-\subsection*{FEP mutation-effect labels provide the strongest final improvement}
+\subsection*{FEP mutation free-energy labels provide the strongest final improvement}
 
-At the selected settings, FEP mutation-effect labels improved held-out Tm
-prediction from 6.61 deg C MAE for Tm-only training to 6.26 deg C MAE. The
-paired improvement was -0.353 deg C MAE with a 90\% confidence interval from
--0.462 to -0.243 deg C (Fig.~\ref{fig:final_performance}). Other
-free-energy-like or generated-variant labels showed weaker but informative
-effects, whereas the MD contact-Q label did not improve final Tm prediction
-when the encoder was updated. Repeating the core comparison with a frozen
-encoder reduced overall accuracy and attenuated the auxiliary-label gains:
-FEP still improved over frozen Tm-only training, but the best frozen FEP model
-remained substantially worse than the updated-encoder FEP model. Increasing
-the ESM2 encoder from 8M to 35M or 650M parameters did not improve this
-small-Tm-data setting. With FEP labels, the 35M and 650M encoders reached
-6.50 and 6.65 deg C MAE, respectively, both worse than the 8M FEP model.
+We then compared the selected settings for each auxiliary source. Tm-only
+training achieved a held-out test MAE of 6.61$^\circ$C. Adding FEP mutation
+free-energy labels reduced the MAE to 6.26$^\circ$C, corresponding to a paired
+improvement of 0.35$^\circ$C (90\% confidence interval, 0.24--0.46$^\circ$C;
+Fig.~\ref{fig:final_performance}). This was the clearest improvement observed
+across all source labels.
+
+The other sources showed weaker or negative effects. Rosetta-scored variants
+generated by ESM2 improved over Tm-only learning (paired improvement,
+0.17$^\circ$C; 90\% confidence interval, 0.03--0.31$^\circ$C), and ThermoMPNN
+mutation-effect labels showed a similar but smaller gain. Rosetta mutation
+scores and Rosetta-scored random variants were weaker and had confidence
+intervals that crossed zero. The MD-derived contact-persistence label worsened
+the final test error relative to Tm-only learning. These results support a
+selective, source-dependent interpretation: mutation free-energy-like labels
+were useful, but a structural trajectory summary was not sufficient for this
+target task.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline03_design_bridge}
-\caption{\textbf{Final held-out Tm performance by auxiliary source.}
-\textbf{(A)} Final test MAE for Tm-only training and each auxiliary source.
+\caption{\textbf{Final held-out Tm performance across auxiliary sources and
+controls.}
+\textbf{(a)} Final test MAE for Tm-only training and each auxiliary source.
 Intervals show bootstrap confidence intervals over test-set absolute errors.
-\textbf{(B)} Paired $\Delta$MAE relative to Tm-only training. Negative values
+\textbf{(b)} Paired $\Delta$MAE relative to Tm-only training. Negative values
 indicate improvement.
-\textbf{(C)} ESM2 size controls show that larger encoders do not improve the
+\textbf{(c)} ESM2 size controls show that larger encoders do not improve the
 selected Tm-only or FEP settings.
-\textbf{(D)} Development-set-selected performance does not always predict final
-held-out performance.
-\textbf{(E)} Core comparisons with frozen and updated encoders show that FEP
-helps in both regimes, with the strongest absolute performance obtained when
-the sequence representation is updated.
-\textbf{(F)} Paired FEP gains remain negative across ESM2 sizes, but the best
+\textbf{(d)} Development-set performance and held-out test performance are
+related but not identical, emphasizing the need for final target-task testing.
+\textbf{(e)} Frozen- and updated-encoder comparisons show that FEP helps in
+both regimes, with the strongest absolute performance obtained when the
+sequence representation is updated.
+\textbf{(f)} Paired FEP gains remain negative across ESM2 sizes, but the best
 absolute error is obtained with the 8M encoder.}
 \label{fig:final_performance}
 \end{figure*}
 
-\subsection*{Physics-labeled generated variants connect the method to design loops}
+\subsection*{The FEP gain is not explained by encoder size alone}
 
-Rosetta labels on ESM2-proposed variants also improved Tm prediction over the
-Tm-only baseline (paired $\Delta$MAE = -0.165 deg C, 90\% CI -0.306 to
--0.025 deg C). The comparison between ESM2-proposed and random Rosetta variants
-was suggestive but not resolved by the current data (paired $\Delta$MAE =
--0.065 deg C, 90\% CI -0.195 to +0.064 deg C). We therefore interpret this
-result as evidence that physics-labeled generated variants retain a useful Tm
-learning signal, not as proof that the current generator outperforms random
-sampling.
+Because PLM scale can affect downstream performance, we tested whether the
+benefit of FEP labels could be reproduced simply by increasing the ESM2 encoder
+size. It could not. In the Tm-only setting, larger 35M and 650M encoders did
+not improve held-out performance relative to the 8M encoder. In the FEP setting,
+the 35M and 650M encoders reached 6.50 and 6.65$^\circ$C MAE, respectively,
+both worse than the 8M FEP model. FEP labels remained beneficial within each
+size comparison, but the best absolute performance was obtained with the
+smallest encoder and FEP auxiliary labels. Thus, in this low-Tm-data regime,
+the dominant gain came from the physical source label rather than from scaling
+the language model.
 
-\subsection*{Mutation-effect labels provide a plausible interpretation of the improvement}
+\subsection*{Encoder adaptation helps exploit the auxiliary signal}
 
-The final interpretation is that Tm and mutation-effect labels provide different
-views of stability. Experimental Tm labels anchor the absolute phenotype, while
-mutation-effect labels provide local directions in sequence space. This explains
-why FEP labels can help without directly measuring Tm. The contrast with MD
-contact-Q shows the boundary of this interpretation: a structural persistence
-summary is not necessarily a useful auxiliary label for Tm generalization
-(Fig.~\ref{fig:interpretation}).
+We also asked whether the FEP gain required updating the sequence encoder. In a
+frozen-encoder control, overall errors increased, but FEP still improved over
+the frozen Tm-only baseline: the frozen Tm-only model achieved 7.38$^\circ$C
+MAE, whereas frozen FEP achieved 7.20$^\circ$C MAE. The improvement was smaller
+than in the updated-encoder setting, and the frozen FEP model remained worse
+than the updated-encoder FEP model. These results indicate that FEP labels carry
+useful information even when the representation is fixed, but limited encoder
+adaptation is important for extracting the strongest target-task benefit.
+
+\subsection*{Physics-labeled generated variants connect auxiliary learning to design loops}
+
+Rosetta labels on ESM2-proposed variants improved Tm prediction over the Tm-only
+baseline, whereas the comparison between ESM2-proposed and random Rosetta-scored
+variants was suggestive but not conclusive. The paired improvement of
+ESM2-proposed variants over Tm-only learning was 0.17$^\circ$C (90\% confidence
+interval, 0.03--0.31$^\circ$C). By contrast, the paired difference between
+ESM2-proposed and random variants was 0.07$^\circ$C in favor of ESM2-proposed
+variants, with a confidence interval crossing zero. We therefore interpret this
+result conservatively. Physics-labeled generated variants retain useful
+supervised signal for Tm prediction, but the present data do not prove that the
+current generator is superior to random variant sampling.
+
+\subsection*{Mutation free-energy labels provide a physical interpretation}
+
+The final pattern suggests why FEP labels transfer to Tm prediction even though
+they are not Tm measurements. Experimental Tm labels provide sparse anchors for
+the absolute thermal-stability phenotype. Mutation free-energy labels provide
+local information about how stability changes under sequence perturbations.
+When learned jointly, these two views can shape a representation that is more
+useful for held-out Tm prediction than either sparse Tm labels alone or a
+generic simulation-derived summary. The negative result for the MD-derived
+contact-persistence label defines the boundary of this interpretation: a
+simulation label must encode the right physical relation to the target phenotype.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline04_mdq_boundary}
 \caption{\textbf{Interpretation and boundary condition.}
-\textbf{(A)} Tm labels provide sparse absolute anchors, while mutation-effect
-labels provide local stability directions.
-\textbf{(B)} FEP improves Tm prediction, whereas MD contact-Q does not.
-\textbf{(C)} Contact-Q summarizes retained hydrophilic native contacts in high
-temperature trajectories.
-\textbf{(D)} The useful signal is not generic simulation augmentation, but
-auxiliary information relevant to Tm generalization.}
+\textbf{(a)} Experimental Tm labels provide sparse absolute stability anchors,
+whereas mutation free-energy labels provide local stability-change directions.
+\textbf{(b)} FEP improves Tm prediction, whereas the MD-derived
+contact-persistence label does not.
+\textbf{(c)} Contact persistence summarizes retained native contacts in
+high-temperature trajectories, but this structural-dynamics signal does not
+necessarily transfer to held-out Tm prediction.
+\textbf{(d)} The useful signal is not generic simulation augmentation, but
+auxiliary information with transferable physical content.}
 \label{fig:interpretation}
 \end{figure*}
