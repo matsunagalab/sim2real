@@ -7,14 +7,14 @@
 We first established an evaluation framework for asking whether
 simulation-derived labels improve experimental Tm prediction. The target task
 was nanobody Tm regression from sequence. Computational labels were treated as
-auxiliary source tasks rather than as substitutes for experimental Tm. Each model
-shared an ESM2 sequence encoder between a Tm prediction head and an auxiliary
+source tasks rather than as substitutes for experimental Tm. Each model
+shared an ESM2 sequence encoder between a Tm prediction head and a source
 source-label head, allowing the source task to shape the representation while
 keeping the final objective anchored to experimental Tm prediction
 (Fig.~\ref{fig:learning_framework}).
 
 The comparison was deliberately target-centered. All candidate settings were
-selected using an experimental Tm development set, and the final numbers were
+selected using an experimental Tm validation set, and the final numbers were
 computed only on a held-out experimental Tm test set. Improvements were assessed
 by paired differences in absolute error on the same test examples. This design
 addresses a common ambiguity in simulation-to-experiment learning: a source task
@@ -24,28 +24,29 @@ experimental phenotype.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline01_concept_protocol}
-\caption{\textbf{Auxiliary-learning framework for using simulation data in
+\caption{\textbf{Multi-task transfer-learning framework for using simulation data in
 experimental Tm prediction.}
 \textbf{(a)} Experimental Tm labels are scarce, whereas simulation and
 physics-based calculations can provide larger source-label pools.
 \textbf{(b)} Nanobody Tm prediction is used as a concrete case in which the
 source labels are related to, but not identical with, the experimental target.
 \textbf{(c)} The model shares an ESM2 sequence encoder between the Tm target
-head and an auxiliary source-label head.
-\textbf{(d)} Model settings are selected on an experimental development set,
+head and a source-label head.
+\textbf{(d)} Model settings are selected on an experimental validation set,
 and final claims are evaluated on held-out experimental Tm test examples using
 paired error statistics.}
 \label{fig:learning_framework}
 \end{figure*}
 
-\subsection*{Auxiliary-label scaling depends on the physical source label}
+\subsection*{Source-label scaling depends on the physical label}
 
 We next varied the number of experimental and computational labels to determine
 whether more source data translated into better Tm prediction. As expected,
 increasing the number of experimental Tm labels improved Tm-only performance
 (Fig.~\ref{fig:scaling}). FEP mutation free-energy labels also showed a
-beneficial trend: the full FEP label set gave the best held-out Tm error among
-the FEP label-count settings. The curve was not strictly monotonic, so we do not
+beneficial trend: the largest FEP label-count setting tested gave the best
+held-out Tm error among the FEP settings. The curve was not strictly monotonic,
+so we do not
 interpret it as a clean power law. Instead, we interpret it as evidence that
 additional FEP labels can improve the target task when they are selected and
 evaluated through the experimental Tm endpoint.
@@ -54,7 +55,7 @@ The MD-derived contact-persistence label behaved differently. Increasing the
 number of these labels did not yield a robust improvement over Tm-only learning,
 even though the source labels were also generated from simulations. Thus, the
 label-count experiment already suggested the central result of the paper:
-auxiliary data quantity is not sufficient. The transferable physical content of
+source-label quantity is not sufficient. The transferable physical content of
 the source label matters.
 
 \begin{figure*}[t]
@@ -64,7 +65,8 @@ the source label matters.
 supervision.}
 \textbf{(a)} Tm-only learning improves as more experimental Tm labels are used.
 \textbf{(b)} FEP mutation free-energy labels reach their best held-out Tm error
-at the full source-label set, although the curve is not strictly monotonic.
+at the largest source-label setting tested, although the curve is not strictly
+monotonic.
 \textbf{(c)} The MD-derived contact-persistence label does not show a robust
 improvement over Tm-only learning.
 \textbf{(d)} Best points from the label-count sweeps separate FEP from the
@@ -74,7 +76,7 @@ Tm-only and MD-derived contact-persistence references.}
 
 \subsection*{FEP mutation free-energy labels provide the strongest final improvement}
 
-We then compared the selected settings for each auxiliary source. Tm-only
+We then compared the selected settings for each source label. Tm-only
 training achieved a held-out test MAE of 6.61$^\circ$C. Adding FEP mutation
 free-energy labels reduced the MAE to 6.26$^\circ$C, corresponding to a paired
 improvement of 0.35$^\circ$C (90\% confidence interval, 0.24--0.46$^\circ$C;
@@ -95,15 +97,15 @@ target task.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline03_design_bridge}
-\caption{\textbf{Final held-out Tm performance across auxiliary sources and
+\caption{\textbf{Final held-out Tm performance across source labels and
 controls.}
-\textbf{(a)} Final test MAE for Tm-only training and each auxiliary source.
+\textbf{(a)} Final test MAE for Tm-only training and each source label.
 Intervals show bootstrap confidence intervals over test-set absolute errors.
 \textbf{(b)} Paired $\Delta$MAE relative to Tm-only training. Negative values
 indicate improvement.
 \textbf{(c)} ESM2 size controls show that larger encoders do not improve the
 selected Tm-only or FEP settings.
-\textbf{(d)} Development-set performance and held-out test performance are
+\textbf{(d)} Validation-set performance and held-out test performance are
 related but not identical, emphasizing the need for final target-task testing.
 \textbf{(e)} Frozen- and updated-encoder comparisons show that FEP helps in
 both regimes, with the strongest absolute performance obtained when the
@@ -122,11 +124,11 @@ not improve held-out performance relative to the 8M encoder. In the FEP setting,
 the 35M and 650M encoders reached 6.50 and 6.65$^\circ$C MAE, respectively,
 both worse than the 8M FEP model. FEP labels remained beneficial within each
 size comparison, but the best absolute performance was obtained with the
-smallest encoder and FEP auxiliary labels. Thus, in this low-Tm-data regime,
+smallest encoder and FEP source labels. Thus, in this low-Tm-data regime,
 the dominant gain came from the physical source label rather than from scaling
 the language model.
 
-\subsection*{Encoder adaptation helps exploit the auxiliary signal}
+\subsection*{Encoder adaptation helps exploit the source-label signal}
 
 We also asked whether the FEP gain required updating the sequence encoder. In a
 frozen-encoder control, overall errors increased, but FEP still improved over
@@ -137,7 +139,7 @@ than the updated-encoder FEP model. These results indicate that FEP labels carry
 useful information even when the representation is fixed, but limited encoder
 adaptation is important for extracting the strongest target-task benefit.
 
-\subsection*{Physics-labeled generated variants connect auxiliary learning to design loops}
+\subsection*{Physics-labeled generated variants connect transfer learning to design loops}
 
 Rosetta labels on ESM2-proposed variants improved Tm prediction over the Tm-only
 baseline, whereas the comparison between ESM2-proposed and random Rosetta-scored
@@ -174,6 +176,6 @@ contact-persistence label does not.
 high-temperature trajectories, but this structural-dynamics signal does not
 necessarily transfer to held-out Tm prediction.
 \textbf{(d)} The useful signal is not generic simulation augmentation, but
-auxiliary information with transferable physical content.}
+source-label information with transferable physical content.}
 \label{fig:interpretation}
 \end{figure*}

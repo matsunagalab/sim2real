@@ -6,7 +6,7 @@ This study asked how simulation-derived labels should be used when the
 experimental target is scarce and the simulated quantity is related to, but not
 identical with, that target. Using nanobody Tm prediction as a case study, we
 found that FEP mutation free-energy labels improved held-out experimental Tm
-prediction more clearly than any other auxiliary source tested. The result was
+prediction more clearly than any other source label tested. The result was
 not reproduced by a simple MD-derived contact-persistence label, nor was it
 explained by using a larger ESM2 encoder. These findings support a selective
 view of Sim2Real learning for biomolecules: simulation data are useful when the
@@ -21,7 +21,7 @@ interchangeable quantities. Nevertheless, both describe the same underlying
 stability landscape from different perspectives. Sparse Tm measurements anchor
 absolute thermal-stability values for observed sequences, while mutation
 free-energy labels provide local directions in sequence space. The improvement
-from FEP therefore suggests that auxiliary labels can help even when they are
+from FEP therefore suggests that source labels can help even when they are
 not direct surrogates for the target, provided that they describe a physically
 relevant perturbation of the target property.
 
@@ -44,12 +44,12 @@ fine-tuning can be critical for downstream protein-property prediction
 larger pretrained ESM2 models do not automatically produce better Tm predictors.
 Our own size controls reached the same practical conclusion: 35M and 650M ESM2
 encoders did not outperform the 8M encoder in either Tm-only or FEP-assisted
-settings. The best model used the 8M encoder with FEP auxiliary labels. Thus,
+settings. The best model used the 8M encoder with FEP source labels. Thus,
 for this dataset, the bottleneck was not simply language-model capacity. The
 more important ingredient was additional supervision carrying information about
 sequence-dependent stability changes.
 
-The frozen-encoder experiment further indicates how the auxiliary signal is
+The frozen-encoder experiment further indicates how the source-label signal is
 used. FEP labels improved performance even when the encoder was fixed, showing
 that part of the signal can be captured by the existing sequence
 representation. However, the best FEP model required updating the encoder. This

@@ -49,14 +49,14 @@ that target-specific supervision and careful validation remain essential
 
 Here we ask whether simulation-derived labels can provide that additional
 supervision when experimental Tm labels are scarce. We formulate Tm prediction
-as the target task and train auxiliary source tasks from computational labels
-using a shared ESM2 sequence encoder. The auxiliary labels include
+as the target task and train source tasks from computational labels
+using a shared ESM2 sequence encoder. The source labels include
 FEP-derived mutation free energies, Rosetta and ThermoMPNN mutation-effect
 labels, Rosetta scores on generated and random variants, and an MD-derived
 contact-persistence label. To keep the comparison target-centered, all model
-settings are selected using an experimental development set, and all final
+settings are selected using an experimental validation set, and all final
 claims are evaluated on the same held-out experimental Tm test set with paired
-error comparisons. This design prevents high performance on an auxiliary task
+error comparisons. This design prevents high performance on a source task
 from being mistaken for improved Tm prediction.
 
 The main result is that the benefit of simulation-derived supervision is highly

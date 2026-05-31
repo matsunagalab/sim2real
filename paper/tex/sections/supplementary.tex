@@ -4,19 +4,152 @@
 
 \section{Supplementary Information} \label{note:Note1}
 
-Supplementary information will include extended source-label sweeps, additional
-encoder-size controls, hyperparameter search summaries, and tabulated paired
-error statistics supporting the main figures.
+\subsection{Reproducibility checklist}
 
-\subsection{Supplementary Methods}
+All main comparisons used the same experimental Tm endpoint and the same
+held-out test set. The experimental split contained 57 training sequences, 114
+validation sequences, and 396 held-out test sequences. The validation split
+was used for checkpoint selection, early stopping, and hyperparameter selection.
+The test split was used only for final reporting after the selected settings
+were fixed. Each final comparison used ten independently seeded models, averaged
+as an ensemble before test errors were computed. Validation-set searches used
+three independently seeded models per candidate setting.
 
-The final supplementary methods will report the exact experimental splits,
-source-label preprocessing steps, training schedules, search grids, random seeds,
-bootstrap procedure, and software versions used to reproduce the reported
-comparisons.
+The exact run arguments and resolved hyperparameters are stored in the
+\texttt{\detokenize{scaling.json}} files under each result directory. These JSON
+files are the primary machine-readable record for the model settings used in the
+figures. The pipeline scripts read processed CSV files, build the target and
+source tasks, train the models, evaluate the seed ensembles, and write bootstrap
+statistics without manual postprocessing of prediction files.
 
-\subsection{Supplementary Figures and Tables}
+\subsection{Data splits and source-task definitions}
 
-The final supplement will provide additional plots for development-set selection,
-source-label count controls, frozen-encoder controls, and model-size comparisons,
-together with machine-readable result tables.
+Table~\ref{tab:supp_data_sources} summarizes the processed data used by the
+reported comparisons. Row counts exclude header rows. Mutation-effect sources
+were represented by two template-specific source tasks; a setting with $n$
+labels therefore sampled up to $n$ labels from each of the two source tables.
+For example, the final FEP setting used $n=320$ from each template-specific
+table before the 80/20 source-task split. The MD-derived contact-persistence
+source was represented by a single processed trajectory-summary table.
+
+\begin{table}[h]
+\centering
+\caption{\textbf{Processed target and source-label data.}}
+\label{tab:supp_data_sources}
+\small
+\begin{tabular}{p{0.27\textwidth}p{0.20\textwidth}p{0.13\textwidth}p{0.28\textwidth}}
+\hline
+Data type & Role & Processed rows & Use in reported comparisons \\
+\hline
+Experimental Tm & Target train & 57 & Model fitting \\
+Experimental Tm & Target validation & 114 & Checkpoint and setting selection \\
+Experimental Tm & Target test & 396 & Final held-out evaluation \\
+FEP mutation free energy & Source tasks & 435 + 409 & Main source task \\
+Rosetta mutation score & Source tasks & 435 + 409 & Source comparison \\
+ThermoMPNN mutation score & Source tasks & 435 + 409 & Source comparison \\
+Rosetta-scored random variants & Source tasks & 1000 + 1000 & Source comparison \\
+Rosetta-scored generated variants & Source tasks & 1000 + 1000 & Source comparison \\
+MD-derived contact persistence & Source task & 1143 & Source comparison and scaling control \\
+\hline
+\end{tabular}
+\end{table}
+
+Experimental Tm labels were read from the fixed NbBench train, validation, and
+test CSV files. Tm scaling was fit only on the target training labels. Source
+labels were read from precomputed [0,1]-scaled columns in the processed source
+CSV files. Within each seeded run, source rows were sampled using the run seed
+and then split 80/20 into source-training and source-validation rows.
+The target validation rows were not resampled.
+
+\subsection{Model-selection workflow}
+
+The model-selection workflow separated three decisions: within-run checkpoint
+selection, hyperparameter selection, and held-out testing. Within each training
+run, checkpoints were selected by the lowest validation-set mean squared error
+on experimental Tm rows. Early stopping also monitored only these experimental
+Tm validation rows. This prevented a model from being chosen because it
+predicted source labels well while failing to improve the target task.
+
+Hyperparameter selection was performed on the experimental Tm validation split.
+For each source class, candidate settings included the default learning rates,
+lower and higher encoder learning rates, a lower head learning rate combined
+with a lower encoder learning rate, dropout rates of 0.05 and 0.30 in addition
+to the default 0.15, and alternative source-loss weighting where relevant.
+Architecture controls included the shared-head model used in the main
+comparison and residual or latent source-fusion variants. Mutation-effect head
+controls compared separate template-specific heads, a shared head, a
+context-conditioned shared head, and a calibrated shared head. The final main
+comparison used the best validation-set setting within each source class and
+then evaluated that selected setting on the held-out test split.
+
+The label-count curves and the final source comparison answer different
+questions. The label-count curves hold a source-specific training protocol fixed
+while varying the number of available source labels, showing how the target
+error changes as source-label count increases. The final source comparison
+selects one validation-set setting per source and compares their held-out test
+errors against the selected Tm-only reference.
+
+\subsection{Training details}
+
+The default encoder was \texttt{\detokenize{facebook/esm2_t6_8M_UR50D}}.
+Sequences were tokenized with truncation and padding to length 160. The first
+token representation was passed through a multilayer perceptron with hidden
+dimensions 256, 128, and 32, ReLU activations, and dropout. The final main
+architecture used this shared trunk with a Tm head and source-specific source
+heads. The loss for each task was Huber loss with $\delta=1.0$ on scaled labels.
+The default multi-task objective used learnable task-uncertainty weights; fixed
+weights were included in the search grid for source classes where loss balance
+was a plausible confounder.
+
+The maximum training length was 400 epochs with batch size 16, AdamW, weight
+decay 0.04, a cosine learning-rate schedule, and 100 warmup steps. The default
+head learning rate was $3\times10^{-4}$. In updated-encoder models, encoder
+parameters were trained with their own learning rate, selected from the
+validation-set search. In frozen-encoder controls, ESM2 parameters were not
+updated and embeddings were precomputed before head training.
+
+\subsection{Statistical reporting}
+
+The primary reported statistic is MAE on the 396 held-out test examples after
+averaging predictions from ten seeded models. Confidence intervals were computed
+by resampling test examples, not by treating training seeds as independent
+experimental replicates. For single-condition MAE intervals, 10,000 bootstrap
+samples were drawn from the absolute-error vector and the 5th and 95th
+percentiles were reported. For paired comparisons, both conditions were
+resampled with the same bootstrap indices and the candidate-minus-reference MAE
+difference was computed for each resample. This paired procedure preserves the
+fact that all models are evaluated on the same test proteins.
+
+The one-sided bootstrap tail probability recorded in the result JSON is the
+fraction of paired bootstrap samples in which candidate-minus-reference
+$\Delta$MAE is greater than zero. It is reported as a diagnostic for the
+direction of the paired difference, but the main text emphasizes the effect
+size and the 90\% confidence interval.
+
+\subsection{Machine-readable result files}
+
+The main source comparison is summarized by
+\texttt{\detokenize{results/source_screen/final_source_screen_summary.json}}.
+The label-count curves for experimental Tm labels, FEP mutation free energies,
+and MD-derived contact persistence are stored as \texttt{\detokenize{scaling.json}}
+files in the corresponding result directories and are referenced by the
+figure-generation script. Source-head controls are summarized by
+\texttt{\detokenize{results/ddg_head_search/final_ddg_head_summary.json}}.
+Additional source-combination controls are summarized by
+\texttt{\detokenize{results/abcd_search/final_abcd_summary.json}}. These files
+record the run arguments, selected settings, per-condition MAE values,
+confidence intervals, and paired bootstrap comparisons used to generate the
+figures.
+
+\subsection{Interpretation of the scaling curves}
+
+The experimental Tm label-count curve is an internal reference showing that the
+pipeline can detect the expected improvement when more target labels are added.
+The FEP curve evaluates whether increasing a physically related
+mutation-free-energy source improves the same held-out Tm endpoint. The FEP
+curve is beneficial but not strictly monotonic, so it should not be interpreted
+as evidence for a universal power law. The MD-derived contact-persistence curve
+shows that increasing the amount of a simulation-derived label is not sufficient
+by itself. The relevant conclusion is source dependence: target-task transfer
+depends on whether the source label encodes physical information that is useful
+for experimental Tm prediction.
