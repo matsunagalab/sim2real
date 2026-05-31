@@ -2,23 +2,107 @@
 
 \section*{Results}
 
-% TODO: Main findings
-\blindtext
+\subsection*{Relative thermodynamic supervision for absolute Tm prediction}
 
-% Example figure - shows how to insert a column-width figure
-\begin{figure}%[tbhp]
+We designed the analysis around a deliberately asymmetric transfer problem:
+experimental Tm labels define an absolute thermal-stability phenotype, whereas
+FEP and Rosetta-style auxiliary labels describe relative mutation effects. The
+fair protocol therefore uses auxiliary labels only for representation learning;
+checkpoint selection, early stopping, and hyperparameter selection are all
+controlled by Tm validation performance (Fig.~\ref{fig:concept_protocol}).
+
+\begin{figure*}[t]
 \centering
-\includegraphics[width=.8\linewidth]{figures/Figure_1}
-\caption{Placeholder image of Iris with a long example caption to show justification setting.}
-\label{fig:figure1}
-\end{figure}
+\includegraphics[width=\textwidth]{fig_outline01_concept_protocol}
+\caption{\textbf{Concept and fair evaluation protocol.}
+\textbf{(A)} Experimental Tm labels provide sparse absolute anchors, while
+mutation $\Delta\Delta G$ labels provide local relative stability directions.
+\textbf{(B)} The multitask model shares an ESM2 encoder and uses separate heads
+for Tm and auxiliary labels; all model selection is based on Tm validation only.
+\textbf{(C)} The auxiliary sources tested in the fair screen include
+free-energy-like mutation labels, Rosetta-scored design variants, and an
+MD-derived hydrophilic-contact Q-value.
+\textbf{(D)} Final claims use a held-out Tm test set with paired bootstrap
+statistics.}
+\label{fig:concept_protocol}
+\end{figure*}
 
-\blindtext
+\subsection*{FEP mutation labels provide the strongest transfer signal}
 
-% Note: To insert a figure wider than one column, use \begin{figure*}...\end{figure*}
-% Figures wider than one column should be sized to 11.4 cm or 17.8 cm wide.
-% Use \begin{SCfigure*}...\end{SCfigure*} for a wide figure with side captions.
+Under the fair source-screen protocol, FEP $\Delta\Delta G$ labels improved
+held-out Tm prediction from 6.61 deg C MAE for Tm-only training to 6.26 deg C
+MAE. The paired improvement was -0.353 deg C MAE with a 90\% confidence interval
+from -0.462 to -0.243 deg C (Fig.~\ref{fig:source_screen}). Other
+free-energy-like or design-scored labels showed weaker but informative effects,
+whereas the MD-Q structural feature did not transfer.
 
-% TODO: Additional results
-Figure \ref{fig:figure1} shows an example of how to insert a column-wide figure.
-\blindtext
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_outline02_source_screen}
+\caption{\textbf{Fair source screen identifies source-specific transfer.}
+\textbf{(A)} Held-out Tm test MAE for Tm-only training and each auxiliary source.
+Intervals show bootstrap confidence intervals over test-set absolute errors.
+\textbf{(B)} Paired $\Delta$MAE relative to Tm-only training. Negative values
+indicate improvement. FEP is the strongest source; ThermoMPNN and
+Rosetta-scored ESM2 variants are positive; MD-Q HPHIL 400K is negative.
+\textbf{(C)} Tm-validation-selected models do not always preserve their apparent
+validation advantage on the held-out test set.
+\textbf{(D)} The effect is source-dependent rather than a generic consequence
+of adding auxiliary data.}
+\label{fig:source_screen}
+\end{figure*}
+
+\subsection*{Rosetta-scored generated variants connect the method to design loops}
+
+Rosetta labels on ESM2-proposed variants also improved Tm prediction over the
+Tm-only baseline (paired $\Delta$MAE = -0.165 deg C, 90\% CI -0.306 to
+-0.025 deg C). The comparison between ESM2-proposed and random Rosetta variants
+was suggestive but not resolved by the current data (paired $\Delta$MAE =
+-0.065 deg C, 90\% CI -0.195 to +0.064 deg C). We therefore interpret this
+result as evidence that physics-labeled generated variants retain a useful Tm
+transfer signal, not as proof that the current generator outperforms random
+sampling (Fig.~\ref{fig:design_bridge}).
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_outline03_design_bridge}
+\caption{\textbf{Physics-labeled generated variants provide a bridge toward
+model-in-the-loop design.}
+\textbf{(A)} ESM2-proposed variants can be scored by Rosetta and used as
+auxiliary labels for a Tm predictor.
+\textbf{(B)} Rosetta-scored ESM2 variants improve over Tm-only training, while
+random Rosetta variants show a weaker and marginal effect.
+\textbf{(C)} Paired comparisons support improvement of Rosetta-scored ESM2
+variants over Tm-only training, but not a definitive advantage over random
+Rosetta variants.
+\textbf{(D)} The result motivates, but does not yet implement, future active
+learning or reinforcement-learning design loops.}
+\label{fig:design_bridge}
+\end{figure*}
+
+\subsection*{The MD-Q result defines an important boundary condition}
+
+The hydrophilic-contact Q-value from 400 K MD trajectories was an informative
+negative control. It slightly improved the selected Tm validation MAE relative
+to Tm-only training, but worsened held-out test performance by +0.117 deg C MAE
+with a 90\% confidence interval from +0.012 to +0.224 deg C
+(Fig.~\ref{fig:mdq_boundary}). This result sharpens the main claim: transfer is
+not guaranteed by adding any simulation-derived scalar, but depends on whether
+the auxiliary label carries thermodynamic information that is useful for Tm.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_outline04_mdq_boundary}
+\caption{\textbf{Hydrophilic-contact MD-Q does not transfer under the same fair
+protocol.}
+\textbf{(A)} FEP improves Tm prediction, while MD-Q HPHIL 400K is worse than
+Tm-only on the held-out test set.
+\textbf{(B)} MD-Q has a small validation advantage but a test-set penalty,
+showing that Tm-validation selection alone is not sufficient when the auxiliary
+source is mismatched.
+\textbf{(C)} MD-Q HPHIL 400K summarizes retained native contacts involving
+hydrophilic residues in 400 K trajectories.
+\textbf{(D)} The contrast between FEP and MD-Q supports a source-specific
+relative-thermodynamic-supervision interpretation.}
+\label{fig:mdq_boundary}
+\end{figure*}
