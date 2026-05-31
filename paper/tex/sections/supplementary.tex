@@ -4,33 +4,29 @@
 
 \section{Supplementary Information} \label{note:Note1}
 
-\subsection{Reproducibility checklist}
+\subsection{S1. Experimental target split}
 
-All main comparisons used the same experimental Tm endpoint and the same
-held-out test set. The experimental split contained 57 training sequences, 114
-validation sequences, and 396 held-out test sequences. The validation split
+All reported comparisons used the same experimental Tm endpoint from NbBench and
+the same held-out test split. The processed experimental split contained 57
+training sequences, 114 validation sequences, and 396 test sequences. The
+training split was used to fit the target model parameters. The validation split
 was used for checkpoint selection, early stopping, and hyperparameter selection.
-The test split was used only for final reporting after the selected settings
-were fixed. Each final comparison used ten independently seeded models, averaged
-as an ensemble before test errors were computed. Validation-set searches used
-three independently seeded models per candidate setting.
+The test split was used only after the model settings had been fixed.
 
-The exact run arguments and resolved hyperparameters are stored in the
-\texttt{\detokenize{scaling.json}} files under each result directory. These JSON
-files are the primary machine-readable record for the model settings used in the
-figures. The pipeline scripts read processed CSV files, build the target and
-source tasks, train the models, evaluate the seed ensembles, and write bootstrap
-statistics without manual postprocessing of prediction files.
+Tm labels were scaled before training and converted back to degrees Celsius
+before evaluation. The scaling transform was fit only on the 57 target training
+labels, using a robust scaling step followed by min--max scaling to [0,1]. The
+same fitted transform was then applied to validation labels during training and
+was inverted for validation and test predictions. Validation and test labels
+therefore did not influence the fitted target-label transform.
 
-\subsection{Data splits and source-task definitions}
+\subsection{S2. Computational source labels}
 
-Table~\ref{tab:supp_data_sources} summarizes the processed data used by the
-reported comparisons. Row counts exclude header rows. Mutation-effect sources
-were represented by two template-specific source tasks; a setting with $n$
-labels therefore sampled up to $n$ labels from each of the two source tables.
-For example, the final FEP setting used $n=320$ from each template-specific
-table before the 80/20 source-task split. The MD-derived contact-persistence
-source was represented by a single processed trajectory-summary table.
+Table~\ref{tab:supp_data_sources} summarizes the processed source-label data used
+by the reported comparisons. Row counts exclude header rows. Mutation-effect
+sources were represented by two template-specific source tasks, corresponding to
+the 1MEL and 4IDL nanobody templates. The MD-derived contact-persistence source
+was represented by a single processed trajectory-summary table.
 
 \begin{table}[h]
 \centering
@@ -54,42 +50,31 @@ MD-derived contact persistence & Source task & 1143 & Source comparison and scal
 \end{tabular}
 \end{table}
 
-Experimental Tm labels were read from the fixed NbBench train, validation, and
-test CSV files. Tm scaling was fit only on the target training labels. Source
-labels were read from precomputed [0,1]-scaled columns in the processed source
-CSV files. Within each seeded run, source rows were sampled using the run seed
-and then split 80/20 into source-training and source-validation rows.
-The target validation rows were not resampled.
+Source labels were read from precomputed [0,1]-scaled columns in the processed
+CSV files. For mutation-effect experiments with requested source-label count
+$n$, up to $n$ rows were sampled from each of the two template-specific source
+tables using the run seed. For example, the final FEP setting used $n=320$ rows
+from each template-specific table before source rows were split into training
+and validation subsets. For MD-derived contact-persistence experiments, rows
+were sampled from the single processed trajectory-summary table.
 
-\subsection{Model-selection workflow}
+\subsection{S3. Source-task sampling and validation}
 
-The model-selection workflow separated three decisions: within-run checkpoint
-selection, hyperparameter selection, and held-out testing. Within each training
-run, checkpoints were selected by the lowest validation-set mean squared error
-on experimental Tm rows. Early stopping also monitored only these experimental
-Tm validation rows. This prevented a model from being chosen because it
-predicted source labels well while failing to improve the target task.
+Within each seeded run, sampled source rows were split 80/20 into
+source-training and source-validation rows. Source-validation rows were retained
+for monitoring and for control analyses, but they were not used to choose the
+best checkpoint in the final target-centered protocol. The validation data used
+for checkpoint selection and early stopping were filtered to the experimental
+Tm validation rows. This design prevented a model from being selected because it
+fit the source labels well while failing to improve experimental Tm prediction.
 
-Hyperparameter selection was performed on the experimental Tm validation split.
-For each source class, candidate settings included the default learning rates,
-lower and higher encoder learning rates, a lower head learning rate combined
-with a lower encoder learning rate, dropout rates of 0.05 and 0.30 in addition
-to the default 0.15, and alternative source-loss weighting where relevant.
-Architecture controls included the shared-head model used in the main
-comparison and residual or latent source-fusion variants. Mutation-effect head
-controls compared separate template-specific heads, a shared head, a
-context-conditioned shared head, and a calibrated shared head. The final main
-comparison used the best validation-set setting within each source class and
-then evaluated that selected setting on the held-out test split.
+The label-count curves and the final source comparison were designed to answer
+different questions. The label-count curves held a source-specific training
+protocol fixed while varying the number of available source labels. The final
+source comparison selected one validation-set setting for each source label and
+then compared the held-out test error against the selected Tm-only reference.
 
-The label-count curves and the final source comparison answer different
-questions. The label-count curves hold a source-specific training protocol fixed
-while varying the number of available source labels, showing how the target
-error changes as source-label count increases. The final source comparison
-selects one validation-set setting per source and compares their held-out test
-errors against the selected Tm-only reference.
-
-\subsection{Training details}
+\subsection{S4. Model architecture and training}
 
 The default encoder was \texttt{\detokenize{facebook/esm2_t6_8M_UR50D}}.
 Sequences were tokenized with truncation and padding to length 160. The first
@@ -108,7 +93,27 @@ parameters were trained with their own learning rate, selected from the
 validation-set search. In frozen-encoder controls, ESM2 parameters were not
 updated and embeddings were precomputed before head training.
 
-\subsection{Statistical reporting}
+\subsection{S5. Hyperparameter and model selection}
+
+Model selection separated three decisions: within-run checkpoint selection,
+hyperparameter selection, and held-out testing. Within each training run,
+checkpoints were selected by the lowest mean squared error on experimental Tm
+validation rows. Early stopping monitored the same experimental validation
+criterion.
+
+Hyperparameter selection was also performed on the experimental Tm validation
+split. For each source class, candidate settings included the default learning
+rates, lower and higher encoder learning rates, a lower head learning rate
+combined with a lower encoder learning rate, dropout rates of 0.05 and 0.30 in
+addition to the default 0.15, and alternative source-loss weighting where
+relevant. Architecture controls included the shared-head model used in the main
+comparison and residual or latent source-fusion variants. Mutation-effect head
+controls compared separate template-specific heads, a shared head, a
+context-conditioned shared head, and a calibrated shared head. The selected
+setting for each source class was then evaluated once on the held-out test
+split.
+
+\subsection{S6. Statistical analysis}
 
 The primary reported statistic is MAE on the 396 held-out test examples after
 averaging predictions from ten seeded models. Confidence intervals were computed
@@ -126,7 +131,7 @@ $\Delta$MAE is greater than zero. It is reported as a diagnostic for the
 direction of the paired difference, but the main text emphasizes the effect
 size and the 90\% confidence interval.
 
-\subsection{Machine-readable result files}
+\subsection{S7. Machine-readable result files}
 
 The main source comparison is summarized by
 \texttt{\detokenize{results/source_screen/final_source_screen_summary.json}}.
@@ -141,7 +146,7 @@ record the run arguments, selected settings, per-condition MAE values,
 confidence intervals, and paired bootstrap comparisons used to generate the
 figures.
 
-\subsection{Interpretation of the scaling curves}
+\subsection{S8. Interpretation of the scaling curves}
 
 The experimental Tm label-count curve is an internal reference showing that the
 pipeline can detect the expected improvement when more target labels are added.
