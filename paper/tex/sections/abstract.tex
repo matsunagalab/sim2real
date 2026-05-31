@@ -2,16 +2,36 @@
 
 %TC:break Abstract
 \begin{abstract}
-% TODO: Write abstract (Background 1-2 sentences, Problem 1 sentence, Findings 1-2 sentences, Significance 1 sentence)
-\blindtext
+Molecular simulation can generate protein-property labels at a scale that is
+difficult to achieve experimentally, but those labels often describe physical
+quantities that are related to, rather than identical with, the experimental
+target. We study this problem in low-data nanobody thermal-stability prediction:
+can simulation-derived labels improve melting-temperature (Tm) prediction when
+the most informative source labels are mutation free energies rather than Tm
+measurements? We developed a target-centered auxiliary-learning framework in
+which experimental Tm prediction is the target task and computational labels are
+source tasks sharing the same ESM2 sequence encoder. All model selection was
+performed using an experimental development set, and all claims were evaluated
+on the same held-out experimental Tm test set. Free-energy perturbation (FEP)
+mutation-effect labels provided the clearest improvement, reducing held-out Tm
+mean absolute error from 6.61 to 6.26$^\circ$C relative to Tm-only training
+(paired improvement, 0.35$^\circ$C; 90\% confidence interval, 0.24--0.46$^\circ$C).
+The effect was source-dependent: Rosetta-scored generated variants produced a
+weaker but positive signal, whereas an MD-derived contact-persistence label did
+not improve test performance. Encoder-size controls showed that increasing ESM2
+from 8M to 35M or 650M parameters did not explain the gain. These results
+support a selective view of simulation-to-experiment transfer: useful auxiliary
+labels are not merely additional data, but encode physical information that
+transfers to the experimental phenotype. In nanobody Tm prediction, mutation
+free-energy labels appear to complement sparse absolute Tm anchors by providing
+local stability-change information over sequence perturbations.
 \end{abstract}
 %TC:break main
 
 \begin{keywords}
-% TODO: Add keywords
-keyword1 | keyword2 | keyword3 | keyword4
+nanobody thermostability | melting temperature | simulation-to-real transfer learning | protein language model | free energy perturbation
 \end{keywords}
 
 \begin{corrauthor}
-ymatsunaga\at riken.jp
+Yasuhiro Matsunaga, ymatsunaga\at riken.jp
 \end{corrauthor}

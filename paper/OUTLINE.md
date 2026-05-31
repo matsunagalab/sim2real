@@ -1,326 +1,596 @@
-# 論文アウトライン
+# CSBJ Manuscript Outline
 
-## 中心メッセージ
+## Submission Target
 
-**Computational stability labels can be used as auxiliary supervision for low-data nanobody Tm prediction, but the benefit depends strongly on what physical quantity is used.**
+- Journal: Computational and Structural Biotechnology Journal (CSBJ)
+- Section: General
+- Article type: Research Article
+- Strategy: compact Research Article, not Short Communication
+- Target length: about 5,000 to 8,000 main-text words, excluding references, figure legends, and supplementary material
+- Main display items: 4 multi-panel figures, 0 to 2 main tables only if needed
+- Section order source of truth: `paper/AUTHOR_GUIDELINES.md`
 
-この論文の入口は、Tm と ΔΔG の概念的な関係ではない。入口はもっと実務的な課題である。
+SECTION_ORDER: abstract -> introduction -> methods -> results -> discussion -> acknowledgments
 
-**実験 Tm が少ないとき、シミュレーションや物理計算で作れるラベルを、どうやって Tm 予測モデルの学習に取り込めばよいのか。**
+## Author And Submission Metadata
 
-本研究では、その一つの解決策として、実験 Tm を主タスク、計算ラベルを補助タスクとして学習する transfer-learning framework を作り、補助ラベルの種類を比較する。
+Author order:
 
-結果として、FEP 由来の変異 ΔΔG ラベルが最も明確に Tm 予測を改善する。一方、単純な MD-derived contact-Q は同じ評価条件では改善しない。したがって、主張は「シミュレーションデータを足せばよい」ではなく、**Tm 学習に転移する計算ラベルを選ぶ必要があり、変異自由エネルギーに近いラベルが特に有効だった**というもの。
+1. Taihei Murakami
+2. Kentaro Sasaki
+3. Yasuhiro Matsunaga
 
-Tm と ΔΔG の関係は、冒頭の概念ではなく、最後の解釈で使う。すなわち、少数の実験 Tm が絶対スケールを与え、変異 ΔΔG が配列空間上の局所的な安定性変化を与えるため、FEP ラベルが Tm 予測を助けた、と解釈する。
+Affiliations:
 
----
+- `1`: Saitama University, Saitama, Japan
+- `2`: RIKEN Center for Computational Science, Kobe, Japan
 
-## 中心課題と検証項目
+Author-affiliation mapping:
 
-- ナノボディの実験 Tm は少ない。
-- 一方で、FEP、Rosetta、ThermoMPNN、MD などから、実験より多くの計算ラベルを作れる。
-- しかし、それらのラベルは Tm そのものではない。
-- 検証する点は以下。
-  - 計算ラベルを、Tm 予測モデルの学習に補助情報として入れられるか。
-  - どの種類の計算ラベルが Tm 予測に効くのか。
-  - 計算ラベルの有効性は、単なるデータ量の効果なのか、物理量の種類に依存するのか。
-  - 生成モデルが提案した配列を物理計算でラベル付けすると、将来の design loop につながる有用な学習信号になるか。
+- Taihei Murakami: `1`
+- Kentaro Sasaki: `1`
+- Yasuhiro Matsunaga: `1,2`
 
----
+Corresponding author:
 
-## ストーリーの順番
+- Yasuhiro Matsunaga
+- Email: `ymatsunaga@riken.jp`
 
-### 1. Problem: 実験 Tm が少ない
+ORCID:
 
-Tm 予測はナノボディ設計に有用だが、実験 Tm ラベルは少ない。Protein language model を fine-tune しても、低データ regime では限界がある。
+- Yasuhiro Matsunaga: `0000-0003-2872-3908`
 
-ここでの自然な発想は、シミュレーションや物理計算から得られるラベルを学習に使うこと。しかし、計算ラベルは Tm とは異なる量であり、そのまま教師ラベルとして置き換えることはできない。
+Student ORCID IDs are not treated as required placeholders unless the authors already have them or the submission system requires them at upload.
 
-### 2. Method: 計算ラベルを補助タスクとして入れる
+## Working Title Options
 
-実験 Tm を主タスク、計算ラベルを補助タスクとして、同じ sequence encoder を共有するモデルを学習する。
+Preferred:
 
-重要なのは、比較条件を揃えること。
+**Simulation-informed auxiliary learning improves low-data nanobody thermal stability prediction**
 
-- 同じ Tm train / development / test split を使う。
-- 補助ラベルごとにモデル設定を探索する。
-- モデル選択は実験データ側の development set で統一する。
-- 最終評価は held-out Tm test set で行う。
-- 評価は同じ test examples 上の paired absolute error で比較する。
+Alternatives:
 
-この段階では、Tm と ΔΔG の深い関係を前面に出さない。あくまで「どうやって simulation labels を Tm 学習に使うか」という方法論を提示する。
+- **Learning from simulation data for experimental protein-property prediction**
+- **Mutation free-energy labels improve low-data nanobody thermal stability prediction**
+- **Auxiliary learning from computational stability labels for nanobody melting-temperature prediction**
+- **Free-energy-guided transfer of simulation labels to nanobody thermal stability prediction**
 
-### 3. Result: FEP が最も明確に改善する
+The preferred title is broad enough for CSBJ while keeping the main technical contribution clear. Avoid title wording that implies generic simulation data always helps.
 
-| condition | test MAE | ΔMAE vs Tm-only | 90% CI |
-|---|---:|---:|---:|
-| Tm-only | 6.6145 | - | - |
-| FEP ΔΔG | 6.2611 | -0.3530 | [-0.4621, -0.2426] |
+## Central Message
 
-解釈はこの時点ではシンプルにする。
+The broad question is how simulation data should be used to improve experimental protein-property prediction when the simulated quantity is not identical to the experimental target.
 
-- FEP ラベルを補助タスクとして入れると、Tm-only より明確に良い。
-- FEP は Tm を直接測っていない。
-- それでも Tm 予測に役立つ計算ラベルである。
+This manuscript studies one concrete case of that question:
 
-### 4. Result: どの計算ラベルでもよいわけではない
+**Can simulation-derived labels be used to improve low-data nanobody Tm prediction, even when those labels measure quantities other than Tm?**
 
-| source | test MAE | ΔMAE vs Tm-only | paired result |
-|---|---:|---:|---|
-| Tm-only | 6.6145 | - | baseline |
-| FEP | 6.2611 | -0.3530 | strong |
-| Rosetta-scored ESM2 variants | 6.4484 | -0.1652 | positive |
-| ThermoMPNN | 6.4607 | -0.1525 | positive |
-| Rosetta-scored random variants | 6.5130 | -0.0998 | weak / marginal |
-| Rosetta | 6.5255 | -0.0880 | weak / marginal |
-| MD contact-Q | 6.7304 | +0.1172 | negative |
+The answer developed in this case study is:
 
-ここから出す結論:
+- Train Tm prediction as the target task.
+- Use computational labels as auxiliary tasks sharing the sequence representation.
+- Select models using the experimental development set.
+- Evaluate all claims on a held-out experimental Tm test set.
+- Compare auxiliary sources by paired errors on the same test examples.
 
-- 改善は、補助データ量を増やしただけでは説明できない。
-- 補助ラベルの物理的意味が重要。
-- 変異自由エネルギーに近いラベルは有効。
-- 単純な構造持続性指標は、この条件では Tm 汎化に結びつかない。
+The main result is that FEP-derived mutation free-energy labels provide the clearest improvement over Tm-only training. Rosetta-scored generated variants provide a weaker but positive signal. A simple MD-derived contact-persistence label does not improve the held-out Tm prediction. Therefore, the message is not that adding simulation data is generically beneficial; rather, the computational label must encode information that transfers to the target phenotype.
 
-### 5. Result: 生成配列に物理ラベルを付けても信号が残る
+The relation between Tm and mutation free energy is the final interpretation, not the opening premise. Sparse experimental Tm labels anchor the absolute stability scale, while mutation free-energy labels provide local stability-change information over sequence perturbations.
 
-ESM2 が提案した配列を Rosetta で評価したデータも、Tm-only より改善した。
+## CSBJ Fit
 
-| condition | test MAE | ΔMAE vs Tm-only | 90% CI |
-|---|---:|---:|---:|
-| Rosetta-scored ESM2 variants | 6.4484 | -0.1652 | [-0.3058, -0.0250] |
-| Rosetta-scored random variants | 6.5130 | -0.0998 | [-0.2248, +0.0259] |
+This manuscript fits CSBJ because it combines:
 
-ただし、ESM2 variants が random variants より明確に良いとはまだ言わない。
+- computational biology;
+- structure- and physics-informed modeling;
+- protein engineering;
+- machine learning under limited experimental data;
+- interpretable comparison of simulation-derived labels.
 
-追加比較:
+The paper should be framed as a scientific Research Article. It should not be framed as a software article, benchmark-only report, or general-purpose method paper.
 
-- ESM2 variants - random variants: ΔMAE -0.0654, 90% CI [-0.1949, +0.0639]
+## Introduction Logic From The Materials Sim2Real Literature
 
-論文で言うべきこと:
+The Introduction should explicitly use the argument structure of Minami et al. (npj Computational Materials, 2025) as the closest conceptual precedent, while making clear that this manuscript transfers the idea from materials informatics to biomolecular stability prediction.
 
-- 生成モデル由来の配列に物理ラベルを付けても、Tm 予測に有用な学習信号が残る。
-- これは将来の generator -> physics scoring -> Tm predictor -> candidate selection という loop に接続できる。
-- 本論文では active learning や reinforcement learning は実施しない。将来展望として示す。
+Minami et al. develop the following logic:
 
-### 6. Interpretation: なぜ FEP ΔΔG が Tm に効くのか
+1. Data-driven prediction can accelerate discovery, but experimental property data are scarce because physical experiments are slow, expensive, multi-step, and often not openly shared.
+2. High-throughput computational experiments can generate much larger source datasets, including first-principles calculations, quantum chemistry, and molecular dynamics simulations.
+3. Transfer learning or simulation-to-real learning can integrate large simulation datasets with smaller experimental datasets.
+4. The source and target domains are separated by a domain gap, so it is not obvious that adding more simulation data will improve real-world prediction.
+5. Scaling behavior provides a quantitative way to evaluate the usefulness of computational databases for downstream experimental tasks.
+6. The observed scaling can guide data-production protocols, estimate how much simulation data is needed, and quantify when simulation data has practical value.
 
-ここで初めて、Tm と ΔΔG の関係を説明する。
+This manuscript should mirror that logic, but with a biological case:
 
-- Tm は、タンパク質ごとの絶対的な熱安定性に関係する実験表現型。
-- 変異 ΔΔG は、ある配列から別の配列へ動いたときの相対的な安定性変化。
-- 両者は同じ安定性 landscape の異なる観測である。
-- 少数の Tm ラベルが絶対スケールを anchor し、多数の ΔΔG ラベルが局所的な傾きや方向を与える。
-- そのため、FEP ΔΔG は Tm を直接代替しなくても、Tm 予測モデルの表現学習を助ける。
+1. Protein engineering also faces scarce experimental property labels.
+2. Biomolecular simulations and physics-based calculations can generate many more labels than experiments.
+3. Unlike many materials examples, the source labels here are often not the same property as the target. In the main case, the experimental target is Tm, while the most useful source labels are mutation free energies.
+4. Therefore, the central question is not only whether simulation data scale, but which simulated physical quantity transfers to the experimental target.
+5. Nanobody Tm prediction is the concrete case study for this broader question.
+6. The main result extends the Sim2Real argument: simulation data are useful when the source label encodes transferable physical content, but not every simulation-derived label helps.
 
-この解釈は最後に置く。冒頭で置くと、読者には「なぜ突然 ΔΔG と Tm の哲学から始まるのか」が分かりにくい。
+The Introduction should not overclaim that this paper establishes a universal scaling law in biomolecular Sim2Real learning. The FEP label-count sweep is useful and should be shown, but the stronger claim is source-dependent transfer rather than a clean power-law.
 
----
+### Citation Plan Inspired By Minami et al.
 
-## 図構成
+Core citation:
 
-### Fig. 1 Transfer-Learning Architecture for Low-Data Tm Prediction
+- Minami et al., "Scaling law of Sim2Real transfer learning in expanding computational materials databases for real-world predictions", npj Computational Materials, 2025. Use this as the main conceptual precedent.
 
-Purpose: transfer learning のアーキテクチャを最初に示す。target task、source task、共有 encoder、task-specific heads、評価の流れを見せる。
+Materials and simulation-data precedent to cite selectively:
 
-Panels:
+- Yamada et al., 2019: little-data materials property prediction with transfer learning.
+- Wu et al., 2019: polymer thermal conductivity prediction and molecular design.
+- Aoki et al., 2023: multitask learning combining quantum-chemistry and experimental polymer-solvent miscibility data.
+- Ju et al., 2021: transfer learning for lattice thermal conductivity with small target data.
+- Mikami et al., 2023: theoretical/empirical Sim2Real scaling law precedent.
 
-- (A) Transfer-learning setup
-  - measured Tm labels define the target task.
-  - computational labels define source tasks.
-  - both streams map into a shared sequence representation.
-- (B) Shared-encoder architecture
-  - sequence encoder shared by Tm and auxiliary label heads.
-  - Tm-only baseline vs auxiliary-label model.
-  - model selection governed by the experimental development set.
-- (C) Candidate auxiliary sources
-  - mutation free-energy labels: FEP, Rosetta, ThermoMPNN.
-  - generated-variant labels: Rosetta-scored ESM2 and random variants.
-  - structural-dynamics label: MD contact-Q.
-- (D) Evaluation design
-  - Tm train / development / test split.
-  - final comparison on held-out Tm test examples.
-  - paired bootstrap on absolute errors.
+Computational database background to cite only if needed:
 
-This figure should not contain the Tm vs ΔΔG landscape interpretation.
+- Materials Project, AFLOW, NOMAD, OQMD, QM9, and RadonPy as examples of large-scale computational data resources.
+- Do not overload the Introduction with all database citations unless the final text needs them; one compact sentence can establish the materials-informatics precedent.
 
-### Fig. 2 Scaling With Experimental and Computational Labels
+Bridge citations to add outside the Minami reference chain:
 
-Purpose: ラベル数 sweep の結果。実験 Tm ラベルでは低データ scaling が見える。FEP 由来の変異効果ラベルも、同じ development-selected protocol で見ると full label set が最良になり、MD contact-Q とは異なる挙動を示す。
+- Protein language models and ESM2.
+- Nanobody thermostability data source.
+- FEP and Rosetta mutation-effect calculations.
+- ThermoMPNN or other protein-stability predictors used as auxiliary sources.
 
-Panels:
+## Related Nanobody Tm Prediction Work From Murakami et al.
 
-- (A) Experimental Tm-label scaling
-  - Tm-only performance improves as experimental labels increase.
-- (B) FEP-label scaling
-  - adding FEP mutation-effect labels improves the best held-out Tm MAE at the full label set.
-  - the curve is not perfectly smooth, so the claim is scaling with noise rather than a strict monotonic law.
-- (C) MD contact-Q scaling
-  - adding MD-derived contact labels also does not provide a robust improvement over Tm-only training.
-- (D) Best points from label-count sweeps
-  - FEP separates from Tm-only and MD contact-Q at the best point.
-  - This motivates the final source comparison in Fig. 3, where the gain is attributed to label type and encoder updating rather than label count alone.
+The manuscript `paper/refs/murakami.pdf` is a closely related in-house prior manuscript under review. It should be used as background for the Tm-prediction side of the Introduction and Discussion. Because it is under review, cite it only if the submission policy and final status allow it; otherwise, describe the relevant ideas through published literature and keep Murakami et al. as internal guidance.
 
-### Fig. 3 Final Performance at Selected Settings
+Relevant points to import into this manuscript's logic:
 
-Purpose: 最大量まで計算ラベルを使い、モデル設定を選んだ後の最終精度をまとめる。今までの source screen はここに置く。
+1. Fine-tuning protein language models on labeled nanobody thermostability data can substantially improve Tm prediction relative to using pretrained embeddings with only a regression head.
+2. For nanobody thermostability, simply increasing ESM2 model size did not improve prediction accuracy in that prior work. The 8M ESM2 model with supervised fine-tuning performed strongly, while larger ESM2 models did not provide a simple scaling benefit.
+3. Pretrained ESM2 embeddings did not show clear Tm-correlated structure, whereas supervised fine-tuning produced representations correlated with Tm.
+4. Interpretable features from the fine-tuned model mapped to known nanobody stability determinants such as VHH-tetrad residues and disulfide bonds, as well as candidate stabilizing residues supported by FEP calculations.
+5. These findings motivate the present paper's design: if model-size scaling alone is not enough for Tm prediction, the next question is whether physically meaningful simulation-derived labels can provide additional supervision.
 
-Panels:
+How to position the present manuscript relative to Murakami et al.:
 
-- (A) Final test MAE with confidence intervals
-  - Tm-only, FEP, Rosetta-scored ESM2 variants, ThermoMPNN, Rosetta-scored random variants, Rosetta, MD contact-Q.
-- (B) Paired ΔMAE vs Tm-only
-  - FEP clearly improves.
-  - generated-variant labels are positive but weaker.
-  - MD contact-Q worsens.
-- (C) ESM2 encoder-size comparison
-  - ESM2 size comparison for Tm-only and FEP settings.
-  - Larger ESM2 encoders do not improve this small-Tm-data regime.
-- (D) Development-set selected performance vs held-out test performance
-  - model-selection performance and final test performance are not identical.
-- (E) Frozen vs updated encoder comparison
-  - compare Tm-only, FEP, Rosetta, and MD contact-Q under both encoder states.
-  - FEP helps in both regimes, but the updated encoder gives the strongest absolute performance.
-- (F) FEP gain across ESM2 sizes
-  - FEP remains beneficial, but the best absolute result is still the 8M updated encoder with FEP labels.
+- Murakami et al. asks: what does a fine-tuned PLM learn for nanobody Tm prediction?
+- The present manuscript asks: how can simulation-derived labels be used to improve Tm prediction beyond Tm-only learning?
+- Murakami et al. provides the Tm-only and PLM-fine-tuning context.
+- The present manuscript adds simulation-informed auxiliary learning and source-label comparison.
+- The ESM2 size result in this manuscript should be interpreted consistently with Murakami et al.: larger ESM2 encoders do not automatically solve the Tm data-scarcity problem.
 
-Generated-variant result:
+Citation plan from Murakami et al.:
 
-- Rosetta-scored ESM2 variants improve over Tm-only.
-- ESM2 vs random remains unresolved.
-- This is discussed as a design-loop bridge in the text and Discussion, not necessarily as a separate main figure.
+- Protein language models: Rives et al. 2021, Elnaggar et al. 2022, Lin et al. 2023, Hayes et al. 2025.
+- Protein thermostability prediction: Blaabjerg et al. 2023, Li et al. 2023, Alvarez and Dean 2024, Chu et al. 2024, Schmirler et al. 2024.
+- Nanobody background: Muyldermans 2013, Muyldermans 2021, Alexander and Leong 2024.
+- Nanobody thermostability and MD: Akiba et al. 2019, Ikeuchi et al. 2021, Bekker et al. 2019.
+- Nanobody datasets and benchmarks: Valdes-Tresanco et al. 2023, Zhang and Tsuda 2025, Deszynski et al. 2022 if INDI or nanobody sequence resources are discussed.
+- Antibody/nanobody language models: Leem et al. 2022, Barton et al. 2024, Tsuruta et al. 2024.
+- FEP and simulation methods: Bennett 1976, Phillips et al. 2020, Best et al. 2012, Koenekoop et al. 2025, plus specific tools used in this manuscript.
 
-### Fig. 4 Interpretation and Boundary Condition
+### Curated Citation Use For This Manuscript
 
-Purpose: 最後の解釈。ここで Tm と ΔΔG の関係を説明する。
+Use the Murakami reference list as the main source for Tm-prediction and nanobody citations. Suggested priority:
 
-Panels:
+High-priority citations for Introduction:
 
-- (A) Absolute-vs-relative stability information
-  - Tm gives sparse absolute anchors.
-  - ΔΔG gives local mutation directions.
-  - together they can define a useful representation of stability.
-- (B) FEP vs MD contact-Q contrast
-  - FEP improves; MD contact-Q does not.
-- (C) Contact-Q boundary condition
-  - contact-Q captures structural persistence, but not necessarily the mutation free-energy information needed for Tm.
-- (D) Take-home interpretation
-  - useful auxiliary labels encode stability changes relevant to sequence perturbations.
-  - the result is not generic simulation augmentation.
+- Rives et al. 2021: PLMs learn broad protein representations.
+- Lin et al. 2023: ESM2 foundation model.
+- Blaabjerg et al. 2023: rapid protein stability prediction using deep learning representations.
+- Li et al. 2023: DeepTM, sequence-based melting-temperature prediction.
+- Alvarez and Dean 2024: TEMPRO, nanobody melting-temperature estimation from protein embeddings.
+- Valdes-Tresanco et al. 2023: NbThermo, nanobody thermostability database.
+- Zhang and Tsuda 2025: NbBench, nanobody-property benchmark including thermostability.
+- Muyldermans 2013 or 2021: nanobody/VHH background.
+- Bekker et al. 2019: MD estimation of single-domain antibody thermal stability.
 
----
+High-priority citations for Methods:
 
-## セクション計画
+- Lin et al. 2023: ESM2 encoder.
+- Valdes-Tresanco et al. 2023 and/or Zhang and Tsuda 2025: experimental Tm data source, depending on the actual dataset used.
+- Bennett 1976: BAR/free-energy estimation if used.
+- Phillips et al. 2020: NAMD if used.
+- Best et al. 2012: CHARMM36 if used.
+- Koenekoop et al. 2025: modern hybrid-topology protein mutation FEP precedent, if relevant to the FEP setup.
+
+Moderate-priority citations, use if the text needs them:
+
+- Elnaggar et al. 2022 and Hayes et al. 2025 for broader PLM context.
+- Chu et al. 2024, Schmirler et al. 2024, Lafita et al. 2024, Wang et al. 2025 for supervised fine-tuning of PLMs.
+- Leem et al. 2022, Barton et al. 2024, Tsuruta et al. 2024 for antibody/nanobody-specific language models.
+- Akiba et al. 2019 and Ikeuchi et al. 2021 for experimental/biophysical nanobody thermostability studies.
+- Deszynski et al. 2022 for large nanobody sequence resources only if INDI or related background is discussed.
+
+Avoid in the main Introduction unless needed:
+
+- Sparse-autoencoder and interpretability literature from Murakami et al. The present paper is not primarily about mechanistic interpretability.
+- AlphaFold 3 and structural interpretation citations unless specific structures or FEP setup require them.
+- Optuna and other implementation citations in the Introduction. Put them in Methods if used.
+
+## Contributions To Emphasize
+
+1. A case study of how simulation data can be used for experimental protein-property prediction when simulated labels are related to, but not identical to, the target phenotype.
+2. A target-centered auxiliary-learning framework for using computational labels in low-data Tm prediction.
+3. A controlled comparison of multiple computational label types under the same experimental split and model-selection rule.
+4. Evidence that mutation free-energy labels improve experimental Tm prediction even though they are not Tm measurements.
+5. A boundary condition: structural-dynamics labels do not automatically transfer to Tm prediction.
+6. A design-loop bridge: generated variants scored by physics-based calculations can still provide useful supervised signal, although this paper does not perform active learning or reinforcement learning.
+
+## Manuscript Architecture
 
 ### Abstract
 
-- Tm prediction is useful for nanobody engineering but experimental labels are scarce.
-- Computational methods can generate additional labels, but these labels measure quantities other than Tm.
-- We test a controlled auxiliary-training framework for incorporating computational labels into Tm prediction.
-- FEP mutation-effect labels improve held-out Tm prediction over Tm-only training by 0.353 deg C MAE.
-- Rosetta-scored ESM2 variants also provide a positive signal, suggesting a route toward model-in-the-loop design.
-- MD contact-Q does not improve test performance, showing that source choice matters.
-- Interpretation: mutation free-energy labels help because they provide local stability-change information complementary to sparse absolute Tm labels.
+Target length: 200 to 250 words.
+
+Required moves:
+
+1. State the broad challenge: simulations can generate large amounts of data, but using them to improve experimental protein-property prediction is nontrivial because simulated labels often do not match the experimental target.
+2. Introduce nanobody Tm prediction as a concrete low-data case.
+3. State that computational calculations can generate auxiliary labels for variants, but these labels measure quantities other than Tm.
+4. Introduce the auxiliary-learning framework.
+5. State the controlled evaluation design: shared experimental split, development-set model selection, held-out Tm test set, paired comparison.
+6. Report the main number: FEP labels improve held-out Tm prediction from MAE 6.61 to 6.26 deg C, a paired improvement of 0.35 deg C.
+7. State source dependence: Rosetta-scored generated variants are positive but weaker; MD contact-Q does not improve performance.
+8. End with the interpretation: mutation free-energy labels provide local stability-change information complementary to sparse absolute Tm measurements.
 
 ### Introduction
 
-1. Nanobody Tm prediction is practically important and experimentally label-limited.
-2. Simulation and physics-based tools can produce labels for many variants.
-3. The central challenge is not whether such labels exist, but how to use them for a target phenotype they do not directly measure.
-4. We use auxiliary training to incorporate computational labels into Tm prediction.
-5. We compare multiple sources under the same evaluation design.
-6. We find that FEP mutation-effect labels are most effective, generated-variant labels are promising, and a structural-dynamics label does not transfer.
-7. We interpret the result as evidence that relative mutation stability information can complement sparse absolute Tm labels.
+Goal: introduce the practical problem before introducing the thermodynamic interpretation.
 
-### Methods
+Paragraph plan:
 
-- Data:
-  - Experimental Tm split: train 57 / development 114 / test 396.
-  - Auxiliary sources:
-    - FEP mutation-effect labels.
-    - Rosetta mutation-effect labels.
-    - ThermoMPNN mutation-effect labels.
-    - Rosetta-scored random variants.
-    - Rosetta-scored ESM2 variants.
-    - MD contact-Q.
-- Model:
-  - ESM2 sequence encoder.
-  - Tm prediction head.
-  - Auxiliary prediction head.
-- Evaluation:
-  - Same experimental split for all comparisons.
-  - Model settings selected with the experimental development set.
-  - Final numbers reported on held-out Tm test set.
-  - Paired bootstrap on per-example absolute errors.
+1. Start with the materials-informatics precedent following Minami et al.: machine learning can accelerate property prediction, but experimental labels are scarce because experiments are costly, multi-step, and not always openly shared.
+2. Explain the response in materials science: high-throughput computational experiments and databases create large source datasets, and Sim2Real transfer learning uses those source data to improve limited experimental target tasks.
+3. State the unresolved issue emphasized by Minami et al.: because simulations and experiments are separated by a domain gap, the value of simulation data must be evaluated by downstream real-world prediction, including scaling behavior as computational data increase.
+4. Transfer this question to biomolecular design: protein engineering also has scarce experimental property labels, while simulations and physics-based calculations can generate many labels for variants.
+5. Introduce the key additional difficulty in this paper: for biomolecules, the simulated label may differ from the experimental target not only by domain gap but also by physical quantity. In this case, Tm is the target, while FEP supplies mutation free-energy labels.
+6. Present nanobody thermal stability as the concrete case: Tm is important for engineering, developability, storage, and downstream screening, but experimental Tm data are limited.
+7. Protein language models provide useful representations, and prior nanobody Tm work shows that supervised fine-tuning is important for extracting Tm-relevant representations.
+8. However, that prior work also suggests that simply increasing ESM2 size does not automatically improve nanobody Tm prediction, motivating information sources beyond model-size scaling.
+9. We use a shared-encoder auxiliary-learning framework and evaluate all claims on held-out experimental Tm examples.
+10. We compare mutation free-energy labels, generated-variant physics labels, and an MD-derived structural-dynamics label.
+11. We find that FEP-derived mutation free-energy labels most clearly improve Tm prediction, supporting the view that relative stability-change information complements sparse absolute Tm anchors.
+
+Do not open the Introduction with a conceptual discussion of Tm versus ΔΔG. That interpretation belongs near the end.
+
+### Materials And Methods
+
+CSBJ encourages the first part of Methods to describe study design. Use a first subsection titled:
+
+**Experimental and technical design**
+
+Subsection plan:
+
+1. **Experimental and technical design**
+   - Study overview.
+   - Broad question: how to use simulation data for experimental protein-property prediction when source labels do not equal the target phenotype.
+   - Case study: low-data nanobody Tm prediction.
+   - Experimental Tm is the target task.
+   - Computational labels are source tasks.
+   - All final claims use the same held-out experimental Tm test set.
+   - Figure 1 summarizes the design.
+
+2. **Experimental Tm dataset**
+   - Dataset origin.
+   - Nanobody sequence inclusion criteria.
+   - Tm units and preprocessing.
+   - Train/development/test split: train 57, development 114, test 396.
+   - Any sequence-level grouping or leakage prevention.
+
+3. **Computational auxiliary labels**
+   - FEP mutation free-energy labels.
+   - Rosetta mutation-effect labels.
+   - ThermoMPNN mutation-effect labels.
+   - Rosetta-scored generated variants.
+   - Rosetta-scored random variants.
+   - MD contact-Q labels.
+   - For each source, report label definition, sign convention, number of labels, and whether labels are mutation-relative or sequence-level.
+
+4. **Generated and random variant sets**
+   - How ESM2-generated variants were produced.
+   - How random variants were produced.
+   - How Rosetta scoring was applied to both sets.
+   - State that generated-vs-random superiority is exploratory and not the main claim.
+
+5. **Model architecture**
+   - ESM2 sequence encoder.
+   - Tm prediction head.
+   - Auxiliary prediction head.
+   - Shared representation.
+   - Updated encoder and frozen-encoder control.
+   - ESM2 size controls.
+   - Link to prior Murakami et al. architecture: the present model keeps the same basic PLM-to-Tm prediction idea but adds auxiliary source-task supervision.
+
+6. **Training and model selection**
+   - Tm-only baseline.
+   - Auxiliary-training objective.
+   - Hyperparameter search space.
+   - Model selection using experimental development-set Tm performance.
+   - Seed handling.
+   - Early stopping rule.
+   - This subsection must be explicit enough to avoid reviewer concern about unfair auxiliary-task selection.
+
+7. **Evaluation and statistical analysis**
+   - Held-out Tm test MAE.
+   - Confidence intervals.
+   - Paired bootstrap on per-example absolute errors.
+   - Development-set versus test-set comparison.
+   - Label-count scaling analysis.
+   - Software versions and hardware.
+
+8. **Data and code availability**
+   - Processed data and figure-generation scripts.
+   - Availability of raw simulation data or reason for restricted/large-file availability.
+   - Archive/DOI target if available.
 
 ### Results
 
-1. **A framework for using computational labels in Tm prediction**
-   - Introduce auxiliary-label training.
-   - Show evaluation design.
-   - Figure 1.
+The Results should follow the figures and keep interpretation controlled.
 
-2. **FEP mutation-effect labels give the strongest Tm improvement**
-   - First show label-count sweeps.
-   - FEP improves at the full label set, although the curve is not perfectly smooth.
-   - The main FEP gain appears in the final source comparison in Fig. 3.
-   - Figure 2.
+#### Result 1: A framework for using simulation labels in experimental protein-property prediction
 
-3. **Final selected-setting comparison**
-   - Show Tm-only vs FEP.
-   - Main quantitative result.
-   - Full source screen.
-   - Figure 3A/B.
+Figure: Fig. 1.
 
-4. **The effect is source-dependent**
-   - MD contact-Q as boundary condition.
-   - Development-set selected performance vs final test performance.
-   - Figure 3C/D and Figure 4B/C.
+Key points:
 
-5. **Physics-labeled generated variants provide a route toward design loops**
-   - Rosetta-scored ESM2 variants improve over Tm-only.
-   - ESM2 vs random is not conclusive.
-   - Discuss as design-loop bridge in text and Discussion.
+- The general problem is how to exploit simulation data when source labels are related to, but not identical to, the experimental target.
+- Nanobody Tm prediction is the concrete target-task case study.
+- Tm prediction is the target task.
+- Computational labels are auxiliary source tasks.
+- Source labels are not used as Tm replacements.
+- The final evaluation is held-out experimental Tm prediction.
 
-6. **Interpretation: mutation-effect labels complement sparse Tm anchors**
-   - Tm gives absolute anchors.
-   - ΔΔG gives local mutation directions.
-   - FEP works because its auxiliary label is close to the relevant thermodynamic perturbation.
-   - Figure 4A/D.
+Main claim:
+
+The design permits computational labels to influence representation learning while preserving target-task evaluation.
+
+#### Result 2: FEP labels show label-count-dependent improvement, unlike the MD contact-Q boundary condition
+
+Figure: Fig. 2.
+
+Key points:
+
+- Experimental Tm-label scaling establishes the low-data regime.
+- FEP labels improve best held-out Tm performance when the full auxiliary label set is used.
+- The FEP curve is not perfectly monotonic; do not claim a clean power law.
+- MD contact-Q does not show robust improvement over Tm-only training.
+
+Main claim:
+
+The amount of auxiliary data matters, but data quantity alone does not explain improvement; label type matters.
+
+#### Result 3: Final selected-setting comparison identifies FEP as the strongest auxiliary source
+
+Figure: Fig. 3a,b.
+
+Key numbers:
+
+| condition | test MAE | ΔMAE vs Tm-only | 90% paired CI |
+|---|---:|---:|---:|
+| Tm-only | 6.6145 | - | - |
+| FEP | 6.2611 | -0.3530 | [-0.4621, -0.2426] |
+| Rosetta-scored ESM2 variants | 6.4484 | -0.1652 | [-0.3058, -0.0250] |
+| ThermoMPNN | 6.4607 | -0.1525 | [-0.2958, -0.0067] |
+| Rosetta-scored random variants | 6.5130 | -0.0998 | [-0.2248, +0.0259] |
+| Rosetta | 6.5255 | -0.0880 | [-0.2008, +0.0247] |
+| MD contact-Q | 6.7304 | +0.1172 | [+0.0120, +0.2235] |
+
+Main claim:
+
+FEP-derived mutation free-energy labels give the strongest and most statistically stable improvement over Tm-only learning.
+
+#### Result 4: The gain is not explained by simply using a larger encoder
+
+Figure: Fig. 3c,f.
+
+Key points:
+
+- ESM2 size controls compare 8M, 35M, and 650M encoders.
+- Larger ESM2 encoders do not improve absolute performance in this small-Tm-data setting.
+- FEP remains beneficial within each size comparison, but the best absolute result is the 8M updated encoder with FEP labels.
+- This agrees with the related Murakami et al. observation that model-size scaling alone did not solve nanobody Tm prediction.
+
+Main claim:
+
+The result supports physics-informed auxiliary supervision rather than model-size scaling as the primary driver in this regime.
+
+#### Result 5: The auxiliary signal is strongest when the encoder can adapt, but it is not entirely dependent on encoder updating
+
+Figure: Fig. 3e.
+
+Key points:
+
+- FEP improves both updated-encoder and frozen-encoder settings.
+- The updated-encoder setting gives the best absolute performance.
+- Rosetta and MD contact-Q remain weaker than FEP.
+
+Main claim:
+
+FEP contributes useful information to the representation, and limited encoder adaptation helps exploit it.
+
+#### Result 6: Physics-labeled generated variants provide a design-loop bridge
+
+Figure: Fig. 3a,b and Discussion.
+
+Key numbers:
+
+| comparison | ΔMAE | 90% paired CI |
+|---|---:|---:|
+| Rosetta-scored ESM2 variants vs Tm-only | -0.1652 | [-0.3058, -0.0250] |
+| Rosetta-scored ESM2 variants vs Rosetta-scored random variants | -0.0654 | [-0.1949, +0.0639] |
+
+Main claim:
+
+Rosetta-scored generated variants improve over Tm-only training, but their superiority over random variants is not conclusive. This should be framed as a route toward future generator-physics-predictor design loops, not as proof that generated variants are optimized.
+
+#### Result 7: Mutation free-energy labels complement sparse absolute Tm anchors
+
+Figure: Fig. 4.
+
+Key points:
+
+- Tm provides sparse absolute stability anchors.
+- Mutation free-energy labels provide local sequence-perturbation information.
+- FEP works because its label is close to the relevant thermodynamic perturbation.
+- MD contact-Q provides a boundary condition: structural persistence alone did not transfer in this setting.
+
+Main claim:
+
+The useful source labels are not simply more labels; they encode stability changes relevant to the target phenotype.
 
 ### Discussion
 
-- Main advance:
-  - A practical framework for using computational labels in low-data Tm prediction.
-- Key result:
-  - FEP mutation-effect labels robustly improve Tm prediction.
-- Boundary:
-  - Not all simulation-derived labels help.
-- Design implication:
-  - Physics-labeled generated variants are a supervised precursor to active design loops.
-- Mechanistic interpretation:
-  - Tm and ΔΔG are different observations of stability, and their complementarity explains the FEP result.
-- Limitations:
-  - Small experimental Tm train set.
-  - Nanobody-specific dataset.
-  - Generated-variant result is not yet a direct design success.
-  - No new experimental validation of proposed high-Tm variants.
+Paragraph plan:
 
----
+1. Restate the main advance: a target-centered way to incorporate simulation-derived labels into experimental protein-property prediction, demonstrated in low-data nanobody Tm prediction.
+2. Emphasize the main result: FEP mutation free-energy labels produce the clearest improvement.
+3. Interpret why this matters: relative mutation free energies complement sparse absolute Tm labels.
+4. Discuss source dependence: not every simulation-derived or physics-based label transfers.
+5. Discuss encoder adaptation and model size: limited adaptation helps; larger language models were not sufficient in this low-data regime.
+6. Discuss generated variants: positive supervised signal, but no claim of completed design optimization.
+7. Limitations:
+   - small experimental Tm train set;
+   - nanobody-specific dataset;
+   - no new experimental validation of high-Tm candidates;
+   - generated-variant comparison remains exploratory;
+   - raw simulation data may be large and difficult to deposit fully.
+8. Outlook:
+   - candidate generation, physics scoring, Tm prediction, and iterative selection;
+   - future active-learning or reinforcement-learning design loops;
+   - the present paper stops at supervised evidence supporting this direction.
+9. Concluding paragraph:
+   - The key practical lesson is to choose computational labels by their transferable physical content, not by availability alone.
 
-## 重要な表現ルール
+### Acknowledgments And Required Statements
+
+This section must include or be followed by the required CSBJ statements:
+
+- Funding.
+- Author contributions.
+- Competing interests.
+- Data availability.
+- Code availability.
+- AI-use disclosure, if used.
+- Any third-party figure or asset permissions.
+
+Draft statement placeholders:
+
+- Data availability: Processed data required to reproduce the main and supplementary figures will be deposited in Zenodo at `ZENODO_DATA_DOI_PLACEHOLDER`. Raw simulation trajectories are large and will be made available at `RAW_DATA_LOCATION_OR_REQUEST_POLICY_PLACEHOLDER`.
+- Code availability: Analysis, training, and figure-generation code will be available on GitHub at `GITHUB_REPOSITORY_URL_PLACEHOLDER`; an archival release will be deposited in Zenodo at `ZENODO_CODE_DOI_PLACEHOLDER`.
+- Competing interests: The authors declare that they have no competing interests.
+- Author contributions: Use the CRediT-style draft in `paper/tex/sections/acknowledgments.tex` and confirm before submission.
+- Funding: Use the JSPS KAKENHI and Fugaku support statement in `paper/tex/sections/acknowledgments.tex` and confirm grant details before submission.
+- AI-use disclosure: Use the draft disclosure in `paper/tex/sections/acknowledgments.tex` and adjust to the journal's final submission form.
+- Third-party permissions: Confirm that all figures are original or document any required permissions before submission.
+
+Known placeholders still to fill later:
+
+- Final Zenodo DOI for data.
+- Final GitHub URL and Zenodo DOI for code.
+- Suggested reviewers for submission.
+
+## Figure Plan
+
+### Fig. 1. Auxiliary-learning framework for using simulation data in experimental Tm prediction
+
+Purpose: introduce the general problem of using simulation labels for an experimental target, then instantiate it as nanobody Tm prediction. Do not introduce the Tm/ΔΔG interpretation here.
+
+Panels:
+
+- (a) General setting: scarce experimental target labels and larger simulation-derived source-label pools.
+- (b) Case study: low-data nanobody Tm prediction with non-Tm computational labels.
+- (c) Shared sequence encoder with Tm target head and auxiliary source head.
+- (d) Evaluation workflow: fixed Tm train/development/test split, development-set model selection, held-out test comparison.
+
+CSBJ figure rules:
+
+- No in-panel title.
+- Use lower-case panel labels in parentheses.
+- Put explanatory text in the legend.
+
+### Fig. 2. Label-count scaling of experimental and computational supervision
+
+Purpose: show scaling behavior and motivate final source comparison.
+
+Panels:
+
+- (a) Experimental Tm-label scaling.
+- (b) FEP-label scaling.
+- (c) MD contact-Q label-count control.
+- (d) Best points from label-count sweeps.
+
+Claims:
+
+- Experimental Tm labels show the expected low-data scaling behavior.
+- FEP reaches the best held-out Tm MAE at the full label set, but the curve is noisy.
+- MD contact-Q does not reproduce the FEP benefit.
+- Avoid claiming a strict monotonic law.
+
+### Fig. 3. Final held-out Tm performance across auxiliary sources and controls
+
+Purpose: central quantitative result.
+
+Panels:
+
+- (a) Final test MAE with confidence intervals.
+- (b) Paired ΔMAE versus Tm-only.
+- (c) ESM2 size controls.
+- (d) Development-set performance versus held-out test performance.
+- (e) Frozen versus updated encoder comparison.
+- (f) FEP gain across ESM2 sizes.
+
+Claims:
+
+- FEP is the strongest auxiliary source.
+- Rosetta-scored generated variants are positive but weaker.
+- Larger ESM2 encoders do not improve this low-data regime.
+- Encoder updating improves absolute performance.
+
+### Fig. 4. Interpretation: absolute Tm anchors and mutation free-energy directions
+
+Purpose: interpret why FEP labels transfer while the MD contact-Q label does not.
+
+Panels:
+
+- (a) Sparse absolute Tm anchors and local mutation-effect directions.
+- (b) FEP versus MD contact-Q performance contrast.
+- (c) Boundary condition for structural-dynamics labels.
+- (d) Take-home model: useful auxiliary labels encode transferable stability-change information.
+
+Claims:
+
+- Tm and mutation free energy are different observations of stability.
+- FEP labels help because they encode local mutation effects.
+- Generic simulation augmentation is not sufficient.
+
+## Supplementary Material Plan
+
+Expected supplementary components:
+
+- Supplementary Methods: dataset construction, computational label definitions, model details, training objective, hyperparameter search, statistical testing.
+- Supplementary Table 1: dataset split sizes and label counts.
+- Supplementary Table 2: hyperparameter search space and selected settings.
+- Supplementary Table 3: run-level final metrics by seed.
+- Supplementary Figure 1: all label-count sweeps with confidence intervals.
+- Supplementary Figure 2: additional source comparisons and negative controls.
+- Supplementary Figure 3: encoder-size and frozen-encoder controls, if not fully clear in the main figure.
+- Supplementary Data: processed inputs and plotting tables used for the figures.
+
+Keep the main paper compact and put reproducibility details here.
+
+## Writing Rules
 
 - Avoid: "simulation data generally improves Tm prediction."
 - Use: "the utility of computational labels is source-dependent."
 - Avoid: "ΔΔG predicts Tm."
-- Use: "mutation-effect labels provide auxiliary information that improves Tm prediction."
+- Use: "mutation free-energy labels provide auxiliary information that improves Tm prediction."
 - Avoid: "generated variants are better than random variants."
 - Use: "Rosetta-scored generated variants improve over Tm-only, while superiority over random variants remains unresolved."
-- Avoid: making the Tm/ΔΔG conceptual relation the opening claim.
-- Use: Tm/ΔΔG relation as the final interpretation of why FEP works.
-
----
+- Avoid: opening the paper with the Tm/ΔΔG relationship.
+- Use: the Tm/ΔΔG relationship as the final interpretation of why FEP works.
+- Avoid local lab shorthand in the manuscript and figures.
+- Use reader-facing terms: "development set", "held-out test set", "auxiliary labels", "mutation free-energy labels", "MD-derived contact-persistence label".
 
 ## Current Key Numbers
 
@@ -341,8 +611,6 @@ Additional paired comparison:
   - 90% CI [-0.1949, +0.0639]
   - Interpretation: suggestive but not conclusive.
 
----
-
 ## Decision Log
 
 - 2026-05-30: Initial MD-centered story was weakened after controlled comparison.
@@ -350,14 +618,18 @@ Additional paired comparison:
 - 2026-05-31: Generated-variant result positioned as a bridge toward future design loops, not proof of optimized design.
 - 2026-05-31: MD contact-Q positioned as a boundary condition showing that not all simulation-derived labels help.
 - 2026-05-31: Story reframed so the opening is about how to incorporate computational labels into Tm prediction; the Tm/ΔΔG relation is moved to the final interpretation.
+- 2026-06-01: Submission target fixed to CSBJ General section as a compact Research Article.
 
----
+## Drafting Checklist
 
-## Writing Checklist
-
-- [ ] Start from the practical problem: how to use computational labels for low-data Tm prediction.
+- [ ] Start from the broad practical problem: how to use simulation data for experimental protein-property prediction when source labels differ from the target.
+- [ ] Present nanobody Tm prediction as the concrete case study, not as the only possible use case.
 - [ ] Present auxiliary-label training before discussing the Tm/ΔΔG relationship.
 - [ ] Keep FEP as the main quantitative result.
 - [ ] Use the MD contact-Q result to show source dependence.
 - [ ] Treat generated-variant results as a design-loop bridge, not as proof of optimized design.
 - [ ] Place the Tm/ΔΔG conceptual interpretation near the end of Results or in Discussion.
+- [ ] Add CSBJ-required statements: funding, author contributions, competing interests, data availability, code availability, and AI-use disclosure.
+- [ ] Convert figure panel labels to `(a)`, `(b)`, `(c)` style.
+- [ ] Keep all figure titles out of the figure panels.
+- [ ] Prepare suggested reviewers before submission.

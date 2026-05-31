@@ -2,13 +2,40 @@
 
 \section*{Methods}
 
-% TODO: Key methodologies
-\blindtext
+\subsection*{Experimental Tm target data}
 
-\subsection*{Data Collection}
-% TODO: Data collection methods
-\blindtext
+Nanobody melting-temperature (Tm) prediction was formulated as a supervised
+sequence-regression task. Experimental Tm measurements defined the target
+endpoint for model selection and final evaluation. The data were split into
+training, development, and held-out test sets before model comparison. The
+development set was used for selecting model settings, and the held-out test set
+was used only for the final paired comparisons reported in the Results.
 
-\subsection*{Analysis}
-% TODO: Analysis methods
-\blindtext
+\subsection*{Computational source labels}
+
+Computational labels were treated as auxiliary source tasks rather than as
+additional Tm measurements. The source-label collection included mutation
+free-energy labels from free-energy perturbation calculations, structure-based
+mutation-effect labels, scores assigned to generated and random variants, and an
+MD-derived contact-persistence label. Label-count experiments were performed by
+training models with increasing numbers of source labels while preserving the
+same target-task evaluation protocol.
+
+\subsection*{Auxiliary-learning model}
+
+All models used an ESM2 sequence encoder followed by task-specific prediction
+heads. In the Tm-only baseline, the encoder and Tm head were trained using only
+experimental Tm labels. In auxiliary-learning models, the Tm head and a
+source-label head shared the sequence encoder, allowing the computational source
+task to influence the representation. Encoder-size controls compared the same
+protocol across ESM2 model sizes. Frozen-encoder controls kept the pretrained
+sequence representation fixed and trained only the task heads.
+
+\subsection*{Model selection and evaluation}
+
+To avoid selecting models by auxiliary-task performance, all candidate settings
+were chosen using the experimental Tm development set. Final performance was
+reported as mean absolute error on the held-out experimental Tm test set.
+Auxiliary sources were compared against the Tm-only baseline by paired
+differences in absolute error on the same test examples. Confidence intervals
+were estimated by bootstrap resampling of held-out test examples.
