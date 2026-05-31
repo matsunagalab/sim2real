@@ -147,20 +147,20 @@ This figure should not contain the Tm vs ΔΔG landscape interpretation.
 
 ### Fig. 2 Scaling With Experimental and Computational Labels
 
-Purpose: スケーリング結果。実験 Tm ラベルと計算ラベルを増やしたときに、held-out Tm prediction がどう変わるかを見せる。
+Purpose: ラベル数 sweep の結果。実験 Tm ラベルでは低データ scaling が見える。FEP 由来の変異効果ラベルも、同じ development-selected protocol で見ると full label set が最良になり、MD contact-Q とは異なる挙動を示す。
 
 Panels:
 
 - (A) Experimental Tm-label scaling
   - Tm-only performance improves as experimental labels increase.
 - (B) FEP-label scaling
-  - adding FEP mutation-effect labels changes Tm test error.
-  - show the best point in the scaling curve.
+  - adding FEP mutation-effect labels improves the best held-out Tm MAE at the full label set.
+  - the curve is not perfectly smooth, so the claim is scaling with noise rather than a strict monotonic law.
 - (C) MD contact-Q scaling
-  - adding MD-derived contact labels does not show the same robust improvement.
-- (D) Best points from scaling runs
-  - Tm-only, FEP, and MD contact-Q best points.
-  - This motivates the final selected-setting comparison in Fig. 3.
+  - adding MD-derived contact labels also does not provide a robust improvement over Tm-only training.
+- (D) Best points from label-count sweeps
+  - FEP separates from Tm-only and MD contact-Q at the best point.
+  - This motivates the final source comparison in Fig. 3, where the gain is attributed to label type and encoder updating rather than label count alone.
 
 ### Fig. 3 Final Performance at Selected Settings
 
@@ -174,10 +174,16 @@ Panels:
   - FEP clearly improves.
   - generated-variant labels are positive but weaker.
   - MD contact-Q worsens.
-- (C) Development-set selected performance vs held-out test performance
+- (C) ESM2 encoder-size comparison
+  - ESM2 size comparison for Tm-only and FEP settings.
+  - Larger ESM2 encoders do not improve this small-Tm-data regime.
+- (D) Development-set selected performance vs held-out test performance
   - model-selection performance and final test performance are not identical.
-- (D) Source category map
-  - mutation-effect labels, generated-variant labels, structural-dynamics labels.
+- (E) Frozen vs updated encoder comparison
+  - compare Tm-only, FEP, Rosetta, and MD contact-Q under both encoder states.
+  - FEP helps in both regimes, but the updated encoder gives the strongest absolute performance.
+- (F) FEP gain across ESM2 sizes
+  - FEP remains beneficial, but the best absolute result is still the 8M updated encoder with FEP labels.
 
 Generated-variant result:
 
@@ -256,8 +262,9 @@ Panels:
    - Figure 1.
 
 2. **FEP mutation-effect labels give the strongest Tm improvement**
-   - First show label-count scaling.
-   - FEP scaling and MD contact-Q scaling behave differently.
+   - First show label-count sweeps.
+   - FEP improves at the full label set, although the curve is not perfectly smooth.
+   - The main FEP gain appears in the final source comparison in Fig. 3.
    - Figure 2.
 
 3. **Final selected-setting comparison**
