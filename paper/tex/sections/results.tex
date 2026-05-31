@@ -2,57 +2,80 @@
 
 \section*{Results}
 
-\subsection*{Relative thermodynamic supervision for absolute Tm prediction}
+\subsection*{A transfer-learning architecture for using computational labels in Tm prediction}
 
-We designed the analysis around a deliberately asymmetric transfer problem:
-experimental Tm labels define an absolute thermal-stability phenotype, whereas
-FEP and Rosetta-style auxiliary labels describe relative mutation effects. The
-fair protocol therefore uses auxiliary labels only for representation learning;
-checkpoint selection, early stopping, and hyperparameter selection are all
-controlled by Tm validation performance (Fig.~\ref{fig:concept_protocol}).
+We used a transfer-learning architecture to incorporate simulation or
+physics-based labels into Tm prediction when experimental Tm measurements are
+scarce. The target task is Tm prediction, while the computational labels measure
+related but non-identical quantities. Models share a sequence encoder between a
+Tm prediction head and an auxiliary computational-label head. Model settings
+were selected using the experimental development set, and all final claims were
+evaluated on the same held-out Tm test examples
+(Fig.~\ref{fig:learning_framework}).
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline01_concept_protocol}
-\caption{\textbf{Concept and fair evaluation protocol.}
-\textbf{(A)} Experimental Tm labels provide sparse absolute anchors, while
-mutation $\Delta\Delta G$ labels provide local relative stability directions.
-\textbf{(B)} The multitask model shares an ESM2 encoder and uses separate heads
-for Tm and auxiliary labels; all model selection is based on Tm validation only.
-\textbf{(C)} The auxiliary sources tested in the fair screen include
-free-energy-like mutation labels, Rosetta-scored design variants, and an
-MD-derived hydrophilic-contact Q-value.
-\textbf{(D)} Final claims use a held-out Tm test set with paired bootstrap
+\caption{\textbf{Transfer-learning architecture for low-data Tm prediction.}
+\textbf{(A)} Measured Tm labels define the target task, and computational labels
+define source tasks that provide additional supervised signal.
+\textbf{(B)} The architecture shares a sequence encoder between the Tm task and
+a computational-label task. Model settings are selected using the experimental
+development set.
+\textbf{(C)} Candidate auxiliary sources include mutation-effect labels,
+generated-variant labels, and an MD-derived contact-Q label.
+\textbf{(D)} Final comparisons use held-out Tm test errors and paired bootstrap
 statistics.}
-\label{fig:concept_protocol}
+\label{fig:learning_framework}
 \end{figure*}
 
-\subsection*{FEP mutation labels provide the strongest transfer signal}
+\subsection*{Prediction accuracy changes with the number of computational labels}
 
-Under the fair source-screen protocol, FEP $\Delta\Delta G$ labels improved
-held-out Tm prediction from 6.61 deg C MAE for Tm-only training to 6.26 deg C
-MAE. The paired improvement was -0.353 deg C MAE with a 90\% confidence interval
-from -0.462 to -0.243 deg C (Fig.~\ref{fig:source_screen}). Other
-free-energy-like or design-scored labels showed weaker but informative effects,
-whereas the MD-Q structural feature did not transfer.
+We next evaluated how prediction accuracy changes as the number of training
+labels increases. Experimental Tm labels show the expected low-data scaling.
+Computational-label scaling is more source-dependent: FEP mutation-effect labels
+show a useful best point in the scaling run, whereas the MD contact-Q curve does
+not provide a robust monotonic improvement (Fig.~\ref{fig:scaling}). These
+scaling experiments motivate the final source comparison at selected settings.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline02_source_screen}
-\caption{\textbf{Fair source screen identifies source-specific transfer.}
-\textbf{(A)} Held-out Tm test MAE for Tm-only training and each auxiliary source.
-Intervals show bootstrap confidence intervals over test-set absolute errors.
-\textbf{(B)} Paired $\Delta$MAE relative to Tm-only training. Negative values
-indicate improvement. FEP is the strongest source; ThermoMPNN and
-Rosetta-scored ESM2 variants are positive; MD-Q HPHIL 400K is negative.
-\textbf{(C)} Tm-validation-selected models do not always preserve their apparent
-validation advantage on the held-out test set.
-\textbf{(D)} The effect is source-dependent rather than a generic consequence
-of adding auxiliary data.}
-\label{fig:source_screen}
+\caption{\textbf{Scaling with experimental and computational labels.}
+\textbf{(A)} Tm-only learning improves as more experimental labels are used.
+\textbf{(B)} FEP mutation-effect labels provide a useful best point as
+computational labels are added.
+\textbf{(C)} MD contact-Q labels do not show the same robust improvement.
+\textbf{(D)} Best points from the scaling runs. The final selected-setting
+comparison is shown separately in Fig.~\ref{fig:final_performance}.}
+\label{fig:scaling}
 \end{figure*}
 
-\subsection*{Rosetta-scored generated variants connect the method to design loops}
+\subsection*{FEP mutation-effect labels provide the strongest final improvement}
+
+At the selected settings, FEP mutation-effect labels improved held-out Tm
+prediction from 6.61 deg C MAE for Tm-only training to 6.26 deg C MAE. The
+paired improvement was -0.353 deg C MAE with a 90\% confidence interval from
+-0.462 to -0.243 deg C (Fig.~\ref{fig:final_performance}). Other
+free-energy-like or generated-variant labels showed weaker but informative
+effects, whereas the MD contact-Q label did not improve final Tm prediction.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_outline03_design_bridge}
+\caption{\textbf{Final held-out Tm performance by auxiliary source.}
+\textbf{(A)} Final test MAE for Tm-only training and each auxiliary source.
+Intervals show bootstrap confidence intervals over test-set absolute errors.
+\textbf{(B)} Paired $\Delta$MAE relative to Tm-only training. Negative values
+indicate improvement.
+\textbf{(C)} Development-set-selected performance does not always predict final
+held-out performance.
+\textbf{(D)} The effect depends on the category of computational label rather
+than on adding auxiliary data generically.}
+\label{fig:final_performance}
+\end{figure*}
+
+\subsection*{Physics-labeled generated variants connect the method to design loops}
 
 Rosetta labels on ESM2-proposed variants also improved Tm prediction over the
 Tm-only baseline (paired $\Delta$MAE = -0.165 deg C, 90\% CI -0.306 to
@@ -60,49 +83,29 @@ Tm-only baseline (paired $\Delta$MAE = -0.165 deg C, 90\% CI -0.306 to
 was suggestive but not resolved by the current data (paired $\Delta$MAE =
 -0.065 deg C, 90\% CI -0.195 to +0.064 deg C). We therefore interpret this
 result as evidence that physics-labeled generated variants retain a useful Tm
-transfer signal, not as proof that the current generator outperforms random
-sampling (Fig.~\ref{fig:design_bridge}).
+learning signal, not as proof that the current generator outperforms random
+sampling.
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{fig_outline03_design_bridge}
-\caption{\textbf{Physics-labeled generated variants provide a bridge toward
-model-in-the-loop design.}
-\textbf{(A)} ESM2-proposed variants can be scored by Rosetta and used as
-auxiliary labels for a Tm predictor.
-\textbf{(B)} Rosetta-scored ESM2 variants improve over Tm-only training, while
-random Rosetta variants show a weaker and marginal effect.
-\textbf{(C)} Paired comparisons support improvement of Rosetta-scored ESM2
-variants over Tm-only training, but not a definitive advantage over random
-Rosetta variants.
-\textbf{(D)} The result motivates, but does not yet implement, future active
-learning or reinforcement-learning design loops.}
-\label{fig:design_bridge}
-\end{figure*}
+\subsection*{Mutation-effect labels provide a plausible interpretation of the improvement}
 
-\subsection*{The MD-Q result defines an important boundary condition}
-
-The hydrophilic-contact Q-value from 400 K MD trajectories was an informative
-negative control. It slightly improved the selected Tm validation MAE relative
-to Tm-only training, but worsened held-out test performance by +0.117 deg C MAE
-with a 90\% confidence interval from +0.012 to +0.224 deg C
-(Fig.~\ref{fig:mdq_boundary}). This result sharpens the main claim: transfer is
-not guaranteed by adding any simulation-derived scalar, but depends on whether
-the auxiliary label carries thermodynamic information that is useful for Tm.
+The final interpretation is that Tm and mutation-effect labels provide different
+views of stability. Experimental Tm labels anchor the absolute phenotype, while
+mutation-effect labels provide local directions in sequence space. This explains
+why FEP labels can help without directly measuring Tm. The contrast with MD
+contact-Q shows the boundary of this interpretation: a structural persistence
+summary is not necessarily a useful auxiliary label for Tm generalization
+(Fig.~\ref{fig:interpretation}).
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline04_mdq_boundary}
-\caption{\textbf{Hydrophilic-contact MD-Q does not transfer under the same fair
-protocol.}
-\textbf{(A)} FEP improves Tm prediction, while MD-Q HPHIL 400K is worse than
-Tm-only on the held-out test set.
-\textbf{(B)} MD-Q has a small validation advantage but a test-set penalty,
-showing that Tm-validation selection alone is not sufficient when the auxiliary
-source is mismatched.
-\textbf{(C)} MD-Q HPHIL 400K summarizes retained native contacts involving
-hydrophilic residues in 400 K trajectories.
-\textbf{(D)} The contrast between FEP and MD-Q supports a source-specific
-relative-thermodynamic-supervision interpretation.}
-\label{fig:mdq_boundary}
+\caption{\textbf{Interpretation and boundary condition.}
+\textbf{(A)} Tm labels provide sparse absolute anchors, while mutation-effect
+labels provide local stability directions.
+\textbf{(B)} FEP improves Tm prediction, whereas MD contact-Q does not.
+\textbf{(C)} Contact-Q summarizes retained hydrophilic native contacts in high
+temperature trajectories.
+\textbf{(D)} The useful signal is not generic simulation augmentation, but
+auxiliary information relevant to Tm generalization.}
+\label{fig:interpretation}
 \end{figure*}
