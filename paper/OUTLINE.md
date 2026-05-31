@@ -31,6 +31,10 @@ Author-affiliation mapping:
 - Kentaro Sasaki: `1`
 - Yasuhiro Matsunaga: `1,2`
 
+Equal contribution:
+
+- Taihei Murakami and Kentaro Sasaki contributed equally to this work.
+
 Corresponding author:
 
 - Yasuhiro Matsunaga
@@ -246,11 +250,14 @@ Paragraph plan:
 4. Transfer this question to biomolecular design: protein engineering also has scarce experimental property labels, while simulations and physics-based calculations can generate many labels for variants.
 5. Introduce the key additional difficulty in this paper: for biomolecules, the simulated label may differ from the experimental target not only by domain gap but also by physical quantity. In this case, Tm is the target, while FEP supplies mutation free-energy labels.
 6. Present nanobody thermal stability as the concrete case: Tm is important for engineering, developability, storage, and downstream screening, but experimental Tm data are limited.
-7. Protein language models provide useful representations, and prior nanobody Tm work shows that supervised fine-tuning is important for extracting Tm-relevant representations.
-8. However, that prior work also suggests that simply increasing ESM2 size does not automatically improve nanobody Tm prediction, motivating information sources beyond model-size scaling.
-9. We use a shared-encoder multi-task transfer-learning framework and evaluate all claims on held-out experimental Tm examples.
-10. We compare mutation free-energy labels, generated-variant physics labels, and an MD-derived structural-dynamics label.
-11. We find that FEP-derived mutation free-energy labels most clearly improve Tm prediction, supporting the view that relative stability-change information complements sparse absolute Tm anchors.
+7. Acknowledge high-throughput experimental stability data: Tsuboyama et al. introduced the Nature 2023 mega-scale folding-stability dataset using cDNA-display proteolysis, with approximately 776,000 high-quality measurements for 40--72 amino-acid domains.
+8. Explain why this does not solve the present problem directly: nanobody VHH domains are longer than the small domains covered by that dataset, and direct large-scale experimental Delta G measurements are not yet available at that nanobody length scale.
+9. Cite the separate ESMtherm study by Chu et al. 2024: fine-tuning on the mega-scale dataset works well for small domains but transferred poorly to larger 177--501-residue proteins, motivating target-specific supervision for longer scaffolds.
+10. Protein language models provide useful representations, and prior nanobody Tm work shows that supervised fine-tuning is important for extracting Tm-relevant representations.
+11. However, that prior work also suggests that simply increasing ESM2 size does not automatically improve nanobody Tm prediction, motivating information sources beyond model-size scaling.
+12. We use a shared-encoder multi-task transfer-learning framework and evaluate all claims on held-out experimental Tm examples.
+13. We compare mutation free-energy labels, generated-variant physics labels, and an MD-derived structural-dynamics label.
+14. We find that FEP-derived mutation free-energy labels most clearly improve Tm prediction, supporting the view that relative stability-change information complements sparse absolute Tm anchors.
 
 Do not open the Introduction with a conceptual discussion of Tm versus ΔΔG. That interpretation belongs near the end.
 

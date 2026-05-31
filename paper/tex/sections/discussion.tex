@@ -2,6 +2,8 @@
 
 \section*{Discussion}
 
+\subsection*{Source-label transfer is selective}
+
 This study asked how simulation-derived labels should be used when the
 experimental target is scarce and the simulated quantity is related to, but not
 identical with, that target. Using nanobody Tm prediction as a case study, we
@@ -12,6 +14,8 @@ explained by using a larger ESM2 encoder. These findings support a selective
 view of Sim2Real learning for biomolecules: simulation data are useful when the
 source label encodes physical information that transfers to the experimental
 phenotype.
+
+\subsection*{Mutation free-energy labels connect relative and absolute stability}
 
 The main conceptual point is that the helpful source label did not measure Tm
 itself. FEP estimates mutation free-energy changes, whereas Tm is an
@@ -24,6 +28,8 @@ free-energy labels provide local directions in sequence space. The improvement
 from FEP therefore suggests that source labels can help even when they are
 not direct surrogates for the target, provided that they describe a physically
 relevant perturbation of the target property.
+
+\subsection*{Scaling behavior depends on the source label}
 
 This result extends the materials-informatics Sim2Real argument to a more
 heterogeneous biomolecular setting. In materials applications, transfer learning
@@ -38,6 +44,8 @@ simulation-derived data should be evaluated by target-task performance, and
 source labels must be chosen for transferable physical content rather than
 availability alone.
 
+\subsection*{Model scale is not the main bottleneck}
+
 The encoder controls sharpen this conclusion. Prior work on PLMs has shown that
 fine-tuning can be critical for downstream protein-property prediction
 \citep{Schmirler2024FineTuning}, and related nanobody Tm analyses suggest that
@@ -48,6 +56,8 @@ settings. The best model used the 8M encoder with FEP source labels. Thus,
 for this dataset, the bottleneck was not simply language-model capacity. The
 more important ingredient was additional supervision carrying information about
 sequence-dependent stability changes.
+
+\subsection*{Encoder adaptation helps but does not make every source useful}
 
 The frozen-encoder experiment further indicates how the source-label signal is
 used. FEP labels improved performance even when the encoder was fixed, showing
@@ -69,6 +79,8 @@ alter the stability landscape. This distinction matters for future database
 design. A simulation campaign optimized for target transfer should not only
 maximize the number of labels; it should choose labels whose physical meaning is
 expected to transfer to the experimental decision being made.
+
+\subsection*{Generated variants point toward design workflows}
 
 The generated-variant result points toward a possible design workflow. Rosetta
 scores assigned to ESM2-generated variants improved Tm prediction relative to
@@ -100,14 +112,14 @@ clear reporting of the simulation protocol.
 
 \subsection*{Outlook}
 
-The practical lesson is that simulation labels should be treated as design
-choices. For low-data experimental protein-property prediction, the relevant
-question is not whether simulations can produce many labels, but whether those
-labels encode information that improves the target task under a target-centered
-validation protocol. In this study, mutation free-energy labels provided that
-information for nanobody Tm prediction. This supports a broader strategy for
-biomolecular design: use experimental data to define the target phenotype, use
+For low-data experimental protein-property prediction, simulation labels should
+be treated as design choices rather than as generic data augmentation. The
+relevant question is not whether simulations can produce many labels, but
+whether those labels encode information that improves the target task under a
+target-centered validation protocol. In this study, mutation free-energy labels
+provided that information for nanobody Tm prediction. The broader strategy is
+therefore to use experimental data to define the target phenotype, use
 simulation to annotate physically meaningful perturbations around that
 phenotype, and evaluate the combined model only on held-out experimental data.
-Such a strategy offers a disciplined path from simulation-assisted prediction to
-future closed-loop protein engineering.
+This gives a disciplined path from simulation-assisted prediction toward future
+closed-loop protein engineering.
