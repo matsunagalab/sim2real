@@ -26,11 +26,13 @@ and sparse, whereas biomolecular simulations and physics-based calculations can
 generate labels for many designed or mutated sequences. The challenge is sharper
 than in many property-matched transfer settings, because the simulated quantity
 may not be the same as the experimental target. For example, a target phenotype
-may be the melting temperature (Tm) of a protein, while a tractable simulation
-may report a mutation free-energy change, a structure-derived score, or a
-trajectory summary. The central question is therefore not simply whether
-simulation data can be added to a training set, but which simulated physical
-quantities can transfer to the experimental phenotype.
+may be the melting temperature (Tm), the temperature at which a protein loses
+half of its folded population under a given assay condition. A tractable
+calculation, by contrast, may estimate how much a mutation changes stability,
+assign a structure-based stability score, or summarize a molecular-dynamics
+trajectory. The central question is therefore not simply whether simulation data
+can be added to a training set, but which simulated physical quantities can
+transfer to the experimental phenotype.
 
 \subsection*{Nanobody thermostability in the high-throughput era}
 
@@ -67,22 +69,27 @@ target-specific supervision and careful validation in nanobody Tm prediction
 \subsection*{Study design and main finding}
 
 Here we ask whether simulation-derived labels can provide that additional
-supervision when experimental Tm labels are scarce. We formulate Tm prediction
-as the target task and train source tasks from computational labels
-using a shared ESM2 sequence encoder. The source labels include
-FEP-derived mutation free energies, Rosetta and ThermoMPNN mutation-effect
-labels, Rosetta scores on generated and random variants, and an MD-derived
-contact-persistence label. To keep the comparison target-centered, all model
-settings are selected using an experimental validation set, and all final
-claims are evaluated on the same held-out experimental Tm test set with paired
-error comparisons. This design prevents high performance on a source task
-from being mistaken for improved Tm prediction.
+supervision when experimental Tm labels are scarce. We treat Tm prediction as
+the experimental target task and treat each computational label as a source
+task that can shape the learned sequence representation. The implementation
+uses ESM2, a pretrained protein language model, as the shared sequence encoder
+\citep{Lin2023Evolutionary}. The computational labels represent several kinds of
+computational information: mutation free-energy changes from alchemical
+free-energy perturbation (FEP) calculations, structure-based mutation scores
+from Rosetta, learned stability-change scores from ThermoMPNN, Rosetta scores
+on generated and random variants, and a molecular-dynamics (MD) trajectory
+summary measuring retained native contacts. To keep the comparison
+target-centered, all model settings are selected using an experimental
+validation set, and all final claims are evaluated on the same held-out
+experimental Tm test set with paired error comparisons. This design prevents
+high performance on a computational task from being mistaken for improved Tm
+prediction.
 
 The main result is that the benefit of simulation-derived supervision is highly
-source-dependent. FEP mutation free-energy labels provide the strongest
-improvement over Tm-only training, whereas the MD-derived contact-persistence
-label does not improve held-out Tm prediction under the same evaluation design.
-Rosetta-scored generated variants provide a weaker but positive signal,
+source-dependent. Mutation free-energy labels from FEP provide the strongest
+improvement over training on Tm labels alone, whereas the MD contact-persistence
+summary does not improve held-out Tm prediction under the same evaluation
+design. Rosetta-scored generated variants provide a weaker but positive signal,
 suggesting a connection to future generator--physics--predictor design loops.
 Taken together, these results extend the Sim2Real argument from materials
 informatics to a biomolecular setting in which the source and target labels

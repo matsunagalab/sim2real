@@ -15,10 +15,11 @@ Source-task losses were used for representation learning during training, but
 source-task validation errors were not used to select final checkpoints or final
 hyperparameters.
 
-\subsection*{NbBench Tm data set and split definitions}
+\subsection*{Experimental Tm data set and split definitions}
 
-Experimental Tm labels were taken from the thermo-seq task of NbBench, a
-nanobody benchmark data set with predefined splits \citep{Zhang2025NbBench}.
+Experimental Tm labels were taken from a public nanobody benchmark data set,
+NbBench, which provides a thermo-seq task with predefined splits
+\citep{Zhang2025NbBench}.
 The processed files used in this study contained 57 training sequences, 114
 validation sequences, and 396 test sequences. The terms were used as follows.
 The training split was used to fit model parameters. The validation split was
@@ -45,11 +46,13 @@ the expected direction.
 \subsection*{Computational source-label data sets}
 
 Computational labels were represented as source tasks rather than as additional
-Tm measurements. The source-label collection comprised FEP-derived mutation free
-energies, Rosetta mutation-effect scores, ThermoMPNN mutation-effect scores,
-Rosetta scores assigned to generated and random variants, and an MD-derived
-contact-persistence label. All source labels were preprocessed to [0,1]-scaled
-regression targets and were used only through their own source-task heads.
+Tm measurements. The source-label collection comprised mutation free-energy
+changes from alchemical free-energy perturbation (FEP), structure-based
+mutation-effect scores from Rosetta, learned mutation-effect scores from
+ThermoMPNN, Rosetta scores assigned to generated and random variants, and a
+molecular-dynamics (MD) contact-persistence label. All source labels were
+preprocessed to [0,1]-scaled regression targets and were used only through
+their own source-task heads.
 
 Mutation-effect sources were organized as two template-specific tables derived
 from the 1MEL and 4IDL nanobody structures. FEP, Rosetta, and ThermoMPNN each

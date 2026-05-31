@@ -81,6 +81,37 @@ The main result is that FEP-derived mutation free-energy labels provide the clea
 
 The relation between Tm and mutation free energy is the final interpretation, not the opening premise. Sparse experimental Tm labels anchor the absolute stability scale, while mutation free-energy labels provide local stability-change information over sequence perturbations.
 
+## Reader Entry And Terminology
+
+The manuscript must be readable before the reader knows the local data names or
+method abbreviations. The abstract and opening Results paragraphs should be
+self-contained.
+
+Reader-facing order:
+
+1. Start with the experimental problem: nanobody thermal stability is important,
+   Tm is the experimental readout, and experimental labels are scarce.
+2. Explain the modeling problem: simulations and structure-based calculations
+   can produce related labels, but those labels are not Tm measurements.
+3. Introduce transfer learning as the mechanism for using those related labels.
+4. Only then introduce specific tools or data names, with definitions at first
+   use.
+
+Terminology rules:
+
+- Do not open a section with unexplained names such as NbBench, FEP, Rosetta,
+  ThermoMPNN, ESM2, or MD.
+- Prefer the physical meaning first: "public nanobody Tm benchmark" before
+  "NbBench"; "mutation free-energy labels from alchemical free-energy
+  perturbation (FEP)" before "FEP"; "structure-based scores" before
+  "Rosetta"; "learned stability-change scores" before "ThermoMPNN";
+  "pretrained protein language model" before "ESM2"; "molecular-dynamics
+  trajectory summary" before "MD contact persistence".
+- In figures, use reader-facing labels such as "Tm labels only", "mutation
+  free energy", "structure score", "learned stability score", and "MD contact
+  persistence"; keep tool names as short parenthetical clarifications only when
+  necessary.
+
 ## CSBJ Fit
 
 This manuscript fits CSBJ because it combines:
