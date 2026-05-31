@@ -239,17 +239,17 @@
   {0em}
   {#1}
   []  
-\titleformat{\subsection}[runin]
+\titleformat{\subsection}[hang]
   {\sffamily\bfseries}
   {\thesubsection.}
   {0.5em}
-  {#1. }
+  {#1}
   []
-\titleformat{\subsubsection}[runin]
+\titleformat{\subsubsection}[hang]
   {\sffamily\small\bfseries\itshape}
   {\thesubsubsection.}
   {0.5em}
-  {#1. }
+  {#1}
   []    
 \titleformat{\paragraph}[runin]
   {\sffamily\small\bfseries}
@@ -426,15 +426,15 @@
 \pagestyle{fancy}		  % Enables the custom headers/footers
 
 \def\aBioRXiv{{\footnotesize
-    \footerfont \@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}CSBJ draft\hspace{7pt}|\hspace{7pt}\today\hspace{7pt}|\hspace{7pt}\thepage\textendash\pageref{LastPage}
+    \footerfont \@leadauthor\ifnum \value{authors} > 1\hspace{2pt}\textit{et al.}\fi\hspace{7pt}|\hspace{7pt}Manuscript\hspace{7pt}|\hspace{7pt}\today\hspace{7pt}|\hspace{7pt}\thepage\textendash\pageref{LastPage}
   }}
 
 \def\bBioRXiv{{\footnotesize
-    \footerfont \thepage\hspace{7pt}|\hspace{7pt}CSBJ draft
+    \footerfont \thepage\hspace{7pt}|\hspace{7pt}Manuscript
   }}
   
 \def\cBioRXiv{{\footnotesize
-    \footerfont CSBJ draft\hspace{7pt}|\hspace{7pt}\thepage
+    \footerfont Manuscript\hspace{7pt}|\hspace{7pt}\thepage
   }}
    
 \def\dBioRXiv{{\footnotesize

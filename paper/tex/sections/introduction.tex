@@ -2,6 +2,8 @@
 
 \section*{Introduction}
 
+\subsection*{Simulation data for low-data experimental prediction}
+
 Machine learning has made it possible to screen large molecular and materials
 spaces before costly experimental testing, but its usefulness still depends on
 the availability of reliable property labels. In materials informatics, this
@@ -30,6 +32,8 @@ trajectory summary. The central question is therefore not simply whether
 simulation data can be added to a training set, but which simulated physical
 quantities can transfer to the experimental phenotype.
 
+\subsection*{Nanobody thermostability in the high-throughput era}
+
 We examine this question using nanobody thermostability as a concrete case.
 Nanobodies, or single-domain VHH antibodies, are attractive engineering
 scaffolds because of their small size, modularity, and binding properties
@@ -43,9 +47,24 @@ useful protein representations from large sequence corpora
 \citep{Rives2021Biological,Lin2023Evolutionary}, and recent methods have used
 deep sequence representations to predict protein or nanobody melting
 temperatures \citep{Blaabjerg2023Rapid,Li2023DeepTM,Alvarez2024TEMPRO}.
-Nevertheless, published benchmarks and related nanobody Tm studies indicate
-that target-specific supervision and careful validation remain essential
+High-throughput stability measurements are also changing the data landscape.
+Tsuboyama et al. introduced a cDNA-display proteolysis assay and used it to
+produce a mega-scale folding-stability dataset with approximately 776,000
+high-quality measurements from natural and designed protein domains
+\citep{Tsuboyama2023MegaScale}. That advance shows that experimental $\Delta G$
+can now be measured at unprecedented scale for suitable small domains. However,
+the curated measurements span 40--72 amino-acid domains, whereas nanobody VHH
+domains are typically much longer, and comparable high-throughput $\Delta G$
+measurements are not yet available for full-length nanobody VHH domains. A
+model fine-tuned on the mega-scale dataset also showed limited transfer to
+larger protein scaffolds: although it performed well on small protein domains,
+benchmarks on 177--501-residue proteins were substantially weaker than
+structure-based methods \citep{Chu2024EsmTherm}.
+Thus, large-scale $\Delta G$ data are powerful but do not remove the need for
+target-specific supervision and careful validation in nanobody Tm prediction
 \citep{ValdesTresanco2023NbThermo,Zhang2025NbBench,Schmirler2024FineTuning}.
+
+\subsection*{Study design and main finding}
 
 Here we ask whether simulation-derived labels can provide that additional
 supervision when experimental Tm labels are scarce. We formulate Tm prediction
