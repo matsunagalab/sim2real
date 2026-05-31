@@ -73,7 +73,7 @@ SOURCE_LABEL = {
     "thermoMPNN": "ThermoMPNN",
     "rosetta_random": "Rosetta random",
     "rosetta_esm": "Rosetta ESM2",
-    MD_CONTACT_Q_SOURCE: "MD contact-Q",
+    MD_CONTACT_Q_SOURCE: "MD contact persistence",
 }
 
 SOURCE_COLOR = {
@@ -99,10 +99,10 @@ SCALING_CURVES = {
         "x_label": "FEP labels",
         "sample_factor": 1.0,
     },
-    "MD contact-Q labels": {
+    "MD contact-persistence labels": {
         "path": RESULTS / "hot_q_400k_tmselect" / "scaling.json",
         "color": COL["mdq"],
-        "x_label": "MD contact-Q labels",
+        "x_label": "MD contact-persistence labels",
         "sample_factor": 1.0,
     },
 }
@@ -361,7 +361,7 @@ def fig01_concept_protocol(rows: pd.DataFrame) -> None:
     box(ax, (0.07, 0.23), (0.27, 0.16), "source task\ncomputed label", fc=COL["soft_green"], ec=COL["fep"], weight="bold")
     box(ax, (0.43, 0.43), (0.22, 0.18), "shared\nsequence\nrepresentation", fc=COL["soft_blue"], ec=COL["design"], weight="bold", fontsize=7.8)
     box(ax, (0.74, 0.64), (0.20, 0.14), "Tm head", fc="white", ec=COL["baseline"], weight="bold")
-    box(ax, (0.74, 0.25), (0.20, 0.14), "auxiliary\nhead", fc="white", ec=COL["fep"], weight="bold")
+    box(ax, (0.74, 0.25), (0.20, 0.14), "source\nhead", fc="white", ec=COL["fep"], weight="bold")
     arrow(ax, (0.34, 0.72), (0.43, 0.54), color=COL["baseline"])
     arrow(ax, (0.34, 0.31), (0.43, 0.50), color=COL["fep"])
     arrow(ax, (0.65, 0.54), (0.74, 0.71), color=COL["baseline"])
@@ -376,11 +376,11 @@ def fig01_concept_protocol(rows: pd.DataFrame) -> None:
     box(ax, (0.06, 0.40), (0.20, 0.20), "sequence", fc=COL["soft_gray"])
     box(ax, (0.36, 0.39), (0.22, 0.22), "shared\nencoder", fc=COL["soft_blue"], weight="bold")
     box(ax, (0.70, 0.63), (0.22, 0.16), "Tm\nprediction", fc=COL["soft_gray"])
-    box(ax, (0.70, 0.22), (0.22, 0.16), "auxiliary\nprediction", fc=COL["soft_green"])
+    box(ax, (0.70, 0.22), (0.22, 0.16), "source-label\nprediction", fc=COL["soft_green"])
     arrow(ax, (0.26, 0.50), (0.36, 0.50))
     arrow(ax, (0.58, 0.50), (0.70, 0.71))
     arrow(ax, (0.58, 0.50), (0.70, 0.30))
-    box(ax, (0.19, 0.08), (0.64, 0.10), "model selection uses the experimental development set", fc="white", ec=COL["fep"], fontsize=7.4)
+    box(ax, (0.19, 0.08), (0.64, 0.10), "model selection uses the experimental validation set", fc="white", ec=COL["fep"], fontsize=7.4)
     panel_label(ax, "B")
 
     ax = axes[1, 0]
@@ -388,7 +388,7 @@ def fig01_concept_protocol(rows: pd.DataFrame) -> None:
     categories = [
         ("free-energy-like", ["FEP", "Rosetta", "ThermoMPNN"], COL["soft_green"], COL["fep"]),
         ("design-scored", ["Rosetta ESM2", "Rosetta random"], COL["soft_blue"], COL["design"]),
-        ("structural dynamics", ["MD contact-Q"], COL["soft_red"], COL["mdq"]),
+        ("structural dynamics", ["MD contact persistence"], COL["soft_red"], COL["mdq"]),
     ]
     y0 = 0.68
     for i, (title, items, fc, ec) in enumerate(categories):
@@ -438,7 +438,7 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     ax.plot(fep_scale["x"], fep_scale["mae"], marker="o", color=COL["fep"], label="FEP")
     best_idx = int(fep_scale["mae"].argmin())
     ax.scatter([fep_scale.loc[best_idx, "x"]], [fep_scale.loc[best_idx, "mae"]], s=54, color=COL["fep"], edgecolor="white", zorder=5)
-    ax.text(0.96, 0.10, "best at full\nlabel set", transform=ax.transAxes, ha="right", va="bottom", fontsize=7.2, color=COL["fep"])
+    ax.text(0.96, 0.10, "best at largest\nlabel setting", transform=ax.transAxes, ha="right", va="bottom", fontsize=7.2, color=COL["fep"])
     ax.set_xscale("log")
     ax.set_xticks([10, 40, 80, 160, 320])
     ax.set_xticklabels(["10", "40", "80", "160", "320"])
@@ -450,16 +450,16 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     panel_label(ax, "B")
 
     ax = axes[1, 0]
-    md_scale = load_scaling(SCALING_CURVES["MD contact-Q labels"]["path"])
+    md_scale = load_scaling(SCALING_CURVES["MD contact-persistence labels"]["path"])
     ax.axhline(baseline, color=COL["baseline"], linestyle="--", linewidth=1.1, label="Tm-only final")
     ax.fill_between(md_scale["x"], md_scale["ci_lo"], md_scale["ci_hi"], color=COL["mdq"], alpha=0.15, lw=0)
-    ax.plot(md_scale["x"], md_scale["mae"], marker="o", color=COL["mdq"], label="MD contact-Q")
+    ax.plot(md_scale["x"], md_scale["mae"], marker="o", color=COL["mdq"], label="MD contact persistence")
     best_idx = int(md_scale["mae"].argmin())
     ax.scatter([md_scale.loc[best_idx, "x"]], [md_scale.loc[best_idx, "mae"]], s=54, color=COL["mdq"], edgecolor="white", zorder=5)
     ax.set_xscale("log")
     ax.set_xticks([10, 40, 80, 160, 320, 640])
     ax.set_xticklabels(["10", "40", "80", "160", "320", "640"])
-    ax.set_xlabel("MD contact-Q labels used")
+    ax.set_xlabel("MD contact-persistence labels used")
     ax.set_ylabel("held-out Tm test MAE (deg C)")
     ax.set_ylim(6.55, 7.05)
     ax.legend(frameon=False, loc="upper right")
@@ -467,7 +467,7 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     panel_label(ax, "C")
 
     ax = axes[1, 1]
-    labels = ["Tm-only\n57", "FEP\nbest sweep", "MD contact-Q\nbest sweep"]
+    labels = ["Tm-only\n57", "FEP\nbest sweep", "MD contact\nbest sweep"]
     vals = [float(tm_scale.iloc[-1]["mae"]), float(fep_scale["mae"].min()), float(md_scale["mae"].min())]
     colors = [COL["baseline"], COL["fep"], COL["mdq"]]
     xpos = np.arange(len(vals))
@@ -578,7 +578,7 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
         dx = 0.015
         dy = 0.015 if row["source"] not in ["rosetta", "rosetta_random"] else -0.045
         ax.text(row["val_mae"] + dx, row["test_mae"] + dy, SOURCE_LABEL[str(row["source"])], fontsize=7.0)
-    ax.set_xlabel("selected development-set MAE (deg C)")
+    ax.set_xlabel("selected validation-set MAE (deg C)")
     ax.set_ylabel("held-out Tm test MAE (deg C)")
     ax.set_xlim(5.72, 6.28)
     ax.set_ylim(6.18, 6.88)
@@ -604,14 +604,14 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
             linewidth=0.4,
             hatch=hatch,
             alpha=alpha,
-            label=encoder,
+            label={"frozen": "frozen encoder", "hot": "updated encoder"}[encoder],
             zorder=3,
         )
         ax.errorbar(xpos + offset, vals, yerr=[err_lo, err_hi], fmt="none", ecolor=COL["black"], elinewidth=0.7, capsize=2, zorder=4)
         for bar, value in zip(bars, vals):
             ax.text(bar.get_x() + bar.get_width() / 2, value + 0.035, f"{value:.2f}", ha="center", va="bottom", fontsize=6.4, rotation=90)
     ax.set_xticks(xpos)
-    ax.set_xticklabels(["Tm-only", "FEP", "Rosetta", "MD\ncontact-Q"], fontsize=7.1)
+    ax.set_xticklabels(["Tm-only", "FEP", "Rosetta", "MD\ncontact"], fontsize=7.1)
     ax.set_ylabel("held-out Tm test MAE (deg C)")
     ax.set_ylim(6.05, 7.62)
     ax.legend(frameon=False, loc="upper right")
@@ -676,7 +676,7 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
 
     ax = axes[0, 1]
     keys = ["FEP_minus_Tm_only", f"{MD_CONTACT_Q_SOURCE}_minus_Tm_only"]
-    labs = ["FEP ddG", "MD contact-Q"]
+    labs = ["FEP ddG", "MD contact persistence"]
     cols = [COL["fep"], COL["mdq"]]
     y = np.arange(2)
     for i, (key, col) in enumerate(zip(keys, cols)):
@@ -713,13 +713,13 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
     ax.plot(coords[:, 0], coords[:, 1], color=COL["gray"], linewidth=1.1, alpha=0.55)
     for i, (xx, yy) in enumerate(coords):
         ax.add_patch(Circle((xx, yy), 0.038, facecolor=COL["soft_red"] if i in hyd else "white", edgecolor=COL["mdq"] if i in hyd else COL["gray"], linewidth=1.1))
-    box(ax, (0.12, 0.13), (0.76, 0.13), "Q = retained native hydrophilic contacts\n400K trajectory, final 30 ns average", fc="white", ec=COL["mdq"], fontsize=7.4)
+    box(ax, (0.12, 0.13), (0.76, 0.13), "contact persistence = retained native contacts\n400 K trajectory, final 30 ns average", fc="white", ec=COL["mdq"], fontsize=7.4)
     panel_label(ax, "C")
 
     ax = axes[1, 1]
     hide_axes(ax)
     box(ax, (0.06, 0.64), (0.88, 0.16), "FEP labels encode mutation effects\nthat are close to stability perturbations.", fc=COL["soft_green"], ec=COL["fep"], fontsize=8.0, weight="bold")
-    box(ax, (0.06, 0.39), (0.88, 0.16), "MD contact-Q summarizes structural persistence;\nit did not improve final Tm prediction here.", fc=COL["soft_red"], ec=COL["mdq"], fontsize=8.0)
+    box(ax, (0.06, 0.39), (0.88, 0.16), "MD contact persistence summarizes structural dynamics;\nit did not improve final Tm prediction here.", fc=COL["soft_red"], ec=COL["mdq"], fontsize=8.0)
     box(ax, (0.06, 0.14), (0.88, 0.16), "Take-home: useful simulation labels must carry\ninformation relevant to Tm generalization.", fc="white", ec=COL["black"], fontsize=8.0)
     panel_label(ax, "D")
 

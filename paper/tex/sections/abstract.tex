@@ -2,29 +2,27 @@
 
 %TC:break Abstract
 \begin{abstract}
-Molecular simulation can generate protein-property labels at a scale that is
-difficult to achieve experimentally, but those labels often describe physical
-quantities that are related to, rather than identical with, the experimental
-target. We study this problem in low-data nanobody thermal-stability prediction:
-can simulation-derived labels improve melting-temperature (Tm) prediction when
-the most informative source labels are mutation free energies rather than Tm
-measurements? We developed a target-centered auxiliary-learning framework in
-which experimental Tm prediction is the target task and computational labels are
-source tasks sharing the same ESM2 sequence encoder. All model selection was
-performed using an experimental development set, and all claims were evaluated
-on the same held-out experimental Tm test set. Free-energy perturbation (FEP)
-mutation-effect labels provided the clearest improvement, reducing held-out Tm
-mean absolute error from 6.61 to 6.26$^\circ$C relative to Tm-only training
-(paired improvement, 0.35$^\circ$C; 90\% confidence interval, 0.24--0.46$^\circ$C).
-The effect was source-dependent: Rosetta-scored generated variants produced a
-weaker but positive signal, whereas an MD-derived contact-persistence label did
-not improve test performance. Encoder-size controls showed that increasing ESM2
-from 8M to 35M or 650M parameters did not explain the gain. These results
-support a selective view of simulation-to-experiment transfer: useful auxiliary
-labels are not merely additional data, but encode physical information that
-transfers to the experimental phenotype. In nanobody Tm prediction, mutation
-free-energy labels appear to complement sparse absolute Tm anchors by providing
-local stability-change information over sequence perturbations.
+Experimental thermal-stability measurements for nanobodies are scarce, whereas
+simulation and physics-based calculations can produce many labels for related
+sequence perturbations. The practical question is how to use those labels when
+they do not measure the experimental endpoint itself. Here we study this problem
+for nanobody melting-temperature (Tm) prediction using NbBench as the
+experimental target dataset. We trained multi-task transfer models in which an
+ESM2 sequence encoder is shared by the Tm target task and computational source
+tasks, but all checkpoint selection, model selection, and final evaluation remain
+anchored to experimental Tm data. The source tasks included FEP-derived mutation
+free energies, Rosetta and ThermoMPNN mutation-effect scores, Rosetta scores on
+generated and random variants, and an MD-derived contact-persistence label. FEP
+labels gave the clearest improvement: held-out Tm mean absolute error decreased
+from 6.61 to 6.26$^\circ$C relative to Tm-only training, with a paired
+improvement of 0.35$^\circ$C (90\% confidence interval, 0.24--0.46$^\circ$C).
+The effect was not explained by simply using a larger ESM2 encoder, and it was
+not reproduced by the MD-derived contact-persistence label. Rosetta-scored
+generated variants gave a weaker but positive signal. These results show that
+simulation labels are useful for Tm prediction only when their physical content
+transfers to the experimental phenotype. In this case, mutation free energies
+appear to complement sparse absolute Tm measurements by providing local
+stability-change information around sequence variants.
 \end{abstract}
 %TC:break main
 
