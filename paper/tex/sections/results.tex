@@ -29,25 +29,30 @@ statistics.}
 \label{fig:learning_framework}
 \end{figure*}
 
-\subsection*{Prediction accuracy changes with the number of computational labels}
+\subsection*{FEP labels scale differently from structural MD labels}
 
 We next evaluated how prediction accuracy changes as the number of training
 labels increases. Experimental Tm labels show the expected low-data scaling.
-Computational-label scaling is more source-dependent: FEP mutation-effect labels
-show a useful best point in the scaling run, whereas the MD contact-Q curve does
-not provide a robust monotonic improvement (Fig.~\ref{fig:scaling}). These
-scaling experiments motivate the final source comparison at selected settings.
+FEP mutation-effect labels also improved the best held-out Tm MAE as the
+auxiliary label set increased, with the full FEP label set giving the best
+result. The curve was not perfectly smooth, but its best point separated from
+the Tm-only and MD contact-Q curves. In contrast, the MD contact-Q curve did
+not provide a robust improvement over Tm-only training (Fig.~\ref{fig:scaling}).
+Thus, the gain is not explained by adding more computational labels generically;
+it depends on the physical content of the auxiliary label and on allowing the
+sequence representation to adapt.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline02_source_screen}
 \caption{\textbf{Scaling with experimental and computational labels.}
 \textbf{(A)} Tm-only learning improves as more experimental labels are used.
-\textbf{(B)} FEP mutation-effect labels provide a useful best point as
-computational labels are added.
-\textbf{(C)} MD contact-Q labels do not show the same robust improvement.
-\textbf{(D)} Best points from the scaling runs. The final selected-setting
-comparison is shown separately in Fig.~\ref{fig:final_performance}.}
+\textbf{(B)} FEP mutation-effect labels give their best held-out Tm error at
+the full label set, although the curve is not perfectly smooth.
+\textbf{(C)} MD contact-Q labels likewise do not show a robust improvement over
+Tm-only training.
+\textbf{(D)} Best points from the label-count sweeps separate FEP from the
+Tm-only and MD contact-Q references.}
 \label{fig:scaling}
 \end{figure*}
 
@@ -58,7 +63,14 @@ prediction from 6.61 deg C MAE for Tm-only training to 6.26 deg C MAE. The
 paired improvement was -0.353 deg C MAE with a 90\% confidence interval from
 -0.462 to -0.243 deg C (Fig.~\ref{fig:final_performance}). Other
 free-energy-like or generated-variant labels showed weaker but informative
-effects, whereas the MD contact-Q label did not improve final Tm prediction.
+effects, whereas the MD contact-Q label did not improve final Tm prediction
+when the encoder was updated. Repeating the core comparison with a frozen
+encoder reduced overall accuracy and attenuated the auxiliary-label gains:
+FEP still improved over frozen Tm-only training, but the best frozen FEP model
+remained substantially worse than the updated-encoder FEP model. Increasing
+the ESM2 encoder from 8M to 35M or 650M parameters did not improve this
+small-Tm-data setting. With FEP labels, the 35M and 650M encoders reached
+6.50 and 6.65 deg C MAE, respectively, both worse than the 8M FEP model.
 
 \begin{figure*}[t]
 \centering
@@ -68,10 +80,15 @@ effects, whereas the MD contact-Q label did not improve final Tm prediction.
 Intervals show bootstrap confidence intervals over test-set absolute errors.
 \textbf{(B)} Paired $\Delta$MAE relative to Tm-only training. Negative values
 indicate improvement.
-\textbf{(C)} Development-set-selected performance does not always predict final
+\textbf{(C)} ESM2 size controls show that larger encoders do not improve the
+selected Tm-only or FEP settings.
+\textbf{(D)} Development-set-selected performance does not always predict final
 held-out performance.
-\textbf{(D)} The effect depends on the category of computational label rather
-than on adding auxiliary data generically.}
+\textbf{(E)} Core comparisons with frozen and updated encoders show that FEP
+helps in both regimes, with the strongest absolute performance obtained when
+the sequence representation is updated.
+\textbf{(F)} Paired FEP gains remain negative across ESM2 sizes, but the best
+absolute error is obtained with the 8M encoder.}
 \label{fig:final_performance}
 \end{figure*}
 

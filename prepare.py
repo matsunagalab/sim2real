@@ -398,6 +398,12 @@ def main():
     parser.add_argument("--fixed-n-md", type=int, default=None,
                         help="Use this many MD samples per MD task while scaling another axis.")
     parser.add_argument("--n-runs", type=int, default=3, help="Number of runs (model seeds)")
+    parser.add_argument("--run-ids", type=str, default=None,
+                        help="Comma-separated run IDs to train. Defaults to 1..n-runs.")
+    parser.add_argument("--skip-eval", action="store_true",
+                        help="Train requested run IDs but skip final ensemble evaluation.")
+    parser.add_argument("--eval-only", action="store_true",
+                        help="Skip training and only evaluate existing run directories.")
     parser.add_argument("--result-dir", type=str, default=None)
     parser.add_argument("--train-mode", choices=["mtl", "single"], default="mtl",
                         help="mtl: task-aware MultiTaskModel loss; single: Tm-only loss path "
@@ -502,6 +508,13 @@ def main():
     print(f"Train mode: {args.train_mode} | checkpoint selection: {args.selection_scope}",
           flush=True)
     print(f"Scaling ({scaling_name}) points: {scaling_list}, Runs per point: {args.n_runs}", flush=True)
+    if args.run_ids:
+        train_run_ids = [int(x) for x in args.run_ids.split(",") if x.strip()]
+    else:
+        train_run_ids = list(range(1, args.n_runs + 1))
+    if args.eval_only:
+        train_run_ids = []
+    print(f"Train run IDs: {train_run_ids if train_run_ids else 'none'}", flush=True)
 
     from train import train as train_fn
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
@@ -537,8 +550,10 @@ def main():
         md_aux_src = args.md_aux_source if args.md_aux_source != "none" else None
         ddg_src = args.ddg_source if args.ddg_source != "none" else None
 
-        # Train n_runs models (different init seeds, same Tm data, different aux samples)
-        for run in range(1, args.n_runs + 1):
+        # Train selected models (different init seeds, same Tm data, different aux samples).
+        for run in train_run_ids:
+            if run < 1 or run > args.n_runs:
+                raise ValueError(f"run id {run} is outside 1..n-runs ({args.n_runs})")
             set_seed(run)
             print(f"\n  [Train] seed={run}, {scaling_name}={n_val}", flush=True)
 
@@ -570,6 +585,10 @@ def main():
             train_fn(train_ds, trainer_eval_ds, device, run, point_dir,
                      multi_task=(args.train_mode == "mtl"))
 
+        if args.skip_eval:
+            print(f"\n  [Eval] skipped for {scaling_name}={n_val}", flush=True)
+            continue
+
         # Evaluate (ensemble of all runs on single test set)
         print(f"\n  [Eval:{args.final_eval_split}] {scaling_name}={n_val}", flush=True)
         metrics, residuals = evaluate_runs(point_dir, args.n_runs, device, split=args.final_eval_split)
@@ -581,6 +600,11 @@ def main():
         ci_bounds.append((float(lo), float(hi)))
         all_residuals[n_val] = residuals
         print(f"    MAE: {mean_mae:.4f}  90% CI: [{lo:.4f}, {hi:.4f}]  width={ci_w:.4f}", flush=True)
+
+    if args.skip_eval:
+        elapsed = time.time() - total_start
+        print(f"\nTraining shards completed in {elapsed:.0f}s; final evaluation skipped.")
+        return
 
     # Scaling law fit
     print(f"\n{'='*60}", flush=True)

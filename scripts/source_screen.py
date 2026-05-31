@@ -80,14 +80,16 @@ def build_hpo_jobs(
     ddg_n: int,
     md_n: int,
     n_runs: int,
+    common: dict[str, str],
+    exp_prefix: str = "",
 ) -> list[dict]:
     jobs: list[dict] = []
 
     for arch in tm_archs:
         for label, hp in BASE_CONFIGS:
-            exp = f"sourcehpo_tm_{arch}_{label}"
+            exp = f"{exp_prefix}sourcehpo_tm_{arch}_{label}"
             options = {
-                **COMMON,
+                **common,
                 **hp,
                 "n-runs": n_runs,
                 "exp-name": exp,
@@ -111,9 +113,9 @@ def build_hpo_jobs(
 
     for source in ddg_sources:
         for label, hp in DDG_CONFIGS:
-            exp = f"sourcehpo_ddg_{source_slug(source)}_{label}"
+            exp = f"{exp_prefix}sourcehpo_ddg_{source_slug(source)}_{label}"
             options = {
-                **COMMON,
+                **common,
                 **hp,
                 "n-runs": n_runs,
                 "exp-name": exp,
@@ -138,9 +140,9 @@ def build_hpo_jobs(
 
     for source in md_sources:
         for label, hp in MD_CONFIGS:
-            exp = f"sourcehpo_md_{source_slug(source)}_{label}"
+            exp = f"{exp_prefix}sourcehpo_md_{source_slug(source)}_{label}"
             options = {
-                **COMMON,
+                **common,
                 **hp,
                 "n-runs": n_runs,
                 "exp-name": exp,
@@ -272,7 +274,7 @@ def paired_delta(abs_a: np.ndarray, abs_b: np.ndarray, seed: int = 42) -> dict:
     }
 
 
-def write_final_summary(results: list[dict]) -> Path:
+def write_final_summary(results: list[dict], filename: str = "final_source_screen_summary.json") -> Path:
     rows = [r for r in results if "test_mae" in r]
     rows = sorted(rows, key=lambda r: source_order(r["source"]))
     by_source = {r["source"]: r for r in rows}
@@ -309,7 +311,7 @@ def write_final_summary(results: list[dict]) -> Path:
         "best": min(rows, key=lambda r: r["test_mae"]) if rows else None,
         "paired_comparisons": comparisons,
     }
-    path = RESULT_ROOT / "final_source_screen_summary.json"
+    path = RESULT_ROOT / filename
     path.write_text(json.dumps(out, indent=2, default=str))
     return path
 
@@ -357,11 +359,19 @@ def main() -> int:
     parser.add_argument("--n-runs", type=int, default=3)
     parser.add_argument("--final-runs", type=int, default=10)
     parser.add_argument("--hpo-summary", default=str(RESULT_ROOT / "hpo_summary.json"))
+    parser.add_argument("--encoder-mode", choices=["frozen", "lora", "hot"], default=COMMON["encoder-mode"])
+    parser.add_argument("--base-model", default=None)
+    parser.add_argument("--exp-prefix", default="")
+    parser.add_argument("--summary-name", default=None)
+    parser.add_argument("--final-summary-name", default="final_source_screen_summary.json")
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--collect-only", action="store_true")
     args = parser.parse_args()
 
     gpus = parse_csv(args.gpus)
+    common = {**COMMON, "encoder-mode": args.encoder_mode}
+    if args.base_model:
+        common["base-model"] = args.base_model
     if args.mode == "hpo":
         jobs = build_hpo_jobs(
             ddg_sources=parse_csv(args.ddg_sources),
@@ -370,13 +380,15 @@ def main() -> int:
             ddg_n=args.ddg_n,
             md_n=args.md_n,
             n_runs=args.n_runs,
+            common=common,
+            exp_prefix=args.exp_prefix,
         )
         metric = "val_mae"
-        summary_name = "hpo_summary.json"
+        summary_name = args.summary_name or "hpo_summary.json"
     else:
         jobs = build_final_jobs(Path(args.hpo_summary), n_runs=args.final_runs)
         metric = "test_mae"
-        summary_name = "final_jobs_summary.json"
+        summary_name = args.summary_name or "final_jobs_summary.json"
 
     if args.collect_only:
         results = [collect_job_result(job) for job in jobs]
@@ -386,7 +398,7 @@ def main() -> int:
     summary_path = write_summary(results, summary_name)
     print_best(results, metric)
     if args.mode == "final":
-        final_path = write_final_summary(results)
+        final_path = write_final_summary(results, args.final_summary_name)
         print(f"Final source-screen summary: {final_path}")
     print(f"Summary: {summary_path}")
     return 0 if all(row.get("rc") == 0 for row in results) and all(metric in row for row in results) else 1
