@@ -485,7 +485,7 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
 
 
 def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
-    fig, axes = plt.subplots(2, 3, figsize=(7.4, 6.7), constrained_layout=True)
+    fig, axes = plt.subplots(3, 2, figsize=(7.4, 7.9), constrained_layout=True)
 
     ax = axes[0, 0]
     ordered = rows.set_index("source").loc[SOURCE_ORDER].reset_index()
@@ -532,7 +532,7 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
     polish(ax, "x")
     panel_label(ax, "B")
 
-    ax = axes[0, 2]
+    ax = axes[1, 0]
     size_df = model_size_rows(rows)
     sizes = ["8M", "35M", "650M"]
     size_xpos = np.arange(len(sizes))
@@ -564,7 +564,7 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
     polish(ax, "y")
     panel_label(ax, "C")
 
-    ax = axes[1, 0]
+    ax = axes[1, 1]
     for _, row in ordered.iterrows():
         ax.scatter(
             row["val_mae"],
@@ -585,7 +585,7 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
     polish(ax, "both")
     panel_label(ax, "D")
 
-    ax = axes[1, 1]
+    ax = axes[2, 0]
     core = encoder_core_rows()
     core_sources = ["Tm_only", "FEP", "rosetta", MD_CONTACT_Q_SOURCE]
     xpos = np.arange(len(core_sources))
@@ -618,7 +618,7 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
     polish(ax, "y")
     panel_label(ax, "E")
 
-    ax = axes[1, 2]
+    ax = axes[2, 1]
     delta_records = []
     for size in sizes:
         subset = size_df[size_df["size"] == size].set_index("condition")
