@@ -2,35 +2,26 @@
 
 %TC:break Abstract
 \begin{abstract}
-Nanobodies are single-domain antibody fragments whose practical development
-often depends on thermal stability. A common experimental readout is the melting
-temperature (Tm), the temperature at which a protein loses half of its folded
-population under a given assay condition. Experimental Tm measurements are
-scarce for nanobodies, whereas molecular simulations and structure-based
-calculations can produce many related labels for mutated or designed sequences.
-The practical problem is that these computational labels are usually not Tm
-measurements. We therefore asked how such labels should be used for
-experimental Tm prediction when they measure related but different physical
-quantities. Using a public nanobody Tm benchmark, we trained transfer-learning
-models in which a pretrained protein sequence model learned the experimental Tm
-task together with one computational prediction task at a time. To keep the
-comparison experimental, checkpoint selection, model selection, and final
-evaluation were all based only on experimental Tm validation or test examples.
-We compared mutation free-energy changes from alchemical free-energy
-perturbation (FEP) calculations, structure-based mutation scores, learned
-stability-change scores, physics scores on generated and random sequence
-variants, and a molecular-dynamics trajectory summary that measures retained
-native contacts. The FEP mutation free-energy labels gave the clearest
-improvement: held-out Tm mean absolute error decreased from 6.61 to
-6.26$^\circ$C relative to training on Tm labels alone, with a paired improvement
-of 0.35$^\circ$C (90\% confidence interval, 0.24--0.46$^\circ$C). The
-improvement was not explained by using a larger protein sequence model and was
-not reproduced by the contact-persistence trajectory summary. Structure-scored
-generated variants gave a weaker but positive signal. These results show that
-simulation data can improve low-data Tm prediction, but only when the computed
-label carries physical information that transfers to the experimental endpoint.
-In this case, sparse absolute Tm measurements and relative mutation
-free-energy changes provide complementary views of nanobody stability.
+Nanobody development often depends on thermal stability, but experimental
+melting-temperature (Tm) measurements remain scarce. Simulations and
+structure-based calculations can label many mutated or designed sequences, yet
+these labels usually measure related quantities rather than Tm itself. We
+tested whether such computational labels can improve low-data nanobody Tm
+prediction under strictly experimental model selection. Using a public nanobody
+Tm benchmark, we trained transfer-learning models that combined Tm prediction
+with one computational prediction task at a time; checkpoints, model choices,
+and final evaluation used only experimental Tm validation or test examples. We
+compared mutation free energies from alchemical free-energy perturbation (FEP),
+structure-based mutation scores, learned stability-change scores, scores on
+generated or random variants, and a molecular-dynamics contact-persistence
+summary. FEP gave the clearest benefit: held-out Tm mean absolute error
+decreased from 6.61 to 6.26$^\circ$C relative to Tm-only training, with a paired
+improvement of 0.35$^\circ$C (90\% confidence interval, 0.24--0.46$^\circ$C).
+The gain was not reproduced by larger protein sequence models or by the
+contact-persistence summary, whereas generated-variant scores gave a weaker
+positive signal. Thus, computational labels can improve nanobody Tm prediction
+when their physical meaning transfers to the experimental endpoint; mutation
+free energies complement sparse absolute Tm measurements.
 \end{abstract}
 %TC:break main
 
