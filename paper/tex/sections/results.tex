@@ -52,11 +52,11 @@ law. Instead, we interpret it as evidence that additional mutation free-energy
 labels can improve the target task when they are selected and evaluated through
 the experimental Tm endpoint.
 
-The trajectory-summary label behaved differently. This label was derived from
-MD simulations and measured how strongly native contacts persisted during
-high-temperature trajectories. Increasing the number of these labels did not
-yield a robust improvement over learning from Tm measurements alone, even
-though the computed labels were also generated from simulations. Thus, the
+The MD-derived Q-value label behaved differently. This label measured how
+strongly native contacts persisted during high-temperature MD trajectories.
+Increasing the number of these labels did not yield a robust improvement over
+learning from Tm measurements alone, even though the computed labels were also
+generated from simulations. Thus, the
 label-count experiment already suggested the central result of the paper:
 the number of computed labels is not sufficient. The transferable physical
 content of the label matters.
@@ -71,10 +71,10 @@ labels are used.
 \textbf{(b)} Mutation free-energy labels from FEP reach their best held-out Tm
 error at the largest computed-label setting tested, although the curve is not
 strictly monotonic.
-\textbf{(c)} The MD contact-persistence summary does not show a robust
+\textbf{(c)} The MD-derived Q-value does not show a robust
 improvement over learning from Tm labels alone.
 \textbf{(d)} Best points from the label-count sweeps separate FEP from the
-experimental-only and MD contact-persistence references.}
+experimental-only and MD Q-value references.}
 \label{fig:scaling}
 \end{figure*}
 
@@ -87,16 +87,16 @@ corresponding to a paired improvement of 0.35$^\circ$C (90\% confidence
 interval, 0.24--0.46$^\circ$C; Fig.~\ref{fig:final_performance}). This was the
 clearest improvement observed across all computational labels.
 
-The other sources showed weaker or negative effects. Structure-based scores
-from Rosetta assigned to variants proposed by ESM2 improved over learning from
-Tm labels alone (paired improvement, 0.17$^\circ$C; 90\% confidence interval,
-0.03--0.31$^\circ$C), and ThermoMPNN stability-change labels showed a similar
-but smaller gain. Rosetta mutation scores and Rosetta-scored random variants
-were weaker and had confidence intervals that crossed zero. The MD
-contact-persistence summary worsened the final test error relative to learning
-from Tm labels alone. These results support a selective, source-dependent
-interpretation: mutation free-energy-like labels were useful, but a structural
-trajectory summary was not sufficient for this target task.
+The other sources showed weaker or negative effects. Rosetta scores assigned to
+ESM2-generated variants improved over learning from Tm labels alone (paired
+improvement, 0.17$^\circ$C; 90\% confidence interval,
+0.03--0.31$^\circ$C), and ThermoMPNN stability scores showed a similar but
+smaller gain. Rosetta mutation scores and random variants scored by Rosetta were
+weaker and had confidence intervals that crossed zero. The MD-derived Q-value
+worsened the final test error relative to learning from Tm labels alone. These
+results support a selective, source-dependent interpretation: mutation
+free-energy-like labels were useful, but an MD Q-value summarizing native
+contacts was not sufficient for this target task.
 
 \begin{figure*}[t]
 \centering
@@ -112,9 +112,9 @@ Negative values indicate improvement.
 not improve the selected experimental-only or FEP settings.
 \textbf{(d)} Validation-set performance and held-out test performance are
 related but not identical, emphasizing the need for final target-task testing.
-\textbf{(e)} Frozen- and updated-encoder comparisons show that FEP helps in
-both regimes, with the strongest absolute performance obtained when the
-sequence representation is updated.
+\textbf{(e)} Frozen-encoder and fine-tuned-encoder comparisons show that FEP
+helps in both regimes, with the strongest absolute performance obtained when
+the sequence representation is fine-tuned.
 \textbf{(f)} Paired FEP gains remain negative across protein sequence-model
 sizes, but the best absolute error is obtained with the 8M encoder.}
 \label{fig:final_performance}
@@ -139,8 +139,8 @@ We also asked whether the FEP gain required updating the sequence encoder. In a
 frozen-encoder control, overall errors increased, but FEP still improved over
 the frozen experimental-only baseline: the frozen experimental-only model
 achieved 7.38$^\circ$C MAE, whereas frozen FEP achieved 7.20$^\circ$C MAE. The
-improvement was smaller than in the updated-encoder setting, and the frozen FEP
-model remained worse than the updated-encoder FEP model. These results indicate
+improvement was smaller than in the fine-tuned-encoder setting, and the frozen
+FEP model remained worse than the fine-tuned-encoder FEP model. These results indicate
 that FEP labels carry useful information even when the representation is fixed,
 but limited encoder adaptation is important for extracting the strongest
 target-task benefit.
@@ -169,7 +169,7 @@ local information about how stability changes under sequence perturbations.
 When learned jointly, these two views can shape a representation that is more
 useful for held-out Tm prediction than either sparse Tm labels alone or a
 generic simulation-derived summary. The negative result for the MD-derived
-contact-persistence label defines the boundary of this interpretation: a
+Q-value defines the boundary of this interpretation: a
 simulation label must encode the right physical relation to the target phenotype.
 
 \begin{figure*}[t]
@@ -179,8 +179,8 @@ simulation label must encode the right physical relation to the target phenotype
 \textbf{(a)} Experimental Tm labels provide sparse absolute stability anchors,
 whereas mutation free-energy labels provide local stability-change directions.
 \textbf{(b)} FEP mutation free-energy labels improve Tm prediction, whereas
-the molecular-dynamics contact-persistence label does not.
-\textbf{(c)} Contact persistence summarizes retained native contacts in
+the MD-derived Q-value does not.
+\textbf{(c)} The MD-derived Q-value summarizes retained native contacts in
 high-temperature trajectories, but this structural-dynamics signal does not
 necessarily transfer to held-out Tm prediction.
 \textbf{(d)} The useful signal is not generic simulation augmentation, but

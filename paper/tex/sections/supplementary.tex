@@ -34,8 +34,8 @@ from the processed CSV files. Mutation-effect sources were represented by two
 template-specific source tasks, corresponding to the 1MEL and 4IDL nanobody
 templates. These files used \texttt{\detokenize{seq}} as the sequence column and
 \texttt{\detokenize{ddg_scaled01}} as the [0,1]-scaled source-label column. The
-MD-derived contact-persistence source was represented by a single processed
-trajectory-summary table with sequence, raw trajectory-summary quantities, and a
+MD-derived Q-value source was represented by a single processed table with
+sequence, raw Q-value quantities, and a
 \texttt{\detokenize{ddg_scaled01}} training label.
 
 \begin{table}[h]
@@ -52,10 +52,10 @@ Experimental Tm & Target validation & 114 & Checkpoint and setting selection \\
 Experimental Tm & Target test & 396 & Final held-out evaluation \\
 FEP mutation free energy & Source tasks & 435 + 409 & Main source task \\
 Rosetta mutation score & Source tasks & 435 + 409 & Source comparison \\
-ThermoMPNN mutation score & Source tasks & 435 + 409 & Source comparison \\
-Rosetta-scored random variants & Source tasks & 1000 + 1000 & Source comparison \\
-Rosetta-scored generated variants & Source tasks & 1000 + 1000 & Source comparison \\
-MD-derived contact persistence & Source task & 1143 & Source comparison and scaling control \\
+ThermoMPNN stability score & Source tasks & 435 + 409 & Source comparison \\
+Random variants scored by Rosetta & Source tasks & 1000 + 1000 & Source comparison \\
+ESM2 variants scored by Rosetta & Source tasks & 1000 + 1000 & Source comparison \\
+MD-derived Q-value & Source task & 1143 & Source comparison and scaling control \\
 \hline
 \end{tabular}
 \end{table}
@@ -80,8 +80,8 @@ For mutation-effect experiments with requested source-label count $n$, up to
 $n$ rows were sampled independently from each of the two template-specific
 source tables using the run seed. Thus, the final FEP setting with $n=320$
 provided 320 sampled 1MEL rows and 320 sampled 4IDL rows before the source split.
-For MD-derived contact-persistence experiments, $n$ rows were sampled from the
-single processed trajectory-summary table. Sampled source rows were split 80/20
+For MD-derived Q-value experiments, $n$ rows were sampled from the single
+processed Q-value table. Sampled source rows were split 80/20
 into source-training and source-validation rows. Source-validation rows were
 kept in the result files for monitoring and control analyses, but the production
 training scripts filtered the validation data passed to the trainer so that
@@ -92,7 +92,7 @@ Sequences were tokenized with the ESM2 tokenizer using truncation and padding to
 padding so that target and source examples entered the same model interface.
 The frozen-encoder controls precomputed the first-token ESM2 embedding for each
 example and stored it as an \texttt{\detokenize{embedding}} field before head
-training. Updated-encoder models kept token IDs and attention masks and updated
+training. Fine-tuned-encoder models kept token IDs and attention masks and updated
 the ESM2 weights during training.
 
 \section{Neural-network implementation}
@@ -136,8 +136,8 @@ experimental Tm target.
 
 Training used AdamW, weight decay 0.04, a cosine learning-rate schedule, 100
 warmup steps, batch size 16, and at most 400 epochs. The default head learning
-rate was $3\times10^{-4}$, the default updated-encoder learning rate was
-$1\times10^{-4}$, and the default dropout rate was 0.15. Updated-encoder models
+rate was $3\times10^{-4}$, the default fine-tuned-encoder learning rate was
+$1\times10^{-4}$, and the default dropout rate was 0.15. Fine-tuned-encoder models
 used separate optimizer parameter groups for ESM2 parameters and newly
 initialized trunk/head parameters. Frozen-encoder controls set all ESM2
 parameters to non-trainable and optimized only the downstream network.
@@ -230,8 +230,8 @@ pipeline detects the expected improvement when more target labels are added. The
 FEP curve evaluates whether increasing a physically related mutation-free-energy
 source improves the same held-out Tm endpoint. The FEP curve is beneficial but
 not strictly monotonic, so it should not be interpreted as evidence for a
-universal power law. The MD-derived contact-persistence curve shows that
-increasing the amount of a simulation-derived label is not sufficient by itself.
+universal power law. The MD-derived Q-value curve shows that increasing the
+amount of a simulation-derived label is not sufficient by itself.
 The relevant conclusion is source dependence: target-task transfer depends on
 whether the source label encodes physical information that is useful for
 experimental Tm prediction.

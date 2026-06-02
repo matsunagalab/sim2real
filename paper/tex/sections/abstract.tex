@@ -12,13 +12,13 @@ Tm benchmark, we trained transfer-learning models that combined Tm prediction
 with one computational prediction task at a time; checkpoints, model choices,
 and final evaluation used only experimental Tm validation or test examples. We
 compared mutation free energies from alchemical free-energy perturbation (FEP),
-structure-based mutation scores, learned stability-change scores, scores on
-generated or random variants, and a molecular-dynamics contact-persistence
-summary. FEP gave the clearest benefit: held-out Tm mean absolute error
+Rosetta mutation scores, ThermoMPNN stability scores, Rosetta scores on
+ESM2-generated or random variants, and an MD-derived Q-value summarizing
+native-contact persistence. FEP gave the clearest benefit: held-out Tm mean absolute error
 decreased from 6.61 to 6.26$^\circ$C relative to Tm-only training, with a paired
 improvement of 0.35$^\circ$C (90\% confidence interval, 0.24--0.46$^\circ$C).
 The gain was not reproduced by larger protein sequence models or by the
-contact-persistence summary, whereas generated-variant scores gave a weaker
+MD-derived Q-value, whereas ESM2 variants scored by Rosetta gave a weaker
 positive signal. Thus, computational labels can improve nanobody Tm prediction
 when their physical meaning transfers to the experimental endpoint; mutation
 free energies complement sparse absolute Tm measurements.

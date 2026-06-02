@@ -69,12 +69,12 @@ SOURCE_ORDER = [
 
 SOURCE_LABEL = {
     "Tm_only": "Tm labels only",
-    "FEP": "mutation free energy\n(FEP)",
-    "rosetta": "structure mutation\nscore",
-    "thermoMPNN": "learned stability\nscore",
-    "rosetta_random": "random variants\n+ structure score",
-    "rosetta_esm": "generated variants\n+ structure score",
-    MD_CONTACT_Q_SOURCE: "MD contact persistence",
+    "FEP": "FEP mutation\nfree energy",
+    "rosetta": "Rosetta mutation\nscore",
+    "thermoMPNN": "ThermoMPNN\nstability score",
+    "rosetta_random": "random variants\nscored by Rosetta",
+    "rosetta_esm": "ESM2 variants\nscored by Rosetta",
+    MD_CONTACT_Q_SOURCE: "MD Q-value",
 }
 
 SOURCE_COLOR = {
@@ -100,10 +100,10 @@ SCALING_CURVES = {
         "x_label": "FEP labels",
         "sample_factor": 1.0,
     },
-    "MD contact-persistence labels": {
+    "MD Q-value labels": {
         "path": RESULTS / "hot_q_400k_tmselect" / "scaling.json",
         "color": COL["mdq"],
-        "x_label": "MD contact-persistence labels",
+        "x_label": "MD Q-value labels",
         "sample_factor": 1.0,
     },
 }
@@ -386,9 +386,9 @@ def fig01_concept_protocol(rows: pd.DataFrame) -> None:
     ax = axes[1, 0]
     hide_axes(ax)
     categories = [
-        ("mutation effects", ["mutation free energy (FEP)", "structure mutation score", "learned stability-change score"], COL["soft_green"], COL["fep"]),
-        ("designed variants", ["language-model variants + structure score", "random variants + structure score"], COL["soft_blue"], COL["design"]),
-        ("structural dynamics", ["MD contact persistence"], COL["soft_red"], COL["mdq"]),
+        ("mutation effects", ["FEP mutation free energy", "Rosetta mutation score", "ThermoMPNN stability score"], COL["soft_green"], COL["fep"]),
+        ("designed variants", ["ESM2 variants scored by Rosetta", "random variants scored by Rosetta"], COL["soft_blue"], COL["design"]),
+        ("structural dynamics", ["MD Q-value from native contacts"], COL["soft_red"], COL["mdq"]),
     ]
     y0 = 0.70
     for i, (title, items, fc, ec) in enumerate(categories):
@@ -450,16 +450,16 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     panel_label(ax, "B")
 
     ax = axes[1, 0]
-    md_scale = load_scaling(SCALING_CURVES["MD contact-persistence labels"]["path"])
+    md_scale = load_scaling(SCALING_CURVES["MD Q-value labels"]["path"])
     ax.axhline(baseline, color=COL["baseline"], linestyle="--", linewidth=1.1, label="Tm labels only")
     ax.fill_between(md_scale["x"], md_scale["ci_lo"], md_scale["ci_hi"], color=COL["mdq"], alpha=0.08, lw=0)
-    ax.plot(md_scale["x"], md_scale["mae"], marker="o", color=COL["mdq"], label="MD contact persistence")
+    ax.plot(md_scale["x"], md_scale["mae"], marker="o", color=COL["mdq"], label="MD Q-value")
     best_idx = int(md_scale["mae"].argmin())
     ax.scatter([md_scale.loc[best_idx, "x"]], [md_scale.loc[best_idx, "mae"]], s=54, color=COL["mdq"], edgecolor="white", zorder=5)
     ax.set_xscale("log")
     ax.set_xticks([10, 40, 80, 160, 320, 640])
     ax.set_xticklabels(["10", "40", "80", "160", "320", "640"])
-    ax.set_xlabel("MD contact-persistence labels used")
+    ax.set_xlabel("MD Q-value labels used")
     ax.set_ylabel("held-out Tm test MAE (deg C)")
     ax.set_ylim(6.55, 7.05)
     ax.legend(frameon=False, loc="upper right")
@@ -467,7 +467,7 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     panel_label(ax, "C")
 
     ax = axes[1, 1]
-    labels = ["Tm labels\nonly", "mutation free\nenergy", "MD contact\npersistence"]
+    labels = ["Tm labels\nonly", "FEP mutation\nfree energy", "MD\nQ-value"]
     vals = [float(tm_scale.iloc[-1]["mae"]), float(fep_scale["mae"].min()), float(md_scale["mae"].min())]
     colors = [COL["baseline"], COL["fep"], COL["mdq"]]
     xpos = np.arange(len(vals))
@@ -579,7 +579,7 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
     key_labels = {
         "Tm_only": ("Tm labels\nonly", (8, 8), "left"),
         "FEP": ("FEP", (10, -18), "left"),
-        MD_CONTACT_Q_SOURCE: ("MD contact", (8, 8), "left"),
+        MD_CONTACT_Q_SOURCE: ("MD Q-value", (8, 8), "left"),
     }
     for source, (label, offset, ha) in key_labels.items():
         row = ordered.loc[ordered["source"].astype(str) == source].iloc[0]
@@ -617,7 +617,7 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
     ypos = np.arange(len(core_sources))
     y_offsets = {"frozen": -0.13, "updated": 0.13}
     markers = {"frozen": "s", "updated": "o"}
-    encoder_labels = {"frozen": "fixed encoder", "updated": "updated encoder"}
+    encoder_labels = {"frozen": "frozen encoder", "updated": "fine-tuned encoder"}
     for encoder in ["frozen", "updated"]:
         subset = core[core["encoder"] == encoder].set_index("source")
         for i, source in enumerate(core_sources):
@@ -632,7 +632,7 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
                 marker=markers[encoder],
             )
     ax.set_yticks(ypos)
-    ax.set_yticklabels(["Tm labels\nonly", "mutation free\nenergy", "structure\nscore", "MD contact"])
+    ax.set_yticklabels(["Tm labels\nonly", "FEP mutation\nfree energy", "Rosetta mutation\nscore", "MD Q-value"])
     ax.invert_yaxis()
     ax.set_xlabel("held-out Tm test MAE (deg C)")
     ax.set_xlim(5.95, 7.70)
@@ -709,7 +709,7 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
 
     ax = axes[0, 1]
     keys = ["FEP_minus_Tm_only", f"{MD_CONTACT_Q_SOURCE}_minus_Tm_only"]
-    labs = ["mutation free energy\n(FEP)", "MD contact persistence"]
+    labs = ["FEP mutation\nfree energy", "MD Q-value"]
     cols = [COL["fep"], COL["mdq"]]
     y = np.arange(2)
     for i, (key, col) in enumerate(zip(keys, cols)):
@@ -754,8 +754,8 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
                 linewidth=1.1,
             )
         )
-    ax.text(0.50, 0.22, "retained native contacts", ha="center", fontsize=8.0, color=COL["mdq"])
-    ax.text(0.50, 0.13, "high-temperature trajectory summary", ha="center", fontsize=7.4, color=COL["gray"])
+    ax.text(0.50, 0.22, "MD Q-value", ha="center", fontsize=8.0, color=COL["mdq"])
+    ax.text(0.50, 0.13, "native-contact persistence in high-temperature MD", ha="center", fontsize=7.0, color=COL["gray"])
     panel_label(ax, "C")
 
     ax = axes[1, 1]
@@ -765,10 +765,10 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
     arrow(ax, (0.44, 0.705), (0.57, 0.705), color=COL["fep"], lw=1.4)
     ax.text(0.50, 0.80, "local stability changes", ha="center", fontsize=7.2, color=COL["fep"])
 
-    box(ax, (0.08, 0.35), (0.36, 0.15), "MD contact\npersistence", fc=COL["soft_red"], ec=COL["mdq"], fontsize=8.0, weight="bold")
+    box(ax, (0.08, 0.35), (0.36, 0.15), "MD\nQ-value", fc=COL["soft_red"], ec=COL["mdq"], fontsize=8.0, weight="bold")
     box(ax, (0.57, 0.35), (0.36, 0.15), "no gain\nin this test", fc=COL["soft_red"], ec=COL["mdq"], fontsize=8.0)
     arrow(ax, (0.44, 0.425), (0.57, 0.425), color=COL["mdq"], lw=1.4)
-    ax.text(0.50, 0.52, "trajectory summary", ha="center", fontsize=7.2, color=COL["mdq"])
+    ax.text(0.50, 0.52, "native-contact summary", ha="center", fontsize=7.2, color=COL["mdq"])
 
     ax.text(0.50, 0.16, "transfer depends on the computed label", ha="center", fontsize=8.0, color=COL["black"])
     panel_label(ax, "D")
