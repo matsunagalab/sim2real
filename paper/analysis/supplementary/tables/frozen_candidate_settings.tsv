@@ -1,0 +1,43 @@
+condition	source	source_label	arch	label	n_ddg	n_md	val_mae	ci_width	exp
+Tm_only	Tm_only	Tm only	latent	default	0	0	7.209712152158333	1.5737889203838034	frozen_sourcehpo_tm_latent_default
+Tm_only	Tm_only	Tm only	latent	drop0.05	0	0	7.283400383808748	1.5735600205764175	frozen_sourcehpo_tm_latent_drop0.05
+Tm_only	Tm_only	Tm only	latent	drop0.30	0	0	7.040689084018909	1.6099804952900216	frozen_sourcehpo_tm_latent_drop0.30
+Tm_only	Tm_only	Tm only	latent	enc3e-4	0	0	7.209712152158333	1.5737889203838034	frozen_sourcehpo_tm_latent_enc3e-4
+Tm_only	Tm_only	Tm only	latent	enc3e-5	0	0	7.209712152158333	1.5737889203838034	frozen_sourcehpo_tm_latent_enc3e-5
+Tm_only	Tm_only	Tm only	latent	lr1e-4_enc3e-5	0	0	7.2867767410269	1.5744834863805917	frozen_sourcehpo_tm_latent_lr1e-4_enc3e-5
+Tm_only	Tm_only	Tm only	residual	default	0	0	7.225642966157626	1.579919172908899	frozen_sourcehpo_tm_residual_default
+Tm_only	Tm_only	Tm only	residual	drop0.05	0	0	7.1939064818687175	1.5693871638204682	frozen_sourcehpo_tm_residual_drop0.05
+Tm_only	Tm_only	Tm only	residual	drop0.30	0	0	7.047547785212446	1.5901439399506776	frozen_sourcehpo_tm_residual_drop0.30
+Tm_only	Tm_only	Tm only	residual	enc3e-4	0	0	7.225642966157626	1.579919172908899	frozen_sourcehpo_tm_residual_enc3e-4
+Tm_only	Tm_only	Tm only	residual	enc3e-5	0	0	7.225642966157626	1.579919172908899	frozen_sourcehpo_tm_residual_enc3e-5
+Tm_only	Tm_only	Tm only	residual	lr1e-4_enc3e-5	0	0	7.32292898137983	1.5653687377307843	frozen_sourcehpo_tm_residual_lr1e-4_enc3e-5
+Tm_only	Tm_only	Tm only	shared	default	0	0	7.220055772179947	1.5705893567796565	frozen_sourcehpo_tm_shared_default
+Tm_only	Tm_only	Tm only	shared	drop0.05	0	0	7.302562493383999	1.5587468453810462	frozen_sourcehpo_tm_shared_drop0.05
+Tm_only	Tm_only	Tm only	shared	drop0.30	0	0	6.961082132962038	1.610265127563978	frozen_sourcehpo_tm_shared_drop0.30
+Tm_only	Tm_only	Tm only	shared	enc3e-4	0	0	7.220055772179947	1.5705893567796565	frozen_sourcehpo_tm_shared_enc3e-4
+Tm_only	Tm_only	Tm only	shared	enc3e-5	0	0	7.220055772179947	1.5705893567796565	frozen_sourcehpo_tm_shared_enc3e-5
+Tm_only	Tm_only	Tm only	shared	lr1e-4_enc3e-5	0	0	7.366948115463692	1.5395401945034308	frozen_sourcehpo_tm_shared_lr1e-4_enc3e-5
+ddG	FEP	FEP	shared	default	320	0	6.443909248971213	1.4897396363445008	frozen_sourcehpo_ddg_fep_default
+ddG	FEP	FEP	shared	drop0.05	320	0	6.7772645559359095	1.5174088220009194	frozen_sourcehpo_ddg_fep_drop0.05
+ddG	FEP	FEP	shared	drop0.30	320	0	6.614627976507845	1.519162722888904	frozen_sourcehpo_ddg_fep_drop0.30
+ddG	FEP	FEP	shared	enc3e-4	320	0	6.443909248971213	1.4897396363445008	frozen_sourcehpo_ddg_fep_enc3e-4
+ddG	FEP	FEP	shared	enc3e-5	320	0	6.443909248971213	1.4897396363445008	frozen_sourcehpo_ddg_fep_enc3e-5
+ddG	FEP	FEP	shared	fixed	320	0	6.774752141289657	1.5215799463060398	frozen_sourcehpo_ddg_fep_fixed
+ddG	FEP	FEP	shared	lr1e-4_enc3e-5	320	0	6.7730799118430545	1.5348681205852088	frozen_sourcehpo_ddg_fep_lr1e-4_enc3e-5
+ddG	rosetta	Rosetta	shared	default	320	0	6.594275504540308	1.4873201451359588	frozen_sourcehpo_ddg_rosetta_default
+ddG	rosetta	Rosetta	shared	drop0.05	320	0	6.693229261927027	1.528473417091683	frozen_sourcehpo_ddg_rosetta_drop0.05
+ddG	rosetta	Rosetta	shared	drop0.30	320	0	6.765579462107712	1.5026664623156707	frozen_sourcehpo_ddg_rosetta_drop0.30
+ddG	rosetta	Rosetta	shared	enc3e-4	320	0	6.594275504540308	1.4873201451359588	frozen_sourcehpo_ddg_rosetta_enc3e-4
+ddG	rosetta	Rosetta	shared	enc3e-5	320	0	6.594275504540308	1.4873201451359588	frozen_sourcehpo_ddg_rosetta_enc3e-5
+ddG	rosetta	Rosetta	shared	fixed	320	0	6.750247523969054	1.539784095106242	frozen_sourcehpo_ddg_rosetta_fixed
+ddG	rosetta	Rosetta	shared	lr1e-4_enc3e-5	320	0	6.887459036452451	1.5605456158528828	frozen_sourcehpo_ddg_rosetta_lr1e-4_enc3e-5
+MD	MD_Q_HPHIL_400K	MD Q-value	residual	default	0	640	6.92029276531005	1.5786953004948456	frozen_sourcehpo_md_q-hphil-400k_default
+MD	MD_Q_HPHIL_400K	MD Q-value	residual	drop0.05	0	640	7.0286812800248555	1.5687989435779643	frozen_sourcehpo_md_q-hphil-400k_drop0.05
+MD	MD_Q_HPHIL_400K	MD Q-value	residual	drop0.30	0	640	6.884064043610095	1.5914422490797877	frozen_sourcehpo_md_q-hphil-400k_drop0.30
+MD	MD_Q_HPHIL_400K	MD Q-value	residual	enc3e-4	0	640	6.92029276531005	1.5786953004948456	frozen_sourcehpo_md_q-hphil-400k_enc3e-4
+MD	MD_Q_HPHIL_400K	MD Q-value	residual	enc3e-5	0	640	6.92029276531005	1.5786953004948456	frozen_sourcehpo_md_q-hphil-400k_enc3e-5
+MD	MD_Q_HPHIL_400K	MD Q-value	residual	fixed_w0.05	0	640	7.054837640442982	1.556952818497468	frozen_sourcehpo_md_q-hphil-400k_fixed_w0.05
+MD	MD_Q_HPHIL_400K	MD Q-value	residual	fixed_w0.10	0	640	7.048471593643863	1.5521573883278226	frozen_sourcehpo_md_q-hphil-400k_fixed_w0.10
+MD	MD_Q_HPHIL_400K	MD Q-value	residual	fixed_w0.25	0	640	7.052516826654063	1.5559105193599168	frozen_sourcehpo_md_q-hphil-400k_fixed_w0.25
+MD	MD_Q_HPHIL_400K	MD Q-value	residual	fixed_w0.50	0	640	7.049993528621875	1.5533123039431036	frozen_sourcehpo_md_q-hphil-400k_fixed_w0.50
+MD	MD_Q_HPHIL_400K	MD Q-value	residual	lr1e-4_enc3e-5	0	640	7.196731668449398	1.5677447863956866	frozen_sourcehpo_md_q-hphil-400k_lr1e-4_enc3e-5

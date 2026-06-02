@@ -1,0 +1,7 @@
+condition	label	architecture	n_md	test_mae_deg_c	ci_lo_approx_deg_c	ci_hi_approx_deg_c	ci_width_deg_c	exp
+tm_latent_drop0.30	Tm only, latent-control architecture	latent	0	6.598215445231169	6.173705330908147	7.022725559554191	0.8490202286460438	final_tm_latent_drop0.30
+tm_residual_enc3e-4	Tm only, residual-control architecture	residual	0	6.839219114821068	6.4135064030199995	7.264931826622137	0.8514254236021381	final_tm_residual_enc3e-4
+residual_q_hphil_400k	MD Q-value, residual-control architecture	residual	640	6.5136256563016985	6.088029041418464	6.939222271184933	0.8511932297664684	final_residual_q_hphil_400k
+residual_q_hphil_400k_shuf	MD Q-value, shuffled labels	residual	640	6.549265075337402	6.114985717361034	6.983544433313771	0.8685587159527381	final_residual_q_hphil_400k_shuf
+residual_ss_dist_std	disulfide-distance fluctuation	residual	640	6.7263240432161115	6.300301422176217	7.152346664256006	0.8520452420797895	final_residual_ss_dist_std
+residual_rmsf_max	maximum residue fluctuation	residual	640	6.512520597424417	6.080682538139544	6.94435865670929	0.8636761185697459	final_residual_rmsf_max

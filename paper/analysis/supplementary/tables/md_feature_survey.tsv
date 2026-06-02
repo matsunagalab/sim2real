@@ -1,0 +1,19 @@
+feature	label	validation_mae_deg_c	ci_width_deg_c	architecture	exp
+MD_Q_HPHIL_400K_SHUF	Q-value, shuffled labels	5.763330394080383	1.3483811397934078	residual	feature_residual_md_q_hphil_400k_shuf
+MD_Q_HPHIL_400K	Q-value, 400 K	5.809868651207063	1.4508210217926054	residual	feature_residual_md_q_hphil_400k
+MD_SS_DIST_STD	disulfide-distance fluctuation	5.8361468341431415	1.3576952281988497	residual	feature_residual_md_ss_dist_std
+MD_Q_SLOPE_400K	Q-value slope, 400 K	5.861221567298676	1.429394744894691	residual	feature_residual_md_q_slope_400k
+MD_RMSF_MAX	maximum residue fluctuation	5.895634332326798	1.4210979369176888	residual	feature_residual_md_rmsf_max
+MD_SALTBRIDGE	salt-bridge persistence	5.9328943226579085	1.402551147743412	residual	feature_residual_md_saltbridge
+MD_Q_CDR3	CDR3 Q-value	5.961232660093968	1.359309503644071	residual	feature_residual_md_q_cdr3
+MD_Q_FRAMEWORK	framework Q-value	5.9960591646115065	1.394475997597179	residual	feature_residual_md_q_framework
+MD_Q_MIN_400K	minimum Q-value, 400 K	6.008738494568144	1.3934983827717868	residual	feature_residual_md_q_min_400k
+MD_RMSF_FRAMEWORK	framework residue fluctuation	6.034803015041166	1.3354389454903144	residual	feature_residual_md_rmsf_framework
+MD_RG_STD	radius-of-gyration fluctuation	6.03878871860811	1.4093225507291356	residual	feature_residual_md_rg_std
+MD_SS_DIST_MEAN	disulfide distance	6.050647636153439	1.4169565820495755	residual	feature_residual_md_ss_dist_mean
+MD_RMSF	mean residue fluctuation	6.074941173031256	1.4558120151525715	residual	feature_residual_md_rmsf
+MD_RMSF_MAX_400K	maximum residue fluctuation, 400 K	6.116726659925342	1.4712316724014176	residual	feature_residual_md_rmsf_max_400k
+MD_CDR3_LEN	CDR3 length	6.14681697557741	1.5019059911963497	residual	feature_residual_md_cdr3_len
+MD_RG_STD_400K	radius-of-gyration fluctuation, 400 K	6.19760177819033	1.4737372094067718	residual	feature_residual_md_rg_std_400k
+MD_RMSF_CDR3	CDR3 residue fluctuation	6.274737511136142	1.4387955086450592	residual	feature_residual_md_rmsf_cdr3
+MD_Q_STD_400K	Q-value fluctuation, 400 K	6.277823810079493	1.4037054924964316	residual	feature_residual_md_q_std_400k
