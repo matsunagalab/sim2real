@@ -67,14 +67,16 @@ content of the label matters.
 \caption{\textbf{Label-count scaling of experimental and computational
 supervision.}
 \textbf{(a)} Learning from experimental Tm labels alone improves as more Tm
-labels are used.
+labels are used. The shaded band shows the 90\% bootstrap interval.
 \textbf{(b)} Mutation free-energy labels from FEP reach their best held-out Tm
 error at the largest computed-label setting tested, although the curve is not
-strictly monotonic.
+strictly monotonic. Points show ensemble MAE values and thin vertical intervals
+show 90\% bootstrap intervals.
 \textbf{(c)} The MD-derived Q-value does not show a robust
-improvement over learning from Tm labels alone.
-\textbf{(d)} Best points from the label-count sweeps separate FEP from the
-experimental-only and MD Q-value references.}
+improvement over learning from Tm labels alone. The confidence intervals are
+shown with the same thin-interval convention as in panel b.
+\textbf{(d)} Best points from the label-count sweeps are replotted as interval
+estimates to compare the experimental-only, FEP, and MD Q-value references.}
 \label{fig:scaling}
 \end{figure*}
 
@@ -176,14 +178,17 @@ simulation label must encode the right physical relation to the target phenotype
 \centering
 \includegraphics[width=\textwidth]{fig_outline04_mdq_boundary}
 \caption{\textbf{Interpretation and boundary condition.}
-\textbf{(a)} Experimental Tm labels provide sparse absolute stability anchors,
-whereas mutation free-energy labels provide local stability-change directions.
-\textbf{(b)} FEP mutation free-energy labels improve Tm prediction, whereas
-the MD-derived Q-value does not.
-\textbf{(c)} The MD-derived Q-value summarizes retained native contacts in
-high-temperature trajectories, but this structural-dynamics signal does not
-necessarily transfer to held-out Tm prediction.
-\textbf{(d)} The useful signal is not generic simulation augmentation, but
-computed-label information with transferable physical content.}
+\textbf{(a)} Cumulative distributions of absolute held-out Tm errors compare
+the experimental-only reference with FEP and MD Q-value source labels.
+\textbf{(b)} Per-example changes in absolute error relative to the
+experimental-only reference show where the FEP gain occurs. Negative values
+indicate lower error than the reference.
+\textbf{(c)} Paired $\Delta$MAE estimates summarize all computed-label sources
+in the final comparison. Negative values indicate improvement over training on
+experimental Tm labels alone.
+\textbf{(d)} The interpretation is that sparse Tm measurements anchor absolute
+thermal stability, whereas mutation free-energy labels provide local stability
+directions; the MD Q-value control shows that simulation-derived labels must
+encode transferable physical content to improve the target task.}
 \label{fig:interpretation}
 \end{figure*}

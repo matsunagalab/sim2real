@@ -59,9 +59,10 @@ Mutation-effect sources were organized as two template-specific tables derived
 from the 1MEL and 4IDL nanobody structures. FEP, Rosetta, and ThermoMPNN each
 contained 435 and 409 processed rows for the two templates. ESM2-generated
 variants and random variants scored by Rosetta each contained 1000 and 1000
-processed rows. The MD-derived Q-value source was represented by a single
-processed table with 1143 rows. Row counts
-exclude headers.
+processed rows. The MD-derived Q-value source was generated from a separate
+panel of simulated single-domain antibody structures selected from SAbDab, the
+Structural Antibody Database \citep{Dunbar2014SAbDab}. The processed MD table
+contained 1143 analysis-ready rows. Row counts exclude headers.
 
 For a mutation-effect experiment with requested source-label count $n$, up to
 $n$ rows were sampled independently from each of the two template-specific
@@ -74,6 +75,68 @@ source-validation rows were retained for monitoring and control analyses. In the
 reported final protocol, however, the validation data passed to the trainer for
 checkpoint selection and early stopping were filtered to the experimental Tm
 validation rows.
+
+\subsection*{SAbDab-derived MD simulations and Q-value labels}
+
+The MD source-label set was built from nanobody structures selected from a
+SAbDab-derived summary table \citep{Dunbar2014SAbDab}. The manifest-generation
+script matched the SAbDab nanobody summary against IMGT-renumbered PDB files in
+the local MDClaw structure collection. For each PDB entry with an available
+IMGT-renumbered structure, the first heavy-chain assignment in the SAbDab table
+was selected, the corresponding chain was verified to be present in the IMGT
+file, and a single nanobody-only job directory was created. The 400 K simulation
+manifest contained 1146 entries. After requiring a usable trajectory, topology,
+reference structure, sequence of at least 50 residues, and at least one native
+contact under the Q-value definition below, 1143 trajectories entered the
+processed source-label table.
+
+MD systems were prepared with MDClaw using the selected nanobody chain only.
+The IMGT PDB file was registered as the structure source, the heavy chain was
+extracted, non-protein components were excluded, termini were left uncapped, and
+protein protonation was assigned at pH 7.4. The preparation workflow used
+PDBFixer for structure cleaning and missing-atom handling, followed by
+pdb2pqr/PROPKA for pH-aware protonation and Amber-compatible atom naming when
+available \citep{Dolinsky2004PDB2PQR,Olsson2011PROPKA3}. Systems were solvated
+in explicit OPC water with 15 \AA{} padding and 0.15 M NaCl, and Amber
+topologies were built with the ff19SB protein force field and OPC water model
+\citep{Case2023AmberTools,Tian2020ff19SB,Izadi2014OPC}.
+
+The trajectory protocol used OpenMM on CUDA devices \citep{Eastman2017OpenMM}.
+Each system was first equilibrated at 300 K with 1 ns NVT followed by 1 ns NPT
+at 1 atm, using a 2-fs timestep without hydrogen-mass repartitioning. The 400 K
+branch was then generated from the 300 K equilibrated state by two restrained
+NVT relaxation stages: 1 ns at 400 K with C$\alpha$ restraints followed by a
+second 1 ns 400 K NVT restrained relaxation. The production trajectory used
+100 ns of restraint-free 400 K NVT dynamics, hydrogen-mass repartitioning with
+4 amu hydrogen mass, a 4-fs timestep, Langevin middle integration with
+1 ps$^{-1}$ collision rate, PME electrostatics with a 1.0-nm nonbonded cutoff,
+and coordinate/energy reporting every 100 ps. The reported MD source labels use
+the 400 K production branch.
+
+Q-values were extracted from the 400 K production trajectories with MDTraj
+\citep{McGibbon2015MDTraj}. For each trajectory, the simulation topology was
+loaded from the Amber parameter file and the native reference was defined as
+frame 0 of the production trajectory. This choice avoids atom-count mismatches
+between the simulation-ready system and the original coordinate file. The atom
+selection was protein backbone heavy atoms. Native contact pairs were defined as
+pairs separated by more than three residues, within 0.45 nm in the reference
+frame, and with at least one atom belonging to a hydrophilic residue
+(Asp, Glu, Gln, Asn, Arg, Lys, or His, including Amber protonation variants).
+For each frame, the Best--Hummer-style native-contact fraction was computed as
+\citep{Best2013NativeContacts}
+\[
+  Q = \left\langle
+  \frac{1}{1+\exp\{\beta(r_{ij}-\lambda r^0_{ij})\}}
+  \right\rangle_{(i,j)}
+\]
+with $\beta=50$ nm$^{-1}$ and $\lambda=1.8$. The processed label was the mean
+Q-value over the final portion of each trajectory: for long trajectories the
+implementation used the larger of 300 frames (30 ns at the 100-ps reporting
+interval) and one third of the available frames, and otherwise used all frames.
+The raw Q-values were min--max scaled to [0,1] for use by the existing
+source-task data loader. The column name in the processed CSV is
+\texttt{\detokenize{ddg_scaled01}} for loader compatibility, but the physical
+quantity is a native-contact Q-value rather than a mutation free energy.
 
 \subsection*{FEP mutation free-energy labels}
 

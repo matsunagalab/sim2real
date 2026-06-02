@@ -1,0 +1,5 @@
+encoder	source_head	test_mae_deg_c	ci_lo_deg_c	ci_hi_deg_c	validation_mae_deg_c	selected_setting	exp
+frozen encoder	template-specific	7.201965523148467	6.767099981096698	7.642452557857971	6.443909248971213	default	ddgheadfrozenfinal_separate_default
+frozen encoder	shared	7.220413236713436	6.781645092856851	7.667015379397281	6.537928008791496	lr1e-4_enc3e-5	ddgheadfrozenfinal_shared_lr1e-4_enc3e-5
+frozen encoder	conditioned	7.136479976536992	6.697352912968369	7.579211341534741	6.624286060130108	drop0.05	ddgheadfrozenfinal_context_drop0.05
+frozen encoder	calibrated	7.2154182714348645	6.7719577916327545	7.66101857685515	6.55032800742943	drop0.05	ddgheadfrozenfinal_calibrated_drop0.05
