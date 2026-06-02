@@ -77,7 +77,7 @@ The answer developed in this case study is:
 - Evaluate all claims on a held-out experimental Tm test set.
 - Compare source labels by paired errors on the same test examples.
 
-The main result is that FEP-derived mutation free-energy labels provide the clearest improvement over Tm-only training. Rosetta-scored generated variants provide a weaker but positive signal. A simple MD-derived contact-persistence label does not improve the held-out Tm prediction. Therefore, the message is not that adding simulation data is generically beneficial; rather, the computational label must encode information that transfers to the target phenotype.
+The main result is that FEP-derived mutation free-energy labels provide the clearest improvement over Tm-only training. ESM2-generated variants scored by Rosetta provide a weaker but positive signal. A simple MD-derived Q-value label does not improve the held-out Tm prediction. Therefore, the message is not that adding simulation data is generically beneficial; rather, the computational label must encode information that transfers to the target phenotype.
 
 The relation between Tm and mutation free energy is the final interpretation, not the opening premise. Sparse experimental Tm labels anchor the absolute stability scale, while mutation free-energy labels provide local stability-change information over sequence perturbations.
 
@@ -104,13 +104,12 @@ Terminology rules:
 - Prefer the physical meaning first: "public nanobody Tm benchmark" before
   "NbBench"; "mutation free-energy labels from alchemical free-energy
   perturbation (FEP)" before "FEP"; "structure-based scores" before
-  "Rosetta"; "learned stability-change scores" before "ThermoMPNN";
-  "pretrained protein language model" before "ESM2"; "molecular-dynamics
-  trajectory summary" before "MD contact persistence".
+  "Rosetta"; "stability scores from ThermoMPNN" before "ThermoMPNN";
+  "pretrained protein language model" before "ESM2"; "MD-derived Q-value
+  summarizing native-contact persistence" before "MD Q-value".
 - In figures, use reader-facing labels such as "Tm labels only", "mutation
-  free energy", "structure score", "learned stability score", and "MD contact
-  persistence"; keep tool names as short parenthetical clarifications only when
-  necessary.
+  free energy", "Rosetta mutation score", "ThermoMPNN stability score",
+  "ESM2 variants scored by Rosetta", and "MD Q-value".
 
 ## CSBJ Fit
 
@@ -266,7 +265,7 @@ Required moves:
 4. Introduce the multi-task transfer-learning framework.
 5. State the controlled evaluation design: shared experimental split, validation-set model selection, held-out Tm test set, paired comparison.
 6. Report the main number: FEP labels improve held-out Tm prediction from MAE 6.61 to 6.26 deg C, a paired improvement of 0.35 deg C.
-7. State source dependence: Rosetta-scored generated variants are positive but weaker; MD-derived contact-persistence label does not improve performance.
+7. State source dependence: ESM2-generated variants scored by Rosetta are positive but weaker; the MD-derived Q-value does not improve performance.
 8. End with the interpretation: mutation free-energy labels provide local stability-change information complementary to sparse absolute Tm measurements.
 
 ### Introduction
@@ -320,9 +319,9 @@ Subsection plan:
    - FEP mutation free-energy labels.
    - Rosetta mutation-effect labels.
    - ThermoMPNN mutation-effect labels.
-   - Rosetta-scored generated variants.
-   - Rosetta-scored random variants.
-   - MD-derived contact-persistence label labels.
+   - ESM2 variants scored by Rosetta.
+   - Random variants scored by Rosetta.
+   - MD-derived Q-value labels.
    - For each source, report label definition, sign convention, number of labels, and whether labels are mutation-relative or sequence-level.
 
 4. **Generated and random variant sets**
@@ -336,7 +335,7 @@ Subsection plan:
    - Tm prediction head.
    - Source-label prediction head.
    - Shared representation.
-   - Updated encoder and frozen-encoder control.
+   - Fine-tuned encoder and frozen-encoder control.
    - ESM2 size controls.
    - Link to prior Murakami et al. architecture: the present model keeps the same basic PLM-to-Tm prediction idea but adds source-task supervision.
 
@@ -383,7 +382,7 @@ Main claim:
 
 The design permits computational labels to influence representation learning while preserving target-task evaluation.
 
-#### Result 2: FEP labels show label-count-dependent improvement, unlike the MD-derived contact-persistence label boundary condition
+#### Result 2: FEP labels show label-count-dependent improvement, unlike the MD-derived Q-value boundary condition
 
 Figure: Fig. 2.
 
@@ -392,7 +391,7 @@ Key points:
 - Experimental Tm-label scaling establishes the low-data regime.
 - FEP labels improve best held-out Tm performance when the full source label set is used.
 - The FEP curve is not perfectly monotonic; do not claim a clean power law.
-- MD-derived contact-persistence label does not show robust improvement over Tm-only training.
+- The MD-derived Q-value does not show robust improvement over Tm-only training.
 
 Main claim:
 
@@ -408,11 +407,11 @@ Key numbers:
 |---|---:|---:|---:|
 | Tm-only | 6.6145 | - | - |
 | FEP | 6.2611 | -0.3530 | [-0.4621, -0.2426] |
-| Rosetta-scored ESM2 variants | 6.4484 | -0.1652 | [-0.3058, -0.0250] |
+| ESM2 variants scored by Rosetta | 6.4484 | -0.1652 | [-0.3058, -0.0250] |
 | ThermoMPNN | 6.4607 | -0.1525 | [-0.2958, -0.0067] |
-| Rosetta-scored random variants | 6.5130 | -0.0998 | [-0.2248, +0.0259] |
+| Random variants scored by Rosetta | 6.5130 | -0.0998 | [-0.2248, +0.0259] |
 | Rosetta | 6.5255 | -0.0880 | [-0.2008, +0.0247] |
-| MD-derived contact-persistence label | 6.7304 | +0.1172 | [+0.0120, +0.2235] |
+| MD-derived Q-value | 6.7304 | +0.1172 | [+0.0120, +0.2235] |
 
 Main claim:
 
@@ -426,7 +425,7 @@ Key points:
 
 - ESM2 size controls compare 8M, 35M, and 650M encoders.
 - Larger ESM2 encoders do not improve absolute performance in this small-Tm-data setting.
-- FEP remains beneficial within each size comparison, but the best absolute result is the 8M updated encoder with FEP labels.
+- FEP remains beneficial within each size comparison, but the best absolute result is the 8M fine-tuned encoder with FEP labels.
 - This agrees with the related Murakami et al. observation that model-size scaling alone did not solve nanobody Tm prediction.
 
 Main claim:
@@ -439,9 +438,9 @@ Figure: Fig. 3e.
 
 Key points:
 
-- FEP improves both updated-encoder and frozen-encoder settings.
-- The updated-encoder setting gives the best absolute performance.
-- Rosetta and MD-derived contact-persistence label remain weaker than FEP.
+- FEP improves both fine-tuned-encoder and frozen-encoder settings.
+- The fine-tuned-encoder setting gives the best absolute performance.
+- Rosetta mutation scores and the MD-derived Q-value remain weaker than FEP.
 
 Main claim:
 
@@ -455,12 +454,12 @@ Key numbers:
 
 | comparison | ΔMAE | 90% paired CI |
 |---|---:|---:|
-| Rosetta-scored ESM2 variants vs Tm-only | -0.1652 | [-0.3058, -0.0250] |
-| Rosetta-scored ESM2 variants vs Rosetta-scored random variants | -0.0654 | [-0.1949, +0.0639] |
+| ESM2 variants scored by Rosetta vs Tm-only | -0.1652 | [-0.3058, -0.0250] |
+| ESM2 variants scored by Rosetta vs random variants scored by Rosetta | -0.0654 | [-0.1949, +0.0639] |
 
 Main claim:
 
-Rosetta-scored generated variants improve over Tm-only training, but their superiority over random variants is not conclusive. This should be framed as a route toward future generator-physics-predictor design loops, not as proof that generated variants are optimized.
+ESM2-generated variants scored by Rosetta improve over Tm-only training, but their superiority over random variants scored by Rosetta is not conclusive. This should be framed as a route toward future generator-physics-predictor design loops, not as proof that generated variants are optimized.
 
 #### Result 7: Mutation free-energy labels complement sparse absolute Tm anchors
 
@@ -471,7 +470,7 @@ Key points:
 - Tm provides sparse absolute stability anchors.
 - Mutation free-energy labels provide local sequence-perturbation information.
 - FEP works because its label is close to the relevant thermodynamic perturbation.
-- MD-derived contact-persistence label provides a boundary condition: structural persistence alone did not transfer in this setting.
+- The MD-derived Q-value provides a boundary condition: native-contact persistence alone did not transfer in this setting.
 
 Main claim:
 
@@ -555,14 +554,14 @@ Panels:
 
 - (a) Experimental Tm-label scaling.
 - (b) FEP-label scaling.
-- (c) MD-derived contact-persistence label label-count control.
+- (c) MD-derived Q-value label-count control.
 - (d) Best points from label-count sweeps.
 
 Claims:
 
 - Experimental Tm labels show the expected low-data scaling behavior.
 - FEP reaches the best held-out Tm MAE at the full label set, but the curve is noisy.
-- MD-derived contact-persistence label does not reproduce the FEP benefit.
+- The MD-derived Q-value does not reproduce the FEP benefit.
 - Avoid claiming a strict monotonic law.
 
 ### Fig. 3. Final held-out Tm performance across source labels and controls
@@ -575,24 +574,24 @@ Panels:
 - (b) Paired ΔMAE versus Tm-only.
 - (c) ESM2 size controls.
 - (d) Validation-set performance versus held-out test performance.
-- (e) Frozen versus updated encoder comparison.
+- (e) Frozen versus fine-tuned encoder comparison.
 - (f) FEP gain across ESM2 sizes.
 
 Claims:
 
 - FEP is the strongest source label.
-- Rosetta-scored generated variants are positive but weaker.
+- ESM2-generated variants scored by Rosetta are positive but weaker.
 - Larger ESM2 encoders do not improve this low-data regime.
-- Encoder updating improves absolute performance.
+- Encoder fine-tuning improves absolute performance.
 
 ### Fig. 4. Interpretation: absolute Tm anchors and mutation free-energy directions
 
-Purpose: interpret why FEP labels transfer while the MD-derived contact-persistence label label does not.
+Purpose: interpret why FEP labels transfer while the MD-derived Q-value label does not.
 
 Panels:
 
 - (a) Sparse absolute Tm anchors and local mutation-effect directions.
-- (b) FEP versus MD-derived contact-persistence label performance contrast.
+- (b) FEP versus MD-derived Q-value performance contrast.
 - (c) Boundary condition for structural-dynamics labels.
 - (d) Take-home model: useful source labels encode transferable stability-change information.
 
@@ -624,11 +623,11 @@ Keep the main paper compact and put reproducibility details here.
 - Avoid: "ΔΔG predicts Tm."
 - Use: "mutation free-energy labels provide source-label information that improves Tm prediction."
 - Avoid: "generated variants are better than random variants."
-- Use: "Rosetta-scored generated variants improve over Tm-only, while superiority over random variants remains unresolved."
+- Use: "ESM2-generated variants scored by Rosetta improve over Tm-only, while superiority over random variants scored by Rosetta remains unresolved."
 - Avoid: opening the paper with the Tm/ΔΔG relationship.
 - Use: the Tm/ΔΔG relationship as the final interpretation of why FEP works.
 - Avoid local lab shorthand in the manuscript and figures.
-- Use reader-facing terms: "validation set", "held-out test set", "source labels", "mutation free-energy labels", "MD-derived contact-persistence label".
+- Use reader-facing terms: "validation set", "held-out test set", "source labels", "mutation free-energy labels", "MD-derived Q-value".
 
 ## Current Key Numbers
 
@@ -636,15 +635,15 @@ Keep the main paper compact and put reproducibility details here.
 |---|---:|---:|---:|
 | Tm-only | 6.6145 | - | - |
 | FEP | 6.2611 | -0.3530 | [-0.4621, -0.2426] |
-| Rosetta-scored ESM2 variants | 6.4484 | -0.1652 | [-0.3058, -0.0250] |
+| ESM2 variants scored by Rosetta | 6.4484 | -0.1652 | [-0.3058, -0.0250] |
 | ThermoMPNN | 6.4607 | -0.1525 | [-0.2958, -0.0067] |
-| Rosetta-scored random variants | 6.5130 | -0.0998 | [-0.2248, +0.0259] |
+| Random variants scored by Rosetta | 6.5130 | -0.0998 | [-0.2248, +0.0259] |
 | Rosetta | 6.5255 | -0.0880 | [-0.2008, +0.0247] |
-| MD-derived contact-persistence label | 6.7304 | +0.1172 | [+0.0120, +0.2235] |
+| MD-derived Q-value | 6.7304 | +0.1172 | [+0.0120, +0.2235] |
 
 Additional paired comparison:
 
-- Rosetta-scored ESM2 variants minus Rosetta-scored random variants:
+- ESM2 variants scored by Rosetta minus random variants scored by Rosetta:
   - ΔMAE -0.0654
   - 90% CI [-0.1949, +0.0639]
   - Interpretation: suggestive but not conclusive.
@@ -654,7 +653,7 @@ Additional paired comparison:
 - 2026-05-30: Initial MD-centered story was weakened after controlled comparison.
 - 2026-05-31: FEP mutation-effect labels identified as the robust main result.
 - 2026-05-31: Generated-variant result positioned as a bridge toward future design loops, not proof of optimized design.
-- 2026-05-31: MD-derived contact-persistence label positioned as a boundary condition showing that not all simulation-derived labels help.
+- 2026-05-31: MD-derived Q-value positioned as a boundary condition showing that not all simulation-derived labels help.
 - 2026-05-31: Story reframed so the opening is about how to incorporate computational labels into Tm prediction; the Tm/ΔΔG relation is moved to the final interpretation.
 - 2026-06-01: Submission target fixed to CSBJ General section as a compact Research Article.
 
@@ -664,7 +663,7 @@ Additional paired comparison:
 - [ ] Present nanobody Tm prediction as the concrete case study, not as the only possible use case.
 - [ ] Present source-label training before discussing the Tm/ΔΔG relationship.
 - [ ] Keep FEP as the main quantitative result.
-- [ ] Use the MD-derived contact-persistence label result to show source dependence.
+- [ ] Use the MD-derived Q-value result to show source dependence.
 - [ ] Treat generated-variant results as a design-loop bridge, not as proof of optimized design.
 - [ ] Place the Tm/ΔΔG conceptual interpretation near the end of Results or in Discussion.
 - [ ] Add CSBJ-required statements: funding, author contributions, competing interests, data availability, code availability, and AI-use disclosure.

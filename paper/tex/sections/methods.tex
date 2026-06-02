@@ -50,24 +50,25 @@ Tm measurements. The source-label collection comprised mutation free-energy
 changes from alchemical free-energy perturbation (FEP), structure-based
 mutation-effect scores from Rosetta, learned mutation-effect scores from
 ThermoMPNN, Rosetta scores assigned to generated and random variants, and a
-molecular-dynamics (MD) contact-persistence label. All source labels were
+molecular-dynamics (MD)-derived Q-value label that summarizes native-contact
+persistence. All source labels were
 preprocessed to [0,1]-scaled regression targets and were used only through
 their own source-task heads.
 
 Mutation-effect sources were organized as two template-specific tables derived
 from the 1MEL and 4IDL nanobody structures. FEP, Rosetta, and ThermoMPNN each
-contained 435 and 409 processed rows for the two templates. Rosetta-scored
-generated variants and Rosetta-scored random variants each contained 1000 and
-1000 processed rows. The MD-derived contact-persistence source was represented
-by a single processed trajectory-summary table with 1143 rows. Row counts
+contained 435 and 409 processed rows for the two templates. ESM2-generated
+variants and random variants scored by Rosetta each contained 1000 and 1000
+processed rows. The MD-derived Q-value source was represented by a single
+processed table with 1143 rows. Row counts
 exclude headers.
 
 For a mutation-effect experiment with requested source-label count $n$, up to
 $n$ rows were sampled independently from each of the two template-specific
 source tables using the run seed. The two template-specific tables were assigned
-separate task identifiers. For an MD-derived source experiment with requested
-source-label count $n$, $n$ rows were sampled from the single processed
-trajectory-summary table. After sampling, source-label rows were split 80/20
+separate task identifiers. For an MD-derived Q-value experiment with requested
+source-label count $n$, $n$ rows were sampled from the single processed Q-value
+table. After sampling, source-label rows were split 80/20
 into source-training and source-validation rows using the same run seed. These
 source-validation rows were retained for monitoring and control analyses. In the
 reported final protocol, however, the validation data passed to the trainer for
@@ -148,13 +149,13 @@ and a shared head with template-specific affine calibration. Architecture
 controls also evaluated residual and latent source-fusion variants, but the main
 result used the original shared-trunk architecture.
 
-\subsection*{Updated-encoder and frozen-encoder training}
+\subsection*{Fine-tuned-encoder and frozen-encoder training}
 
-Two encoder-training regimes were evaluated. In the updated-encoder regime, the
-ESM2 encoder and regression heads were optimized jointly. The encoder used a
-separate learning rate from the newly initialized trunk and heads, so that the
-pretrained representation was updated more conservatively than the output
-layers. In the final FEP setting, the selected encoder learning rate was
+Two encoder-training regimes were evaluated. In the fine-tuned-encoder regime,
+the ESM2 encoder and regression heads were optimized jointly. The encoder used
+a separate learning rate from the newly initialized trunk and heads, so that
+the pretrained representation was fine-tuned more conservatively than the
+output layers. In the final FEP setting, the selected encoder learning rate was
 $3\times10^{-5}$ and the head learning rate was the default
 $3\times10^{-4}$.
 
@@ -189,7 +190,7 @@ MD-derived source labels.
 
 Models were trained with AdamW, cosine learning-rate scheduling, batch size 16,
 weight decay 0.04, 100 warmup steps, and at most 400 epochs. The default head
-learning rate was $3\times10^{-4}$, the default updated-encoder learning rate
+learning rate was $3\times10^{-4}$, the default fine-tuned-encoder learning rate
 was $1\times10^{-4}$, and the default dropout rate was 0.15. Training used mixed
 precision on CUDA devices. Checkpoints were saved and evaluated once per epoch.
 

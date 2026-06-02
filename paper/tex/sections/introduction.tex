@@ -75,10 +75,10 @@ task that can shape the learned sequence representation. The implementation
 uses ESM2, a pretrained protein language model, as the shared sequence encoder
 \citep{Lin2023Evolutionary}. The computational labels represent several kinds of
 computational information: mutation free-energy changes from alchemical
-free-energy perturbation (FEP) calculations, structure-based mutation scores
-from Rosetta, learned stability-change scores from ThermoMPNN, Rosetta scores
-on generated and random variants, and a molecular-dynamics (MD) trajectory
-summary measuring retained native contacts. To keep the comparison
+free-energy perturbation (FEP) calculations, mutation scores from Rosetta,
+stability scores from ThermoMPNN, Rosetta scores on ESM2-generated and random
+variants, and a molecular-dynamics (MD)-derived Q-value measuring native-contact
+persistence. To keep the comparison
 target-centered, all model settings are selected using an experimental
 validation set, and all final claims are evaluated on the same held-out
 experimental Tm test set with paired error comparisons. This design prevents
@@ -87,9 +87,9 @@ prediction.
 
 The main result is that the benefit of simulation-derived supervision is highly
 source-dependent. Mutation free-energy labels from FEP provide the strongest
-improvement over training on Tm labels alone, whereas the MD contact-persistence
-summary does not improve held-out Tm prediction under the same evaluation
-design. Rosetta-scored generated variants provide a weaker but positive signal,
+improvement over training on Tm labels alone, whereas the MD-derived Q-value
+does not improve held-out Tm prediction under the same evaluation
+design. ESM2 variants scored by Rosetta provide a weaker but positive signal,
 suggesting a connection to future generator--physics--predictor design loops.
 Taken together, these results extend the Sim2Real argument from materials
 informatics to a biomolecular setting in which the source and target labels

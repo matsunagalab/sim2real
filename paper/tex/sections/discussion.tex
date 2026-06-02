@@ -9,7 +9,7 @@ experimental target is scarce and the simulated quantity is related to, but not
 identical with, that target. Using nanobody Tm prediction as a case study, we
 found that FEP mutation free-energy labels improved held-out experimental Tm
 prediction more clearly than any other source label tested. The result was
-not reproduced by a simple MD-derived contact-persistence label, nor was it
+not reproduced by a simple MD-derived Q-value label, nor was it
 explained by using a larger ESM2 encoder. These findings support a selective
 view of Sim2Real learning for biomolecules: simulation data are useful when the
 source label encodes physical information that transfers to the experimental
@@ -69,15 +69,16 @@ selected by experimental Tm performance. In practical terms, the result argues
 for controlled encoder adaptation rather than either fully fixed feature
 extraction or unconstrained source-task optimization.
 
-The negative result for the MD-derived contact-persistence label is equally
+The negative result for the MD-derived Q-value label is equally
 important. It shows that the failure mode is not a lack of simulation in
 general, but a mismatch between the source label and the target phenotype.
-Contact persistence in high-temperature trajectories may report aspects of
-structural durability, but it is a compressed trajectory statistic and may miss
-the mutation-specific energetic effects that determine how sequence changes
-alter the stability landscape. This distinction matters for future database
-design. A simulation campaign optimized for target transfer should not only
-maximize the number of labels; it should choose labels whose physical meaning is
+The Q-value used here reports native-contact persistence in high-temperature
+trajectories, and may capture aspects of structural durability. However, it is
+a compressed trajectory statistic and may miss the mutation-specific energetic
+effects that determine how sequence changes alter the stability landscape. This
+distinction matters for future database design. A simulation campaign optimized
+for target transfer should not only maximize the number of labels; it should
+choose labels whose physical meaning is
 expected to transfer to the experimental decision being made.
 
 \subsection*{Generated variants point toward design workflows}
