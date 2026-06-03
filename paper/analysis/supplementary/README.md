@@ -7,8 +7,22 @@ extend.
 
 - `tables/*.tsv`: numerical source data for Supplementary Figs. 1-5.
 - `figures/*.pdf` and `figures/*.png`: rendered supplementary figures.
+- `MANIFEST.tsv`: panel-level index of figures, source tables, upstream result
+  summaries, generator functions, and reviewer-facing questions.
 - `../../tex/figures/supp_fig*.pdf`: LaTeX-ready figure copies.
 - `../../../plot/make_supplementary_figures.py`: table and figure generator.
+
+## Panel manifest
+
+Use `MANIFEST.tsv` as the first stop when extending or auditing the
+supplementary analysis. Each row corresponds to one figure panel and records:
+
+- the rendered figure file and LaTeX-ready copy;
+- the compact TSV table used for the panel;
+- the upstream source data or result summary;
+- the function in `plot/make_supplementary_figures.py` that builds the table;
+- the plotting function that renders the panel;
+- the reviewer question addressed by the panel.
 
 ## Source-of-truth result summaries
 
@@ -56,4 +70,3 @@ The MD structure manifests and raw MDClaw outputs are stored outside the paper
 tree under `/home/yasu/tmp/mdclaw/`. The generated TSV tables in this directory
 capture the SAbDab method counts and processed Q-value summaries needed by the
 current manuscript.
-
