@@ -4,6 +4,9 @@ This directory contains training outputs and compact result summaries. The
 manuscript and supplementary figures should be regenerated from tracked summary
 JSON files, not by scanning arbitrary run directories.
 
+For a downstream rerun from fixed source-label CSV files, use
+`scripts/reproduce_paper_results.py`. See `REPRODUCE.md` for the full workflow.
+
 ## Current Manuscript Inputs
 
 The current manuscript-facing figure generators read these summaries directly:

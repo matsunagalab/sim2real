@@ -392,9 +392,15 @@ def main() -> int:
 
     if args.collect_only:
         results = [collect_job_result(job) for job in jobs]
-    else:
-        results = run_jobs(jobs, gpus=gpus, metric=metric, force=args.force)
+        summary_path = write_summary(results, summary_name)
+        print_best(results, metric)
+        if args.mode == "final":
+            final_path = write_final_summary(results, args.final_summary_name)
+            print(f"Final source-screen summary: {final_path}")
+        print(f"Summary: {summary_path}")
+        return 0 if all(metric in row for row in results) else 1
 
+    results = run_jobs(jobs, gpus=gpus, metric=metric, force=args.force)
     summary_path = write_summary(results, summary_name)
     print_best(results, metric)
     if args.mode == "final":
