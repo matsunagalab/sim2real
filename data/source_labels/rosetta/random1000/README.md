@@ -1,4 +1,4 @@
-# rosetta_random1000
+# Rosetta Random-Variant Source Labels
 
 **ランダム変異**で生成した約 1000 バリアントを、Rosetta の ddG 計算で評価するためのワークフローです。  
 ESM-2 等のモデルを使わず、位置・アミノ酸を一様ランダムに選んで変異を入れるベースライン用です。
@@ -12,7 +12,7 @@ ESM-2 等のモデルを使わず、位置・アミノ酸を一様ランダム�
 ## ディレクトリ構成
 
 ```
-rosetta_random1000/
+data/source_labels/rosetta/random1000/
 ├── README.md
 ├── generate_mutation_random.ipynb   # ランダム変異生成
 ├── csv_to_rosetta_mutations.py      # CSV → Rosetta 変異リスト変換
@@ -92,9 +92,9 @@ SLURM で投入する場合は、ジョブ名やパーティションを環境�
 
 `csv_to_rosetta_mutations.py` はこの `mutations` を読み、Rosetta の変異リスト形式（`original_aa position mutated_aa` の行）に変換します。
 
-## rosetta_esm1000 との違い
+## ESM2-generated Rosetta variantsとの違い
 
-| 項目 | rosetta_random1000 | rosetta_esm1000 |
+| 項目 | `rosetta/random1000` | `rosetta/esm1000` |
 |------|--------------------|-----------------|
 | 変異の決め方 | 位置・アミノ酸を一様ランダム | ESM-2 の確率でサンプリング |
 | バリアント数 | 指定数（例: 1000）をそのまま使用 | 10 万生成 → PLL 上位 1% で約 1000 本に絞る |

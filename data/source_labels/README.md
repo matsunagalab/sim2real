@@ -1,17 +1,20 @@
 # Computational Source-Label Catalog
 
-This directory is an index, not a duplicate data store. The actual CSV files
-remain in the original source-specific directories:
+This directory is the canonical store for computational mutation-label datasets
+used by the manuscript workflow. The actual CSV files now live here, organized
+by source:
 
-- `data/fep/`
-- `data/rosetta/`
-- `data/rosetta_random1000/`
-- `data/rosetta_esm1000/`
-- `data/mpnn/`
+- `fep/`
+- `thermompnn/`
+- `rosetta/measured/`
+- `rosetta/random1000/`
+- `rosetta/esm1000/`
 
 `MANIFEST.tsv` records the processed CSV files used by `prepare.py` for the
-computational mutation-label tasks. It is meant to answer three questions before
-a reviewer-round rerun:
+computational mutation-label tasks. `prepare.py` reads this file directly, so
+new manuscript source-label datasets should be added here rather than hard-coded
+in Python. The manifest is meant to answer three questions before a
+reviewer-round rerun:
 
 1. Which `--ddg-source` argument selects this table?
 2. Which processed CSVs are the fixed source labels?
@@ -43,7 +46,7 @@ is still the model-selection target for manuscript-facing comparisons.
 | `rosetta_random` | Uniformly random two-mutation variants scored by Rosetta. |
 | `rosetta_esm` | ESM2-generated two-mutation variants, filtered by model likelihood, then scored by Rosetta. |
 
-`data/mpnn/*_thermompnn_data.csv` are the larger Google Colab ThermoMPNN
+`thermompnn/*_thermompnn_data.csv` are the larger Google Colab ThermoMPNN
 outputs. The current manuscript training code does not read those files
-directly; it reads `data/mpnn/1melMPNN2_processed.csv` and
-`data/mpnn/4idlMPNN2_processed.csv`.
+directly; it reads `thermompnn/1melMPNN2_processed.csv` and
+`thermompnn/4idlMPNN2_processed.csv`.

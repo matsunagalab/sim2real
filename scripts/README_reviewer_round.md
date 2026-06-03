@@ -49,6 +49,11 @@ For an auxiliary source label, keep a table with at least:
 - optional metadata columns such as template, mutation identifier, structure
   source, simulation temperature window, or score type.
 
+For mutation-effect source labels used through `--ddg-source`, place the data
+under `data/source_labels/` and add the two active processed CSVs to
+`data/source_labels/MANIFEST.tsv`. `prepare.py` reads that manifest directly;
+do not add new source-label paths by hard-coding them in Python.
+
 For target Tm data, keep the existing NbBench split files under
 `data/nbbench/`. Do not reshuffle these splits during reviewer-round analyses.
 

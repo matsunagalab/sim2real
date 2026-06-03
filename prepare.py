@@ -38,32 +38,52 @@ REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
 MODEL_NAME = os.environ.get("BASE_MODEL_NAME", "facebook/esm2_t6_8M_UR50D")
 MAX_LENGTH = 160
 
-DDG_PATHS = {
-    "FEP": (
-        "data/fep/fep1mel_435_processed.csv",
-        "data/fep/fep4idl_409_processed.csv",
-    ),
-    "FoldX": (
-        "data/foldX/1mel_all-var_ddg_with_rosettaddg_with_foldx_processed.csv",
-        "data/foldX/4idl_all-var_ddg_with_rosettaddg_with_foldx_processed.csv",
-    ),
-    "rosetta": (
-        "data/rosetta/1mel_rosettaddg_processed.csv",
-        "data/rosetta/4idl_rosettaddg_processed.csv",
-    ),
-    "thermoMPNN": (
-        "data/mpnn/1melMPNN2_processed.csv",
-        "data/mpnn/4idlMPNN2_processed.csv",
-    ),
-    "rosetta_esm": (
-        "data/rosetta_esm1000/esm2_650M_2muts_1mel_100000_top1pct_with_ddg_processed.csv",
-        "data/rosetta_esm1000/esm2_650M_2muts_4idl_100000_top1pct_with_ddg_processed.csv",
-    ),
-    "rosetta_random": (
-        "data/rosetta_random1000/random_2mut_1mel_1000_with_ddg_processed.csv",
-        "data/rosetta_random1000/random_2mut_4idl_1000_with_ddg_processed.csv",
-    ),
-}
+SOURCE_LABEL_MANIFEST = os.path.join(REPO_ROOT, "data", "source_labels", "MANIFEST.tsv")
+
+
+def load_ddg_paths_from_manifest(manifest_path: str = SOURCE_LABEL_MANIFEST) -> dict[str, tuple[str, str]]:
+    """Resolve active mutation-label source tables from the data manifest."""
+    if not os.path.exists(manifest_path):
+        raise FileNotFoundError(f"Missing source-label manifest: {manifest_path}")
+
+    manifest = pd.read_csv(manifest_path, sep="\t")
+    required = {
+        "source_key",
+        "structure",
+        "processed_csv",
+        "prepare_argument",
+        "used_in_current_manuscript",
+    }
+    missing = required.difference(manifest.columns)
+    if missing:
+        missing_str = ", ".join(sorted(missing))
+        raise ValueError(f"Source-label manifest is missing required columns: {missing_str}")
+
+    current = manifest[
+        manifest["used_in_current_manuscript"].astype(str).str.lower().eq("yes")
+        & manifest["prepare_argument"].astype(str).str.startswith("--ddg-source ")
+    ].copy()
+
+    paths: dict[str, tuple[str, str]] = {}
+    for prepare_arg, group in current.groupby("prepare_argument", sort=False):
+        source_key = prepare_arg.split(maxsplit=1)[1]
+        by_structure = {
+            str(row["structure"]).upper(): str(row["processed_csv"])
+            for _, row in group.iterrows()
+        }
+        if not {"1MEL", "4IDL"}.issubset(by_structure):
+            continue
+        for rel_path in (by_structure["1MEL"], by_structure["4IDL"]):
+            if not os.path.exists(os.path.join(REPO_ROOT, rel_path)):
+                raise FileNotFoundError(f"Manifest points to a missing source-label table: {rel_path}")
+        paths[source_key] = (by_structure["1MEL"], by_structure["4IDL"])
+
+    if not paths:
+        raise ValueError(f"No active DDG source paths found in {manifest_path}")
+    return paths
+
+
+DDG_PATHS = load_ddg_paths_from_manifest()
 
 # MD auxiliary task: single file (1 sequence per nanobody)
 # Primary MD task uses task_id=3, optional auxiliary uses task_id=4
@@ -355,8 +375,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Run experiment: train → evaluate → scaling metrics")
     parser.add_argument("--ddg-source", type=str, default="FEP",
-                        choices=["FEP", "FoldX", "rosetta", "thermoMPNN",
-                                 "rosetta_esm", "rosetta_random", "none"])
+                        choices=[*DDG_PATHS.keys(), "none"])
     parser.add_argument("--n-ddg-list", type=str, default="20,80,280",
                         help="Comma-separated n_ddg values (ignored if ddg-source=none)")
     parser.add_argument("--md-source", type=str, default="none",

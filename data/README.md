@@ -10,18 +10,14 @@ are not rerun by `scripts/reproduce_paper_results.py`.
 | Directory | Contents | Used directly by training |
 | --- | --- | --- |
 | `nbbench/` | Fixed experimental Tm train/validation/test splits. | Yes |
-| `fep/` | FEP-derived mutation free-energy labels. | Yes, via `--ddg-source FEP` |
-| `rosetta/` | Rosetta mutation-effect labels for the measured variant sets. | Yes, via `--ddg-source rosetta` |
-| `rosetta_random1000/` | Random two-mutation variants scored by Rosetta. | Yes, via `--ddg-source rosetta_random` |
-| `rosetta_esm1000/` | ESM2-generated two-mutation variants scored by Rosetta. | Yes, via `--ddg-source rosetta_esm` |
-| `mpnn/` | ThermoMPNN-derived mutation-effect labels. | Yes, via `--ddg-source thermoMPNN` |
 | `md/` | Processed MD-derived source-label tables. | Yes, via `--md-source ...` |
-| `source_labels/` | Cross-source catalog of the processed computational labels. | Documentation only |
+| `source_labels/` | FEP, Rosetta, ThermoMPNN, random Rosetta, and ESM2-generated Rosetta source-label datasets plus their manifest. | Yes, via `--ddg-source ...` |
 
 ## Canonical Source-Label Tables
 
 The current training loader is `prepare.py`. For computational mutation labels,
-it reads `DDG_PATHS` and uses only two columns from each processed CSV:
+it reads `data/source_labels/MANIFEST.tsv` and uses only two columns from each
+processed CSV:
 
 - `seq`: amino-acid sequence;
 - `ddg_scaled01`: normalized source label used as the auxiliary regression
