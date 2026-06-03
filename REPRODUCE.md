@@ -39,6 +39,11 @@ stored in `reproduce/manuscript_results.yaml`; the runner is
 `scripts/reproduce_paper_results.py`. See `reproduce/README.md` for how to add
 new reviewer-round calculations.
 
+The fixed computational mutation-label inputs are catalogued in
+`data/source_labels/MANIFEST.tsv`. That file records which processed CSVs are
+used for FEP, Rosetta, ThermoMPNN, random Rosetta variants, and ESM2-generated
+Rosetta variants.
+
 ## Fast Integrity Checks
 
 Check that fixed inputs and manuscript-facing outputs exist without writing
