@@ -4,6 +4,10 @@ This file is for the graduate student or maintainer who needs to add
 reviewer-requested calculations without breaking the current manuscript result
 set.
 
+For reproducing the current manuscript-facing results before adding new
+calculations, start with `REPRODUCE.md` and
+`scripts/reproduce_paper_results.py`.
+
 ## Non-Negotiable Protocol
 
 - Keep the NbBench train, validation, and test definitions fixed.
