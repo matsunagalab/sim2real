@@ -64,6 +64,14 @@ panel of simulated single-domain antibody structures selected from SAbDab, the
 Structural Antibody Database \citep{Dunbar2014SAbDab}. The processed MD table
 contained 1143 analysis-ready rows. Row counts exclude headers.
 
+We checked exact sequence overlap between source-label tables and the NbBench
+splits. The mutation-effect and generated-variant source tables with explicit
+sequence columns had no exact overlap with the NbBench training, validation, or
+test sequences. The SAbDab-derived MD table contained a small number of exact
+matches to NbBench sequences, including eight test-set sequences; because the
+MD Q-value source did not improve final Tm prediction, this overlap does not
+support the positive FEP result but is reported for transparency.
+
 For a mutation-effect experiment with requested source-label count $n$, up to
 $n$ rows were sampled independently from each of the two template-specific
 source tables using the run seed. The two template-specific tables were assigned
@@ -79,16 +87,13 @@ validation rows.
 \subsection*{SAbDab-derived MD simulations and Q-value labels}
 
 The MD source-label set was built from nanobody structures selected from a
-SAbDab-derived summary table \citep{Dunbar2014SAbDab}. The manifest-generation
-script matched the SAbDab nanobody summary against IMGT-renumbered PDB files in
-the local MDClaw structure collection. For each PDB entry with an available
-IMGT-renumbered structure, the first heavy-chain assignment in the SAbDab table
-was selected, the corresponding chain was verified to be present in the IMGT
-file, and a single nanobody-only job directory was created. The 400 K simulation
-manifest contained 1146 entries. After requiring a usable trajectory, topology,
-reference structure, sequence of at least 50 residues, and at least one native
-contact under the Q-value definition below, 1143 trajectories entered the
-processed source-label table.
+SAbDab-derived summary table \citep{Dunbar2014SAbDab}. We selected one
+heavy-chain nanobody structure per PDB entry when an IMGT-renumbered coordinate
+file was available and the selected chain could be verified in that file. The
+400 K simulation panel contained 1146 nanobody systems. After requiring a usable
+trajectory, topology, reference structure, sequence of at least 50 residues, and
+at least one selected native contact, 1143 trajectories entered the processed
+source-label table.
 
 MD systems were prepared with MDClaw using the selected nanobody chain only.
 The IMGT PDB file was registered as the structure source, the heavy chain was
@@ -116,38 +121,25 @@ the 400 K production branch.
 Q-values were extracted from the 400 K production trajectories with MDTraj
 \citep{McGibbon2015MDTraj}. For each trajectory, the simulation topology was
 loaded from the Amber parameter file and the native reference was defined as
-frame 0 of the production trajectory. This choice avoids atom-count mismatches
-between the simulation-ready system and the original coordinate file. The atom
-selection was protein backbone heavy atoms. Native contact pairs were defined as
-pairs separated by more than three residues, within 0.45 nm in the reference
-frame, and with at least one atom belonging to a hydrophilic residue
-(Asp, Glu, Gln, Asn, Arg, Lys, or His, including Amber protonation variants).
-For each frame, the Best--Hummer-style native-contact fraction was computed as
-\citep{Best2013NativeContacts}
-\[
-  Q = \left\langle
-  \frac{1}{1+\exp\{\beta(r_{ij}-\lambda r^0_{ij})\}}
-  \right\rangle_{(i,j)}
-\]
-with $\beta=50$ nm$^{-1}$ and $\lambda=1.8$. The processed label was the mean
-Q-value over the final portion of each trajectory: for long trajectories the
-implementation used the larger of 300 frames (30 ns at the 100-ps reporting
-interval) and one third of the available frames, and otherwise used all frames.
-The raw Q-values were min--max scaled to [0,1] for use by the existing
-source-task data loader. The column name in the processed CSV is
-\texttt{\detokenize{ddg_scaled01}} for loader compatibility, but the physical
-quantity is a native-contact Q-value rather than a mutation free energy.
+frame 0 of the production trajectory. A smooth native-contact fraction
+\citep{Best2013NativeContacts} was computed from backbone-heavy-atom contacts
+and averaged over the terminal portion of the trajectory. The raw trajectory
+averages were min--max scaled to [0,1] before training. The exact contact
+selection, contact function, averaging window, and processed-column convention
+are reported in Supplementary Methods.
 
 \subsection*{FEP mutation free-energy labels}
 
-The FEP source labels were mutation free-energy changes for variants of the
-1MEL and 4IDL nanobody templates. FEP calculations followed the same protocol as
-our related nanobody thermostability study. Briefly, alchemical mutation
-simulations were run with NAMD 3 using GPU acceleration \citep{Phillips2020NAMD}.
-Input systems were prepared in VMD \citep{Humphrey1996VMD} using a customized
-AlaScan workflow \citep{Ramadoss2016AlaScan}. Initial structures were obtained
-from AlphaFold 3 predictions \citep{Abramson2024AlphaFold3}. Systems used the
-CHARMM36 protein force field \citep{Best2012CHARMM36}, TIP3P water
+The FEP source labels were mutation free-energy changes for variants associated
+with the 1MEL and 4IDL nanobody template sequences. FEP calculations followed
+the same protocol as our related nanobody thermostability study. Briefly,
+alchemical mutation simulations were run with NAMD 3 using GPU acceleration
+\citep{Phillips2020NAMD}. Input systems were prepared in VMD
+\citep{Humphrey1996VMD} using a customized AlaScan workflow
+\citep{Ramadoss2016AlaScan}. Simulation coordinates were initialized from
+AlphaFold 3 models of the corresponding wild-type sequences
+\citep{Abramson2024AlphaFold3}. Systems used the CHARMM36 protein force field
+\citep{Best2012CHARMM36}, TIP3P water
 \citep{Jorgensen1983TIP3P}, and 150 mM NaCl.
 
 Each alchemical transformation used a dual-topology mutation setup with a

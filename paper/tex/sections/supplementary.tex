@@ -85,6 +85,17 @@ MD-derived source at a time. The task identifier determines which scalar
 regression head is used and which task-specific loss term an example
 contributes to.
 
+Exact sequence overlap was checked between the processed source-label tables
+and the fixed NbBench splits. The processed FEP/Rosetta mutation-effect tables,
+random variants scored by Rosetta, and ESM2 variants scored by Rosetta had no
+exact sequence matches to the NbBench training, validation, or test sequences.
+The ThermoMPNN tables used the same template-specific variant design as the
+mutation-effect sources. The SAbDab-derived MD Q-value table contained exact
+matches to 2 NbBench training sequences, 4 validation sequences, and 8 test
+sequences. This overlap is disclosed because it affects interpretation of the
+MD control; it cannot explain the positive FEP result, and the MD Q-value
+source did not improve held-out Tm prediction.
+
 For mutation-effect experiments with requested source-label count $n$, the
 loader samples up to $n$ rows independently from each of the two template tables
 with \texttt{\detokenize{random_state=seed}}. Thus, the final FEP setting with

@@ -44,13 +44,16 @@ paired error statistics.}
 We next varied the number of experimental and computational labels to determine
 whether more source data translated into better Tm prediction. As expected,
 increasing the number of experimental Tm labels improved the model trained only
-on Tm measurements (Fig.~\ref{fig:scaling}). Mutation free-energy labels from
-FEP calculations also showed a beneficial trend: the largest FEP label-count
-setting tested gave the best held-out Tm error among the FEP settings. The
-curve was not strictly monotonic, so we do not interpret it as a clean power
-law. Instead, we interpret it as evidence that additional mutation free-energy
-labels can improve the target task when they are selected and evaluated through
-the experimental Tm endpoint.
+on Tm measurements (Fig.~\ref{fig:scaling}). The target-label sweep used 10,
+20, 30, 40, and 57 experimental Tm training labels. The FEP sweep used 10, 40,
+80, 160, and 320 rows per template-specific source table, and the MD Q-value
+sweep used 10, 40, 80, 160, 320, and 640 rows from the single MD source table.
+Mutation free-energy labels from FEP calculations showed a beneficial trend:
+the largest FEP label-count setting tested gave the best held-out Tm error
+among the FEP settings. The curve was not strictly monotonic, so we do not
+interpret it as a clean power law. Instead, we interpret it as evidence that
+additional mutation free-energy labels can improve the target task when they
+are selected and evaluated through the experimental Tm endpoint.
 
 The MD-derived Q-value label behaved differently. This label measured how
 strongly native contacts persisted during high-temperature MD trajectories.
@@ -85,20 +88,29 @@ estimates to compare the experimental-only, FEP, and MD Q-value references.}
 We then compared the selected settings for each computational label. Training on the
 experimental Tm labels alone achieved a held-out test MAE of 6.61$^\circ$C.
 Adding FEP mutation free-energy labels reduced the MAE to 6.26$^\circ$C,
-corresponding to a paired improvement of 0.35$^\circ$C (90\% confidence
-interval, 0.24--0.46$^\circ$C; Fig.~\ref{fig:final_performance}). This was the
-clearest improvement observed across all computational labels.
+corresponding to a source-minus-Tm-only paired change of -0.35$^\circ$C
+(90\% confidence interval, -0.46 to -0.24$^\circ$C;
+Fig.~\ref{fig:final_performance}). Negative paired changes indicate lower error
+than the Tm-only reference. This was the clearest improvement observed across
+all computational labels. The absolute gain is incremental relative to the
+6.61$^\circ$C baseline error, but it is consistent across paired test examples
+and across the bootstrap interval.
 
 The other sources showed weaker or negative effects. Rosetta scores assigned to
-ESM2-generated variants improved over learning from Tm labels alone (paired
-improvement, 0.17$^\circ$C; 90\% confidence interval,
-0.03--0.31$^\circ$C), and ThermoMPNN stability scores showed a similar but
-smaller gain. Rosetta mutation scores and random variants scored by Rosetta were
-weaker and had confidence intervals that crossed zero. The MD-derived Q-value
-worsened the final test error relative to learning from Tm labels alone. These
-results support a selective, source-dependent interpretation: mutation
-free-energy-like labels were useful, but an MD Q-value summarizing native
-contacts was not sufficient for this target task.
+ESM2-generated variants reached
+6.45$^\circ$C (paired change, -0.17$^\circ$C; 90\% confidence interval,
+-0.31 to -0.03$^\circ$C), and ThermoMPNN stability scores reached
+6.46$^\circ$C (paired change, -0.15$^\circ$C; 90\% confidence interval,
+-0.30 to -0.01$^\circ$C). Rosetta mutation scores reached 6.53$^\circ$C
+(paired change, -0.09$^\circ$C; 90\% confidence interval, -0.20 to
++0.02$^\circ$C), and random variants scored by Rosetta reached 6.51$^\circ$C
+(paired change, -0.10$^\circ$C; 90\% confidence interval, -0.22 to
++0.03$^\circ$C). Their intervals crossed zero. The MD-derived Q-value worsened
+the final test error to 6.73$^\circ$C (paired change, +0.12$^\circ$C; 90\%
+confidence interval, +0.01 to +0.22$^\circ$C). These results support a
+selective, source-dependent interpretation: mutation free-energy-like labels
+were useful, but an MD Q-value summarizing native contacts was not sufficient
+for this target task.
 
 \begin{figure*}[t]
 \centering
