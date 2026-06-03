@@ -75,12 +75,14 @@ uv run python scripts/reproduce_paper_results.py --stage figures --force
 
 ## Adding A Reviewer-Round Calculation
 
-1. Add any new fixed source-label CSV to `fixed_inputs` if it is required.
-2. Add a new stage or action under `stages`.
-3. Add the final summary or figure input to `expected_outputs`.
-4. Run with `--dry-run` to check the command expansion.
-5. Run the stage with `--force`.
-6. Regenerate `figures` if the manuscript or supplementary figure set changes.
+1. Add any new mutation-label dataset under `data/source_labels/` and register
+   active `--ddg-source` inputs in `data/source_labels/MANIFEST.tsv`.
+2. Add any other new fixed source-label CSV to `fixed_inputs` if it is required.
+3. Add a new stage or action under `stages`.
+4. Add the final summary or figure input to `expected_outputs`.
+5. Run with `--dry-run` to check the command expansion.
+6. Run the stage with `--force`.
+7. Regenerate `figures` if the manuscript or supplementary figure set changes.
 
 Use `type: prepare` for a direct `prepare.py` call, `type: script` for an
 existing orchestration script, `type: command` for figure or PDF commands, and

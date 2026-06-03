@@ -1,4 +1,4 @@
-# rosetta_esm1000
+# ESM2-Generated Rosetta Source Labels
 
 ESM-2（Protein Language Model）で生成した変異バリアントを、Rosetta の ddG 計算で評価するためのワークフローです。  
 約 10 万バリアントを生成し、PLL（Pseudolog-Likelihood）で上位 1% を選んだ約 1000 バリアントに対して Rosetta ddG を実行します。
@@ -13,7 +13,7 @@ ESM-2（Protein Language Model）で生成した変異バリアントを、Roset
 ## ディレクトリ構成
 
 ```
-rosetta_esm1000/
+data/source_labels/rosetta/esm1000/
 ├── README.md
 ├── generate_mutation_plm.ipynb   # ESM-2 で変異生成・PLL 計算
 ├── csv_to_rosetta_mutations.py   # CSV → Rosetta 変異リスト変換

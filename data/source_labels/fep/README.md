@@ -33,8 +33,8 @@ manuscript training path:
 | `fep5E0Q_308_processed.csv` | 308 | Available, not used by `prepare.py` |
 | `fep6LR7_192_processed.csv` | 192 | Available, not used by `prepare.py` |
 
-Add these to `prepare.py::DDG_PATHS` and `data/source_labels/MANIFEST.tsv` if
-they become part of a reviewer-round analysis.
+Add these to `data/source_labels/MANIFEST.tsv` if they become part of a
+reviewer-round analysis. `prepare.py` reads that manifest directly.
 
 ## Provenance Notes
 

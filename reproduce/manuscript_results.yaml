@@ -3,19 +3,20 @@
 # calculations are fixed upstream inputs and are not run here.
 
 fixed_inputs:
+  - data/source_labels/MANIFEST.tsv
   - data/nbbench/train.csv
   - data/nbbench/val.csv
   - data/nbbench/test.csv
-  - data/fep/fep1mel_435_processed.csv
-  - data/fep/fep4idl_409_processed.csv
-  - data/rosetta/1mel_rosettaddg_processed.csv
-  - data/rosetta/4idl_rosettaddg_processed.csv
-  - data/rosetta_random1000/random_2mut_1mel_1000_with_ddg_processed.csv
-  - data/rosetta_random1000/random_2mut_4idl_1000_with_ddg_processed.csv
-  - data/rosetta_esm1000/esm2_650M_2muts_1mel_100000_top1pct_with_ddg_processed.csv
-  - data/rosetta_esm1000/esm2_650M_2muts_4idl_100000_top1pct_with_ddg_processed.csv
-  - data/mpnn/1melMPNN2_processed.csv
-  - data/mpnn/4idlMPNN2_processed.csv
+  - data/source_labels/fep/fep1mel_435_processed.csv
+  - data/source_labels/fep/fep4idl_409_processed.csv
+  - data/source_labels/rosetta/measured/1mel_rosettaddg_processed.csv
+  - data/source_labels/rosetta/measured/4idl_rosettaddg_processed.csv
+  - data/source_labels/rosetta/random1000/random_2mut_1mel_1000_with_ddg_processed.csv
+  - data/source_labels/rosetta/random1000/random_2mut_4idl_1000_with_ddg_processed.csv
+  - data/source_labels/rosetta/esm1000/esm2_650M_2muts_1mel_100000_top1pct_with_ddg_processed.csv
+  - data/source_labels/rosetta/esm1000/esm2_650M_2muts_4idl_100000_top1pct_with_ddg_processed.csv
+  - data/source_labels/thermompnn/1melMPNN2_processed.csv
+  - data/source_labels/thermompnn/4idlMPNN2_processed.csv
   - data/md/nanobody_qvalue_hphil_400K.csv
   - data/md/feat_q_hphil_400K_shuffled.csv
   - data/md/nanobody_rmsf.csv
