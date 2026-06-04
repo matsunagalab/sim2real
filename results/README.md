@@ -46,8 +46,8 @@ inputs:
 - `results/hparam_search/summary.json`
 
 Historical filenames may contain short internal labels. Manuscript text and
-figure labels should use reader-facing descriptions such as `fine-tuned
-encoder`, `frozen encoder`, `FEP mutation free energy`, and `MD Q-value`.
+figure labels should use reader-facing descriptions such as `hot encoder`,
+`frozen encoder`, `FEP mutation free energy`, and `MD Q-value`.
 
 ## Scratch Run Directories
 

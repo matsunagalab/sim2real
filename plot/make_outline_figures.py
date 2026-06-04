@@ -72,8 +72,8 @@ SOURCE_LABEL = {
     "FEP": "FEP mutation\nfree energy",
     "rosetta": "Rosetta mutation\nscore",
     "thermoMPNN": "ThermoMPNN\nstability score",
-    "rosetta_random": "random variants\nscored by Rosetta",
-    "rosetta_esm": "ESM2 variants\nscored by Rosetta",
+    "rosetta_random": "random variants\n+ Rosetta",
+    "rosetta_esm": "ESM2-proposed\nvariants + Rosetta",
     MD_CONTACT_Q_SOURCE: "MD Q-value",
 }
 
@@ -182,7 +182,7 @@ def paired_comparisons() -> dict:
 
 def encoder_core_rows() -> pd.DataFrame:
     records = []
-    for encoder, path in [("frozen", FROZEN_SUMMARY_JSON), ("updated", SUMMARY_JSON)]:
+    for encoder, path in [("frozen", FROZEN_SUMMARY_JSON), ("hot", SUMMARY_JSON)]:
         summary = read_json(path)
         for row in summary["rows"]:
             source = str(row["source"])
@@ -421,7 +421,7 @@ def fig01_concept_protocol(rows: pd.DataFrame) -> None:
     hide_axes(ax)
     categories = [
         ("mutation effects", ["FEP mutation free energy", "Rosetta mutation score", "ThermoMPNN stability score"], COL["soft_green"], COL["fep"]),
-        ("designed variants", ["ESM2 variants scored by Rosetta", "random variants scored by Rosetta"], COL["soft_blue"], COL["design"]),
+        ("variant proposals", ["ESM2-proposed variants + Rosetta", "random variants + Rosetta"], COL["soft_blue"], COL["design"]),
         ("structural dynamics", ["MD Q-value from native contacts"], COL["soft_red"], COL["mdq"]),
     ]
     y0 = 0.70
@@ -521,10 +521,12 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
 
 
 def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
-    fig, axes = plt.subplots(3, 2, figsize=(7.4, 7.9), constrained_layout=True)
+    fig, axes = plt.subplots(2, 2, figsize=(7.4, 6.2), constrained_layout=True)
+    row_lookup = rows.set_index(rows["source"].astype(str))
+    sim_sources = ["Tm_only", "FEP", MD_CONTACT_Q_SOURCE]
 
     ax = axes[0, 0]
-    ordered = rows.set_index("source").loc[SOURCE_ORDER].reset_index()
+    ordered = row_lookup.loc[sim_sources].reset_index(drop=True)
     y = np.arange(len(ordered))
     for i, row in ordered.iterrows():
         horizontal_interval(
@@ -541,14 +543,25 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_yticklabels(ordered["label_plot"])
     ax.invert_yaxis()
     ax.set_xlabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(5.70, 7.35)
+    ax.set_xlim(5.95, 6.95)
     polish(ax, "x")
     panel_label(ax, "A")
 
     ax = axes[0, 1]
-    delta_sources = [s for s in SOURCE_ORDER if s != "Tm_only"]
-    y = np.arange(len(delta_sources))
-    for i, source in enumerate(delta_sources):
+    tm_abs = np.asarray(row_lookup.loc["Tm_only", "abs_errors"], dtype=float)
+    fep_abs = np.asarray(row_lookup.loc["FEP", "abs_errors"], dtype=float)
+    md_abs = np.asarray(row_lookup.loc[MD_CONTACT_Q_SOURCE, "abs_errors"], dtype=float)
+    delta_data = [fep_abs - tm_abs, md_abs - tm_abs]
+    parts = ax.violinplot(delta_data, positions=[0, 1], vert=False, widths=0.72, showextrema=False)
+    for body, color in zip(parts["bodies"], [COL["fep"], COL["mdq"]]):
+        body.set_facecolor(color)
+        body.set_edgecolor("none")
+        body.set_alpha(0.24)
+    rng = np.random.default_rng(7)
+    for i, (delta, color) in enumerate(zip(delta_data, [COL["fep"], COL["mdq"]])):
+        y_jitter = np.full(len(delta), i) + rng.uniform(-0.15, 0.15, len(delta))
+        ax.scatter(delta, y_jitter, s=7, color=color, alpha=0.15, edgecolor="none", rasterized=True)
+    for i, source in enumerate(["FEP", MD_CONTACT_Q_SOURCE]):
         comp = paired[paired_key(source)]
         horizontal_interval(
             ax,
@@ -557,104 +570,35 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
             comp["delta_ci_lo"],
             comp["delta_ci_hi"],
             SOURCE_COLOR[source],
+            zorder=6,
         )
-        ax.text(comp["delta_ci_hi"] + 0.018, i, f"{comp['delta_mae']:+.2f}", va="center", fontsize=7.2)
+        ax.text(
+            comp["delta_mae"] + 0.36,
+            i,
+            f"{comp['delta_mae']:+.2f}",
+            va="center",
+            ha="left",
+            fontsize=7.2,
+            bbox=dict(facecolor="white", edgecolor="none", alpha=0.78, pad=0.6),
+            zorder=8,
+        )
     ax.axvline(0, color=COL["black"], linewidth=0.9)
-    ax.set_yticks(y)
-    ax.set_yticklabels([SOURCE_LABEL[s] for s in delta_sources])
+    ax.set_yticks([0, 1])
+    ax.set_yticklabels([SOURCE_LABEL[s] for s in ["FEP", MD_CONTACT_Q_SOURCE]])
     ax.invert_yaxis()
-    ax.set_xlabel("MAE change vs Tm labels only (deg C)")
-    ax.set_xlim(-0.55, 0.32)
+    ax.set_xlabel("error change vs Tm labels only (deg C)")
+    ax.set_xlim(-9, 9)
     polish(ax, "x")
     panel_label(ax, "B")
 
     ax = axes[1, 0]
-    size_df = model_size_rows(rows)
-    sizes = ["8M", "35M", "650M"]
-    size_xpos = np.arange(len(sizes))
-    offsets = {"Tm-only": -0.09, "FEP": 0.09}
-    for condition, color, marker, label in [("Tm-only", COL["baseline"], "s", "Tm labels only"), ("FEP", COL["fep"], "o", "mutation free energy")]:
-        subset = size_df[size_df["condition"] == condition].set_index("size")
-        vals = np.asarray([float(subset.loc[s, "mae"]) for s in sizes])
-        err_lo = np.asarray([float(subset.loc[s, "mae"] - subset.loc[s, "ci_lo"]) for s in sizes])
-        err_hi = np.asarray([float(subset.loc[s, "ci_hi"] - subset.loc[s, "mae"]) for s in sizes])
-        ax.errorbar(
-            size_xpos + offsets[condition],
-            vals,
-            yerr=[err_lo, err_hi],
-            marker=marker,
-            markersize=4.5,
-            linewidth=1.0,
-            capsize=2,
-            color=color,
-            label=label,
-            zorder=3,
-        )
-        for x, value in zip(size_xpos + offsets[condition], vals):
-            ax.text(x, value + 0.045, f"{value:.2f}", ha="center", va="bottom", fontsize=6.5)
-    ax.set_xticks(size_xpos)
-    ax.set_xticklabels(sizes)
-    ax.set_ylabel("held-out Tm test MAE (deg C)")
-    ax.set_ylim(6.05, 7.12)
-    ax.legend(frameon=False, loc="upper left")
-    polish(ax, "y")
-    panel_label(ax, "C")
-
-    ax = axes[1, 1]
-    for _, row in ordered.iterrows():
-        source = str(row["source"])
-        ax.scatter(
-            row["val_mae"],
-            row["test_mae"],
-            s=54,
-            color=row["color"],
-            edgecolor="white",
-            linewidth=0.7,
-            zorder=3,
-        )
-    key_labels = {
-        "Tm_only": ("Tm labels\nonly", (8, 8), "left"),
-        "FEP": ("FEP", (10, -18), "left"),
-        MD_CONTACT_Q_SOURCE: ("MD Q-value", (8, 8), "left"),
-    }
-    for source, (label, offset, ha) in key_labels.items():
-        row = ordered.loc[ordered["source"].astype(str) == source].iloc[0]
-        ax.annotate(
-            label,
-            xy=(row["val_mae"], row["test_mae"]),
-            xytext=offset,
-            textcoords="offset points",
-            fontsize=6.8,
-            ha=ha,
-            va="center",
-            arrowprops=dict(arrowstyle="-", lw=0.5, color=COL["gray"], shrinkA=2, shrinkB=3),
-        )
-    cluster = ordered[~ordered["source"].astype(str).isin(list(key_labels))]
-    ax.annotate(
-        "other computed\nlabels",
-        xy=(float(cluster["val_mae"].mean()), float(cluster["test_mae"].mean())),
-        xytext=(26, -4),
-        textcoords="offset points",
-        fontsize=6.8,
-        ha="left",
-        va="center",
-        arrowprops=dict(arrowstyle="-", lw=0.5, color=COL["gray"], shrinkA=2, shrinkB=3),
-    )
-    ax.set_xlabel("selected validation-set MAE (deg C)")
-    ax.set_ylabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(5.72, 6.43)
-    ax.set_ylim(6.18, 6.88)
-    polish(ax, "both")
-    panel_label(ax, "D")
-
-    ax = axes[2, 0]
     core = encoder_core_rows()
-    core_sources = ["Tm_only", "FEP", "rosetta", MD_CONTACT_Q_SOURCE]
+    core_sources = ["Tm_only", "FEP", MD_CONTACT_Q_SOURCE]
     ypos = np.arange(len(core_sources))
-    y_offsets = {"frozen": -0.13, "updated": 0.13}
-    markers = {"frozen": "s", "updated": "o"}
-    encoder_labels = {"frozen": "frozen encoder", "updated": "fine-tuned encoder"}
-    for encoder in ["frozen", "updated"]:
+    y_offsets = {"frozen": -0.13, "hot": 0.13}
+    markers = {"frozen": "s", "hot": "o"}
+    encoder_labels = {"frozen": "frozen encoder", "hot": "hot encoder"}
+    for encoder in ["frozen", "hot"]:
         subset = core[core["encoder"] == encoder].set_index("source")
         for i, source in enumerate(core_sources):
             row = subset.loc[source]
@@ -668,14 +612,14 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
                 marker=markers[encoder],
             )
     ax.set_yticks(ypos)
-    ax.set_yticklabels(["Tm labels\nonly", "FEP mutation\nfree energy", "Rosetta mutation\nscore", "MD Q-value"])
+    ax.set_yticklabels(["Tm labels\nonly", "FEP mutation\nfree energy", "MD Q-value"])
     ax.invert_yaxis()
     ax.set_xlabel("held-out Tm test MAE (deg C)")
     ax.set_xlim(5.95, 7.70)
     ax.legend(
         handles=[
             Line2D([0], [0], marker="s", color=COL["black"], linestyle="none", markersize=5, label=encoder_labels["frozen"]),
-            Line2D([0], [0], marker="o", color=COL["black"], linestyle="none", markersize=5, label=encoder_labels["updated"]),
+            Line2D([0], [0], marker="o", color=COL["black"], linestyle="none", markersize=5, label=encoder_labels["hot"]),
         ],
         frameon=False,
         loc="lower center",
@@ -684,52 +628,9 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
         borderaxespad=0.0,
     )
     polish(ax, "x")
-    panel_label(ax, "E")
+    panel_label(ax, "C")
 
-    ax = axes[2, 1]
-    delta_records = []
-    for size in sizes:
-        subset = size_df[size_df["size"] == size].set_index("condition")
-        mean, lo, hi = paired_delta_ci(
-            np.asarray(subset.loc["Tm-only", "abs_errors"], dtype=float),
-            np.asarray(subset.loc["FEP", "abs_errors"], dtype=float),
-        )
-        delta_records.append((size, mean, lo, hi))
-    vals = np.asarray([r[1] for r in delta_records])
-    err_lo = vals - np.asarray([r[2] for r in delta_records])
-    err_hi = np.asarray([r[3] for r in delta_records]) - vals
-    ax.errorbar(
-        size_xpos,
-        vals,
-        yerr=[err_lo, err_hi],
-        fmt="o",
-        color=COL["fep"],
-        markersize=5.4,
-        elinewidth=1.0,
-        capsize=3,
-        zorder=3,
-    )
-    ax.axhline(0, color=COL["black"], linewidth=0.9)
-    for x, value in zip(size_xpos, vals):
-        ax.text(x, value - 0.035, f"{value:+.2f}", ha="center", va="top", fontsize=7.0)
-    ax.set_xticks(size_xpos)
-    ax.set_xticklabels(sizes)
-    ax.set_ylabel("FEP minus Tm-label-only MAE (deg C)")
-    ax.set_ylim(-0.55, 0.12)
-    polish(ax, "y")
-    panel_label(ax, "F")
-
-    save_figure(fig, "fig_outline03_design_bridge")
-
-
-def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
-    fig, axes = plt.subplots(2, 2, figsize=(7.4, 6.1), constrained_layout=True)
-    row_lookup = rows.set_index(rows["source"].astype(str))
-    tm_abs = np.asarray(row_lookup.loc["Tm_only", "abs_errors"], dtype=float)
-    fep_abs = np.asarray(row_lookup.loc["FEP", "abs_errors"], dtype=float)
-    md_abs = np.asarray(row_lookup.loc[MD_CONTACT_Q_SOURCE, "abs_errors"], dtype=float)
-
-    ax = axes[0, 0]
+    ax = axes[1, 1]
     for label, values, color in [
         ("Tm labels only", tm_abs, COL["baseline"]),
         ("FEP mutation free energy", fep_abs, COL["fep"]),
@@ -743,78 +644,97 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_ylim(0, 1.02)
     ax.legend(frameon=False, loc="lower right")
     polish(ax, "both")
-    panel_label(ax, "A")
+    panel_label(ax, "D")
 
-    ax = axes[0, 1]
-    delta_data = [fep_abs - tm_abs, md_abs - tm_abs]
-    parts = ax.violinplot(delta_data, positions=[0, 1], vert=False, widths=0.72, showextrema=False)
-    for body, color in zip(parts["bodies"], [COL["fep"], COL["mdq"]]):
-        body.set_facecolor(color)
-        body.set_edgecolor("none")
-        body.set_alpha(0.25)
-    rng = np.random.default_rng(7)
-    for i, (delta, color) in enumerate(zip(delta_data, [COL["fep"], COL["mdq"]])):
-        y = np.full(len(delta), i) + rng.uniform(-0.16, 0.16, len(delta))
-        ax.scatter(delta, y, s=7, color=color, alpha=0.16, edgecolor="none", rasterized=True)
-    for i, (key, color) in enumerate([("FEP_minus_Tm_only", COL["fep"]), (f"{MD_CONTACT_Q_SOURCE}_minus_Tm_only", COL["mdq"])]):
-        comp = paired[key]
-        horizontal_interval(ax, i, comp["delta_mae"], comp["delta_ci_lo"], comp["delta_ci_hi"], color, zorder=6)
-        ax.text(
-            comp["delta_mae"] + 0.35,
-            i,
-            f"{comp['delta_mae']:+.2f}",
-            va="center",
-            ha="left",
-            fontsize=7.2,
-            bbox=dict(facecolor="white", edgecolor="none", alpha=0.78, pad=0.6),
-            zorder=8,
-        )
-    ax.axvline(0, color=COL["black"], linewidth=0.9)
-    ax.set_yticks([0, 1])
-    ax.set_yticklabels(["FEP mutation\nfree energy", "MD\nQ-value"])
-    ax.set_xlabel("absolute-error change vs Tm labels only (deg C)")
-    ax.set_xlim(-9, 9)
-    polish(ax, "x")
-    panel_label(ax, "B")
+    save_figure(fig, "fig_outline03_design_bridge")
 
-    ax = axes[1, 0]
-    delta_sources = [s for s in SOURCE_ORDER if s != "Tm_only"]
-    y = np.arange(len(delta_sources))
-    for i, source in enumerate(delta_sources):
-        comp = paired[paired_key(source)]
+
+def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
+    fig, axes = plt.subplots(
+        2,
+        2,
+        figsize=(7.4, 4.9),
+        constrained_layout=True,
+        gridspec_kw={"height_ratios": [1.0, 0.68]},
+    )
+    row_lookup = rows.set_index(rows["source"].astype(str))
+    design_sources = ["Tm_only", "rosetta_esm", "thermoMPNN", "rosetta_random", "rosetta"]
+
+    ax = axes[0, 0]
+    ordered = row_lookup.loc[design_sources].reset_index(drop=True)
+    y = np.arange(len(ordered))
+    for i, row in ordered.iterrows():
         horizontal_interval(
             ax,
             i,
-            comp["delta_mae"],
-            comp["delta_ci_lo"],
-            comp["delta_ci_hi"],
-            SOURCE_COLOR[source],
+            row["test_mae"],
+            row["ci_lo"],
+            row["ci_hi"],
+            row["color"],
+            marker="s" if row["source"] == "Tm_only" else "o",
         )
+        ax.text(row["ci_hi"] + 0.030, i, f"{row['test_mae']:.2f}", va="center", fontsize=7.3)
+    ax.set_yticks(y)
+    ax.set_yticklabels(ordered["label_plot"])
+    ax.invert_yaxis()
+    ax.set_xlabel("held-out Tm test MAE (deg C)")
+    ax.set_xlim(6.25, 6.95)
+    polish(ax, "x")
+    panel_label(ax, "A")
+
+    ax = axes[0, 1]
+    delta_sources = [s for s in design_sources if s != "Tm_only"]
+    y = np.arange(len(delta_sources))
+    for i, source in enumerate(delta_sources):
+        comp = paired[paired_key(source)]
+        horizontal_interval(ax, i, comp["delta_mae"], comp["delta_ci_lo"], comp["delta_ci_hi"], SOURCE_COLOR[source], zorder=6)
+        ax.text(comp["delta_ci_hi"] + 0.016, i, f"{comp['delta_mae']:+.2f}", va="center", fontsize=7.2)
     ax.axvline(0, color=COL["black"], linewidth=0.9)
     ax.set_yticks(y)
     ax.set_yticklabels([SOURCE_LABEL[s] for s in delta_sources])
     ax.invert_yaxis()
     ax.set_xlabel("MAE change vs Tm labels only (deg C)")
-    ax.set_xlim(-0.55, 0.30)
+    ax.set_xlim(-0.36, 0.14)
+    polish(ax, "x")
+    panel_label(ax, "B")
+
+    ax = axes[1, 0]
+    random_abs = np.asarray(row_lookup.loc["rosetta_random", "abs_errors"], dtype=float)
+    esm_abs = np.asarray(row_lookup.loc["rosetta_esm", "abs_errors"], dtype=float)
+    mean, lo, hi = paired_delta_ci(random_abs, esm_abs)
+    horizontal_interval(ax, 0, mean, lo, hi, COL["design"], zorder=4)
+    ax.axvline(0, color=COL["black"], linewidth=0.9)
+    ax.set_yticks([0])
+    ax.set_yticklabels(["ESM2-proposed\nminus random"])
+    ax.set_xlabel("ESM2-proposed minus random MAE (deg C)")
+    ax.set_xlim(-0.25, 0.16)
+    ax.set_ylim(-0.55, 0.55)
+    ax.text(mean, -0.22, f"{mean:+.2f}", ha="center", va="top", fontsize=7.3, color=COL["design"])
+    ax.text(
+        0.02,
+        0.88,
+        "negative values favor\nESM2-proposed variants",
+        transform=ax.transAxes,
+        ha="left",
+        va="top",
+        fontsize=7.2,
+        color=COL["gray"],
+    )
     polish(ax, "x")
     panel_label(ax, "C")
 
     ax = axes[1, 1]
     hide_axes(ax)
-    x = np.linspace(0.06, 0.94, 300)
-    landscape = 0.52 + 0.16 * np.sin(2.0 * np.pi * x + 0.20) - 0.08 * np.cos(5.1 * np.pi * x)
-    ax.plot(x, landscape, color=COL["black"], linewidth=2.0)
-    anchors = np.array([0.18, 0.42, 0.68, 0.86])
-    ay = np.interp(anchors, x, landscape)
-    ax.scatter(anchors, ay, s=48, color=COL["baseline"], edgecolor="white", linewidth=0.8, zorder=5)
-    for axx, ayy in zip(anchors, ay):
-        ax.plot([axx, axx], [0.14, ayy - 0.035], color=COL["baseline"], linewidth=0.9, alpha=0.55)
-    for x0, x1 in [(0.26, 0.35), (0.54, 0.63), (0.73, 0.82)]:
-        y0, y1 = np.interp([x0, x1], x, landscape)
-        ax.annotate("", xy=(x1, y1), xytext=(x0, y0), arrowprops=dict(arrowstyle="-|>", color=COL["fep"], lw=1.8))
-    ax.text(0.18, 0.08, "sparse absolute\nTm anchors", ha="center", va="center", fontsize=7.4, color=COL["baseline"])
-    ax.text(0.68, 0.08, "local mutation\nfree-energy directions", ha="center", va="center", fontsize=7.4, color=COL["fep"])
-    ax.text(0.57, 0.74, "MD Q-value", ha="center", fontsize=7.0, color=COL["mdq"])
+    box(ax, (0.05, 0.60), (0.25, 0.18), "sequence\nproposal", fc=COL["soft_blue"], ec=COL["design"], weight="bold", fontsize=7.2)
+    box(ax, (0.375, 0.60), (0.25, 0.18), "physics-based\nscoring", fc=COL["soft_orange"], ec=COL["rosetta"], weight="bold", fontsize=7.2)
+    box(ax, (0.70, 0.60), (0.25, 0.18), "Tm\npredictor", fc=COL["soft_gray"], ec=COL["baseline"], weight="bold", fontsize=7.2)
+    box(ax, (0.375, 0.24), (0.25, 0.18), "future\nexperimental\nfeedback", fc="white", ec=COL["black"], fontsize=7.0)
+    arrow(ax, (0.30, 0.69), (0.375, 0.69), color=COL["design"])
+    arrow(ax, (0.625, 0.69), (0.70, 0.69), color=COL["rosetta"])
+    arrow(ax, (0.82, 0.60), (0.54, 0.42), color=COL["baseline"])
+    arrow(ax, (0.40, 0.33), (0.18, 0.60), color=COL["black"], style="--")
+    ax.text(0.50, 0.08, "current study tests the supervised-scoring step,\nnot a closed-loop reinforcement-learning experiment",
+            ha="center", va="center", fontsize=7.0, color=COL["gray"])
     panel_label(ax, "D")
 
     save_figure(fig, "fig_outline04_mdq_boundary")

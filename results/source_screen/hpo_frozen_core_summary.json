@@ -24,7 +24,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_latent_default.log",
-    "gpu": "5",
     "rc": 0,
     "val_mae": 7.209712152158333,
     "ci_width": 1.5737889203838034,
@@ -79,7 +78,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_latent_drop0.05.log",
-    "gpu": "2",
     "rc": 0,
     "val_mae": 7.283400383808748,
     "ci_width": 1.5735600205764175,
@@ -134,7 +132,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_latent_drop0.30.log",
-    "gpu": "3",
     "rc": 0,
     "val_mae": 7.040689084018909,
     "ci_width": 1.6099804952900216,
@@ -189,7 +186,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_latent_enc3e-4.log",
-    "gpu": "0",
     "rc": 0,
     "val_mae": 7.209712152158333,
     "ci_width": 1.5737889203838034,
@@ -244,7 +240,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_latent_enc3e-5.log",
-    "gpu": "6",
     "rc": 0,
     "val_mae": 7.209712152158333,
     "ci_width": 1.5737889203838034,
@@ -300,7 +295,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_latent_lr1e-4_enc3e-5.log",
-    "gpu": "1",
     "rc": 0,
     "val_mae": 7.2867767410269,
     "ci_width": 1.5744834863805917,
@@ -354,7 +348,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_residual_default.log",
-    "gpu": "6",
     "rc": 0,
     "val_mae": 7.225642966157626,
     "ci_width": 1.579919172908899,
@@ -409,7 +402,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_residual_drop0.05.log",
-    "gpu": "3",
     "rc": 0,
     "val_mae": 7.1939064818687175,
     "ci_width": 1.5693871638204682,
@@ -464,7 +456,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_residual_drop0.30.log",
-    "gpu": "4",
     "rc": 0,
     "val_mae": 7.047547785212446,
     "ci_width": 1.5901439399506776,
@@ -519,7 +510,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_residual_enc3e-4.log",
-    "gpu": "1",
     "rc": 0,
     "val_mae": 7.225642966157626,
     "ci_width": 1.579919172908899,
@@ -574,7 +564,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_residual_enc3e-5.log",
-    "gpu": "0",
     "rc": 0,
     "val_mae": 7.225642966157626,
     "ci_width": 1.579919172908899,
@@ -630,7 +619,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_residual_lr1e-4_enc3e-5.log",
-    "gpu": "2",
     "rc": 0,
     "val_mae": 7.32292898137983,
     "ci_width": 1.5653687377307843,
@@ -684,7 +672,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_shared_default.log",
-    "gpu": "0",
     "rc": 0,
     "val_mae": 7.220055772179947,
     "ci_width": 1.5705893567796565,
@@ -739,7 +726,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_shared_drop0.05.log",
-    "gpu": "4",
     "rc": 0,
     "val_mae": 7.302562493383999,
     "ci_width": 1.5587468453810462,
@@ -794,7 +780,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_shared_drop0.30.log",
-    "gpu": "5",
     "rc": 0,
     "val_mae": 6.961082132962038,
     "ci_width": 1.610265127563978,
@@ -849,7 +834,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_shared_enc3e-4.log",
-    "gpu": "2",
     "rc": 0,
     "val_mae": 7.220055772179947,
     "ci_width": 1.5705893567796565,
@@ -904,7 +888,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_shared_enc3e-5.log",
-    "gpu": "1",
     "rc": 0,
     "val_mae": 7.220055772179947,
     "ci_width": 1.5705893567796565,
@@ -960,7 +943,6 @@
       "n-ddg-list": "0"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_tm_shared_lr1e-4_enc3e-5.log",
-    "gpu": "3",
     "rc": 0,
     "val_mae": 7.366948115463692,
     "ci_width": 1.5395401945034308,
@@ -1015,7 +997,6 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_ddg_fep_default.log",
-    "gpu": "4",
     "rc": 0,
     "val_mae": 6.443909248971213,
     "ci_width": 1.4897396363445008,
@@ -1071,7 +1052,6 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_ddg_fep_drop0.05.log",
-    "gpu": "1",
     "rc": 0,
     "val_mae": 6.7772645559359095,
     "ci_width": 1.5174088220009194,
@@ -1127,7 +1107,6 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_ddg_fep_drop0.30.log",
-    "gpu": "2",
     "rc": 0,
     "val_mae": 6.614627976507845,
     "ci_width": 1.519162722888904,
@@ -1183,7 +1162,6 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_ddg_fep_enc3e-4.log",
-    "gpu": "6",
     "rc": 0,
     "val_mae": 6.443909248971213,
     "ci_width": 1.4897396363445008,
@@ -1239,7 +1217,6 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_ddg_fep_enc3e-5.log",
-    "gpu": "5",
     "rc": 0,
     "val_mae": 6.443909248971213,
     "ci_width": 1.4897396363445008,
@@ -1295,7 +1272,6 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_ddg_fep_fixed.log",
-    "gpu": "3",
     "rc": 0,
     "val_mae": 6.774752141289657,
     "ci_width": 1.5215799463060398,
@@ -1352,7 +1328,6 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_ddg_fep_lr1e-4_enc3e-5.log",
-    "gpu": "0",
     "rc": 0,
     "val_mae": 6.7730799118430545,
     "ci_width": 1.5348681205852088,
@@ -1407,7 +1382,6 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_ddg_rosetta_default.log",
-    "gpu": "4",
     "rc": 0,
     "val_mae": 6.594275504540308,
     "ci_width": 1.4873201451359588,
@@ -1463,7 +1437,6 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_ddg_rosetta_drop0.05.log",
-    "gpu": "1",
     "rc": 0,
     "val_mae": 6.693229261927027,
     "ci_width": 1.528473417091683,
@@ -1519,7 +1492,6 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_ddg_rosetta_drop0.30.log",
-    "gpu": "2",
     "rc": 0,
     "val_mae": 6.765579462107712,
     "ci_width": 1.5026664623156707,
@@ -1575,7 +1547,6 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_ddg_rosetta_enc3e-4.log",
-    "gpu": "6",
     "rc": 0,
     "val_mae": 6.594275504540308,
     "ci_width": 1.4873201451359588,
@@ -1631,7 +1602,6 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_ddg_rosetta_enc3e-5.log",
-    "gpu": "5",
     "rc": 0,
     "val_mae": 6.594275504540308,
     "ci_width": 1.4873201451359588,
@@ -1687,7 +1657,6 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_ddg_rosetta_fixed.log",
-    "gpu": "3",
     "rc": 0,
     "val_mae": 6.750247523969054,
     "ci_width": 1.539784095106242,
@@ -1744,7 +1713,6 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_ddg_rosetta_lr1e-4_enc3e-5.log",
-    "gpu": "0",
     "rc": 0,
     "val_mae": 6.887459036452451,
     "ci_width": 1.5605456158528828,
@@ -1799,7 +1767,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_md_q-hphil-400k_default.log",
-    "gpu": "4",
     "rc": 0,
     "val_mae": 6.92029276531005,
     "ci_width": 1.5786953004948456,
@@ -1855,7 +1822,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_md_q-hphil-400k_drop0.05.log",
-    "gpu": "1",
     "rc": 0,
     "val_mae": 7.0286812800248555,
     "ci_width": 1.5687989435779643,
@@ -1911,7 +1877,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_md_q-hphil-400k_drop0.30.log",
-    "gpu": "2",
     "rc": 0,
     "val_mae": 6.884064043610095,
     "ci_width": 1.5914422490797877,
@@ -1967,7 +1932,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_md_q-hphil-400k_enc3e-4.log",
-    "gpu": "6",
     "rc": 0,
     "val_mae": 6.92029276531005,
     "ci_width": 1.5786953004948456,
@@ -2023,7 +1987,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_md_q-hphil-400k_enc3e-5.log",
-    "gpu": "5",
     "rc": 0,
     "val_mae": 6.92029276531005,
     "ci_width": 1.5786953004948456,
@@ -2080,7 +2043,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_md_q-hphil-400k_fixed_w0.05.log",
-    "gpu": "3",
     "rc": 0,
     "val_mae": 7.054837640442982,
     "ci_width": 1.556952818497468,
@@ -2137,7 +2099,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_md_q-hphil-400k_fixed_w0.10.log",
-    "gpu": "4",
     "rc": 0,
     "val_mae": 7.048471593643863,
     "ci_width": 1.5521573883278226,
@@ -2194,7 +2155,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_md_q-hphil-400k_fixed_w0.25.log",
-    "gpu": "5",
     "rc": 0,
     "val_mae": 7.052516826654063,
     "ci_width": 1.5559105193599168,
@@ -2251,7 +2211,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_md_q-hphil-400k_fixed_w0.50.log",
-    "gpu": "6",
     "rc": 0,
     "val_mae": 7.049993528621875,
     "ci_width": 1.5533123039431036,
@@ -2308,7 +2267,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/frozen_sourcehpo_md_q-hphil-400k_lr1e-4_enc3e-5.log",
-    "gpu": "0",
     "rc": 0,
     "val_mae": 7.196731668449398,
     "ci_width": 1.5677447863956866,

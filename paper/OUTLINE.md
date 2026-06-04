@@ -109,7 +109,7 @@ Terminology rules:
   summarizing native-contact persistence" before "MD Q-value".
 - In figures, use reader-facing labels such as "Tm labels only", "mutation
   free energy", "Rosetta mutation score", "ThermoMPNN stability score",
-  "ESM2 variants scored by Rosetta", and "MD Q-value".
+  "ESM2-proposed variants scored by Rosetta", and "MD Q-value".
 
 ## CSBJ Fit
 
@@ -286,7 +286,7 @@ Paragraph plan:
 10. Protein language models provide useful representations, and prior nanobody Tm work shows that supervised fine-tuning is important for extracting Tm-relevant representations.
 11. However, that prior work also suggests that simply increasing ESM2 size does not automatically improve nanobody Tm prediction, motivating information sources beyond model-size scaling.
 12. We use a shared-encoder multi-task transfer-learning framework and evaluate all claims on held-out experimental Tm examples.
-13. We compare mutation free-energy labels, generated-variant physics labels, and an MD-derived structural-dynamics label.
+13. We compare mutation free-energy labels, Rosetta-scored variant proposal labels, and an MD-derived structural-dynamics label.
 14. We find that FEP-derived mutation free-energy labels most clearly improve Tm prediction, supporting the view that relative stability-change information complements sparse absolute Tm anchors.
 
 Do not open the Introduction with a conceptual discussion of Tm versus ΔΔG. That interpretation belongs near the end.
@@ -319,7 +319,7 @@ Subsection plan:
    - FEP mutation free-energy labels.
    - Rosetta mutation-effect labels.
    - ThermoMPNN mutation-effect labels.
-   - ESM2 variants scored by Rosetta.
+   - ESM2-proposed variants scored by Rosetta.
    - Random variants scored by Rosetta.
    - MD-derived Q-value labels.
    - For each source, report label definition, sign convention, number of labels, and whether labels are mutation-relative or sequence-level.
@@ -328,7 +328,7 @@ Subsection plan:
    - How ESM2-proposed variants were produced.
    - How random variants were produced.
    - How Rosetta scoring was applied to both sets.
-   - State that generated-vs-random superiority is exploratory and not the main claim.
+   - State that ESM2-proposed-vs-random superiority is exploratory and not the main claim.
 
 5. **Model architecture**
    - ESM2 sequence encoder.
@@ -407,7 +407,7 @@ Key numbers:
 |---|---:|---:|---:|
 | Tm-only | 6.6145 | - | - |
 | FEP | 6.2611 | -0.3530 | [-0.4621, -0.2426] |
-| ESM2 variants scored by Rosetta | 6.4484 | -0.1652 | [-0.3058, -0.0250] |
+| ESM2-proposed variants scored by Rosetta | 6.4484 | -0.1652 | [-0.3058, -0.0250] |
 | ThermoMPNN | 6.4607 | -0.1525 | [-0.2958, -0.0067] |
 | Random variants scored by Rosetta | 6.5130 | -0.0998 | [-0.2248, +0.0259] |
 | Rosetta | 6.5255 | -0.0880 | [-0.2008, +0.0247] |
@@ -425,7 +425,7 @@ Key points:
 
 - ESM2 size controls compare 8M, 35M, and 650M encoders.
 - Larger ESM2 encoders do not improve absolute performance in this small-Tm-data setting.
-- FEP remains beneficial within each size comparison, but the best absolute result is the 8M fine-tuned encoder with FEP labels.
+- FEP remains beneficial within each size comparison, but the best absolute result is the 8M hot encoder with FEP labels.
 - This agrees with the related Murakami et al. observation that model-size scaling alone did not solve nanobody Tm prediction.
 
 Main claim:
@@ -438,8 +438,8 @@ Figure: Fig. 3e.
 
 Key points:
 
-- FEP improves both fine-tuned-encoder and frozen-encoder settings.
-- The fine-tuned-encoder setting gives the best absolute performance.
+- FEP improves both hot-encoder and frozen-encoder settings.
+- The hot-encoder setting gives the best absolute performance.
 - Rosetta mutation scores and the MD-derived Q-value remain weaker than FEP.
 
 Main claim:
@@ -454,8 +454,8 @@ Key numbers:
 
 | comparison | ΔMAE | 90% paired CI |
 |---|---:|---:|
-| ESM2 variants scored by Rosetta vs Tm-only | -0.1652 | [-0.3058, -0.0250] |
-| ESM2 variants scored by Rosetta vs random variants scored by Rosetta | -0.0654 | [-0.1949, +0.0639] |
+| ESM2-proposed variants scored by Rosetta vs Tm-only | -0.1652 | [-0.3058, -0.0250] |
+| ESM2-proposed variants scored by Rosetta vs random variants scored by Rosetta | -0.0654 | [-0.1949, +0.0639] |
 
 Main claim:
 
@@ -490,7 +490,7 @@ Paragraph plan:
    - small experimental Tm train set;
    - nanobody-specific dataset;
    - no new experimental validation of high-Tm candidates;
-   - generated-variant comparison remains exploratory;
+   - ESM2-proposed-vs-random comparison remains exploratory;
    - raw simulation data may be large and difficult to deposit fully.
 8. Outlook:
    - candidate generation, physics scoring, Tm prediction, and iterative selection;
@@ -574,7 +574,7 @@ Panels:
 - (b) Paired ΔMAE versus Tm-only.
 - (c) ESM2 size controls.
 - (d) Validation-set performance versus held-out test performance.
-- (e) Frozen versus fine-tuned encoder comparison.
+- (e) Frozen versus hot encoder comparison.
 - (f) FEP gain across ESM2 sizes.
 
 Claims:
@@ -635,7 +635,7 @@ Keep the main paper compact and put reproducibility details here.
 |---|---:|---:|---:|
 | Tm-only | 6.6145 | - | - |
 | FEP | 6.2611 | -0.3530 | [-0.4621, -0.2426] |
-| ESM2 variants scored by Rosetta | 6.4484 | -0.1652 | [-0.3058, -0.0250] |
+| ESM2-proposed variants scored by Rosetta | 6.4484 | -0.1652 | [-0.3058, -0.0250] |
 | ThermoMPNN | 6.4607 | -0.1525 | [-0.2958, -0.0067] |
 | Random variants scored by Rosetta | 6.5130 | -0.0998 | [-0.2248, +0.0259] |
 | Rosetta | 6.5255 | -0.0880 | [-0.2008, +0.0247] |
@@ -643,7 +643,7 @@ Keep the main paper compact and put reproducibility details here.
 
 Additional paired comparison:
 
-- ESM2 variants scored by Rosetta minus random variants scored by Rosetta:
+- ESM2-proposed variants scored by Rosetta minus random variants scored by Rosetta:
   - ΔMAE -0.0654
   - 90% CI [-0.1949, +0.0639]
   - Interpretation: suggestive but not conclusive.
@@ -664,7 +664,7 @@ Additional paired comparison:
 - [ ] Present source-label training before discussing the Tm/ΔΔG relationship.
 - [ ] Keep FEP as the main quantitative result.
 - [ ] Use the MD-derived Q-value result to show source dependence.
-- [ ] Treat generated-variant results as a design-loop bridge, not as proof of optimized design.
+- [ ] Treat ESM2-proposed-vs-random results as a design-loop bridge, not as proof of optimized design.
 - [ ] Place the Tm/ΔΔG conceptual interpretation near the end of Results or in Discussion.
 - [ ] Add CSBJ-required statements: funding, author contributions, competing interests, data availability, code availability, and AI-use disclosure.
 - [ ] Convert figure panel labels to `(a)`, `(b)`, `(c)` style.

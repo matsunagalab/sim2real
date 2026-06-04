@@ -77,8 +77,8 @@ uses ESM2, a pretrained protein language model, as the shared sequence encoder
 computational information: mutation free-energy changes from alchemical
 free-energy perturbation (FEP) calculations, mutation scores from Rosetta,
 stability scores from ThermoMPNN, Rosetta scores on variants proposed by ESM2
-or sampled at random, and a molecular-dynamics (MD)-derived Q-value measuring native-contact
-persistence. To keep the comparison
+or sampled at random, and a molecular-dynamics (MD)-derived Q-value measuring
+native-contact persistence. To keep the comparison
 target-centered, all model settings are selected using an experimental
 validation set, and all final claims are evaluated on the same held-out
 experimental Tm test set with paired error comparisons. This design prevents
@@ -89,8 +89,9 @@ The main result is that the benefit of simulation-derived supervision is highly
 source-dependent. Mutation free-energy labels from FEP provide the strongest
 improvement over training on Tm labels alone, whereas the MD-derived Q-value
 does not improve held-out Tm prediction under the same evaluation
-design. ESM2 variants scored by Rosetta provide a weaker but positive signal,
-suggesting a connection to future generator--physics--predictor design loops.
+design. Rosetta-scored ESM2 proposal sets provide a weaker exploratory signal,
+suggesting a possible connection to future generator--physics--predictor design
+loops, but not yet demonstrating closed-loop sequence optimization.
 Taken together, these results extend the Sim2Real argument from materials
 informatics to a biomolecular setting in which the source and target labels
 differ in physical meaning. Useful simulation data are not merely abundant; they

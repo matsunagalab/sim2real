@@ -78,23 +78,29 @@ a compressed trajectory statistic and may miss the mutation-specific energetic
 effects that determine how sequence changes alter the stability landscape. This
 distinction matters for future database design. A simulation campaign optimized
 for target transfer should not only maximize the number of labels; it should
-choose labels whose physical meaning is
-expected to transfer to the experimental decision being made.
+choose labels whose physical meaning is expected to transfer to the
+experimental endpoint being optimized.
 
-\subsection*{Physics-labeled sequence proposals point toward design workflows}
+\subsection*{Physics-scored sequence proposals point toward design workflows}
 
-The language-model proposal result points toward a possible design workflow.
-Rosetta scores assigned to ESM2-proposed variants improved Tm prediction
-relative to Tm-only learning, although those proposals were not conclusively
-better than random variants in the current comparison. This should be viewed as
-a bridge, not a completed design loop. The positive signal indicates that
-proposed sequences can be labeled by physics-based calculations and used as
-supervised source data for a Tm predictor. A natural next step is an iterative
-loop in which a generator proposes variants, physics-based calculations annotate
-them, the Tm predictor is updated, and candidates are selected for experimental
-testing. The present work supplies evidence for the supervised learning
-component of that loop, but it does not test active learning, reinforcement
-learning, or experimental validation of newly proposed high-Tm nanobodies.
+The ESM2 proposal result points toward a possible design workflow. Rosetta
+scores assigned to ESM2-proposed variants improved Tm prediction relative to
+Tm-only learning, and they were slightly better than the same Rosetta workflow
+applied to random variants. The direct ESM2-versus-random comparison remained
+exploratory because its confidence interval crossed zero. We therefore do not
+interpret this result as proof that the current proposal model has already
+optimized nanobody thermostability. The useful point is more limited and more
+practical: sequences proposed by a protein language model can be annotated by a
+physics-based score and then used as supervised source data for a Tm predictor.
+
+That supervised-scoring step is the part of a design loop tested here. In a
+future closed loop, a sequence generator could propose variants, physics-based
+calculations could annotate them, the Tm predictor could update its estimate of
+experimental stability, and the resulting score could be used as a reward or
+selection signal for the next round of proposals. Such a workflow would connect
+the present transfer-learning result to active learning or reinforcement
+learning, but those closed-loop steps and the experimental validation of newly
+proposed high-Tm nanobodies remain outside the scope of this paper.
 
 \subsection*{Limitations}
 

@@ -4,26 +4,25 @@
 \begin{abstract}
 Nanobody development often depends on thermal stability, but experimental
 melting-temperature (Tm) measurements remain scarce. Simulations and
-structure-based calculations can label many mutated or designed sequences, yet
-these labels usually measure related quantities rather than Tm itself. We
-tested whether such computational labels can improve low-data nanobody Tm
-prediction under strictly experimental model selection. Using a public nanobody
-Tm benchmark, we trained transfer-learning models that combined Tm prediction
-with one computational prediction task at a time; checkpoints, model choices,
-and final evaluation used only experimental Tm validation or test examples. We
-compared mutation free energies from alchemical free-energy perturbation (FEP),
-Rosetta mutation scores, ThermoMPNN stability scores, Rosetta scores on
-variants proposed by ESM2 or sampled at random, and an MD-derived Q-value summarizing
-native-contact persistence. FEP gave the clearest benefit: held-out Tm mean absolute error
-decreased from 6.61 to 6.26$^\circ$C relative to Tm-only training, with a paired
-improvement of 0.35$^\circ$C (90\% confidence interval, 0.24--0.46$^\circ$C).
-The reduction was small in absolute magnitude but robust in the paired test-set
-analysis.
-The gain was not reproduced by larger protein sequence models or by the
-MD-derived Q-value, whereas ESM2 variants scored by Rosetta gave a weaker
-positive signal. Thus, computational labels can improve nanobody Tm prediction
-when their physical meaning transfers to the experimental endpoint; mutation
-free energies complement sparse absolute Tm measurements.
+structure-based calculations can annotate many sequence variants, yet their
+labels usually describe related physical quantities rather than Tm itself. We
+asked whether such computational labels can improve low-data nanobody Tm
+prediction when every model choice is anchored to experimental Tm validation.
+Using a public nanobody Tm benchmark, we trained transfer-learning models that
+combined Tm prediction with one computational source task at a time. The source
+labels covered mutation free energies, structure-based scores, protein-language
+model proposal sets scored by Rosetta, and molecular-dynamics trajectory
+summaries. Alchemical free-energy perturbation (FEP) gave the clearest benefit:
+held-out Tm mean absolute error decreased from 6.61 to 6.26$^\circ$C relative
+to training only on experimental Tm labels, with a paired improvement of
+0.35$^\circ$C (90\% confidence interval, 0.24--0.46$^\circ$C). The gain was not
+reproduced by increasing the ESM2 encoder size or by using the MD-derived
+Q-value. Rosetta-scored proposal sets were feasible as supervised source labels,
+but the direct advantage of ESM2-proposed variants over random variants remained
+exploratory.
+Thus, computational labels can improve nanobody Tm prediction when their
+physical meaning transfers to the experimental endpoint; mutation free energies
+complement sparse absolute Tm measurements.
 \end{abstract}
 %TC:break main
 
