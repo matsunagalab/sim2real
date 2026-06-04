@@ -1,6 +1,6 @@
 # Rosetta Random-Variant Source Labels
 
-**ランダム変異**で生成した約 1000 バリアントを、Rosetta の ddG 計算で評価するためのワークフローです。  
+**ランダム変異**で生成した約 1000 バリアントを、Rosetta の ddG 計算で評価するためのワークフローです。
 ESM-2 等のモデルを使わず、位置・アミノ酸を一様ランダムに選んで変異を入れるベースライン用です。
 
 ## 概要
@@ -45,8 +45,8 @@ data/source_labels/rosetta/random1000/
   - 変異先アミノ酸は Cys を除く 19 種類（`ADEFGHIKLMNPQRSTVWY`）から一様ランダムに選択
   - 同じ配列は重複排除して、指定本数になるまで生成
 
-- **出力**:  
-  `multi_mutations_random_<num_mutations>mut_<seq_name>_<num_sequences>.csv`  
+- **出力**:
+  `multi_mutations_random_<num_mutations>mut_<seq_name>_<num_sequences>.csv`
   列: `sequence`, `num_mutations`, `mutations`
 
 ### 2. CSV → Rosetta 変異リスト
