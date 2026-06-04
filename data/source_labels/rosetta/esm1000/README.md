@@ -1,6 +1,6 @@
 # ESM2-Generated Rosetta Source Labels
 
-ESM-2（Protein Language Model）で生成した変異バリアントを、Rosetta の ddG 計算で評価するためのワークフローです。  
+ESM-2（Protein Language Model）で生成した変異バリアントを、Rosetta の ddG 計算で評価するためのワークフローです。
 約 10 万バリアントを生成し、PLL（Pseudolog-Likelihood）で上位 1% を選んだ約 1000 バリアントに対して Rosetta ddG を実行します。
 
 ## 概要
@@ -43,8 +43,8 @@ data/source_labels/rosetta/esm1000/
   - `mutation_counts`: 1 バリアントあたりの変異数（例: `[2]`）
   - `top_pll_percent`: PLL 上位何 % を残すか（例: 1）
 
-- **出力**:  
-  `esm2_650M_large_scale_variants_<seq_name>_<num_variants>_top1pct.csv`  
+- **出力**:
+  `esm2_650M_large_scale_variants_<seq_name>_<num_variants>_top1pct.csv`
   列: `sequence`, `num_mutations`, `mutations`, `pll`
 
 ### 2. CSV → Rosetta 変異リスト
