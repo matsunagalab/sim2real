@@ -81,17 +81,17 @@ for target transfer should not only maximize the number of labels; it should
 choose labels whose physical meaning is
 expected to transfer to the experimental decision being made.
 
-\subsection*{Generated variants point toward design workflows}
+\subsection*{Physics-labeled sequence proposals point toward design workflows}
 
-The generated-variant result points toward a possible design workflow. Rosetta
-scores assigned to ESM2-generated variants improved Tm prediction relative to
-Tm-only learning, although generated variants were not conclusively better than
-random variants in the current comparison. This should be viewed as a bridge,
-not a completed design loop. The positive signal indicates that proposed
-sequences can be labeled by physics-based calculations and used as supervised
-source data for a Tm predictor. A natural next step is an iterative loop in
-which a generator proposes variants, physics-based calculations annotate them,
-the Tm predictor is updated, and candidates are selected for experimental
+The language-model proposal result points toward a possible design workflow.
+Rosetta scores assigned to ESM2-proposed variants improved Tm prediction
+relative to Tm-only learning, although those proposals were not conclusively
+better than random variants in the current comparison. This should be viewed as
+a bridge, not a completed design loop. The positive signal indicates that
+proposed sequences can be labeled by physics-based calculations and used as
+supervised source data for a Tm predictor. A natural next step is an iterative
+loop in which a generator proposes variants, physics-based calculations annotate
+them, the Tm predictor is updated, and candidates are selected for experimental
 testing. The present work supplies evidence for the supervised learning
 component of that loop, but it does not test active learning, reinforcement
 learning, or experimental validation of newly proposed high-Tm nanobodies.

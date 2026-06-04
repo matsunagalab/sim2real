@@ -1,7 +1,7 @@
 {
   "exp_name": "sourcefinal_frozen_md_q-hphil-400k_drop0.30",
-  "timestamp": "2026-05-31T18:03:14",
-  "git_commit": "d2bf5b2",
+  "timestamp": "2026-06-03T17:31:28",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "none",
     "n_ddg_list": "0",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 10,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "/home/yasu/tmp/sim2real/results/source_screen/final/sourcefinal_frozen_md_q-hphil-400k_drop0.30",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -490,7 +493,7 @@
     "slope": null,
     "ci_width_avg": 0.8969484683924369,
     "mae_avg": 7.327979031419028,
-    "elapsed_s": 869.4694218635559
+    "elapsed_s": 726.8464043140411
   },
   "paired_bootstrap": {
     "ref_n": 640,

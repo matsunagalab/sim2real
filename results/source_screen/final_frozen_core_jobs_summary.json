@@ -83,7 +83,7 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/sourcefinal_frozen_ddg_fep_default.log",
-    "gpu": "2",
+    "gpu": "1",
     "rc": 0,
     "val_mae": 6.443909248971213,
     "ci_width": 0.8753525767612729,
@@ -141,7 +141,7 @@
       "ddg-head-mode": "separate"
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/sourcefinal_frozen_ddg_rosetta_default.log",
-    "gpu": "3",
+    "gpu": "2",
     "rc": 0,
     "val_mae": 6.594275504540308,
     "ci_width": 0.875255746175915,
@@ -200,7 +200,7 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/source_screen/sourcefinal_frozen_md_q-hphil-400k_drop0.30.log",
-    "gpu": "4",
+    "gpu": "3",
     "rc": 0,
     "val_mae": 6.884064043610095,
     "ci_width": 0.8969484683924369,

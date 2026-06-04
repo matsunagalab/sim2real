@@ -1,7 +1,7 @@
 {
   "exp_name": "sourcefinal_frozen_tm_shared_drop0.30",
-  "timestamp": "2026-05-31T17:56:59",
-  "git_commit": "d2bf5b2",
+  "timestamp": "2026-06-03T17:26:54",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "none",
     "n_ddg_list": "0",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 10,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "/home/yasu/tmp/sim2real/results/source_screen/final/sourcefinal_frozen_tm_shared_drop0.30",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -490,7 +493,7 @@
     "slope": null,
     "ci_width_avg": 0.903266728664402,
     "mae_avg": 7.377377426314388,
-    "elapsed_s": 494.5616421699524
+    "elapsed_s": 453.0385100841522
   },
   "paired_bootstrap": {
     "ref_n": 0,

@@ -77,7 +77,7 @@ The answer developed in this case study is:
 - Evaluate all claims on a held-out experimental Tm test set.
 - Compare source labels by paired errors on the same test examples.
 
-The main result is that FEP-derived mutation free-energy labels provide the clearest improvement over Tm-only training. ESM2-generated variants scored by Rosetta provide a weaker but positive signal. A simple MD-derived Q-value label does not improve the held-out Tm prediction. Therefore, the message is not that adding simulation data is generically beneficial; rather, the computational label must encode information that transfers to the target phenotype.
+The main result is that FEP-derived mutation free-energy labels provide the clearest improvement over Tm-only training. Rosetta scores assigned to variants proposed by ESM2 provide a weaker but positive signal. A simple MD-derived Q-value label does not improve the held-out Tm prediction. Therefore, the message is not that adding simulation data is generically beneficial; rather, the computational label must encode information that transfers to the target phenotype.
 
 The relation between Tm and mutation free energy is the final interpretation, not the opening premise. Sparse experimental Tm labels anchor the absolute stability scale, while mutation free-energy labels provide local stability-change information over sequence perturbations.
 
@@ -249,7 +249,7 @@ Avoid in the main Introduction unless needed:
 3. A controlled comparison of multiple computational label types under the same experimental split and model-selection rule.
 4. Evidence that mutation free-energy labels improve experimental Tm prediction even though they are not Tm measurements.
 5. A boundary condition: structural-dynamics labels do not automatically transfer to Tm prediction.
-6. A design-loop bridge: generated variants scored by physics-based calculations can still provide useful supervised signal, although this paper does not perform active learning or reinforcement learning.
+6. A design-loop bridge: variants proposed by a sequence model and scored by physics-based calculations can still provide useful supervised signal, although this paper does not perform active learning or reinforcement learning.
 
 ## Manuscript Architecture
 
@@ -265,7 +265,7 @@ Required moves:
 4. Introduce the multi-task transfer-learning framework.
 5. State the controlled evaluation design: shared experimental split, validation-set model selection, held-out Tm test set, paired comparison.
 6. Report the main number: FEP labels improve held-out Tm prediction from MAE 6.61 to 6.26 deg C, a paired improvement of 0.35 deg C.
-7. State source dependence: ESM2-generated variants scored by Rosetta are positive but weaker; the MD-derived Q-value does not improve performance.
+7. State source dependence: Rosetta scores assigned to ESM2-proposed variants are positive but weaker; the MD-derived Q-value does not improve performance.
 8. End with the interpretation: mutation free-energy labels provide local stability-change information complementary to sparse absolute Tm measurements.
 
 ### Introduction
@@ -325,7 +325,7 @@ Subsection plan:
    - For each source, report label definition, sign convention, number of labels, and whether labels are mutation-relative or sequence-level.
 
 4. **Generated and random variant sets**
-   - How ESM2-generated variants were produced.
+   - How ESM2-proposed variants were produced.
    - How random variants were produced.
    - How Rosetta scoring was applied to both sets.
    - State that generated-vs-random superiority is exploratory and not the main claim.
@@ -446,7 +446,7 @@ Main claim:
 
 FEP contributes useful information to the representation, and limited encoder adaptation helps exploit it.
 
-#### Result 6: Physics-labeled generated variants provide a design-loop bridge
+#### Result 6: Physics-labeled sequence proposals provide a design-loop bridge
 
 Figure: Fig. 3a,b and Discussion.
 
@@ -459,7 +459,7 @@ Key numbers:
 
 Main claim:
 
-ESM2-generated variants scored by Rosetta improve over Tm-only training, but their superiority over random variants scored by Rosetta is not conclusive. This should be framed as a route toward future generator-physics-predictor design loops, not as proof that generated variants are optimized.
+Rosetta scores assigned to ESM2-proposed variants improve over Tm-only training, but their superiority over random variants scored by Rosetta is not conclusive. This should be framed as a route toward future generator-physics-predictor design loops, not as proof that the sequence proposals are optimized.
 
 #### Result 7: Mutation free-energy labels complement sparse absolute Tm anchors
 
@@ -485,7 +485,7 @@ Paragraph plan:
 3. Interpret why this matters: relative mutation free energies complement sparse absolute Tm labels.
 4. Discuss source dependence: not every simulation-derived or physics-based label transfers.
 5. Discuss encoder adaptation and model size: limited adaptation helps; larger language models were not sufficient in this low-data regime.
-6. Discuss generated variants: positive supervised signal, but no claim of completed design optimization.
+6. Discuss ESM2-proposed variants scored by Rosetta: positive supervised signal, but no claim of completed design optimization.
 7. Limitations:
    - small experimental Tm train set;
    - nanobody-specific dataset;
@@ -580,7 +580,7 @@ Panels:
 Claims:
 
 - FEP is the strongest source label.
-- ESM2-generated variants scored by Rosetta are positive but weaker.
+- Rosetta scores assigned to ESM2-proposed variants are positive but weaker.
 - Larger ESM2 encoders do not improve this low-data regime.
 - Encoder fine-tuning improves absolute performance.
 
@@ -622,8 +622,8 @@ Keep the main paper compact and put reproducibility details here.
 - Use: "the utility of computational labels is source-dependent."
 - Avoid: "ΔΔG predicts Tm."
 - Use: "mutation free-energy labels provide source-label information that improves Tm prediction."
-- Avoid: "generated variants are better than random variants."
-- Use: "ESM2-generated variants scored by Rosetta improve over Tm-only, while superiority over random variants scored by Rosetta remains unresolved."
+- Avoid: "sequence-model proposals are better than random variants."
+- Use: "Rosetta scores assigned to ESM2-proposed variants improve over Tm-only, while superiority over random variants scored by Rosetta remains unresolved."
 - Avoid: opening the paper with the Tm/ΔΔG relationship.
 - Use: the Tm/ΔΔG relationship as the final interpretation of why FEP works.
 - Avoid local lab shorthand in the manuscript and figures.

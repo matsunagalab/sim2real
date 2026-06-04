@@ -76,8 +76,8 @@ uses ESM2, a pretrained protein language model, as the shared sequence encoder
 \citep{Lin2023Evolutionary}. The computational labels represent several kinds of
 computational information: mutation free-energy changes from alchemical
 free-energy perturbation (FEP) calculations, mutation scores from Rosetta,
-stability scores from ThermoMPNN, Rosetta scores on ESM2-generated and random
-variants, and a molecular-dynamics (MD)-derived Q-value measuring native-contact
+stability scores from ThermoMPNN, Rosetta scores on variants proposed by ESM2
+or sampled at random, and a molecular-dynamics (MD)-derived Q-value measuring native-contact
 persistence. To keep the comparison
 target-centered, all model settings are selected using an experimental
 validation set, and all final claims are evaluated on the same held-out

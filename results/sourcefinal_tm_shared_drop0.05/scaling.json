@@ -1,7 +1,7 @@
 {
   "exp_name": "sourcefinal_tm_shared_drop0.05",
-  "timestamp": "2026-05-31T15:23:15",
-  "git_commit": "1e2f585",
+  "timestamp": "2026-06-03T16:49:04",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "none",
     "n_ddg_list": "0",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 10,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "/home/yasu/tmp/sim2real/results/source_screen/final/sourcefinal_tm_shared_drop0.05",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -490,7 +493,7 @@
     "slope": null,
     "ci_width_avg": 0.8677707754451092,
     "mae_avg": 6.614527141761442,
-    "elapsed_s": 542.6599414348602
+    "elapsed_s": 538.890355348587
   },
   "paired_bootstrap": {
     "ref_n": 0,

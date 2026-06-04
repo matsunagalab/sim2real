@@ -1,7 +1,7 @@
 {
   "exp_name": "size35_ddg_fep_enc3e-5",
-  "timestamp": "2026-05-31T18:30:53",
-  "git_commit": "d2bf5b2",
+  "timestamp": "2026-06-04T00:34:41",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "FEP",
     "n_ddg_list": "320",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 10,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "results/model_size/final/size35_fep",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -490,7 +493,7 @@
     "slope": null,
     "ci_width_avg": 0.8529924611733124,
     "mae_avg": 6.502512412323837,
-    "elapsed_s": 2410.6760263442993
+    "elapsed_s": 2268.577958583832
   },
   "paired_bootstrap": {
     "ref_n": 320,

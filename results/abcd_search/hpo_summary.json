@@ -26,8 +26,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_latent_default.log",
     "gpu": "0",
     "rc": 0,
-    "val_mae": 6.512255092191447,
-    "ci_width": 1.5573330961807628,
+    "val_mae": 6.538730471663684,
+    "ci_width": 1.50019470427881,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -47,6 +47,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_latent_default/scaling.json"
@@ -79,8 +81,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_latent_drop0.05.log",
     "gpu": "4",
     "rc": 0,
-    "val_mae": 6.6685020509226085,
-    "ci_width": 1.568786864567124,
+    "val_mae": 6.363491863827411,
+    "ci_width": 1.488379643234782,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -100,6 +102,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_latent_drop0.05/scaling.json"
@@ -132,8 +136,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_latent_drop0.30.log",
     "gpu": "5",
     "rc": 0,
-    "val_mae": 6.582843231936671,
-    "ci_width": 1.4996911652878762,
+    "val_mae": 6.488691936247819,
+    "ci_width": 1.5820748455174893,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -153,6 +157,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_latent_drop0.30/scaling.json"
@@ -185,8 +191,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_latent_enc3e-4.log",
     "gpu": "2",
     "rc": 0,
-    "val_mae": 7.134164308276338,
-    "ci_width": 1.533235371132431,
+    "val_mae": 6.704469037476979,
+    "ci_width": 1.5494829865558275,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -206,6 +212,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_latent_enc3e-4/scaling.json"
@@ -238,8 +246,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_latent_enc3e-5.log",
     "gpu": "1",
     "rc": 0,
-    "val_mae": 5.890105401032243,
-    "ci_width": 1.4194440993862907,
+    "val_mae": 6.097047092843461,
+    "ci_width": 1.4341409519269348,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -259,6 +267,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_latent_enc3e-5/scaling.json"
@@ -291,8 +301,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_latent_fixed.log",
     "gpu": "6",
     "rc": 0,
-    "val_mae": 6.642082500593163,
-    "ci_width": 1.551118024062431,
+    "val_mae": 6.736004230878185,
+    "ci_width": 1.614705325987364,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -312,6 +322,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_latent_fixed/scaling.json"
@@ -345,8 +357,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_latent_lr1e-4_enc3e-5.log",
     "gpu": "3",
     "rc": 0,
-    "val_mae": 6.115611968122275,
-    "ci_width": 1.433978041435723,
+    "val_mae": 5.971543993390232,
+    "ci_width": 1.4473036100094134,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -366,6 +378,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_latent_lr1e-4_enc3e-5/scaling.json"
@@ -397,8 +411,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_residual_default.log",
     "gpu": "0",
     "rc": 0,
-    "val_mae": 6.680016295958359,
-    "ci_width": 1.5412007858335484,
+    "val_mae": 6.714780594963499,
+    "ci_width": 1.5148271849800174,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -418,6 +432,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_residual_default/scaling.json"
@@ -450,8 +466,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_residual_drop0.05.log",
     "gpu": "4",
     "rc": 0,
-    "val_mae": 6.4203877008191155,
-    "ci_width": 1.4734827726763395,
+    "val_mae": 6.396742606608214,
+    "ci_width": 1.5547203750636944,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -471,6 +487,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_residual_drop0.05/scaling.json"
@@ -503,8 +521,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_residual_drop0.30.log",
     "gpu": "5",
     "rc": 0,
-    "val_mae": 6.5524068051643125,
-    "ci_width": 1.5122467542299818,
+    "val_mae": 6.412469932604371,
+    "ci_width": 1.4905397046692048,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -524,6 +542,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_residual_drop0.30/scaling.json"
@@ -556,8 +576,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_residual_enc3e-4.log",
     "gpu": "2",
     "rc": 0,
-    "val_mae": 6.642531461562883,
-    "ci_width": 1.5455838960028032,
+    "val_mae": 6.917352487414932,
+    "ci_width": 1.499696810028051,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -577,6 +597,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_residual_enc3e-4/scaling.json"
@@ -609,8 +631,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_residual_enc3e-5.log",
     "gpu": "1",
     "rc": 0,
-    "val_mae": 6.064240343452532,
-    "ci_width": 1.410239082792054,
+    "val_mae": 6.005870989788632,
+    "ci_width": 1.4185351296700492,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -630,6 +652,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_residual_enc3e-5/scaling.json"
@@ -662,8 +686,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_residual_fixed.log",
     "gpu": "6",
     "rc": 0,
-    "val_mae": 6.491983611595589,
-    "ci_width": 1.5141974528252495,
+    "val_mae": 6.564039063026688,
+    "ci_width": 1.5528533176356492,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -683,6 +707,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_residual_fixed/scaling.json"
@@ -716,8 +742,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_residual_lr1e-4_enc3e-5.log",
     "gpu": "3",
     "rc": 0,
-    "val_mae": 6.03344522843639,
-    "ci_width": 1.426395565570922,
+    "val_mae": 6.174611850322193,
+    "ci_width": 1.4755769311368416,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -737,6 +763,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_residual_lr1e-4_enc3e-5/scaling.json"
@@ -768,8 +796,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_shared_default.log",
     "gpu": "0",
     "rc": 0,
-    "val_mae": 6.392584839248325,
-    "ci_width": 1.500506350588359,
+    "val_mae": 6.434275753815822,
+    "ci_width": 1.4676079679787462,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -789,6 +817,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "shared",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_shared_default/scaling.json"
@@ -821,8 +851,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_shared_drop0.05.log",
     "gpu": "4",
     "rc": 0,
-    "val_mae": 6.172536154939794,
-    "ci_width": 1.4321367166084542,
+    "val_mae": 6.281046137587658,
+    "ci_width": 1.5282292681164202,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -842,6 +872,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "shared",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_shared_drop0.05/scaling.json"
@@ -874,8 +906,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_shared_drop0.30.log",
     "gpu": "5",
     "rc": 0,
-    "val_mae": 6.329495280744593,
-    "ci_width": 1.468117512329707,
+    "val_mae": 6.496049723207019,
+    "ci_width": 1.4593918342570928,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -895,6 +927,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "shared",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_shared_drop0.30/scaling.json"
@@ -927,8 +961,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_shared_enc3e-4.log",
     "gpu": "2",
     "rc": 0,
-    "val_mae": 6.837264297750417,
-    "ci_width": 1.496817937624252,
+    "val_mae": 6.561218833645692,
+    "ci_width": 1.460942872220392,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -948,6 +982,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "shared",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_shared_enc3e-4/scaling.json"
@@ -980,8 +1016,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_shared_enc3e-5.log",
     "gpu": "1",
     "rc": 0,
-    "val_mae": 6.235388320729642,
-    "ci_width": 1.4331820552590848,
+    "val_mae": 5.8738843708806785,
+    "ci_width": 1.4542103454885016,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -1001,6 +1037,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "shared",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_shared_enc3e-5/scaling.json"
@@ -1033,8 +1071,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_shared_fixed.log",
     "gpu": "6",
     "rc": 0,
-    "val_mae": 6.27287390676224,
-    "ci_width": 1.4734386250397344,
+    "val_mae": 6.142408570500959,
+    "ci_width": 1.5429994342127582,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -1054,6 +1092,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 1.0,
       "model_arch": "shared",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_shared_fixed/scaling.json"
@@ -1087,8 +1127,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_shared_lr1e-4_enc3e-5.log",
     "gpu": "3",
     "rc": 0,
-    "val_mae": 5.888612586784764,
-    "ci_width": 1.3941246453760936,
+    "val_mae": 6.228217776860959,
+    "ci_width": 1.4438100368909934,
     "best_n": 320,
     "hparams": {
       "num_train_epochs": 400,
@@ -1108,6 +1148,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "shared",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_B_ddg320_shared_lr1e-4_enc3e-5/scaling.json"
@@ -1140,8 +1182,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_default.log",
     "gpu": "6",
     "rc": 0,
-    "val_mae": 6.558128369723873,
-    "ci_width": 1.5114725751110738,
+    "val_mae": 7.041806749057206,
+    "ci_width": 1.5009340323697504,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1161,6 +1203,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_default/scaling.json"
@@ -1194,8 +1238,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_drop0.05.log",
     "gpu": "3",
     "rc": 0,
-    "val_mae": 6.931338724284956,
-    "ci_width": 1.514411425731514,
+    "val_mae": 6.617139766490235,
+    "ci_width": 1.5180036161500343,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1215,6 +1259,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_drop0.05/scaling.json"
@@ -1248,8 +1294,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_drop0.30.log",
     "gpu": "4",
     "rc": 0,
-    "val_mae": 6.5326977564016575,
-    "ci_width": 1.5332234344749942,
+    "val_mae": 6.53084361409878,
+    "ci_width": 1.5055832295915739,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1269,6 +1315,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_drop0.30/scaling.json"
@@ -1302,8 +1350,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_enc3e-4.log",
     "gpu": "1",
     "rc": 0,
-    "val_mae": 7.1022947552422275,
-    "ci_width": 1.523976690087859,
+    "val_mae": 7.252180175506869,
+    "ci_width": 1.526398679645336,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1323,6 +1371,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_enc3e-4/scaling.json"
@@ -1356,8 +1406,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_enc3e-5.log",
     "gpu": "0",
     "rc": 0,
-    "val_mae": 6.041818579990335,
-    "ci_width": 1.4531334388420127,
+    "val_mae": 6.062633766445788,
+    "ci_width": 1.404723992269104,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1377,6 +1427,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_enc3e-5/scaling.json"
@@ -1411,8 +1463,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_fixed_w0.05.log",
     "gpu": "5",
     "rc": 0,
-    "val_mae": 6.828842959153138,
-    "ci_width": 1.5935740842960087,
+    "val_mae": 6.67815630804955,
+    "ci_width": 1.6601426757585855,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1432,6 +1484,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.05,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_fixed_w0.05/scaling.json"
@@ -1466,8 +1520,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_fixed_w0.10.log",
     "gpu": "6",
     "rc": 0,
-    "val_mae": 6.482819720006811,
-    "ci_width": 1.5014542130773556,
+    "val_mae": 6.472593477563561,
+    "ci_width": 1.6387561294420099,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1487,6 +1541,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.1,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_fixed_w0.10/scaling.json"
@@ -1521,8 +1577,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_fixed_w0.25.log",
     "gpu": "0",
     "rc": 0,
-    "val_mae": 7.091799740573146,
-    "ci_width": 1.574020061787654,
+    "val_mae": 6.645692882734026,
+    "ci_width": 1.5488272432020231,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1542,6 +1598,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.25,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_fixed_w0.25/scaling.json"
@@ -1576,8 +1634,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_fixed_w0.50.log",
     "gpu": "1",
     "rc": 0,
-    "val_mae": 6.87658765301512,
-    "ci_width": 1.5536940847900027,
+    "val_mae": 6.5854115324645015,
+    "ci_width": 1.468386766558023,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1597,6 +1655,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.5,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_fixed_w0.50/scaling.json"
@@ -1631,8 +1691,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_lr1e-4_enc3e-5.log",
     "gpu": "2",
     "rc": 0,
-    "val_mae": 5.927731911172847,
-    "ci_width": 1.4090667225293068,
+    "val_mae": 6.2293835135396876,
+    "ci_width": 1.4705144526273806,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1652,6 +1712,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_lr1e-4_enc3e-5/scaling.json"
@@ -1684,8 +1746,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_default.log",
     "gpu": "2",
     "rc": 0,
-    "val_mae": 7.050548533003957,
-    "ci_width": 1.5992606313552216,
+    "val_mae": 6.828238822680669,
+    "ci_width": 1.5883599362358725,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1705,6 +1767,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_latent_default/scaling.json"
@@ -1738,8 +1802,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_drop0.05.log",
     "gpu": "6",
     "rc": 0,
-    "val_mae": 6.462254100355778,
-    "ci_width": 1.4926885956805789,
+    "val_mae": 6.412699753706247,
+    "ci_width": 1.5026382610234155,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1759,6 +1823,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_latent_drop0.05/scaling.json"
@@ -1792,8 +1858,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_drop0.30.log",
     "gpu": "0",
     "rc": 0,
-    "val_mae": 6.662152645866454,
-    "ci_width": 1.603999900401921,
+    "val_mae": 6.760431404968741,
+    "ci_width": 1.4542603906360245,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1813,6 +1879,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_latent_drop0.30/scaling.json"
@@ -1846,8 +1914,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_enc3e-4.log",
     "gpu": "4",
     "rc": 0,
-    "val_mae": 6.944453985436951,
-    "ci_width": 1.4792615089228711,
+    "val_mae": 7.142180130430853,
+    "ci_width": 1.5370997213823916,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1867,6 +1935,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_latent_enc3e-4/scaling.json"
@@ -1900,8 +1970,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_enc3e-5.log",
     "gpu": "3",
     "rc": 0,
-    "val_mae": 6.125599601450575,
-    "ci_width": 1.5164741560983908,
+    "val_mae": 6.055061744171258,
+    "ci_width": 1.4932814592952361,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1921,6 +1991,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_latent_enc3e-5/scaling.json"
@@ -1955,8 +2027,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_fixed_w0.05.log",
     "gpu": "1",
     "rc": 0,
-    "val_mae": 6.504122917790148,
-    "ci_width": 1.5336208877435915,
+    "val_mae": 6.561120530096439,
+    "ci_width": 1.6228230482536414,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -1976,6 +2048,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.05,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_latent_fixed_w0.05/scaling.json"
@@ -2010,8 +2084,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_fixed_w0.10.log",
     "gpu": "2",
     "rc": 0,
-    "val_mae": 6.3676447563802565,
-    "ci_width": 1.5787639276821963,
+    "val_mae": 6.757681394029981,
+    "ci_width": 1.5985360260311898,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2031,6 +2105,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.1,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_latent_fixed_w0.10/scaling.json"
@@ -2065,8 +2141,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_fixed_w0.25.log",
     "gpu": "3",
     "rc": 0,
-    "val_mae": 6.470658269186144,
-    "ci_width": 1.5157081240953953,
+    "val_mae": 6.909147148256614,
+    "ci_width": 1.4836718378654918,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2086,6 +2162,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.25,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_latent_fixed_w0.25/scaling.json"
@@ -2120,8 +2198,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_fixed_w0.50.log",
     "gpu": "4",
     "rc": 0,
-    "val_mae": 6.846404908627649,
-    "ci_width": 1.674624826929402,
+    "val_mae": 6.77120550258979,
+    "ci_width": 1.6368013036852345,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2141,6 +2219,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.5,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_latent_fixed_w0.50/scaling.json"
@@ -2175,8 +2255,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_lr1e-4_enc3e-5.log",
     "gpu": "5",
     "rc": 0,
-    "val_mae": 5.825992752702599,
-    "ci_width": 1.4543638576711544,
+    "val_mae": 6.085969323649333,
+    "ci_width": 1.4782792613412452,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2196,6 +2276,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "latent",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_latent_lr1e-4_enc3e-5/scaling.json"
@@ -2228,8 +2310,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_default.log",
     "gpu": "0",
     "rc": 0,
-    "val_mae": 6.991897032085855,
-    "ci_width": 1.5194850623831977,
+    "val_mae": 6.937136529561965,
+    "ci_width": 1.581465793249654,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2249,6 +2331,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_default/scaling.json"
@@ -2282,8 +2366,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_drop0.05.log",
     "gpu": "4",
     "rc": 0,
-    "val_mae": 6.512038618390674,
-    "ci_width": 1.5097621360923803,
+    "val_mae": 7.056148761418814,
+    "ci_width": 1.6279641850193238,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2303,6 +2387,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_drop0.05/scaling.json"
@@ -2336,8 +2422,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_drop0.30.log",
     "gpu": "5",
     "rc": 0,
-    "val_mae": 7.006736757209018,
-    "ci_width": 1.5462721463650029,
+    "val_mae": 6.446198939118453,
+    "ci_width": 1.5401009715191414,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2357,6 +2443,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_drop0.30/scaling.json"
@@ -2390,8 +2478,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_enc3e-4.log",
     "gpu": "2",
     "rc": 0,
-    "val_mae": 7.186629838032534,
-    "ci_width": 1.5593039560029878,
+    "val_mae": 7.213316170160299,
+    "ci_width": 1.5729586895159047,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2411,6 +2499,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_enc3e-4/scaling.json"
@@ -2444,8 +2534,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_enc3e-5.log",
     "gpu": "1",
     "rc": 0,
-    "val_mae": 6.099128520113381,
-    "ci_width": 1.4495085486934656,
+    "val_mae": 5.753996148153012,
+    "ci_width": 1.4012500861984583,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2465,6 +2555,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_enc3e-5/scaling.json"
@@ -2499,8 +2591,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_fixed_w0.05.log",
     "gpu": "6",
     "rc": 0,
-    "val_mae": 6.691445939312886,
-    "ci_width": 1.6141582737152245,
+    "val_mae": 6.817933487758615,
+    "ci_width": 1.49863078651829,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2520,6 +2612,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.05,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_fixed_w0.05/scaling.json"
@@ -2554,8 +2648,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_fixed_w0.10.log",
     "gpu": "0",
     "rc": 0,
-    "val_mae": 6.842959270933598,
-    "ci_width": 1.5094761862282589,
+    "val_mae": 6.288460106277917,
+    "ci_width": 1.4736950286074215,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2575,6 +2669,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.1,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_fixed_w0.10/scaling.json"
@@ -2609,8 +2705,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_fixed_w0.25.log",
     "gpu": "1",
     "rc": 0,
-    "val_mae": 6.6987644664362715,
-    "ci_width": 1.5599915333895096,
+    "val_mae": 6.851476509341137,
+    "ci_width": 1.542804261081626,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2630,6 +2726,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.25,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_fixed_w0.25/scaling.json"
@@ -2664,8 +2762,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_fixed_w0.50.log",
     "gpu": "2",
     "rc": 0,
-    "val_mae": 6.29150685410435,
-    "ci_width": 1.6510549996394666,
+    "val_mae": 6.664497653963649,
+    "ci_width": 1.5893046200457839,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2685,6 +2783,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.5,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_fixed_w0.50/scaling.json"
@@ -2719,8 +2819,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_lr1e-4_enc3e-5.log",
     "gpu": "3",
     "rc": 0,
-    "val_mae": 6.114169856500517,
-    "ci_width": 1.4108218575514515,
+    "val_mae": 6.276029725210823,
+    "ci_width": 1.4254333596095314,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2740,6 +2840,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_lr1e-4_enc3e-5/scaling.json"
@@ -2772,8 +2874,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_default.log",
     "gpu": "3",
     "rc": 0,
-    "val_mae": 6.580631111070236,
-    "ci_width": 1.4929358329031883,
+    "val_mae": 7.366455865613577,
+    "ci_width": 1.5258027294009722,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2793,6 +2895,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_residual_default/scaling.json"
@@ -2826,8 +2930,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_drop0.05.log",
     "gpu": "0",
     "rc": 0,
-    "val_mae": 6.659067679889482,
-    "ci_width": 1.4857058189935932,
+    "val_mae": 6.710999115123933,
+    "ci_width": 1.537597976585685,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2847,6 +2951,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_residual_drop0.05/scaling.json"
@@ -2880,8 +2986,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_drop0.30.log",
     "gpu": "1",
     "rc": 0,
-    "val_mae": 6.508766775998616,
-    "ci_width": 1.53463914895178,
+    "val_mae": 6.717051891262448,
+    "ci_width": 1.5596154820991144,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2901,6 +3007,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_residual_drop0.30/scaling.json"
@@ -2934,8 +3042,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_enc3e-4.log",
     "gpu": "5",
     "rc": 0,
-    "val_mae": 7.263088157567914,
-    "ci_width": 1.5189364851832012,
+    "val_mae": 7.168157203967487,
+    "ci_width": 1.4873056501909723,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -2955,6 +3063,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_residual_enc3e-4/scaling.json"
@@ -2988,8 +3098,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_enc3e-5.log",
     "gpu": "4",
     "rc": 0,
-    "val_mae": 6.133691786243446,
-    "ci_width": 1.5420666918583983,
+    "val_mae": 6.2200134728739,
+    "ci_width": 1.3886387687105772,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -3009,6 +3119,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_residual_enc3e-5/scaling.json"
@@ -3043,8 +3155,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_fixed_w0.05.log",
     "gpu": "2",
     "rc": 0,
-    "val_mae": 6.443786296345931,
-    "ci_width": 1.4216005275991792,
+    "val_mae": 6.481125899459951,
+    "ci_width": 1.6007439330435416,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -3064,6 +3176,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.05,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_residual_fixed_w0.05/scaling.json"
@@ -3098,8 +3212,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_fixed_w0.10.log",
     "gpu": "3",
     "rc": 0,
-    "val_mae": 6.580294364037334,
-    "ci_width": 1.622984867182967,
+    "val_mae": 6.833055927428745,
+    "ci_width": 1.6680525700308397,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -3119,6 +3233,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.1,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_residual_fixed_w0.10/scaling.json"
@@ -3153,8 +3269,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_fixed_w0.25.log",
     "gpu": "4",
     "rc": 0,
-    "val_mae": 6.65206254432218,
-    "ci_width": 1.4685142757343703,
+    "val_mae": 6.483385943994698,
+    "ci_width": 1.5564927624854494,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -3174,6 +3290,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.25,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_residual_fixed_w0.25/scaling.json"
@@ -3208,8 +3326,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_fixed_w0.50.log",
     "gpu": "5",
     "rc": 0,
-    "val_mae": 6.572433930470546,
-    "ci_width": 1.534896190365064,
+    "val_mae": 6.793023869350276,
+    "ci_width": 1.586781172951719,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -3229,6 +3347,8 @@
       "mtl_weight_mode": "fixed",
       "md_weight": 0.5,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_residual_fixed_w0.50/scaling.json"
@@ -3263,8 +3383,8 @@
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_lr1e-4_enc3e-5.log",
     "gpu": "6",
     "rc": 0,
-    "val_mae": 6.21031608764551,
-    "ci_width": 1.5639943954455733,
+    "val_mae": 6.276935653599061,
+    "ci_width": 1.4196449065414463,
     "best_n": 640,
     "hparams": {
       "num_train_epochs": 400,
@@ -3284,6 +3404,8 @@
       "mtl_weight_mode": "uncertainty",
       "md_weight": 1.0,
       "model_arch": "residual",
+      "ddg_head_mode": "separate",
+      "ddg_context_dim": 4,
       "detach_aux_encoder": true
     },
     "scaling_json": "/home/yasu/tmp/sim2real/results/abcdhpo_D_ddg320_md640_rmsf-max_residual_lr1e-4_enc3e-5/scaling.json"

@@ -493,6 +493,8 @@ def architecture_controls_table() -> pd.DataFrame:
         "tm_residual_enc3e-4": "Tm only, residual-control architecture",
         "residual_q_hphil_400k": "MD Q-value, residual-control architecture",
         "residual_q_hphil_400k_shuf": "MD Q-value, shuffled labels",
+        "residual_cdr3_len": "CDR3 length",
+        "residual_rmsf_cdr3": "CDR3 residue fluctuation",
         "residual_ss_dist_std": "disulfide-distance fluctuation",
         "residual_rmsf_max": "maximum residue fluctuation",
     }

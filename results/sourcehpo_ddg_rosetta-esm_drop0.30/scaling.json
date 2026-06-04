@@ -1,7 +1,7 @@
 {
   "exp_name": "sourcehpo_ddg_rosetta-esm_drop0.30",
-  "timestamp": "2026-05-31T15:02:38",
-  "git_commit": "1e2f585",
+  "timestamp": "2026-06-03T16:31:00",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "rosetta_esm",
     "n_ddg_list": "320",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 3,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "/home/yasu/tmp/sim2real/results/source_screen/hpo/sourcehpo_ddg_rosetta-esm_drop0.30",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -208,7 +211,7 @@
     "slope": null,
     "ci_width_avg": 1.571055219228196,
     "mae_avg": 6.07878048277488,
-    "elapsed_s": 300.4957220554352
+    "elapsed_s": 234.5977394580841
   },
   "paired_bootstrap": {
     "ref_n": 320,

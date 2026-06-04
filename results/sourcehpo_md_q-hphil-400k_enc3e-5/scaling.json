@@ -1,7 +1,7 @@
 {
   "exp_name": "sourcehpo_md_q-hphil-400k_enc3e-5",
-  "timestamp": "2026-05-31T15:07:46",
-  "git_commit": "1e2f585",
+  "timestamp": "2026-06-03T16:35:09",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "none",
     "n_ddg_list": "0",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 3,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "/home/yasu/tmp/sim2real/results/source_screen/hpo/sourcehpo_md_q-hphil-400k_enc3e-5",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -208,7 +211,7 @@
     "slope": null,
     "ci_width_avg": 1.4260782703109074,
     "mae_avg": 5.968758619448708,
-    "elapsed_s": 404.759334564209
+    "elapsed_s": 313.76230454444885
   },
   "paired_bootstrap": {
     "ref_n": 640,

@@ -44,7 +44,7 @@ is still the model-selection target for manuscript-facing comparisons.
 | `rosetta` | Rosetta mutation-effect labels for the measured variant sets. |
 | `thermoMPNN` | ThermoMPNN-derived mutation-effect labels stored as MPNN2 processed tables. |
 | `rosetta_random` | Uniformly random two-mutation variants scored by Rosetta. |
-| `rosetta_esm` | ESM2-generated two-mutation variants, filtered by model likelihood, then scored by Rosetta. |
+| `rosetta_esm` | Two-mutation variants proposed by ESM2, filtered by model likelihood, then scored by Rosetta. |
 
 `thermompnn/*_thermompnn_data.csv` are the larger Google Colab ThermoMPNN
 outputs. The current manuscript training code does not read those files
