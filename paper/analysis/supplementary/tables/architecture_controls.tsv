@@ -1,0 +1,9 @@
+condition	label	architecture	n_md	test_mae_deg_c	ci_lo_approx_deg_c	ci_hi_approx_deg_c	ci_width_deg_c	exp
+tm_latent_drop0.30	Tm only, latent-control architecture	latent	0	6.543056024405374	6.1169016254949735	6.969210423315774	0.8523087978208004	final_tm_latent_drop0.30
+tm_residual_enc3e-4	Tm only, residual-control architecture	residual	0	6.9356672827205585	6.516481212969525	7.354853352471592	0.8383721395020656	final_tm_residual_enc3e-4
+residual_q_value_400k	MD Q-value, residual-control architecture	residual	640	6.671378922355807	6.2354622213676905	7.107295623343923	0.8718334019762333	final_residual_q_value_400k
+residual_ss_dist_std	disulfide-distance fluctuation	residual	640	6.482686393541031	6.060178243104005	6.905194543978057	0.845016300874053	final_residual_ss_dist_std
+residual_rmsf_max	maximum residue fluctuation	residual	640	6.6484205447939075	6.201545733066524	7.095295356521291	0.8937496234547666	final_residual_rmsf_max
+residual_q_value_400k_shuffled	MD Q-value, shuffled labels	residual	640	6.616153758058271	6.191704753462726	7.040602762653816	0.8488980091910907	final_residual_q_value_400k_shuffled
+residual_rmsf_cdr3	CDR3 residue fluctuation	residual	640	6.657632526939643	6.226679529264534	7.088585524614751	0.8619059953502166	final_residual_rmsf_cdr3
+residual_cdr3_len	CDR3 length	residual	640	6.518261573481856	6.088737242452898	6.9477859045108135	0.8590486620579156	final_residual_cdr3_len

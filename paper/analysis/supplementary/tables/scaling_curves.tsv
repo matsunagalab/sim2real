@@ -1,0 +1,17 @@
+curve	label_kind	n_labels	mae_deg_c	ci_lo_deg_c	ci_hi_deg_c	color	source_json
+experimental Tm labels	target labels	10	7.553629894041545	7.111022273720912	8.003222031293857	#4D4D4D	results/tm_ref_hot_mtl_tmselect/scaling.json
+experimental Tm labels	target labels	20	7.014873701120842	6.579846959322929	7.452436934519229	#4D4D4D	results/tm_ref_hot_mtl_tmselect/scaling.json
+experimental Tm labels	target labels	30	7.035970845684081	6.6091687138922035	7.467754480576139	#4D4D4D	results/tm_ref_hot_mtl_tmselect/scaling.json
+experimental Tm labels	target labels	40	6.68697777291392	6.259427812737284	7.113188673045627	#4D4D4D	results/tm_ref_hot_mtl_tmselect/scaling.json
+experimental Tm labels	target labels	57	6.618537981955337	6.188465995354625	7.047562252909161	#4D4D4D	results/tm_ref_hot_mtl_tmselect/scaling.json
+FEP mutation free-energy labels	source labels	10	6.646768848394489	6.221231064039279	7.081344372897933	#009E73	results/fep_hot_tmselect_enc3e-5/scaling.json
+FEP mutation free-energy labels	source labels	40	6.516246497935008	6.0969460448149775	6.942486321127202	#009E73	results/fep_hot_tmselect_enc3e-5/scaling.json
+FEP mutation free-energy labels	source labels	80	6.349142077314672	5.931604412260765	6.766939683225273	#009E73	results/fep_hot_tmselect_enc3e-5/scaling.json
+FEP mutation free-energy labels	source labels	160	6.499901170594848	6.074450019907382	6.923099465493604	#009E73	results/fep_hot_tmselect_enc3e-5/scaling.json
+FEP mutation free-energy labels	source labels	320	6.261138412134152	5.852657398669069	6.670841141457817	#009E73	results/fep_hot_tmselect_enc3e-5/scaling.json
+MD Q-value labels	source labels	10	6.910420660367693	6.485886779118172	7.334681174756975	#D55E00	results/hot_q_400k_tmselect/scaling.json
+MD Q-value labels	source labels	40	6.615187483943111	6.2009026921102	7.031139510176351	#D55E00	results/hot_q_400k_tmselect/scaling.json
+MD Q-value labels	source labels	80	6.6121563087703334	6.182536630320763	7.044719666444959	#D55E00	results/hot_q_400k_tmselect/scaling.json
+MD Q-value labels	source labels	160	6.764064649827661	6.340548321869861	7.187706670676799	#D55E00	results/hot_q_400k_tmselect/scaling.json
+MD Q-value labels	source labels	320	6.739023343618548	6.309985900287482	7.1725024491693175	#D55E00	results/hot_q_400k_tmselect/scaling.json
+MD Q-value labels	source labels	640	6.6519288548287125	6.216237701112737	7.087710905285728	#D55E00	results/hot_q_400k_tmselect/scaling.json

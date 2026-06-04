@@ -1,0 +1,538 @@
+# Manifest for reproducing manuscript-facing results downstream of fixed
+# computational source-label tables. Raw MD, FEP, Rosetta, and ThermoMPNN
+# calculations are fixed upstream inputs and are not run here.
+
+fixed_inputs:
+  - data/source_labels/MANIFEST.tsv
+  - data/nbbench/train.csv
+  - data/nbbench/val.csv
+  - data/nbbench/test.csv
+  - data/source_labels/fep/fep1mel_435_processed.csv
+  - data/source_labels/fep/fep4idl_409_processed.csv
+  - data/source_labels/rosetta/measured/1mel_rosettaddg_processed.csv
+  - data/source_labels/rosetta/measured/4idl_rosettaddg_processed.csv
+  - data/source_labels/rosetta/random1000/random_2mut_1mel_1000_with_ddg_processed.csv
+  - data/source_labels/rosetta/random1000/random_2mut_4idl_1000_with_ddg_processed.csv
+  - data/source_labels/rosetta/esm1000/esm2_650M_2muts_1mel_100000_top1pct_with_ddg_processed.csv
+  - data/source_labels/rosetta/esm1000/esm2_650M_2muts_4idl_100000_top1pct_with_ddg_processed.csv
+  - data/source_labels/thermompnn/1melMPNN2_processed.csv
+  - data/source_labels/thermompnn/4idlMPNN2_processed.csv
+  - data/md/nanobody_qvalue_hphil_400K.csv
+  - data/md/feat_q_hphil_400K_shuffled.csv
+  - data/md/nanobody_rmsf.csv
+  - data/md/feat_rmsf_max.csv
+  - data/md/feat_ss_dist_std.csv
+  - data/md/feat_q_min_400K.csv
+  - data/md/feat_q_std_400K.csv
+  - data/md/feat_q_slope_400K.csv
+  - data/md/feat_rmsf_max_400K.csv
+  - data/md/feat_rg_std_400K.csv
+  - data/md/feat_q_cdr3.csv
+  - data/md/feat_q_framework.csv
+  - data/md/feat_rmsf_cdr3.csv
+  - data/md/feat_rmsf_framework.csv
+  - data/md/feat_saltbridge.csv
+  - data/md/feat_ss_dist_mean.csv
+  - data/md/feat_cdr3_len.csv
+  - data/md/feat_q_hphil_400K_t5ns.csv
+  - data/md/feat_q_hphil_400K_t10ns.csv
+  - data/md/feat_q_hphil_400K_t17ns.csv
+  - data/md/feat_q_hphil_400K_t30ns.csv
+  - data/md/feat_q_hphil_400K_t50ns.csv
+  - data/md/feat_q_hphil_400K_t100ns.csv
+
+expected_outputs:
+  - results/tm_ref_hot_mtl_tmselect/scaling.json
+  - results/fep_hot_tmselect_enc3e-5/scaling.json
+  - results/hot_q_400k_tmselect/scaling.json
+  - results/source_screen/hpo_summary.json
+  - results/source_screen/final_source_screen_summary.json
+  - results/source_screen/hpo_frozen_core_summary.json
+  - results/source_screen/final_frozen_core_summary.json
+  - results/ddg_head_search/hpo_summary.json
+  - results/ddg_head_search/final_ddg_head_summary.json
+  - results/ddg_head_search/frozen/hpo_summary.json
+  - results/ddg_head_search/frozen/final_ddg_head_summary.json
+  - results/hparam_search/per_nmd_summary.json
+  - results/hparam_search/per_nmd_test_summary.json
+  - results/abcd_search/hpo_summary.json
+  - results/abcd_search/final_abcd_summary.json
+  - results/abcd_search/final_abcd_with_dq_summary.json
+  - results/arch_search/feature_summary.json
+  - results/arch_search/final_summary.json
+  - results/size35_tm_shared_drop005/scaling.json
+  - results/size35_ddg_fep_enc3e-5/scaling.json
+  - results/size650_tm_shared_drop005/scaling.json
+  - results/size650_ddg_fep_enc3e-5/scaling.json
+  - results/short_hot_t5/scaling.json
+  - results/short_hot_t10/scaling.json
+  - results/short_hot_t17/scaling.json
+  - results/short_hot_t30/scaling.json
+  - results/short_hot_t50/scaling.json
+  - results/short_hot_t100/scaling.json
+  - results/short_frozen_t5/scaling.json
+  - results/short_frozen_t10/scaling.json
+  - results/short_frozen_t17/scaling.json
+  - results/short_frozen_t30/scaling.json
+  - results/short_frozen_t50/scaling.json
+  - results/short_frozen_t100/scaling.json
+  - paper/analysis/supplementary/MANIFEST.tsv
+  - paper/tex/main.pdf
+
+stage_order:
+  - preflight
+  - core-scaling
+  - source-screen
+  - ddg-head
+  - md-candidate
+  - abcd
+  - architecture
+  - model-size
+  - trajectory
+  - figures
+
+stages:
+  preflight: []
+
+  core-scaling:
+    - name: core experimental Tm scaling
+      type: prepare
+      outputs: [results/tm_ref_hot_mtl_tmselect/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - hot
+        - --ddg-source
+        - none
+        - --md-source
+        - none
+        - --n-tm-list
+        - 10,20,30,40,57
+        - --n-runs
+        - 10
+        - --exp-name
+        - tm_ref_hot_mtl_tmselect
+        - --result-dir
+        - results/tm_ref_hot_mtl_tmselect
+
+    - name: core FEP label-count scaling
+      type: prepare
+      outputs: [results/fep_hot_tmselect_enc3e-5/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - hot
+        - --model-arch
+        - shared
+        - --ddg-source
+        - FEP
+        - --n-ddg-list
+        - 10,40,80,160,320
+        - --md-source
+        - none
+        - --ddg-head-mode
+        - separate
+        - --encoder-lr
+        - 3e-5
+        - --n-runs
+        - 10
+        - --exp-name
+        - fep_hot_tmselect_enc3e-5
+        - --result-dir
+        - results/fep_hot_tmselect_enc3e-5
+
+    - name: core MD Q-value label-count scaling
+      type: prepare
+      outputs: [results/hot_q_400k_tmselect/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - hot
+        - --ddg-source
+        - none
+        - --md-source
+        - MD_Q_HPHIL_400K
+        - --n-md-list
+        - 10,40,80,160,320,640
+        - --n-runs
+        - 10
+        - --exp-name
+        - hot_q_400k_tmselect
+        - --result-dir
+        - results/hot_q_400k_tmselect
+
+  source-screen:
+    - name: source screen candidate search, fine-tuned encoder
+      type: script
+      script: scripts/source_screen.py
+      outputs: [results/source_screen/hpo_summary.json]
+      args: [--mode, hpo, --gpus, "{gpus}"]
+
+    - name: source screen final test, fine-tuned encoder
+      type: script
+      script: scripts/source_screen.py
+      outputs:
+        - results/source_screen/final_jobs_summary.json
+        - results/source_screen/final_source_screen_summary.json
+      args: [--mode, final, --gpus, "{gpus}"]
+
+    - name: source screen candidate search, frozen encoder
+      type: script
+      script: scripts/source_screen.py
+      outputs: [results/source_screen/hpo_frozen_core_summary.json]
+      args:
+        - --mode
+        - hpo
+        - --gpus
+        - "{gpus}"
+        - --encoder-mode
+        - frozen
+        - --ddg-sources
+        - FEP,rosetta
+        - --md-sources
+        - MD_Q_HPHIL_400K
+        - --summary-name
+        - hpo_frozen_core_summary.json
+        - --exp-prefix
+        - frozen_
+
+    - name: source screen final test, frozen encoder
+      type: script
+      script: scripts/source_screen.py
+      outputs:
+        - results/source_screen/final_frozen_core_jobs_summary.json
+        - results/source_screen/final_frozen_core_summary.json
+      args:
+        - --mode
+        - final
+        - --gpus
+        - "{gpus}"
+        - --hpo-summary
+        - results/source_screen/hpo_frozen_core_summary.json
+        - --summary-name
+        - final_frozen_core_jobs_summary.json
+        - --final-summary-name
+        - final_frozen_core_summary.json
+
+  ddg-head:
+    - name: FEP source-head candidate search, fine-tuned encoder
+      type: script
+      script: scripts/ddg_head_search.py
+      outputs: [results/ddg_head_search/hpo_summary.json]
+      args: [--mode, hpo, --encoder-mode, hot, --gpus, "{gpus}"]
+
+    - name: FEP source-head final test, fine-tuned encoder
+      type: script
+      script: scripts/ddg_head_search.py
+      outputs:
+        - results/ddg_head_search/final_jobs_summary.json
+        - results/ddg_head_search/final_ddg_head_summary.json
+      args: [--mode, final, --encoder-mode, hot, --gpus, "{gpus}"]
+
+    - name: FEP source-head candidate search, frozen encoder
+      type: script
+      script: scripts/ddg_head_search.py
+      outputs: [results/ddg_head_search/frozen/hpo_summary.json]
+      args: [--mode, hpo, --encoder-mode, frozen, --gpus, "{gpus}"]
+
+    - name: FEP source-head final test, frozen encoder
+      type: script
+      script: scripts/ddg_head_search.py
+      outputs:
+        - results/ddg_head_search/frozen/final_jobs_summary.json
+        - results/ddg_head_search/frozen/final_ddg_head_summary.json
+      args: [--mode, final, --encoder-mode, frozen, --gpus, "{gpus}"]
+
+  md-candidate:
+    - name: MD Q-value per-count candidate search
+      type: script
+      script: scripts/hparam_search.py
+      outputs: [results/hparam_search/per_nmd_summary.json]
+      args: [--mode, per-nmd, --gpus, "{gpus}"]
+
+    - name: MD Q-value per-count final test
+      type: script
+      script: scripts/hparam_search.py
+      outputs: [results/hparam_search/per_nmd_test_summary.json]
+      args: [--mode, final-selected, --gpus, "{gpus}"]
+
+  abcd:
+    - name: A-D candidate search
+      type: script
+      script: scripts/abcd_search.py
+      outputs: [results/abcd_search/hpo_summary.json]
+      args: [--mode, hpo, --gpus, "{gpus}"]
+
+    - name: A-D final test
+      type: script
+      script: scripts/abcd_search.py
+      outputs:
+        - results/abcd_search/final_jobs_summary.json
+        - results/abcd_search/final_abcd_summary.json
+      args: [--mode, final, --gpus, "{gpus}"]
+
+    - name: A-D extra FEP plus MD Q-value final test
+      type: prepare
+      env:
+        DETACH_AUX_ENCODER: "true"
+      outputs:
+        - results/abcdfinal_D_ddg320_md640_q-hphil-400k_latent_lr1e-4_enc3e-5/scaling.json
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - hot
+        - --model-arch
+        - latent
+        - --learning-rate
+        - 1e-4
+        - --encoder-lr
+        - 3e-5
+        - --ddg-source
+        - FEP
+        - --fixed-n-ddg
+        - 320
+        - --md-source
+        - MD_Q_HPHIL_400K
+        - --n-md-list
+        - 640
+        - --n-runs
+        - 10
+        - --exp-name
+        - abcdfinal_D_ddg320_md640_q-hphil-400k_latent_lr1e-4_enc3e-5
+        - --result-dir
+        - results/abcd_search/final/abcdfinal_D_ddg320_md640_q-hphil-400k_latent_lr1e-4_enc3e-5
+
+    - name: derive A-D summary with extra MD Q-value condition
+      type: derive_abcd_with_q
+      outputs: [results/abcd_search/final_abcd_with_dq_summary.json]
+
+  architecture:
+    - name: MD-derived feature survey
+      type: script
+      script: scripts/arch_search.py
+      outputs: [results/arch_search/feature_summary.json]
+      args: [--mode, feature, --archs, residual, --gpus, "{gpus}"]
+
+    - name: architecture final controls
+      type: script
+      script: scripts/arch_search.py
+      outputs: [results/arch_search/final_summary.json]
+      args: [--mode, final, --gpus, "{gpus}"]
+
+  model-size:
+    - name: ESM2 35M Tm-only final test
+      type: prepare
+      outputs: [results/size35_tm_shared_drop005/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - hot
+        - --base-model
+        - facebook/esm2_t12_35M_UR50D
+        - --model-arch
+        - shared
+        - --dropout-rate
+        - 0.05
+        - --ddg-source
+        - none
+        - --md-source
+        - none
+        - --n-ddg-list
+        - 0
+        - --n-runs
+        - 10
+        - --exp-name
+        - size35_tm_shared_drop005
+        - --result-dir
+        - results/model_size/final/size35_tm
+
+    - name: ESM2 35M FEP final test
+      type: prepare
+      outputs: [results/size35_ddg_fep_enc3e-5/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - hot
+        - --base-model
+        - facebook/esm2_t12_35M_UR50D
+        - --model-arch
+        - shared
+        - --ddg-source
+        - FEP
+        - --n-ddg-list
+        - 320
+        - --md-source
+        - none
+        - --ddg-head-mode
+        - separate
+        - --encoder-lr
+        - 3e-5
+        - --n-runs
+        - 10
+        - --exp-name
+        - size35_ddg_fep_enc3e-5
+        - --result-dir
+        - results/model_size/final/size35_fep
+
+    - name: ESM2 650M Tm-only final test
+      type: prepare
+      outputs: [results/size650_tm_shared_drop005/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - hot
+        - --base-model
+        - facebook/esm2_t33_650M_UR50D
+        - --model-arch
+        - shared
+        - --dropout-rate
+        - 0.05
+        - --ddg-source
+        - none
+        - --md-source
+        - none
+        - --n-ddg-list
+        - 0
+        - --n-runs
+        - 10
+        - --exp-name
+        - size650_tm_shared_drop005
+        - --result-dir
+        - results/model_size/final/size650_tm
+
+    - name: ESM2 650M FEP final test
+      type: prepare
+      outputs: [results/size650_ddg_fep_enc3e-5/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - hot
+        - --base-model
+        - facebook/esm2_t33_650M_UR50D
+        - --model-arch
+        - shared
+        - --ddg-source
+        - FEP
+        - --n-ddg-list
+        - 320
+        - --md-source
+        - none
+        - --ddg-head-mode
+        - separate
+        - --encoder-lr
+        - 3e-5
+        - --n-runs
+        - 10
+        - --exp-name
+        - size650_ddg_fep_enc3e-5
+        - --result-dir
+        - results/model_size/final/size650_fep
+
+  trajectory:
+    - name: trajectory-window control {encoder} encoder {time_ns} ns
+      type: prepare_matrix
+      matrix:
+        encoder: [hot, frozen]
+        time_ns: [5, 10, 17, 30, 50, 100]
+      outputs:
+        - results/short_{encoder}_t{time_ns}/scaling.json
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - "{encoder}"
+        - --ddg-source
+        - none
+        - --md-source
+        - MD_Q_HPHIL_400K_T{time_ns}
+        - --n-md-list
+        - 640
+        - --n-runs
+        - 10
+        - --exp-name
+        - short_{encoder}_t{time_ns}
+        - --result-dir
+        - results/short_{encoder}_t{time_ns}
+
+  figures:
+    - name: main figure regeneration
+      type: command
+      command: [uv, run, python, plot/make_outline_figures.py]
+      outputs:
+        - paper/tex/figures/fig_outline01_concept_protocol.pdf
+        - paper/tex/figures/fig_outline02_source_screen.pdf
+        - paper/tex/figures/fig_outline03_design_bridge.pdf
+        - paper/tex/figures/fig_outline04_mdq_boundary.pdf
+
+    - name: supplementary figure and table regeneration
+      type: command
+      command: [uv, run, python, plot/make_supplementary_figures.py]
+      outputs:
+        - paper/analysis/supplementary/MANIFEST.tsv
+        - paper/tex/figures/supp_fig01_data_and_md_label.pdf
+        - paper/tex/figures/supp_fig02_candidate_setting_search.pdf
+        - paper/tex/figures/supp_fig03_model_controls.pdf
+        - paper/tex/figures/supp_fig04_scaling_and_size_controls.pdf
+        - paper/tex/figures/supp_fig05_md_feature_controls.pdf
+
+    - name: LaTeX typesetting
+      type: command
+      workdir: paper/tex
+      command:
+        - env
+        - XDG_CACHE_HOME=/tmp/tectonic-cache
+        - /tmp/sim2real-latex/bin/tectonic
+        - main.tex
+      outputs:
+        - paper/tex/main.pdf
+
+  diagnostic:
+    - name: legacy representative MD candidate summary
+      type: script
+      script: scripts/hparam_search.py
+      outputs: [results/hparam_search/summary.json]
+      args: [--mode, representative, --gpus, "{gpus}"]

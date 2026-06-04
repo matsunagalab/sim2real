@@ -1,0 +1,99 @@
+{
+  "note": "A-D final test summary with the validation-selected D/RMSF condition and an additional D/Q-value check. D/Q-value was the second-best D condition in validation candidate search.",
+  "rows": [
+    {
+      "condition": "A_Tm",
+      "exp": "abcdfinal_A_tm_latent_drop0.30",
+      "arch": "latent",
+      "md_source": "none",
+      "test_mae": 6.598215445231169,
+      "ci_width": 0.8490202286460438
+    },
+    {
+      "condition": "B_ddG",
+      "exp": "abcdfinal_B_ddg320_shared_lr1e-4_enc3e-5",
+      "arch": "shared",
+      "ddg_source": "FEP",
+      "n_ddg": 320,
+      "test_mae": 6.407683427659544,
+      "ci_width": 0.8497431096298662
+    },
+    {
+      "condition": "C_MD",
+      "exp": "abcdfinal_C_md_q-hphil-400k_residual_enc3e-5",
+      "arch": "residual",
+      "md_source": "MD_Q_HPHIL_400K",
+      "n_md": 640,
+      "test_mae": 6.711410499734318,
+      "ci_width": 0.8569009599537978
+    },
+    {
+      "condition": "D_ddG_MD_validation_selected",
+      "exp": "abcdfinal_D_ddg320_md640_rmsf-max_latent_lr1e-4_enc3e-5",
+      "arch": "latent",
+      "ddg_source": "FEP",
+      "n_ddg": 320,
+      "md_source": "MD_RMSF_MAX",
+      "n_md": 640,
+      "selected_val_mae": 6.085969323649333,
+      "test_mae": 6.661829657535072,
+      "ci_width": 0.8644641126352584
+    },
+    {
+      "condition": "D_ddG_MD_extra_q_hphil",
+      "exp": "abcdfinal_D_ddg320_md640_q-hphil-400k_latent_lr1e-4_enc3e-5",
+      "arch": "latent",
+      "ddg_source": "FEP",
+      "n_ddg": 320,
+      "md_source": "MD_Q_HPHIL_400K",
+      "n_md": 640,
+      "selected_val_mae": 6.2293835135396876,
+      "test_mae": 6.625997622511286,
+      "ci_width": 0.8467220295293716
+    }
+  ],
+  "paired_comparisons": {
+    "B_minus_A": {
+      "delta_mae": -0.18962096410323384,
+      "delta_ci_lo": -0.30551909374045916,
+      "delta_ci_hi": -0.07224438324758223,
+      "p_delta_gt_0": 0.0044
+    },
+    "C_minus_A": {
+      "delta_mae": 0.11368851683016735,
+      "delta_ci_lo": 0.02828053536686026,
+      "delta_ci_hi": 0.1979560445730209,
+      "p_delta_gt_0": 0.9851
+    },
+    "D_RMSF_minus_A": {
+      "delta_mae": 0.06373444213131417,
+      "delta_ci_lo": -0.021925870327543957,
+      "delta_ci_hi": 0.14805419633837133,
+      "p_delta_gt_0": 0.8946
+    },
+    "D_RMSF_minus_B": {
+      "delta_mae": 0.253355406234548,
+      "delta_ci_lo": 0.14624428165511477,
+      "delta_ci_hi": 0.3607035253201775,
+      "p_delta_gt_0": 1.0
+    },
+    "D_Q_minus_A": {
+      "delta_mae": 0.026946302149423923,
+      "delta_ci_lo": -0.07672685660139322,
+      "delta_ci_hi": 0.13059923951213942,
+      "p_delta_gt_0": 0.6629
+    },
+    "D_Q_minus_B": {
+      "delta_mae": 0.2165672662526578,
+      "delta_ci_lo": 0.07947873710074149,
+      "delta_ci_hi": 0.35712046847203077,
+      "p_delta_gt_0": 0.9952
+    },
+    "D_Q_minus_C": {
+      "delta_mae": -0.08674221468074343,
+      "delta_ci_lo": -0.20500897615730737,
+      "delta_ci_hi": 0.03158770445396311,
+      "p_delta_gt_0": 0.1168
+    }
+  }
+}

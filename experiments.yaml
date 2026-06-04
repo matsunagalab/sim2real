@@ -1,0 +1,485 @@
+# Experiment registry for the sim2real nanobody Tm prediction project.
+#
+# Each entry maps a name to the CLI args + env vars + expected results
+# so any experiment can be reproduced with:
+#     uv run python scripts/run_experiment.py <name>
+#
+# Conventions:
+#   args:     keys correspond to prepare.py CLI flags (drop the "--" prefix, kebab-case)
+#   env:      shell env vars (ENCODER_MODE, BASE_MODEL_NAME, MTL_WEIGHT_MODE, MD_WEIGHT)
+#   expected: best_mae / best_ci_width / best_n for sanity-check after a run
+#             (best_mae tolerance is ±0.05°C by default; results are inherently stochastic)
+#   description: short note on why this experiment exists
+#
+# Notes on data dependencies:
+#   - All MD_* experiments require data/md/<csv>.csv present.
+#     Run `scripts/extract_q_values.py`, `extract_rmsf.py`, `extract_features_pilot.py`
+#     and `extract_rosetta_qvalues.py` first to populate data/md/.
+#   - DDG_* experiments only need data/{fep,foldX,rosetta,mpnn}/*.csv (already in repo).
+
+experiments:
+
+  # =========================================================================
+  # 1) Frozen 8M ESM-2 — Q-value variants (current full data: ~1144 nanobodies)
+  # =========================================================================
+
+  frozen_q_hphil_full:
+    description: "MD hphil-Q baseline (default frozen path); 7-pt scaling, 10 runs"
+    args:
+      ddg-source: none
+      md-source: MD_Q_HPHIL
+      n-md-list: "10,20,40,80,160,320,640"
+      n-runs: 10
+    env:
+      ENCODER_MODE: frozen
+    expected:
+      best_mae: 7.32
+      best_ci_width: 0.90
+
+  frozen_q_lowflex_full:
+    description: "Framework Q (residues with bottom 70% RMSF) — same floor as hphil with fewer samples"
+    args:
+      ddg-source: none
+      md-source: MD_Q_LOWFLEX
+      n-md-list: "10,40,160,320,640"
+      n-runs: 10
+    env:
+      ENCODER_MODE: frozen
+    expected:
+      best_mae: 7.32
+
+  frozen_q_highflex_full:
+    description: "CDR proxy Q (residues with top 30% RMSF)"
+    args:
+      ddg-source: none
+      md-source: MD_Q_HIGHFLEX
+      n-md-list: "10,40,160,320,640"
+      n-runs: 10
+    env:
+      ENCODER_MODE: frozen
+    expected:
+      best_mae: 7.33
+
+  frozen_saltbridge_full:
+    description: "Native salt-bridge persistence as the MD signal (weakest of the 4 candidates)"
+    args:
+      ddg-source: none
+      md-source: MD_SALTBRIDGE
+      n-md-list: "10,40,160,320,640"
+      n-runs: 10
+    env:
+      ENCODER_MODE: frozen
+    expected:
+      best_mae: 7.39
+
+  rosetta_full:
+    description: "Rosetta backrub MC Q-value, full scaling 10→960 (1174 seqs available)"
+    args:
+      ddg-source: none
+      md-source: ROSETTA_Q_HPHIL
+      n-md-list: "10,20,40,80,160,320,640,960"
+      n-runs: 10
+    env:
+      ENCODER_MODE: frozen
+    expected:
+      best_mae: 7.32
+
+  # =========================================================================
+  # 2) Frozen 8M — combinations (primary + aux MD task)
+  # =========================================================================
+
+  combo_lowflex_highflex_frozen:
+    description: "Q_LOWFLEX (primary) + Q_HIGHFLEX (aux) — frozen best 7.22 at n=640"
+    args:
+      ddg-source: none
+      md-source: MD_Q_LOWFLEX
+      md-aux-source: MD_Q_HIGHFLEX
+      n-md-list: "10,40,160,320,640"
+      n-runs: 10
+    env:
+      ENCODER_MODE: frozen
+    expected:
+      best_mae: 7.22
+
+  combo_lowflex_saltbridge_frozen:
+    description: "Q_LOWFLEX + saltbridge — combo hurts (7.42)"
+    args:
+      ddg-source: none
+      md-source: MD_Q_LOWFLEX
+      md-aux-source: MD_SALTBRIDGE
+      n-md-list: "10,40,160,320,640"
+      n-runs: 10
+    env:
+      ENCODER_MODE: frozen
+    expected:
+      best_mae: 7.42
+
+  combo_qhphil_rmsf_frozen:
+    description: "Q_HPHIL + RMSF parallel; combo did not help vs Q-only"
+    args:
+      ddg-source: none
+      md-source: MD_Q_HPHIL
+      md-aux-source: MD_RMSF
+      n-md-list: "320"
+      n-runs: 5
+    env:
+      ENCODER_MODE: frozen
+    expected:
+      best_mae: 7.39
+
+  rmsf_only_frozen:
+    description: "RMSF as the sole MD signal — comparable to Q_HPHIL"
+    args:
+      ddg-source: none
+      md-source: MD_RMSF
+      n-md-list: "320"
+      n-runs: 5
+    env:
+      ENCODER_MODE: frozen
+    expected:
+      best_mae: 7.32
+
+  # =========================================================================
+  # 3) Hot ESM-2 8M — full encoder fine-tuning (the breakthrough)
+  # =========================================================================
+
+  hot_lowflex_sweep:
+    description: "ESM-2 8M HOT + Q_LOWFLEX, 4-pt scaling, 10 runs — overall best 6.76"
+    args:
+      ddg-source: none
+      md-source: MD_Q_LOWFLEX
+      n-md-list: "10,40,160,640"
+      n-runs: 10
+    env:
+      ENCODER_MODE: hot
+    expected:
+      best_mae: 6.76
+      best_ci_width: 0.86
+
+  hot_lowflex_alone_640:
+    description: "Hot + Q_LOWFLEX alone, n=640, 5 runs (variance check)"
+    args:
+      ddg-source: none
+      md-source: MD_Q_LOWFLEX
+      n-md-list: "640"
+      n-runs: 5
+    env:
+      ENCODER_MODE: hot
+    expected:
+      best_mae: 6.80
+
+  hot_qhphil_alone_640:
+    description: "Hot + Q_HPHIL alone, n=640, 5 runs"
+    args:
+      ddg-source: none
+      md-source: MD_Q_HPHIL
+      n-md-list: "640"
+      n-runs: 5
+    env:
+      ENCODER_MODE: hot
+    expected:
+      best_mae: 6.93
+
+  hot_lowflex_highflex_combo_640:
+    description: "Hot + (Q_LOWFLEX + Q_HIGHFLEX) combo at n=640 — combo hurts under hot"
+    args:
+      ddg-source: none
+      md-source: MD_Q_LOWFLEX
+      md-aux-source: MD_Q_HIGHFLEX
+      n-md-list: "640"
+      n-runs: 5
+    env:
+      ENCODER_MODE: hot
+    expected:
+      best_mae: 6.94
+
+  # =========================================================================
+  # 4) ESM-2 650M — LoRA and Hot at the largest base model
+  # =========================================================================
+
+  lora_650m_lowflex_640:
+    description: "ESM-2 650M + LoRA + Q_LOWFLEX, n=640, 5 runs"
+    args:
+      ddg-source: none
+      md-source: MD_Q_LOWFLEX
+      n-md-list: "640"
+      n-runs: 5
+    env:
+      ENCODER_MODE: lora
+      BASE_MODEL_NAME: facebook/esm2_t33_650M_UR50D
+    expected:
+      best_mae: 7.04
+
+  hot_650m_lowflex_640:
+    description: "ESM-2 650M + Hot + Q_LOWFLEX, n=640, 5 runs (~90 min)"
+    args:
+      ddg-source: none
+      md-source: MD_Q_LOWFLEX
+      n-md-list: "640"
+      n-runs: 5
+    env:
+      ENCODER_MODE: hot
+      BASE_MODEL_NAME: facebook/esm2_t33_650M_UR50D
+    expected:
+      best_mae: 6.78
+
+  # =========================================================================
+  # 5) MD weight grid (fixed-weight MTL scan at n_md=320)
+  # =========================================================================
+
+  md_weight_w0.5:
+    description: "Fixed MD weight = 0.5 at n=320, 5 runs"
+    args:
+      ddg-source: none
+      md-source: MD_Q_HPHIL
+      n-md-list: "320"
+      n-runs: 5
+    env:
+      MTL_WEIGHT_MODE: fixed
+      MD_WEIGHT: "0.5"
+    expected:
+      best_mae: 7.39
+
+  md_weight_w1.0:
+    description: "Fixed MD weight = 1.0 at n=320 (matches uncertainty result)"
+    args:
+      ddg-source: none
+      md-source: MD_Q_HPHIL
+      n-md-list: "320"
+      n-runs: 5
+    env:
+      MTL_WEIGHT_MODE: fixed
+      MD_WEIGHT: "1.0"
+    expected:
+      best_mae: 7.32
+
+  md_weight_w2.0:
+    description: "Fixed MD weight = 2.0"
+    args:
+      ddg-source: none
+      md-source: MD_Q_HPHIL
+      n-md-list: "320"
+      n-runs: 5
+    env:
+      MTL_WEIGHT_MODE: fixed
+      MD_WEIGHT: "2.0"
+    expected:
+      best_mae: 7.35
+
+  md_weight_w4.0:
+    description: "Fixed MD weight = 4.0"
+    args:
+      ddg-source: none
+      md-source: MD_Q_HPHIL
+      n-md-list: "320"
+      n-runs: 5
+    env:
+      MTL_WEIGHT_MODE: fixed
+      MD_WEIGHT: "4.0"
+    expected:
+      best_mae: 7.37
+
+  md_weight_w8.0:
+    description: "Fixed MD weight = 8.0 — Tm collapses (overweighted aux)"
+    args:
+      ddg-source: none
+      md-source: MD_Q_HPHIL
+      n-md-list: "320"
+      n-runs: 5
+    env:
+      MTL_WEIGHT_MODE: fixed
+      MD_WEIGHT: "8.0"
+    expected:
+      best_mae: 7.72
+
+  # =========================================================================
+  # 6) Autoresearch round 2 — Q-value 以外のスカラー特徴量
+  #    (frozen + hot for each; n_md sweep 10→640 with 10 runs)
+  # =========================================================================
+
+  frozen_q_min:
+    description: "Frozen 8M + Q_min (worst-case unfolding)"
+    args: { ddg-source: none, md-source: MD_Q_MIN, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: frozen }
+
+  hot_q_min:
+    description: "Hot 8M + Q_min"
+    args: { ddg-source: none, md-source: MD_Q_MIN, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: hot }
+
+  frozen_q_std:
+    description: "Frozen 8M + Q_std (temporal fluctuation)"
+    args: { ddg-source: none, md-source: MD_Q_STD, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: frozen }
+
+  hot_q_std:
+    description: "Hot 8M + Q_std"
+    args: { ddg-source: none, md-source: MD_Q_STD, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: hot }
+
+  frozen_q_slope:
+    description: "Frozen 8M + Q_slope (kinetic decay)"
+    args: { ddg-source: none, md-source: MD_Q_SLOPE, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: frozen }
+
+  hot_q_slope:
+    description: "Hot 8M + Q_slope"
+    args: { ddg-source: none, md-source: MD_Q_SLOPE, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: hot }
+
+  frozen_rmsf_max:
+    description: "Frozen 8M + RMSF_max (worst residue flexibility)"
+    args: { ddg-source: none, md-source: MD_RMSF_MAX, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: frozen }
+
+  hot_rmsf_max:
+    description: "Hot 8M + RMSF_max"
+    args: { ddg-source: none, md-source: MD_RMSF_MAX, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: hot }
+
+  frozen_rg_std:
+    description: "Frozen 8M + Rg_std (compactness fluctuation)"
+    args: { ddg-source: none, md-source: MD_RG_STD, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: frozen }
+
+  hot_rg_std:
+    description: "Hot 8M + Rg_std"
+    args: { ddg-source: none, md-source: MD_RG_STD, n-md-list: "10,40,160,640", n-runs: 10 }
+    env: { ENCODER_MODE: hot }
+
+  # =========================================================================
+  # 7) 400K MD trajectories (prod_002) — wider Q dynamic range, kinetic regime
+  #    Update n-md-list as more 400K trajectories complete.
+  # =========================================================================
+
+  frozen_q_400k:
+    description: "Frozen 8M + 400K Q (Tm-relevant temperature, kinetic regime)"
+    args: { ddg-source: none, md-source: MD_Q_HPHIL_400K, n-md-list: "10,40,80", n-runs: 10 }
+    env: { ENCODER_MODE: frozen }
+    expected:
+      best_mae: 7.30
+
+  hot_q_400k:
+    description: "Hot 8M + 400K Q — matches 300K best (6.66) with 1/10 the data"
+    args: { ddg-source: none, md-source: MD_Q_HPHIL_400K, n-md-list: "10,40,80", n-runs: 10 }
+    env: { ENCODER_MODE: hot }
+    expected:
+      best_mae: 6.66
+
+  # =========================================================================
+  # 7b) Fair Tm-selection comparison — checkpoint/early stopping on Tm val only
+  # =========================================================================
+
+  tm_ref_hot_single:
+    description: "Hot 8M pure single-task Tm-only; checkpoint selected on Tm validation"
+    args:
+      ddg-source: none
+      md-source: none
+      n-tm-list: "10,20,30,40,57"
+      n-runs: 10
+      train-mode: single
+      selection-scope: tm
+    env:
+      ENCODER_MODE: hot
+    expected:
+      best_mae: 6.69
+
+  tm_ref_hot_mtl_tmselect:
+    description: "Hot 8M MTL wrapper with task 0 only; checkpoint selected on Tm validation"
+    args:
+      ddg-source: none
+      md-source: none
+      n-tm-list: "10,20,30,40,57"
+      n-runs: 10
+      train-mode: mtl
+      selection-scope: tm
+    env:
+      ENCODER_MODE: hot
+    expected:
+      best_mae: 6.62
+
+  hot_q_400k_tmselect:
+    description: "Hot 8M + 400K Q; mixed training, but checkpoint/early stopping selected on Tm validation only"
+    args:
+      ddg-source: none
+      md-source: MD_Q_HPHIL_400K
+      n-md-list: "10,40,80,160,320,640"
+      n-runs: 10
+      train-mode: mtl
+      selection-scope: tm
+    env:
+      ENCODER_MODE: hot
+    expected:
+      best_mae: 6.63
+
+  fep_hot_tmselect:
+    description: "Hot 8M + FEP ddG; mixed training, but checkpoint/early stopping selected on Tm validation only"
+    args:
+      ddg-source: FEP
+      md-source: none
+      n-ddg-list: "10,40,80,160,320"
+      n-runs: 10
+      train-mode: mtl
+      selection-scope: tm
+    env:
+      ENCODER_MODE: hot
+    expected:
+      best_mae: 6.63
+
+  # =========================================================================
+  # 8) DDG-source baselines (paired-mutant ddG as auxiliary task; no MD)
+  # =========================================================================
+
+  ddg_FEP_full:
+    description: "FEP ddG auxiliary, ensemble of 10 runs"
+    args:
+      ddg-source: FEP
+      n-ddg-list: "10,20,40,80,160,320"
+      n-runs: 10
+    env:
+      ENCODER_MODE: frozen
+
+  ddg_FoldX_full:
+    description: "FoldX ddG auxiliary"
+    args:
+      ddg-source: FoldX
+      n-ddg-list: "10,20,40,80,160,320"
+      n-runs: 10
+    env:
+      ENCODER_MODE: frozen
+
+  ddg_rosetta_full:
+    description: "Rosetta ddG auxiliary"
+    args:
+      ddg-source: rosetta
+      n-ddg-list: "10,20,40,80,160,320"
+      n-runs: 10
+    env:
+      ENCODER_MODE: frozen
+
+  ddg_thermoMPNN_full:
+    description: "ThermoMPNN ddG auxiliary"
+    args:
+      ddg-source: thermoMPNN
+      n-ddg-list: "10,20,40,80,160,320"
+      n-runs: 10
+    env:
+      ENCODER_MODE: frozen
+
+  ddg_rosetta_esm_full:
+    description: "Rosetta ddG over ESM2-selected mutants (1k subset)"
+    args:
+      ddg-source: rosetta_esm
+      n-ddg-list: "10,20,40,80,160,320"
+      n-runs: 10
+    env:
+      ENCODER_MODE: frozen
+
+  ddg_rosetta_random_full:
+    description: "Rosetta ddG over random mutants (1k subset; control)"
+    args:
+      ddg-source: rosetta_random
+      n-ddg-list: "10,20,40,80,160,320"
+      n-runs: 10
+    env:
+      ENCODER_MODE: frozen

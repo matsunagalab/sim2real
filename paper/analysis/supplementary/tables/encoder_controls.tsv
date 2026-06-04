@@ -1,0 +1,9 @@
+encoder	source	label	test_mae_deg_c	ci_lo_deg_c	ci_hi_deg_c	validation_mae_deg_c	scaling_json
+frozen encoder	Tm_only	Tm only	7.377377426314388	6.927707221577269	7.830973950241671	6.961082132962038	results/sourcefinal_frozen_tm_shared_drop0.30/scaling.json
+hot encoder	Tm_only	Tm only	6.614527141761442	6.182964691780551	7.05073546722566	5.991735227038186	results/sourcefinal_tm_shared_drop0.05/scaling.json
+frozen encoder	FEP	FEP	7.201965523148467	6.767099981096698	7.642452557857971	6.443909248971213	results/sourcefinal_frozen_ddg_fep_default/scaling.json
+hot encoder	FEP	FEP	6.261138412134152	5.852657398669069	6.670841141457817	5.8738843708806785	results/sourcefinal_ddg_fep_enc3e-5/scaling.json
+frozen encoder	rosetta	Rosetta	7.281415108406488	6.843493688022469	7.718749434198384	6.594275504540308	results/sourcefinal_frozen_ddg_rosetta_default/scaling.json
+hot encoder	rosetta	Rosetta	6.52551594085576	6.105443617465455	6.950773206428591	5.875935316852555	results/sourcefinal_ddg_rosetta_lr1e-4_enc3e-5/scaling.json
+frozen encoder	MD Q-value	MD Q-value	7.327979031419028	6.881133026299656	7.778081494692093	6.884064043610095	results/sourcefinal_frozen_md_q-value-400k_drop0.30/scaling.json
+hot encoder	MD Q-value	MD Q-value	6.730357691204784	6.306871872180277	7.153715017605893	5.942478148144567	results/sourcefinal_md_q-value-400k_lr1e-4_enc3e-5/scaling.json

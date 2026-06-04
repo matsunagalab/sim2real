@@ -2,16 +2,34 @@
 
 %TC:break Abstract
 \begin{abstract}
-% TODO: Write abstract (Background 1-2 sentences, Problem 1 sentence, Findings 1-2 sentences, Significance 1 sentence)
-\blindtext
+Nanobody development often depends on thermal stability, but experimental
+melting-temperature (Tm) measurements remain scarce. Simulations and
+structure-based calculations can annotate many sequence variants, yet their
+labels usually describe related physical quantities rather than Tm itself. We
+asked whether such computational labels can improve low-data nanobody Tm
+prediction when every model choice is anchored to experimental Tm validation.
+Using a public nanobody Tm benchmark, we trained transfer-learning models that
+combined Tm prediction with one computational source task at a time. The source
+labels covered mutation free energies, structure-based scores, protein-language
+model proposal sets scored by Rosetta, and molecular-dynamics trajectory
+summaries. Alchemical free-energy perturbation (FEP) gave the clearest benefit:
+held-out Tm mean absolute error decreased from 6.61 to 6.26$^\circ$C relative
+to training only on experimental Tm labels, with a paired improvement of
+0.35$^\circ$C (90\% confidence interval, 0.24--0.46$^\circ$C). The gain was not
+reproduced by increasing the ESM2 encoder size or by using the MD-derived
+Q-value. Rosetta-scored proposal sets were feasible as supervised source labels,
+but the direct advantage of ESM2-proposed variants over random variants remained
+exploratory.
+Thus, computational labels can improve nanobody Tm prediction when their
+physical meaning transfers to the experimental endpoint; mutation free energies
+complement sparse absolute Tm measurements.
 \end{abstract}
 %TC:break main
 
 \begin{keywords}
-% TODO: Add keywords
-keyword1 | keyword2 | keyword3 | keyword4
+nanobody thermostability | melting temperature | simulation-to-real transfer learning | protein language model | free energy perturbation
 \end{keywords}
 
 \begin{corrauthor}
-ymatsunaga\at riken.jp
+Yasuhiro Matsunaga, ymatsunaga\at riken.jp
 \end{corrauthor}

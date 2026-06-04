@@ -1,0 +1,64 @@
+condition	source	source_label	arch	label	n_ddg	n_md	val_mae	ci_width	exp
+Tm_only	Tm_only	Tm only	latent	default	0	0	6.091717438646296	1.4680440638635828	sourcehpo_tm_latent_default
+Tm_only	Tm_only	Tm only	latent	drop0.05	0	0	6.02628259977239	1.5480994994445805	sourcehpo_tm_latent_drop0.05
+Tm_only	Tm_only	Tm only	latent	drop0.30	0	0	6.261542462589692	1.489492315584477	sourcehpo_tm_latent_drop0.30
+Tm_only	Tm_only	Tm only	latent	enc3e-4	0	0	6.056101836485154	1.4519311607728582	sourcehpo_tm_latent_enc3e-4
+Tm_only	Tm_only	Tm only	latent	enc3e-5	0	0	6.1344644166347315	1.453876783204831	sourcehpo_tm_latent_enc3e-5
+Tm_only	Tm_only	Tm only	latent	lr1e-4_enc3e-5	0	0	6.3572336514792	1.581350971971382	sourcehpo_tm_latent_lr1e-4_enc3e-5
+Tm_only	Tm_only	Tm only	residual	default	0	0	6.111906674148859	1.426444109585466	sourcehpo_tm_residual_default
+Tm_only	Tm_only	Tm only	residual	drop0.05	0	0	6.087672343174801	1.529914575503157	sourcehpo_tm_residual_drop0.05
+Tm_only	Tm_only	Tm only	residual	drop0.30	0	0	5.9988245063152075	1.503606702550532	sourcehpo_tm_residual_drop0.30
+Tm_only	Tm_only	Tm only	residual	enc3e-4	0	0	6.2916337832875	1.4547659239256712	sourcehpo_tm_residual_enc3e-4
+Tm_only	Tm_only	Tm only	residual	enc3e-5	0	0	6.097027968506591	1.427530151396451	sourcehpo_tm_residual_enc3e-5
+Tm_only	Tm_only	Tm only	residual	lr1e-4_enc3e-5	0	0	6.291667343738947	1.558838852146847	sourcehpo_tm_residual_lr1e-4_enc3e-5
+Tm_only	Tm_only	Tm only	shared	default	0	0	6.133267870781438	1.4635127159836028	sourcehpo_tm_shared_default
+Tm_only	Tm_only	Tm only	shared	drop0.05	0	0	5.991735227038186	1.4858504621212187	sourcehpo_tm_shared_drop0.05
+Tm_only	Tm_only	Tm only	shared	drop0.30	0	0	6.0626118302660075	1.4837815401747863	sourcehpo_tm_shared_drop0.30
+Tm_only	Tm_only	Tm only	shared	enc3e-4	0	0	6.4321434821222265	1.5374720475667436	sourcehpo_tm_shared_enc3e-4
+Tm_only	Tm_only	Tm only	shared	enc3e-5	0	0	6.503827120795175	1.530393433454301	sourcehpo_tm_shared_enc3e-5
+Tm_only	Tm_only	Tm only	shared	lr1e-4_enc3e-5	0	0	6.330348292062535	1.523364423490288	sourcehpo_tm_shared_lr1e-4_enc3e-5
+ddG	FEP	FEP	shared	default	320	0	6.434275753815822	1.4676079679787462	sourcehpo_ddg_fep_default
+ddG	FEP	FEP	shared	drop0.05	320	0	6.281046137587658	1.5282292681164202	sourcehpo_ddg_fep_drop0.05
+ddG	FEP	FEP	shared	drop0.30	320	0	6.496049723207019	1.4593918342570928	sourcehpo_ddg_fep_drop0.30
+ddG	FEP	FEP	shared	enc3e-4	320	0	6.561218833645692	1.460942872220392	sourcehpo_ddg_fep_enc3e-4
+ddG	FEP	FEP	shared	enc3e-5	320	0	5.8738843708806785	1.4542103454885016	sourcehpo_ddg_fep_enc3e-5
+ddG	FEP	FEP	shared	fixed	320	0	6.142408570500959	1.5429994342127582	sourcehpo_ddg_fep_fixed
+ddG	FEP	FEP	shared	lr1e-4_enc3e-5	320	0	6.228217776860959	1.4438100368909934	sourcehpo_ddg_fep_lr1e-4_enc3e-5
+ddG	rosetta_esm	ESM2-proposed/Rosetta	shared	default	320	0	6.1250754428826	1.495986744105112	sourcehpo_ddg_rosetta-esm_default
+ddG	rosetta_esm	ESM2-proposed/Rosetta	shared	drop0.05	320	0	5.9680604395532955	1.4333480122313977	sourcehpo_ddg_rosetta-esm_drop0.05
+ddG	rosetta_esm	ESM2-proposed/Rosetta	shared	drop0.30	320	0	6.07878048277488	1.571055219228196	sourcehpo_ddg_rosetta-esm_drop0.30
+ddG	rosetta_esm	ESM2-proposed/Rosetta	shared	enc3e-4	320	0	6.8675560006722645	1.5816395709467068	sourcehpo_ddg_rosetta-esm_enc3e-4
+ddG	rosetta_esm	ESM2-proposed/Rosetta	shared	enc3e-5	320	0	5.8048373747101865	1.4947447165146368	sourcehpo_ddg_rosetta-esm_enc3e-5
+ddG	rosetta_esm	ESM2-proposed/Rosetta	shared	fixed	320	0	6.344558524958118	1.5949336593407208	sourcehpo_ddg_rosetta-esm_fixed
+ddG	rosetta_esm	ESM2-proposed/Rosetta	shared	lr1e-4_enc3e-5	320	0	6.079750222693588	1.508081785906949	sourcehpo_ddg_rosetta-esm_lr1e-4_enc3e-5
+ddG	thermoMPNN	ThermoMPNN	shared	default	320	0	6.364058169031207	1.543273484267334	sourcehpo_ddg_thermompnn_default
+ddG	thermoMPNN	ThermoMPNN	shared	drop0.05	320	0	6.48021662832886	1.5044473123626716	sourcehpo_ddg_thermompnn_drop0.05
+ddG	thermoMPNN	ThermoMPNN	shared	drop0.30	320	0	6.260511911550748	1.517280176889444	sourcehpo_ddg_thermompnn_drop0.30
+ddG	thermoMPNN	ThermoMPNN	shared	enc3e-4	320	0	7.05178757555206	1.5206868623381515	sourcehpo_ddg_thermompnn_enc3e-4
+ddG	thermoMPNN	ThermoMPNN	shared	enc3e-5	320	0	6.1772982968783285	1.5630533193390308	sourcehpo_ddg_thermompnn_enc3e-5
+ddG	thermoMPNN	ThermoMPNN	shared	fixed	320	0	6.320726440113089	1.6097278618523418	sourcehpo_ddg_thermompnn_fixed
+ddG	thermoMPNN	ThermoMPNN	shared	lr1e-4_enc3e-5	320	0	6.5511354499546695	1.537405581720745	sourcehpo_ddg_thermompnn_lr1e-4_enc3e-5
+ddG	rosetta_random	random/Rosetta	shared	default	320	0	6.819589179733455	1.4880931823196946	sourcehpo_ddg_rosetta-random_default
+ddG	rosetta_random	random/Rosetta	shared	drop0.05	320	0	6.324038939756501	1.5079384871277979	sourcehpo_ddg_rosetta-random_drop0.05
+ddG	rosetta_random	random/Rosetta	shared	drop0.30	320	0	6.423852440177723	1.4752652796581964	sourcehpo_ddg_rosetta-random_drop0.30
+ddG	rosetta_random	random/Rosetta	shared	enc3e-4	320	0	6.7913778976195305	1.489649705682301	sourcehpo_ddg_rosetta-random_enc3e-4
+ddG	rosetta_random	random/Rosetta	shared	enc3e-5	320	0	5.9561455624064825	1.3939694932669493	sourcehpo_ddg_rosetta-random_enc3e-5
+ddG	rosetta_random	random/Rosetta	shared	fixed	320	0	6.399214425341978	1.6200868798866228	sourcehpo_ddg_rosetta-random_fixed
+ddG	rosetta_random	random/Rosetta	shared	lr1e-4_enc3e-5	320	0	6.0293259978782405	1.5250869927871014	sourcehpo_ddg_rosetta-random_lr1e-4_enc3e-5
+ddG	rosetta	Rosetta	shared	default	320	0	6.78677679434953	1.5593309049770836	sourcehpo_ddg_rosetta_default
+ddG	rosetta	Rosetta	shared	drop0.05	320	0	6.1242914837495395	1.5146186194957156	sourcehpo_ddg_rosetta_drop0.05
+ddG	rosetta	Rosetta	shared	drop0.30	320	0	6.603620777653743	1.577957403918112	sourcehpo_ddg_rosetta_drop0.30
+ddG	rosetta	Rosetta	shared	enc3e-4	320	0	6.792908888993932	1.5189700772579897	sourcehpo_ddg_rosetta_enc3e-4
+ddG	rosetta	Rosetta	shared	enc3e-5	320	0	6.054449512876293	1.4377058996332934	sourcehpo_ddg_rosetta_enc3e-5
+ddG	rosetta	Rosetta	shared	fixed	320	0	6.34489526349965	1.4796487238501426	sourcehpo_ddg_rosetta_fixed
+ddG	rosetta	Rosetta	shared	lr1e-4_enc3e-5	320	0	5.875935316852555	1.4068508242017508	sourcehpo_ddg_rosetta_lr1e-4_enc3e-5
+MD	MD Q-value	MD Q-value	residual	default	0	640	6.461935935529031	1.4558417499002951	sourcehpo_md_q-value-400k_default
+MD	MD Q-value	MD Q-value	residual	drop0.05	0	640	6.399767275331168	1.5881483435307322	sourcehpo_md_q-value-400k_drop0.05
+MD	MD Q-value	MD Q-value	residual	drop0.30	0	640	6.483756697228979	1.4843363311933189	sourcehpo_md_q-value-400k_drop0.30
+MD	MD Q-value	MD Q-value	residual	enc3e-4	0	640	7.116994402305451	1.5059732684697948	sourcehpo_md_q-value-400k_enc3e-4
+MD	MD Q-value	MD Q-value	residual	enc3e-5	0	640	5.968758619448708	1.4260782703109074	sourcehpo_md_q-value-400k_enc3e-5
+MD	MD Q-value	MD Q-value	residual	fixed_w0.05	0	640	6.516163169597964	1.5199792698693209	sourcehpo_md_q-value-400k_fixed_w0.05
+MD	MD Q-value	MD Q-value	residual	fixed_w0.10	0	640	6.452019963557378	1.475171365799457	sourcehpo_md_q-value-400k_fixed_w0.10
+MD	MD Q-value	MD Q-value	residual	fixed_w0.25	0	640	6.6219959757651345	1.50439915795066	sourcehpo_md_q-value-400k_fixed_w0.25
+MD	MD Q-value	MD Q-value	residual	fixed_w0.50	0	640	6.488659025573272	1.5637233582334495	sourcehpo_md_q-value-400k_fixed_w0.50
+MD	MD Q-value	MD Q-value	residual	lr1e-4_enc3e-5	0	640	5.942478148144567	1.4637341624104483	sourcehpo_md_q-value-400k_lr1e-4_enc3e-5
