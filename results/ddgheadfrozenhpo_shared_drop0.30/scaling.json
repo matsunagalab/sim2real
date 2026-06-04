@@ -1,7 +1,7 @@
 {
   "exp_name": "ddgheadfrozenhpo_shared_drop0.30",
-  "timestamp": "2026-05-31T10:23:34",
-  "git_commit": "532110b",
+  "timestamp": "2026-06-03T19:03:59",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "FEP",
     "n_ddg_list": "320",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 3,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "/home/yasu/tmp/sim2real/results/ddg_head_search/frozen/hpo/ddgheadfrozenhpo_shared_drop0.30",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -208,7 +211,7 @@
     "slope": null,
     "ci_width_avg": 1.507651593790464,
     "mae_avg": 6.675338967318448,
-    "elapsed_s": 211.18952751159668
+    "elapsed_s": 364.87769412994385
   },
   "paired_bootstrap": {
     "ref_n": 320,

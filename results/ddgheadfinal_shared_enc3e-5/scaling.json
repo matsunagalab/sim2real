@@ -1,7 +1,7 @@
 {
   "exp_name": "ddgheadfinal_shared_enc3e-5",
-  "timestamp": "2026-05-31T03:10:01",
-  "git_commit": "fb59fb0",
+  "timestamp": "2026-06-03T18:31:02",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "FEP",
     "n_ddg_list": "320",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 10,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "/home/yasu/tmp/sim2real/results/ddg_head_search/final/ddgheadfinal_shared_enc3e-5",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -490,7 +493,7 @@
     "slope": null,
     "ci_width_avg": 0.8350701836506458,
     "mae_avg": 6.376903909917744,
-    "elapsed_s": 1133.088341474533
+    "elapsed_s": 1027.8279809951782
   },
   "paired_bootstrap": {
     "ref_n": 320,

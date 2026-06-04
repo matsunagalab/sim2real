@@ -1,7 +1,7 @@
 {
   "exp_name": "sourcehpo_ddg_fep_fixed",
-  "timestamp": "2026-05-31T14:46:20",
-  "git_commit": "1e2f585",
+  "timestamp": "2026-06-03T16:17:55",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "FEP",
     "n_ddg_list": "320",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 3,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "/home/yasu/tmp/sim2real/results/source_screen/hpo/sourcehpo_ddg_fep_fixed",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -208,7 +211,7 @@
     "slope": null,
     "ci_width_avg": 1.5429994342127582,
     "mae_avg": 6.142408570500959,
-    "elapsed_s": 646.1458189487457
+    "elapsed_s": 656.2420752048492
   },
   "paired_bootstrap": {
     "ref_n": 320,

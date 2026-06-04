@@ -1,5 +1,5 @@
 {
-  "note": "A-D final test summary with the validation-selected D/RMSF condition and an additional D/Q-HPhil check. D/Q-HPhil was the second-best D condition in validation HPO.",
+  "note": "A-D final test summary with the validation-selected D/RMSF condition and an additional D/Q-value check. D/Q-value was the second-best D condition in validation candidate search.",
   "rows": [
     {
       "condition": "A_Tm",
@@ -24,8 +24,8 @@
       "arch": "residual",
       "md_source": "MD_Q_HPHIL_400K",
       "n_md": 640,
-      "test_mae": 6.5136256563016985,
-      "ci_width": 0.8511932297664684
+      "test_mae": 6.711410499734318,
+      "ci_width": 0.8569009599537978
     },
     {
       "condition": "D_ddG_MD_validation_selected",
@@ -35,7 +35,7 @@
       "n_ddg": 320,
       "md_source": "MD_RMSF_MAX",
       "n_md": 640,
-      "selected_val_mae": 5.825992752702599,
+      "selected_val_mae": 6.085969323649333,
       "test_mae": 6.661829657535072,
       "ci_width": 0.8644641126352584
     },
@@ -47,9 +47,9 @@
       "n_ddg": 320,
       "md_source": "MD_Q_HPHIL_400K",
       "n_md": 640,
-      "selected_val_mae": 5.927731911172847,
-      "test_mae": 6.6220631226141,
-      "ci_width": 0.8392970010623841
+      "selected_val_mae": 6.2293835135396876,
+      "test_mae": 6.625997622511286,
+      "ci_width": 0.8467220295293716
     }
   ],
   "paired_comparisons": {
@@ -60,10 +60,10 @@
       "p_delta_gt_0": 0.0044
     },
     "C_minus_A": {
-      "delta_mae": -0.08510057565175146,
-      "delta_ci_lo": -0.15519361710447552,
-      "delta_ci_hi": -0.013167789757242037,
-      "p_delta_gt_0": 0.0255
+      "delta_mae": 0.11368851683016735,
+      "delta_ci_lo": 0.02828053536686026,
+      "delta_ci_hi": 0.1979560445730209,
+      "p_delta_gt_0": 0.9851
     },
     "D_RMSF_minus_A": {
       "delta_mae": 0.06373444213131417,
@@ -78,22 +78,22 @@
       "p_delta_gt_0": 1.0
     },
     "D_Q_minus_A": {
-      "delta_mae": 0.023859245731598866,
-      "delta_ci_lo": -0.05743545223055406,
-      "delta_ci_hi": 0.1048833909252026,
-      "p_delta_gt_0": 0.6893
+      "delta_mae": 0.026946302149423923,
+      "delta_ci_lo": -0.07672685660139322,
+      "delta_ci_hi": 0.13059923951213942,
+      "p_delta_gt_0": 0.6629
     },
     "D_Q_minus_B": {
-      "delta_mae": 0.2134802098348327,
-      "delta_ci_lo": 0.08926153152226837,
-      "delta_ci_hi": 0.33568293359083984,
-      "p_delta_gt_0": 0.9982
+      "delta_mae": 0.2165672662526578,
+      "delta_ci_lo": 0.07947873710074149,
+      "delta_ci_hi": 0.35712046847203077,
+      "p_delta_gt_0": 0.9952
     },
     "D_Q_minus_C": {
-      "delta_mae": 0.10895982138335032,
-      "delta_ci_lo": 0.02860219262078894,
-      "delta_ci_hi": 0.189034551131687,
-      "p_delta_gt_0": 0.9874
+      "delta_mae": -0.08674221468074343,
+      "delta_ci_lo": -0.20500897615730737,
+      "delta_ci_hi": 0.03158770445396311,
+      "p_delta_gt_0": 0.1168
     }
   }
 }

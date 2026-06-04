@@ -1,7 +1,7 @@
 {
   "exp_name": "ddgheadhpo_context_drop0.30",
-  "timestamp": "2026-05-31T02:42:38",
-  "git_commit": "fb59fb0",
+  "timestamp": "2026-06-03T17:58:11",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "FEP",
     "n_ddg_list": "320",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 3,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "/home/yasu/tmp/sim2real/results/ddg_head_search/hpo/ddgheadhpo_context_drop0.30",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -208,7 +211,7 @@
     "slope": null,
     "ci_width_avg": 1.5284484399509637,
     "mae_avg": 6.688143750527957,
-    "elapsed_s": 303.04335713386536
+    "elapsed_s": 243.67814898490906
   },
   "paired_bootstrap": {
     "ref_n": 320,

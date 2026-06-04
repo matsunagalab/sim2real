@@ -1,7 +1,7 @@
 {
   "exp_name": "size35_tm_shared_drop005",
-  "timestamp": "2026-05-31T18:10:31",
-  "git_commit": "d2bf5b2",
+  "timestamp": "2026-06-03T23:56:30",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "none",
     "n_ddg_list": "0",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 10,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "results/model_size/final/size35_tm",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -490,7 +493,7 @@
     "slope": null,
     "ci_width_avg": 0.8743244949402449,
     "mae_avg": 6.696432718620675,
-    "elapsed_s": 1189.475153684616
+    "elapsed_s": 1096.0290365219116
   },
   "paired_bootstrap": {
     "ref_n": 0,

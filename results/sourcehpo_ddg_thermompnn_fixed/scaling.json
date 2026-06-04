@@ -1,7 +1,7 @@
 {
   "exp_name": "sourcehpo_ddg_thermompnn_fixed",
-  "timestamp": "2026-05-31T14:51:44",
-  "git_commit": "1e2f585",
+  "timestamp": "2026-06-03T16:22:50",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "thermoMPNN",
     "n_ddg_list": "320",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 3,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "/home/yasu/tmp/sim2real/results/source_screen/hpo/sourcehpo_ddg_thermompnn_fixed",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -208,7 +211,7 @@
     "slope": null,
     "ci_width_avg": 1.6097278618523418,
     "mae_avg": 6.320726440113089,
-    "elapsed_s": 253.13217520713806
+    "elapsed_s": 225.57970762252808
   },
   "paired_bootstrap": {
     "ref_n": 320,

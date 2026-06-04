@@ -1,7 +1,7 @@
 {
   "exp_name": "ddgheadfrozenfinal_calibrated_drop0.05",
-  "timestamp": "2026-05-31T10:47:11",
-  "git_commit": "532110b",
+  "timestamp": "2026-06-03T19:51:53",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "FEP",
     "n_ddg_list": "320",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 10,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "/home/yasu/tmp/sim2real/results/ddg_head_search/frozen/final/ddgheadfrozenfinal_calibrated_drop0.05",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -490,7 +493,7 @@
     "slope": null,
     "ci_width_avg": 0.8890607852223953,
     "mae_avg": 7.2154182714348645,
-    "elapsed_s": 709.913402557373
+    "elapsed_s": 1480.3964681625366
   },
   "paired_bootstrap": {
     "ref_n": 320,

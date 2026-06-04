@@ -1,7 +1,7 @@
 {
   "exp_name": "sourcehpo_tm_shared_drop0.05",
-  "timestamp": "2026-05-31T14:29:35",
-  "git_commit": "1e2f585",
+  "timestamp": "2026-06-03T16:01:00",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "none",
     "n_ddg_list": "0",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 3,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "/home/yasu/tmp/sim2real/results/source_screen/hpo/sourcehpo_tm_shared_drop0.05",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -208,7 +211,7 @@
     "slope": null,
     "ci_width_avg": 1.4858504621212187,
     "mae_avg": 5.991735227038186,
-    "elapsed_s": 238.18181896209717
+    "elapsed_s": 232.6269609928131
   },
   "paired_bootstrap": {
     "ref_n": 0,

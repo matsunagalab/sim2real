@@ -1,7 +1,7 @@
 {
   "exp_name": "ddgheadfrozenfinal_separate_default",
-  "timestamp": "2026-05-31T10:47:31",
-  "git_commit": "532110b",
+  "timestamp": "2026-06-03T19:39:30",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "FEP",
     "n_ddg_list": "320",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 10,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "/home/yasu/tmp/sim2real/results/ddg_head_search/frozen/final/ddgheadfrozenfinal_separate_default",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -490,7 +493,7 @@
     "slope": null,
     "ci_width_avg": 0.8753525767612729,
     "mae_avg": 7.201965523148467,
-    "elapsed_s": 726.6069078445435
+    "elapsed_s": 737.6268327236176
   },
   "paired_bootstrap": {
     "ref_n": 320,

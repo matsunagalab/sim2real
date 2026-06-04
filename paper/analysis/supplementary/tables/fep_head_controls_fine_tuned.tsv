@@ -1,5 +1,5 @@
 encoder	source_head	test_mae_deg_c	ci_lo_deg_c	ci_hi_deg_c	validation_mae_deg_c	selected_setting	exp
 fine-tuned encoder	template-specific	6.261138412134152	5.852657398669069	6.670841141457817	5.8738843708806785	enc3e-5	ddgheadfinal_separate_enc3e-5
 fine-tuned encoder	shared	6.376903909917744	5.960556789015854	6.7956269726665	5.919528406117095	enc3e-5	ddgheadfinal_shared_enc3e-5
-fine-tuned encoder	conditioned	6.511876875884816	6.088067321053655	6.940736334149309	5.891193296053284	lr1e-4_enc3e-5	ddgheadfinal_context_lr1e-4_enc3e-5
+fine-tuned encoder	conditioned	6.511876875884816	6.088067321053655	6.940736334149309	5.891193038567754	lr1e-4_enc3e-5	ddgheadfinal_context_lr1e-4_enc3e-5
 fine-tuned encoder	calibrated	6.328998893611692	5.906018513665426	6.752550071817446	5.7158889266790895	enc3e-5	ddgheadfinal_calibrated_enc3e-5

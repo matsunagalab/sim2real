@@ -21,7 +21,7 @@ calculations, start with `REPRODUCE.md` and
   new compact summaries.
 - Keep manuscript-facing terminology readable. Internal filenames can be
   historical, but figures and manuscript text should use names such as
-  `fine-tuned encoder`, `frozen encoder`, `FEP mutation free energy`, and
+  `hot encoder`, `frozen encoder`, `FEP mutation free energy`, and
   `MD Q-value`.
 
 ## Directory Pattern
@@ -126,6 +126,7 @@ uv run python plot/make_supplementary_figures.py
 Then typeset from `paper/tex/`:
 
 ```bash
+mamba create -y -p /tmp/sim2real-latex -c conda-forge tectonic
 env XDG_CACHE_HOME=/tmp/tectonic-cache /tmp/sim2real-latex/bin/tectonic main.tex
 ```
 

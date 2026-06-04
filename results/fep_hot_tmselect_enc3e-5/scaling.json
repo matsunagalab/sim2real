@@ -1,7 +1,7 @@
 {
   "exp_name": "fep_hot_tmselect_enc3e-5",
-  "timestamp": "2026-05-31T17:09:06",
-  "git_commit": "d2bf5b2",
+  "timestamp": "2026-06-03T14:54:27",
+  "git_commit": "009a4fc",
   "args": {
     "ddg_source": "FEP",
     "n_ddg_list": "10,40,80,160,320",
@@ -12,6 +12,9 @@
     "fixed_n_ddg": null,
     "fixed_n_md": null,
     "n_runs": 10,
+    "run_ids": null,
+    "skip_eval": false,
+    "eval_only": false,
     "result_dir": "results/fep_hot_tmselect_enc3e-5",
     "train_mode": "mtl",
     "selection_scope": "tm",
@@ -2107,21 +2110,50 @@
     "ci_width": 0.8181837427887482
   },
   "summary": {
-    "slope": null,
+    "slope": -0.07846395569180627,
     "ci_width_avg": 0.8415644089020711,
     "mae_avg": 6.454639401274633,
-    "elapsed_s": 659.5736706256866
+    "elapsed_s": 3867.4106805324554
   },
   "paired_bootstrap": {
     "ref_n": 10,
-    "per_n": [],
+    "per_n": [
+      {
+        "n": 40,
+        "delta_mae": -0.13015183315629716,
+        "delta_ci_lo": -0.20198983946444898,
+        "delta_ci_hi": -0.057556503641265,
+        "p_positive": 0.0018
+      },
+      {
+        "n": 80,
+        "delta_mae": -0.2971836202464824,
+        "delta_ci_lo": -0.3963244742610219,
+        "delta_ci_hi": -0.19745327133434581,
+        "p_positive": 0.0
+      },
+      {
+        "n": 160,
+        "delta_mae": -0.14664580016533085,
+        "delta_ci_lo": -0.24343886743874013,
+        "delta_ci_hi": -0.04892067295275633,
+        "p_positive": 0.0055
+      },
+      {
+        "n": 320,
+        "delta_mae": -0.3867156493086269,
+        "delta_ci_lo": -0.4928243250740616,
+        "delta_ci_hi": -0.2800109930724315,
+        "p_positive": 0.0
+      }
+    ],
     "full_range": {
       "from": 10,
-      "to": 10,
-      "delta_mae": NaN,
-      "delta_ci_lo": NaN,
-      "delta_ci_hi": NaN,
-      "p_positive": NaN
+      "to": 320,
+      "delta_mae": -0.3867156493086269,
+      "delta_ci_lo": -0.4928243250740616,
+      "delta_ci_hi": -0.2800109930724315,
+      "p_positive": 0.0
     }
   }
 }

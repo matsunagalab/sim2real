@@ -57,8 +57,8 @@ their own source-task heads.
 
 Mutation-effect sources were organized as two template-specific tables derived
 from the 1MEL and 4IDL nanobody structures. FEP, Rosetta, and ThermoMPNN each
-contained 435 and 409 processed rows for the two templates. ESM2-generated
-variants and random variants scored by Rosetta each contained 1000 and 1000
+contained 435 and 409 processed rows for the two templates. Variants proposed
+by ESM2 and random variants scored by Rosetta each contained 1000 and 1000
 processed rows. The MD-derived Q-value source was generated from a separate
 panel of simulated single-domain antibody structures selected from SAbDab, the
 Structural Antibody Database \citep{Dunbar2014SAbDab}. The processed MD table
@@ -166,8 +166,8 @@ calculation used full-atom Rosetta with the \texttt{\detokenize{ref2015}} score
 function \citep{Alford2017Rosetta}, 50 iterations, Cartesian minimization
 enabled, local-only optimization disabled, side-chain-minimization-only disabled,
 minimum-score aggregation, and no PDB dumping. The same Rosetta protocol was
-used for the template mutation-effect tables, the ESM2-generated variants, and
-the random-variant control.
+used for the template mutation-effect tables, the variants proposed by ESM2,
+and the random-variant control.
 
 For the generated-variant source, ESM2 650M was used to sample 100,000
 two-mutation variants from each wild-type template sequence, variants were ranked

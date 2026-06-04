@@ -49,6 +49,8 @@
         "mtl_weight_mode": "uncertainty",
         "md_weight": 1.0,
         "model_arch": "latent",
+        "ddg_head_mode": "separate",
+        "ddg_context_dim": 4,
         "detach_aux_encoder": true
       },
       "scaling_json": "/home/yasu/tmp/sim2real/results/abcdfinal_A_tm_latent_drop0.30/scaling.json"
@@ -56,11 +58,11 @@
     {
       "condition": "B_ddG",
       "arch": "shared",
-      "label": "lr1e-4_enc3e-5",
+      "label": "enc3e-5",
       "md_source": "none",
       "n_ddg": 320,
       "n_md": 0,
-      "exp": "abcdfinal_B_ddg320_shared_lr1e-4_enc3e-5",
+      "exp": "abcdfinal_B_ddg320_shared_enc3e-5",
       "env": {
         "DETACH_AUX_ENCODER": "true"
       },
@@ -69,26 +71,25 @@
         "selection-scope": "tm",
         "final-eval-split": "test",
         "encoder-mode": "hot",
-        "learning-rate": "1e-4",
         "encoder-lr": "3e-5",
         "n-runs": 10,
-        "exp-name": "abcdfinal_B_ddg320_shared_lr1e-4_enc3e-5",
-        "result-dir": "/home/yasu/tmp/sim2real/results/abcd_search/final/abcdfinal_B_ddg320_shared_lr1e-4_enc3e-5",
+        "exp-name": "abcdfinal_B_ddg320_shared_enc3e-5",
+        "result-dir": "/home/yasu/tmp/sim2real/results/abcd_search/final/abcdfinal_B_ddg320_shared_enc3e-5",
         "model-arch": "shared",
         "ddg-source": "FEP",
         "n-ddg-list": 320,
         "md-source": "none"
       },
-      "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdfinal_B_ddg320_shared_lr1e-4_enc3e-5.log",
+      "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdfinal_B_ddg320_shared_enc3e-5.log",
       "gpu": "2",
       "rc": 0,
-      "val_mae": 5.888612586784764,
-      "ci_width": 0.8497431096298662,
+      "val_mae": 5.8738843708806785,
+      "ci_width": 0.8181837427887482,
       "best_n": 320,
       "hparams": {
         "num_train_epochs": 400,
         "batch_size": 16,
-        "learning_rate": 0.0001,
+        "learning_rate": 0.0003,
         "encoder_lr": 3e-05,
         "weight_decay": 0.04,
         "dropout_rate": 0.15,
@@ -103,12 +104,14 @@
         "mtl_weight_mode": "uncertainty",
         "md_weight": 1.0,
         "model_arch": "shared",
+        "ddg_head_mode": "separate",
+        "ddg_context_dim": 4,
         "detach_aux_encoder": true
       },
-      "scaling_json": "/home/yasu/tmp/sim2real/results/abcdfinal_B_ddg320_shared_lr1e-4_enc3e-5/scaling.json",
-      "selected_from": "abcdhpo_B_ddg320_shared_lr1e-4_enc3e-5",
-      "selected_val_mae": 5.888612586784764,
-      "test_mae": 6.407683427659544
+      "scaling_json": "/home/yasu/tmp/sim2real/results/abcdfinal_B_ddg320_shared_enc3e-5/scaling.json",
+      "selected_from": "abcdhpo_B_ddg320_shared_enc3e-5",
+      "selected_val_mae": 5.8738843708806785,
+      "test_mae": 6.261138412134152
     },
     {
       "condition": "C_MD",
@@ -138,8 +141,8 @@
       "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdfinal_C_md_q-hphil-400k_residual_enc3e-5.log",
       "gpu": "1",
       "rc": 0,
-      "test_mae": 6.5136256563016985,
-      "ci_width": 0.8511932297664684,
+      "test_mae": 6.711410499734318,
+      "ci_width": 0.8569009599537978,
       "best_n": 640,
       "hparams": {
         "num_train_epochs": 400,
@@ -159,18 +162,20 @@
         "mtl_weight_mode": "uncertainty",
         "md_weight": 1.0,
         "model_arch": "residual",
+        "ddg_head_mode": "separate",
+        "ddg_context_dim": 4,
         "detach_aux_encoder": true
       },
       "scaling_json": "/home/yasu/tmp/sim2real/results/abcdfinal_C_md_q-hphil-400k_residual_enc3e-5/scaling.json"
     },
     {
       "condition": "D_ddG_MD",
-      "arch": "latent",
-      "label": "lr1e-4_enc3e-5",
-      "md_source": "MD_RMSF_MAX",
+      "arch": "residual",
+      "label": "enc3e-5",
+      "md_source": "MD_Q_HPHIL_400K",
       "n_ddg": 320,
       "n_md": 640,
-      "exp": "abcdfinal_D_ddg320_md640_rmsf-max_latent_lr1e-4_enc3e-5",
+      "exp": "abcdfinal_D_ddg320_md640_q-hphil-400k_residual_enc3e-5",
       "env": {
         "DETACH_AUX_ENCODER": "true"
       },
@@ -179,27 +184,26 @@
         "selection-scope": "tm",
         "final-eval-split": "test",
         "encoder-mode": "hot",
-        "learning-rate": "1e-4",
         "encoder-lr": "3e-5",
         "n-runs": 10,
-        "exp-name": "abcdfinal_D_ddg320_md640_rmsf-max_latent_lr1e-4_enc3e-5",
-        "result-dir": "/home/yasu/tmp/sim2real/results/abcd_search/final/abcdfinal_D_ddg320_md640_rmsf-max_latent_lr1e-4_enc3e-5",
-        "model-arch": "latent",
+        "exp-name": "abcdfinal_D_ddg320_md640_q-hphil-400k_residual_enc3e-5",
+        "result-dir": "/home/yasu/tmp/sim2real/results/abcd_search/final/abcdfinal_D_ddg320_md640_q-hphil-400k_residual_enc3e-5",
+        "model-arch": "residual",
         "ddg-source": "FEP",
         "fixed-n-ddg": 320,
-        "md-source": "MD_RMSF_MAX",
+        "md-source": "MD_Q_HPHIL_400K",
         "n-md-list": 640
       },
-      "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdfinal_D_ddg320_md640_rmsf-max_latent_lr1e-4_enc3e-5.log",
+      "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdfinal_D_ddg320_md640_q-hphil-400k_residual_enc3e-5.log",
       "gpu": "3",
       "rc": 0,
-      "val_mae": 5.825992752702599,
-      "ci_width": 0.8644641126352584,
+      "val_mae": 5.753996148153012,
+      "ci_width": 0.858194150889072,
       "best_n": 640,
       "hparams": {
         "num_train_epochs": 400,
         "batch_size": 16,
-        "learning_rate": 0.0001,
+        "learning_rate": 0.0003,
         "encoder_lr": 3e-05,
         "weight_decay": 0.04,
         "dropout_rate": 0.15,
@@ -213,45 +217,47 @@
         "base_model_name": "facebook/esm2_t6_8M_UR50D",
         "mtl_weight_mode": "uncertainty",
         "md_weight": 1.0,
-        "model_arch": "latent",
+        "model_arch": "residual",
+        "ddg_head_mode": "separate",
+        "ddg_context_dim": 4,
         "detach_aux_encoder": true
       },
-      "scaling_json": "/home/yasu/tmp/sim2real/results/abcdfinal_D_ddg320_md640_rmsf-max_latent_lr1e-4_enc3e-5/scaling.json",
-      "selected_from": "abcdhpo_D_ddg320_md640_rmsf-max_latent_lr1e-4_enc3e-5",
-      "selected_val_mae": 5.825992752702599,
-      "test_mae": 6.661829657535072
+      "scaling_json": "/home/yasu/tmp/sim2real/results/abcdfinal_D_ddg320_md640_q-hphil-400k_residual_enc3e-5/scaling.json",
+      "selected_from": "abcdhpo_D_ddg320_md640_q-hphil-400k_residual_enc3e-5",
+      "selected_val_mae": 5.753996148153012,
+      "test_mae": 6.4887846903866375
     }
   ],
   "paired_comparisons": {
     "B_ddG_minus_A_Tm": {
-      "delta_mae": -0.18962096410323384,
-      "delta_ci_lo": -0.30551909374045916,
-      "delta_ci_hi": -0.07224438324758223,
-      "p_delta_gt_0": 0.0044
+      "delta_mae": -0.33726092322837264,
+      "delta_ci_lo": -0.44282574914552436,
+      "delta_ci_hi": -0.23194535356558552,
+      "p_delta_gt_0": 0.0
     },
     "C_MD_minus_A_Tm": {
-      "delta_mae": -0.08510057565175146,
-      "delta_ci_lo": -0.15519361710447552,
-      "delta_ci_hi": -0.013167789757242037,
-      "p_delta_gt_0": 0.0255
+      "delta_mae": 0.11368851683016735,
+      "delta_ci_lo": 0.02828053536686026,
+      "delta_ci_hi": 0.1979560445730209,
+      "p_delta_gt_0": 0.9851
     },
     "D_ddG_MD_minus_A_Tm": {
-      "delta_mae": 0.06373444213131417,
-      "delta_ci_lo": -0.021925870327543957,
-      "delta_ci_hi": 0.14805419633837133,
-      "p_delta_gt_0": 0.8946
+      "delta_mae": -0.11081342259597113,
+      "delta_ci_lo": -0.20533023449421534,
+      "delta_ci_hi": -0.0183343494444885,
+      "p_delta_gt_0": 0.0259
     },
     "D_ddG_MD_minus_B_ddG": {
-      "delta_mae": 0.253355406234548,
-      "delta_ci_lo": 0.14624428165511477,
-      "delta_ci_hi": 0.3607035253201775,
-      "p_delta_gt_0": 1.0
+      "delta_mae": 0.22644750063240157,
+      "delta_ci_lo": 0.10716598814685523,
+      "delta_ci_hi": 0.34626016200048815,
+      "p_delta_gt_0": 0.9988
     },
     "D_ddG_MD_minus_C_MD": {
-      "delta_mae": 0.1488350177830656,
-      "delta_ci_lo": 0.07044909710478793,
-      "delta_ci_hi": 0.22719125733417167,
-      "p_delta_gt_0": 0.9995
+      "delta_mae": -0.22450193942613847,
+      "delta_ci_lo": -0.324064121610492,
+      "delta_ci_hi": -0.1244444793690413,
+      "p_delta_gt_0": 0.0
     }
   }
 }

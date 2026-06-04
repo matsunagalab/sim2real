@@ -97,7 +97,7 @@ all computational labels. The absolute gain is incremental relative to the
 and across the bootstrap interval.
 
 The other sources showed weaker or negative effects. Rosetta scores assigned to
-ESM2-generated variants reached
+protein-language-model proposals reached
 6.45$^\circ$C (paired change, -0.17$^\circ$C; 90\% confidence interval,
 -0.31 to -0.03$^\circ$C), and ThermoMPNN stability scores reached
 6.46$^\circ$C (paired change, -0.15$^\circ$C; 90\% confidence interval,
@@ -159,7 +159,7 @@ that FEP labels carry useful information even when the representation is fixed,
 but limited encoder adaptation is important for extracting the strongest
 target-task benefit.
 
-\subsection*{Physics-labeled generated variants connect transfer learning to design loops}
+\subsection*{Physics-labeled sequence proposals connect transfer learning to design loops}
 
 Rosetta labels on variants proposed by the protein language model improved Tm
 prediction over the experimental-only baseline, whereas the comparison between
@@ -169,8 +169,8 @@ experimental-only learning was 0.17$^\circ$C (90\% confidence interval,
 0.03--0.31$^\circ$C). By contrast, the paired difference between
 language-model-proposed and random variants was 0.07$^\circ$C in favor of
 language-model-proposed variants, with a confidence interval crossing zero. We
-therefore interpret this result conservatively. Physics-labeled generated
-variants retain useful supervised signal for Tm prediction, but the present
+therefore interpret this result conservatively. Physics-labeled sequence
+proposals retain useful supervised signal for Tm prediction, but the present
 data do not prove that the current generator is superior to random variant
 sampling.
 

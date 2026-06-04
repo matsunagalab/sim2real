@@ -64,6 +64,18 @@ FINAL_CONFIGS = [
         {"DETACH_AUX_ENCODER": "true"},
     ),
     (
+        "residual_cdr3_len",
+        "residual",
+        {"encoder-lr": "3e-5", "md-source": "MD_CDR3_LEN", "n-md-list": "640"},
+        {"DETACH_AUX_ENCODER": "true"},
+    ),
+    (
+        "residual_rmsf_cdr3",
+        "residual",
+        {"encoder-lr": "3e-5", "md-source": "MD_RMSF_CDR3", "n-md-list": "640"},
+        {"DETACH_AUX_ENCODER": "true"},
+    ),
+    (
         "residual_ss_dist_std",
         "residual",
         {"encoder-lr": "3e-5", "md-source": "MD_SS_DIST_STD", "n-md-list": "640"},
