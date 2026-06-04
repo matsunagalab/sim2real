@@ -71,7 +71,7 @@ FEP mutation free energy & Source tasks & 435 + 409 & Main source task \\
 Rosetta mutation score & Source tasks & 435 + 409 & Source comparison \\
 ThermoMPNN stability score & Source tasks & 435 + 409 & Source comparison \\
 Random variants scored by Rosetta & Source tasks & 1000 + 1000 & Source comparison \\
-ESM2 variants scored by Rosetta & Source tasks & 1000 + 1000 & Source comparison \\
+ESM2-proposed variants scored by Rosetta & Source tasks & 1000 + 1000 & Source comparison \\
 MD-derived Q-value & Source task & 1143 & Source comparison and scaling control \\
 \hline
 \end{tabular}
@@ -87,8 +87,8 @@ contributes to.
 
 Exact sequence overlap was checked between the processed source-label tables
 and the fixed NbBench splits. The processed FEP/Rosetta mutation-effect tables,
-random variants scored by Rosetta, and ESM2 variants scored by Rosetta had no
-exact sequence matches to the NbBench training, validation, or test sequences.
+random variants scored by Rosetta, and ESM2-proposed variants scored by Rosetta
+had no exact sequence matches to the NbBench training, validation, or test sequences.
 The ThermoMPNN tables used the same template-specific variant design as the
 mutation-effect sources. The SAbDab-derived MD Q-value table contained exact
 matches to 2 NbBench training sequences, 4 validation sequences, and 8 test
@@ -110,22 +110,20 @@ experimental Tm validation examples.
 \subsection*{SAbDab-derived nanobody structure panel for MD}
 
 The MD source-label panel was constructed from SAbDab, the Structural Antibody
-Database \citep{Dunbar2014SAbDab}. The local SAbDab nanobody summary file
-\texttt{\detokenize{/home/yasu/tmp/mdclaw/sabdab_nano_summary_all.tsv}} contains
-2422 rows with PDB identifier, heavy-chain assignment, light-chain assignment,
-model index, antigen annotation, experimental method, resolution, species, and
-other SAbDab fields. The manifest construction script
-\texttt{\detokenize{/home/yasu/tmp/mdclaw/scripts/build_manifest_nano_imgt.py}}
-matches this summary against IMGT-renumbered PDB files in
-\texttt{\detokenize{/home/yasu/tmp/mdclaw/nanobodies/imgt/}}.
+Database \citep{Dunbar2014SAbDab}. The archived SAbDab nanobody summary table,
+\texttt{\detokenize{sabdab_nano_summary_all.tsv}}, contains 2422 rows with PDB
+identifier, heavy-chain assignment, light-chain assignment, model index,
+antigen annotation, experimental method, resolution, species, and other SAbDab
+fields. The manifest construction workflow matches this summary against the
+archived IMGT-renumbered PDB files.
 
 The selection rule is deterministic. For each PDB identifier with both a SAbDab
 summary row and a local IMGT-renumbered PDB file, the script picks the first
 heavy-chain row encountered in the SAbDab table. The chain is accepted only if
 the same chain identifier is present in the IMGT PDB file. The output manifest
 contains one entry per PDB identifier, with fields for the manifest row number,
-PDB identifier, selected heavy chain, SAbDab TSV row, IMGT PDB path, and MDClaw
-job directory. This initial one-per-PDB manifest contained 1177 structures.
+PDB identifier, selected heavy chain, SAbDab TSV row, IMGT PDB path, and MD
+run directory. This initial one-per-PDB manifest contained 1177 structures.
 
 The 400 K MD campaign reused the systems prepared in the 300 K campaign and
 created a 1146-entry 400 K manifest. The selected 400 K manifest consisted of
@@ -135,15 +133,15 @@ according to the SAbDab method field. All selected rows had
 single-domain antibody panel. After trajectory and Q-value processing, 1143
 unique PDB identifiers yielded usable source-label rows.
 
-\subsection*{MDClaw system preparation and simulation protocol}
+\subsection*{MD system preparation and simulation protocol}
 
 Each selected structure was prepared as a nanobody-only MD system. The script
-\texttt{\detokenize{/home/yasu/tmp/mdclaw/scripts/run_prep_one_imgt.sh}}
-registers the IMGT-renumbered PDB as a local structure source, creates an
-MDClaw fetch node, extracts the selected heavy chain, includes only protein
-atoms, and leaves termini uncapped. The preparation call uses pH 7.4.
-MDClaw cleans protein chains with PDBFixer and applies pH-aware protonation
-through pdb2pqr/PROPKA when available \citep{Dolinsky2004PDB2PQR,Olsson2011PROPKA3};
+\texttt{\detokenize{run_prep_one_imgt.sh}}
+registers the IMGT-renumbered PDB as a local structure source, extracts the
+selected heavy chain, includes only protein atoms, and leaves termini uncapped.
+The preparation call uses pH 7.4. Protein chains are cleaned with PDBFixer, and
+pH-aware protonation is assigned through pdb2pqr/PROPKA when available
+\citep{Dolinsky2004PDB2PQR,Olsson2011PROPKA3};
 its fallback path uses AmberTools-based hydrogen assignment and Amber naming.
 The resulting prepared chain is solvated with explicit OPC water, 15 \AA{}
 padding, and 0.15 M NaCl. Amber topology and coordinate files are built with
@@ -156,7 +154,7 @@ hydrogen-mass repartitioning. Production at 300 K was generated for the broader
 MD campaign, but the source label used in this manuscript comes from the 400 K
 branch.
 
-The 400 K branch is encoded in the MDClaw batch scripts
+The 400 K branch is encoded in the batch scripts
 \texttt{\detokenize{nano_eq_002_400K.sbatch}},
 \texttt{\detokenize{nano_eq_003_400K.sbatch}}, and
 \texttt{\detokenize{nano_prod_002_400K.sbatch}}.
@@ -168,7 +166,7 @@ repartitioning. The production node runs 100 ns of restraint-free 400 K NVT,
 with hydrogen-mass repartitioning, 4 amu hydrogen mass, a 4-fs timestep, and
 coordinate/energy output every 100 ps.
 
-In the MDClaw OpenMM implementation, explicit-solvent periodic systems use PME
+In the OpenMM implementation, explicit-solvent periodic systems use PME
 electrostatics with a 1.0-nm nonbonded cutoff and constraints on bonds involving
 hydrogen atoms. NPT stages use a Monte Carlo barostat. NVT stages omit the
 barostat. The integrator is the Langevin middle integrator with friction
@@ -179,8 +177,8 @@ complete 100 ns production trajectory.
 
 The processed MD source table was generated with
 \texttt{\detokenize{scripts/extract_q_values.py}} from the sim2real repository.
-The script scans \texttt{\detokenize{/home/yasu/tmp/mdclaw/job_nano_*}} job
-directories and uses the 400 K production node
+The script scans the archived MD run directories
+\texttt{\detokenize{job_nano_*}} and uses the 400 K production node
 \texttt{\detokenize{prod_002}}. A job is eligible only if it contains a
 production trajectory
 \texttt{\detokenize{nodes/prod_002/artifacts/trajectory.dcd}}, a prepared
@@ -234,7 +232,7 @@ trainer receives all target and sampled source rows for training, but its
 evaluation data are filtered to rows with \texttt{\detokenize{task_ids == 0}},
 which are the experimental Tm validation rows.
 
-The fine-tuned-encoder setting keeps token IDs and attention masks in the
+The hot-encoder setting keeps token IDs and attention masks in the
 training data and updates the ESM2 weights. The frozen-encoder setting calls
 \texttt{\detokenize{prepare.precompute_embeddings}} before training. In that
 setting, ESM2 is run once for each target and source sequence, the first-token
@@ -285,11 +283,11 @@ the candidate-setting searches for source classes where loss balance could
 change validation performance.
 
 The optimizer is AdamW. The default head/trunk learning rate is
-$3\times10^{-4}$, the default fine-tuned-encoder learning rate is
+$3\times10^{-4}$, the default hot-encoder learning rate is
 $1\times10^{-4}$, weight decay is 0.04, dropout is 0.15, batch size is 16,
 warmup is 100 steps, and the schedule is cosine decay. Training runs for at
 most 400 epochs. Checkpoints are evaluated and saved once per epoch. Mixed
-precision is enabled when CUDA is available. In the fine-tuned-encoder setting,
+precision is enabled when CUDA is available. In the hot-encoder setting,
 the custom trainer creates separate optimizer parameter groups for ESM2
 parameters and newly initialized trunk/head parameters. In the frozen-encoder
 setting, ESM2 parameters are non-trainable and no encoder optimizer group is
@@ -387,6 +385,38 @@ figures are stored in
 \texttt{\detokenize{paper/analysis/supplementary/figures/}} and copied to
 \texttt{\detokenize{paper/tex/figures/}} for typesetting.
 
+\subsection*{Figure-to-data and code mapping}
+
+The current manuscript figures are regenerated from compact result summaries and
+source tables rather than from scratch run directories. The mapping below is the
+first place to check when auditing or extending a figure.
+
+\begin{table*}[h]
+\centering
+\footnotesize
+\begin{tabular}{p{0.12\textwidth}p{0.30\textwidth}p{0.24\textwidth}p{0.22\textwidth}}
+\hline
+Figure & Inputs & Script & Primary comparison \\
+\hline
+Fig.~1 & Conceptual protocol & Main-figure script & Target-centered transfer-learning design \\
+Fig.~2 & Main scaling summaries & Main-figure script & Label-count scaling for Tm labels, FEP labels, and MD Q-value labels \\
+Fig.~3 & Final hot- and frozen-encoder source-screen summaries & Main-figure script & All-atom FEP and MD labels versus training only on experimental Tm labels \\
+Fig.~4 & Final source-screen summary & Main-figure script & Rosetta, ThermoMPNN, and Rosetta-scored proposal sets \\
+Supplementary Figs.~1--5 & Supplementary manifest and generated TSV tables & Supplementary-figure script & Data-set composition, candidate-setting searches, model controls, scaling controls, and MD-feature controls \\
+\hline
+\end{tabular}
+\end{table*}
+
+The final source-screen settings used in Figs.~3 and 4 are recorded in
+\texttt{\detokenize{paper/analysis/supplementary/tables/final_source_screen.tsv}},
+and the frozen-encoder controls are recorded in
+\texttt{\detokenize{paper/analysis/supplementary/tables/encoder_controls.tsv}}.
+These tables include the selected architecture, validation-selected setting,
+source-label count, validation MAE, held-out test MAE, bootstrap interval, and
+the resolved \texttt{\detokenize{scaling.json}} path for each condition. The full
+panel-level mapping for all supplementary figures is stored in
+\texttt{\detokenize{paper/analysis/supplementary/MANIFEST.tsv}}.
+
 \clearpage
 \section*{Supplementary Figures}
 
@@ -409,7 +439,7 @@ the 400 K MD panel.}
 \includegraphics[width=\textwidth]{supp_fig02_candidate_setting_search}
 \caption{\textbf{Supplementary Figure 2. Candidate-setting searches and
 target-validation selection.}
-\textbf{(a)} Experimental validation MAE values for fine-tuned-encoder source
+\textbf{(a)} Experimental validation MAE values for hot-encoder source
 comparisons.
 \textbf{(b)} Experimental validation MAE values for frozen-encoder controls.
 \textbf{(c)} Candidate source-head designs for FEP mutation free-energy labels.
@@ -423,9 +453,9 @@ panels a--c.}
 \centering
 \includegraphics[width=\textwidth]{supp_fig03_model_controls}
 \caption{\textbf{Supplementary Figure 3. Model and source-combination controls.}
-\textbf{(a)} Frozen-encoder and fine-tuned-encoder comparisons for selected
+\textbf{(a)} Frozen-encoder and hot-encoder comparisons for selected
 source labels.
-\textbf{(b)} Fine-tuned-encoder FEP source-head controls.
+\textbf{(b)} Hot-encoder FEP source-head controls.
 \textbf{(c)} Frozen-encoder FEP source-head controls.
 \textbf{(d)} Source-combination controls comparing Tm-only, FEP-only,
 MD-Q-only, and combined-source settings.}

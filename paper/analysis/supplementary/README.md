@@ -61,12 +61,11 @@ directories and new summary JSON files rather than overwriting these summaries.
 - Single-condition intervals are nonparametric bootstrap intervals over test
   examples.
 - Paired comparisons use paired bootstrap resampling of the same test examples.
-- Figure labels should use manuscript-facing names such as `fine-tuned encoder`,
+- Figure labels should use manuscript-facing names such as `hot encoder`,
   `frozen encoder`, `FEP mutation free energy`, and `MD Q-value`.
 
 ## External MD source files
 
-The MD structure manifests and raw MDClaw outputs are stored outside the paper
-tree under `/home/yasu/tmp/mdclaw/`. The generated TSV tables in this directory
-capture the SAbDab method counts and processed Q-value summaries needed by the
-current manuscript.
+The raw MD trajectories are not stored in the paper tree. The generated TSV
+tables in this directory capture the SAbDab method counts and processed Q-value
+summaries needed by the current manuscript.

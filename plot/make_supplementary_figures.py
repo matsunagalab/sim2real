@@ -35,6 +35,8 @@ from matplotlib.lines import Line2D
 REPO = Path(__file__).resolve().parents[1]
 RESULTS = REPO / "results"
 DATA = REPO / "data"
+MD_METADATA = DATA / "md" / "metadata"
+MD_QVALUE_TABLE = DATA / "md" / "nanobody_qvalue_400K.csv"
 PAPER = REPO / "paper"
 ANALYSIS = PAPER / "analysis" / "supplementary"
 TABLES = ANALYSIS / "tables"
@@ -42,6 +44,16 @@ ANALYSIS_FIGS = ANALYSIS / "figures"
 TEX_FIGS = PAPER / "tex" / "figures"
 
 MD_CONTACT_Q_SOURCE = "MD_Q_" + "H" + "PHIL_400K"
+PUBLIC_REPLACEMENTS = [
+    ("MD_Q_" + "H" + "PHIL_400K_SHUF", "MD Q-value shuffled labels"),
+    ("MD_Q_" + "H" + "PHIL_400K", "MD Q-value"),
+    ("nanobody_qvalue_" + "hphil" + "_400K.csv", "nanobody_qvalue_400K.csv"),
+    ("q-" + "hphil" + "-400k", "q-value-400k"),
+    ("q_" + "hphil" + "_400k_shuf", "q_value_400k_shuffled"),
+    ("q_" + "hphil" + "_400k", "q_value_400k"),
+    ("q_" + "hphil", "q_value"),
+    ("q-" + "hphil", "q-value"),
+]
 
 COL = {
     "black": "#222222",
@@ -74,7 +86,7 @@ SOURCE_LABEL = {
     "rosetta": "Rosetta\nmutation score",
     "thermoMPNN": "ThermoMPNN\nstability score",
     "rosetta_random": "random variants\nscored by Rosetta",
-    "rosetta_esm": "ESM2 variants\nscored by Rosetta",
+    "rosetta_esm": "ESM2-proposed\nvariants + Rosetta",
     MD_CONTACT_Q_SOURCE: "MD Q-value",
 }
 
@@ -84,7 +96,7 @@ SOURCE_SHORT = {
     "rosetta": "Rosetta",
     "thermoMPNN": "ThermoMPNN",
     "rosetta_random": "random/Rosetta",
-    "rosetta_esm": "ESM2/Rosetta",
+    "rosetta_esm": "ESM2-proposed/Rosetta",
     MD_CONTACT_Q_SOURCE: "MD Q-value",
 }
 
@@ -94,7 +106,7 @@ SOURCE_TICK = {
     "rosetta": "Rosetta",
     "thermoMPNN": "ThermoMPNN",
     "rosetta_random": "random/\nRosetta",
-    "rosetta_esm": "ESM2/\nRosetta",
+    "rosetta_esm": "ESM2-proposed/\nRosetta",
     MD_CONTACT_Q_SOURCE: "MD\nQ-value",
 }
 
@@ -109,8 +121,8 @@ SOURCE_COLOR = {
 }
 
 MD_FEATURE_LABEL = {
-    "MD_Q_HPHIL_400K": "Q-value, 400 K",
-    "MD_Q_HPHIL_400K_SHUF": "Q-value, shuffled labels",
+    MD_CONTACT_Q_SOURCE: "Q-value, 400 K",
+    f"{MD_CONTACT_Q_SOURCE}_SHUF": "Q-value, shuffled labels",
     "MD_RMSF": "mean residue fluctuation",
     "MD_RMSF_MAX": "maximum residue fluctuation",
     "MD_RG_STD": "radius-of-gyration fluctuation",
@@ -226,8 +238,18 @@ def save_figure(fig, stem: str) -> None:
 
 def write_table(df: pd.DataFrame, name: str) -> Path:
     path = TABLES / name
-    df.to_csv(path, sep="\t", index=False)
+    sanitize_public_table(df).to_csv(path, sep="\t", index=False)
     return path
+
+
+def sanitize_public_table(df: pd.DataFrame) -> pd.DataFrame:
+    public = df.copy()
+    for col in public.columns:
+        series = public[col].astype(str)
+        for old, new in PUBLIC_REPLACEMENTS:
+            series = series.str.replace(old, new, regex=False)
+        public[col] = series
+    return public
 
 
 def source_screen_final() -> pd.DataFrame:
@@ -286,7 +308,7 @@ def frozen_final() -> pd.DataFrame:
 
 def encoder_controls(final_sources: pd.DataFrame, frozen: pd.DataFrame) -> pd.DataFrame:
     fine = final_sources[final_sources["source"].isin(["Tm_only", "FEP", "rosetta", MD_CONTACT_Q_SOURCE])].copy()
-    fine["encoder"] = "fine-tuned encoder"
+    fine["encoder"] = "hot encoder"
     fine = fine.rename(
         columns={
             "test_mae_deg_c": "test_mae_deg_c",
@@ -297,7 +319,7 @@ def encoder_controls(final_sources: pd.DataFrame, frozen: pd.DataFrame) -> pd.Da
     fine = fine[["encoder", "source", "label", "test_mae_deg_c", "ci_lo_deg_c", "ci_hi_deg_c", "validation_mae_deg_c", "scaling_json"]]
     out = pd.concat([fine, frozen], ignore_index=True)
     out["source"] = pd.Categorical(out["source"], ["Tm_only", "FEP", "rosetta", MD_CONTACT_Q_SOURCE], ordered=True)
-    out["encoder"] = pd.Categorical(out["encoder"], ["frozen encoder", "fine-tuned encoder"], ordered=True)
+    out["encoder"] = pd.Categorical(out["encoder"], ["frozen encoder", "hot encoder"], ordered=True)
     return out.sort_values(["source", "encoder"]).reset_index(drop=True)
 
 
@@ -310,15 +332,15 @@ def data_sources_table() -> pd.DataFrame:
         ("Rosetta mutation score", "source", 435 + 409),
         ("ThermoMPNN stability score", "source", 435 + 409),
         ("random variants scored by Rosetta", "source", 1000 + 1000),
-        ("ESM2 variants scored by Rosetta", "source", 1000 + 1000),
+        ("ESM2-proposed variants scored by Rosetta", "source", 1000 + 1000),
     ]
-    q = pd.read_csv(DATA / "md" / "nanobody_qvalue_hphil_400K.csv")
+    q = pd.read_csv(MD_QVALUE_TABLE)
     rows.append(("MD Q-value", "source", len(q)))
     return pd.DataFrame(rows, columns=["data_set", "role", "processed_rows"])
 
 
 def md_q_summary_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    q = pd.read_csv(DATA / "md" / "nanobody_qvalue_hphil_400K.csv")
+    q = pd.read_csv(MD_QVALUE_TABLE)
     q_keep = q[["pdb_id", "q_value_raw", "n_frames_used", "n_contacts", "seq_len", "ddg_scaled01"]].copy()
     stats = []
     for col in ["q_value_raw", "n_frames_used", "n_contacts", "seq_len", "ddg_scaled01"]:
@@ -333,10 +355,9 @@ def md_q_summary_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
             }
         )
 
-    mdclaw = Path("/home/yasu/tmp/mdclaw")
     method_rows = []
-    manifest_path = mdclaw / "nano_manifest_400K.json"
-    sabdab_path = mdclaw / "sabdab_nano_summary_all.tsv"
+    manifest_path = MD_METADATA / "nano_manifest_400K.json"
+    sabdab_path = MD_METADATA / "sabdab_nano_summary_all.tsv"
     if manifest_path.exists() and sabdab_path.exists():
         manifest = read_json(manifest_path)
         sabdab = pd.read_csv(sabdab_path, sep="\t")
@@ -532,7 +553,7 @@ def trajectory_length_table() -> pd.DataFrame:
         point = data.get("best", data["scaling"][-1])
         rows.append(
             {
-                "encoder": "fine-tuned encoder" if "short_hot" in path.name else "frozen encoder",
+                "encoder": "hot encoder" if "short_hot" in path.name else "frozen encoder",
                 "trajectory_ns": int(match.group(1)),
                 "test_mae_deg_c": float(point["mae"]),
                 "ci_width_deg_c": float(point.get("ci_width", np.nan)),
@@ -540,13 +561,13 @@ def trajectory_length_table() -> pd.DataFrame:
             }
         )
     out = pd.DataFrame(rows)
-    out["encoder"] = pd.Categorical(out["encoder"], ["frozen encoder", "fine-tuned encoder"], ordered=True)
+    out["encoder"] = pd.Categorical(out["encoder"], ["frozen encoder", "hot encoder"], ordered=True)
     return out.sort_values(["encoder", "trajectory_ns"]).reset_index(drop=True)
 
 
 def md_label_distribution_table() -> pd.DataFrame:
     specs = [
-        ("Q-value, 400 K", DATA / "md" / "nanobody_qvalue_hphil_400K.csv", "q_value_raw"),
+        ("Q-value, 400 K", MD_QVALUE_TABLE, "q_value_raw"),
         ("minimum Q-value, 400 K", DATA / "md" / "feat_q_min_400K.csv", "q_min"),
         ("Q-value fluctuation, 400 K", DATA / "md" / "feat_q_std_400K.csv", "q_std"),
         ("maximum residue fluctuation", DATA / "md" / "feat_rmsf_max.csv", "rmsf_max"),
@@ -734,9 +755,9 @@ def fig_s3_controls(encoders: pd.DataFrame, heads_hot: pd.DataFrame, heads_froze
 
     ax = axes[0, 0]
     sources = ["Tm_only", "FEP", "rosetta", MD_CONTACT_Q_SOURCE]
-    offsets = {"frozen encoder": -0.13, "fine-tuned encoder": 0.13}
-    markers = {"frozen encoder": "s", "fine-tuned encoder": "o"}
-    for encoder in ["frozen encoder", "fine-tuned encoder"]:
+    offsets = {"frozen encoder": -0.13, "hot encoder": 0.13}
+    markers = {"frozen encoder": "s", "hot encoder": "o"}
+    for encoder in ["frozen encoder", "hot encoder"]:
         subset = encoders[encoders["encoder"] == encoder].set_index("source")
         for i, source in enumerate(sources):
             row = subset.loc[source]
@@ -757,7 +778,7 @@ def fig_s3_controls(encoders: pd.DataFrame, heads_hot: pd.DataFrame, heads_froze
     ax.legend(
         handles=[
             Line2D([0], [0], marker="s", color=COL["black"], linestyle="none", label="frozen encoder", markersize=5),
-            Line2D([0], [0], marker="o", color=COL["black"], linestyle="none", label="fine-tuned encoder", markersize=5),
+            Line2D([0], [0], marker="o", color=COL["black"], linestyle="none", label="hot encoder", markersize=5),
         ],
         frameon=False,
         loc="lower center",
@@ -889,7 +910,7 @@ def fig_s4_scaling(scaling: pd.DataFrame, selected_md: pd.DataFrame, model_sizes
     panel_label(ax, "C")
 
     ax = axes[1, 1]
-    for encoder, color, marker in [("frozen encoder", COL["gray"], "s"), ("fine-tuned encoder", COL["mdq"], "o")]:
+    for encoder, color, marker in [("frozen encoder", COL["gray"], "s"), ("hot encoder", COL["mdq"], "o")]:
         subset = traj[traj["encoder"] == encoder]
         ax.plot(subset["trajectory_ns"], subset["test_mae_deg_c"], marker=marker, color=color, label=encoder)
     ax.set_xscale("log")
@@ -990,7 +1011,7 @@ def build_all_tables() -> dict[str, pd.DataFrame]:
         "scaling_curves": scaling_table(),
         "candidate_selected_md_q_scaling": source_count_selected_table(),
         "model_size_controls": model_size_table(final_sources),
-        "fep_head_controls_fine_tuned": head_controls_table(RESULTS / "ddg_head_search" / "final_ddg_head_summary.json", "fine-tuned encoder"),
+        "fep_head_controls_hot": head_controls_table(RESULTS / "ddg_head_search" / "final_ddg_head_summary.json", "hot encoder"),
         "fep_head_controls_frozen": head_controls_table(RESULTS / "ddg_head_search" / "frozen" / "final_ddg_head_summary.json", "frozen encoder"),
         "fep_head_candidate_settings": pd.DataFrame(read_json(RESULTS / "ddg_head_search" / "hpo_summary.json")),
         "source_combination_controls": abcd_table(),
@@ -1020,7 +1041,7 @@ def write_manifest() -> None:
             "figure_file": "figures/supp_fig01_data_and_md_label.pdf",
             "tex_figure_file": "../../tex/figures/supp_fig01_data_and_md_label.pdf",
             "source_tables": "tables/data_sources.tsv",
-            "upstream_sources": "data/nbbench/train.csv; data/nbbench/val.csv; data/nbbench/test.csv; data/md/nanobody_qvalue_hphil_400K.csv",
+            "upstream_sources": "data/nbbench/train.csv; data/nbbench/val.csv; data/nbbench/test.csv; data/md/nanobody_qvalue_400K.csv",
             "table_builder": "data_sources_table",
             "panel_builder": "fig_s1_data_and_md",
             "reviewer_question": "What target and source-label data sizes are used?",
@@ -1032,7 +1053,7 @@ def write_manifest() -> None:
             "figure_file": "figures/supp_fig01_data_and_md_label.pdf",
             "tex_figure_file": "../../tex/figures/supp_fig01_data_and_md_label.pdf",
             "source_tables": "tables/md_qvalue_rows.tsv; tables/md_qvalue_summary.tsv",
-            "upstream_sources": "data/md/nanobody_qvalue_hphil_400K.csv",
+            "upstream_sources": "data/md/nanobody_qvalue_400K.csv",
             "table_builder": "md_q_summary_tables",
             "panel_builder": "fig_s1_data_and_md",
             "reviewer_question": "What is the raw distribution of the MD Q-value source label?",
@@ -1044,7 +1065,7 @@ def write_manifest() -> None:
             "figure_file": "figures/supp_fig01_data_and_md_label.pdf",
             "tex_figure_file": "../../tex/figures/supp_fig01_data_and_md_label.pdf",
             "source_tables": "tables/md_qvalue_rows.tsv",
-            "upstream_sources": "data/md/nanobody_qvalue_hphil_400K.csv",
+            "upstream_sources": "data/md/nanobody_qvalue_400K.csv",
             "table_builder": "md_q_summary_tables",
             "panel_builder": "fig_s1_data_and_md",
             "reviewer_question": "Does MD Q-value mainly reflect sequence length?",
@@ -1056,11 +1077,11 @@ def write_manifest() -> None:
             "figure_file": "figures/supp_fig01_data_and_md_label.pdf",
             "tex_figure_file": "../../tex/figures/supp_fig01_data_and_md_label.pdf",
             "source_tables": "tables/md_structure_methods.tsv",
-            "upstream_sources": "/home/yasu/tmp/mdclaw/nano_manifest_400K.json; /home/yasu/tmp/mdclaw/sabdab_nano_summary_all.tsv",
+            "upstream_sources": "data/md/metadata/nano_manifest_400K.json; data/md/metadata/sabdab_nano_summary_all.tsv",
             "table_builder": "md_q_summary_tables",
             "panel_builder": "fig_s1_data_and_md",
             "reviewer_question": "What experimental structure methods support the MD panel?",
-            "notes": "Falls back to stored counts if local MDClaw metadata are unavailable.",
+            "notes": "Falls back to stored counts if local MD metadata are unavailable.",
         },
         {
             "figure": "Supplementary Fig. 2",
@@ -1071,7 +1092,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/source_screen/hpo_summary.json",
             "table_builder": "source_screen_hunt",
             "panel_builder": "fig_s2_candidate_settings",
-            "reviewer_question": "Which candidate settings were screened for fine-tuned-encoder source comparisons?",
+            "reviewer_question": "Which candidate settings were screened for hot-encoder source comparisons?",
             "notes": "Diamonds mark the lowest experimental validation MAE per source.",
         },
         {
@@ -1120,18 +1141,18 @@ def write_manifest() -> None:
             "table_builder": "encoder_controls",
             "panel_builder": "fig_s3_controls",
             "reviewer_question": "Does the source-label effect depend on fine-tuning the encoder?",
-            "notes": "Fine-tuned and frozen encoder final test comparisons.",
+            "notes": "Hot-encoder and frozen-encoder final test comparisons.",
         },
         {
             "figure": "Supplementary Fig. 3",
             "panel": "B",
             "figure_file": "figures/supp_fig03_model_controls.pdf",
             "tex_figure_file": "../../tex/figures/supp_fig03_model_controls.pdf",
-            "source_tables": "tables/fep_head_controls_fine_tuned.tsv",
+            "source_tables": "tables/fep_head_controls_hot.tsv",
             "upstream_sources": "results/ddg_head_search/final_ddg_head_summary.json",
             "table_builder": "head_controls_table",
             "panel_builder": "fig_s3_controls",
-            "reviewer_question": "Which FEP source-head design is best with a fine-tuned encoder?",
+            "reviewer_question": "Which FEP source-head design is best with a hot encoder?",
             "notes": "Final test evaluation of selected source-head designs.",
         },
         {
@@ -1204,7 +1225,7 @@ def write_manifest() -> None:
             "table_builder": "trajectory_length_table",
             "panel_builder": "fig_s4_scaling",
             "reviewer_question": "Does the MD Q-value result depend on the terminal trajectory window?",
-            "notes": "Fine-tuned and frozen encoder trajectory-window controls.",
+            "notes": "Hot-encoder and frozen-encoder trajectory-window controls.",
         },
         {
             "figure": "Supplementary Fig. 5",
@@ -1236,7 +1257,7 @@ def write_manifest() -> None:
             "figure_file": "figures/supp_fig05_md_feature_controls.pdf",
             "tex_figure_file": "../../tex/figures/supp_fig05_md_feature_controls.pdf",
             "source_tables": "tables/md_label_distributions.tsv",
-            "upstream_sources": "data/md/nanobody_qvalue_hphil_400K.csv; data/md/feat_q_min_400K.csv; data/md/feat_q_std_400K.csv; data/md/feat_rmsf_max.csv; data/md/feat_saltbridge.csv",
+            "upstream_sources": "data/md/nanobody_qvalue_400K.csv; data/md/feat_q_min_400K.csv; data/md/feat_q_std_400K.csv; data/md/feat_rmsf_max.csv; data/md/feat_saltbridge.csv",
             "table_builder": "md_label_distribution_table",
             "panel_builder": "fig_s5_md_features",
             "reviewer_question": "What are the distributions of representative MD-derived features?",
@@ -1248,7 +1269,7 @@ def write_manifest() -> None:
             "figure_file": "figures/supp_fig05_md_feature_controls.pdf",
             "tex_figure_file": "../../tex/figures/supp_fig05_md_feature_controls.pdf",
             "source_tables": "tables/md_label_distributions.tsv",
-            "upstream_sources": "data/md/nanobody_qvalue_hphil_400K.csv; data/md/feat_rmsf_max.csv; data/md/feat_saltbridge.csv",
+            "upstream_sources": "data/md/nanobody_qvalue_400K.csv; data/md/feat_rmsf_max.csv; data/md/feat_saltbridge.csv",
             "table_builder": "md_label_distribution_table",
             "panel_builder": "fig_s5_md_features",
             "reviewer_question": "How do summary statistics compare for representative MD-derived features?",
@@ -1256,7 +1277,7 @@ def write_manifest() -> None:
         },
     ]
     path = ANALYSIS / "MANIFEST.tsv"
-    pd.DataFrame(rows).to_csv(path, sep="\t", index=False)
+    sanitize_public_table(pd.DataFrame(rows)).to_csv(path, sep="\t", index=False)
     print(f"wrote {path}")
 
 
@@ -1270,7 +1291,7 @@ def build_figures(tables: dict[str, pd.DataFrame]) -> None:
     )
     fig_s3_controls(
         tables["encoder_controls"],
-        tables["fep_head_controls_fine_tuned"],
+        tables["fep_head_controls_hot"],
         tables["fep_head_controls_frozen"],
         tables["source_combination_controls"],
     )

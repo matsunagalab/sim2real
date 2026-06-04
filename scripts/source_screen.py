@@ -172,7 +172,10 @@ def build_final_jobs(hpo_summary: Path, n_runs: int) -> list[dict]:
     rows = json.loads(hpo_summary.read_text())
     jobs: list[dict] = []
     for source in SOURCE_ORDER:
-        candidates = [r for r in rows if r.get("source") == source and r.get("rc") == 0 and "val_mae" in r]
+        candidates = [
+            r for r in rows
+            if r.get("source") == source and r.get("rc", 0) == 0 and "val_mae" in r
+        ]
         if not candidates:
             continue
         best = min(candidates, key=lambda r: r["val_mae"])
@@ -391,7 +394,7 @@ def main() -> int:
         summary_name = args.summary_name or "final_jobs_summary.json"
 
     if args.collect_only:
-        results = [collect_job_result(job) for job in jobs]
+        results = [collect_job_result(job, rc=0) for job in jobs]
         summary_path = write_summary(results, summary_name)
         print_best(results, metric)
         if args.mode == "final":

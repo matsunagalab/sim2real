@@ -5,7 +5,7 @@ MD_RMSF_CDR3	CDR3 residue fluctuation	5.89253497251762	1.4491241688584537	residu
 MD_RMSF_MAX	maximum residue fluctuation	5.939468835737475	1.4220826681934655	residual	feature_residual_md_rmsf_max
 MD_RMSF	mean residue fluctuation	5.946693988491556	1.445951326793697	residual	feature_residual_md_rmsf
 MD_Q_SLOPE_400K	Q-value slope, 400 K	5.960940818074356	1.4489194681362365	residual	feature_residual_md_q_slope_400k
-MD_Q_HPHIL_400K	Q-value, 400 K	5.968758619448708	1.4260782703109074	residual	feature_residual_md_q_hphil_400k
+MD Q-value	Q-value, 400 K	5.968758619448708	1.4260782703109074	residual	feature_residual_md_q_value_400k
 MD_Q_MIN_400K	minimum Q-value, 400 K	5.980056292631436	1.4585695954897178	residual	feature_residual_md_q_min_400k
 MD_RMSF_MAX_400K	maximum residue fluctuation, 400 K	5.980761712275627	1.4240394859039185	residual	feature_residual_md_rmsf_max_400k
 MD_RG_STD_400K	radius-of-gyration fluctuation, 400 K	5.981779841861166	1.3894603336034015	residual	feature_residual_md_rg_std_400k
@@ -14,6 +14,6 @@ MD_Q_FRAMEWORK	framework Q-value	6.004432349517536	1.4005430841145277	residual	f
 MD_Q_CDR3	CDR3 Q-value	6.017101896595194	1.411453892334925	residual	feature_residual_md_q_cdr3
 MD_RG_STD	radius-of-gyration fluctuation	6.019567541106014	1.4038099135569384	residual	feature_residual_md_rg_std
 MD_RMSF_FRAMEWORK	framework residue fluctuation	6.06098202107845	1.4001358631434089	residual	feature_residual_md_rmsf_framework
-MD_Q_HPHIL_400K_SHUF	Q-value, shuffled labels	6.111795417913598	1.3569541889536954	residual	feature_residual_md_q_hphil_400k_shuf
+MD Q-value shuffled labels	Q-value, shuffled labels	6.111795417913598	1.3569541889536954	residual	feature_residual_md_q_value_400k_shuffled
 MD_Q_STD_400K	Q-value fluctuation, 400 K	6.11729467050821	1.4001134630305456	residual	feature_residual_md_q_std_400k
 MD_SALTBRIDGE	salt-bridge persistence	6.179321343419175	1.4888840665119245	residual	feature_residual_md_saltbridge

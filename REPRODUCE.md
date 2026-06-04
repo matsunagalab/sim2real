@@ -41,8 +41,8 @@ new reviewer-round calculations.
 
 The fixed computational mutation-label inputs are catalogued in
 `data/source_labels/MANIFEST.tsv`. That file records which processed CSVs are
-used for FEP, Rosetta, ThermoMPNN, random Rosetta variants, and ESM2-generated
-Rosetta variants.
+used for FEP, Rosetta, ThermoMPNN, random Rosetta variants, and ESM2-proposed
+Rosetta-scored variants.
 
 ## Fast Integrity Checks
 
@@ -78,7 +78,7 @@ uv run python scripts/reproduce_paper_results.py --stage source-screen,ddg-head,
 - `core-scaling`: regenerate the main experimental Tm, FEP, and MD Q-value
   label-count curves.
 - `source-screen`: rerun the source-label candidate search and final test
-  comparison for fine-tuned and frozen encoders.
+  comparison for hot and frozen encoders.
 - `ddg-head`: rerun source-head controls for FEP labels.
 - `md-candidate`: rerun the per-source-count MD Q-value candidate-setting
   search and final test evaluation.
