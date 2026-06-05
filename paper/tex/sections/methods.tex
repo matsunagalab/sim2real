@@ -11,7 +11,7 @@ prediction was the target task, and each computational label was a source task
 that shared part of the network with the target. Throughout, model selection and
 every reported number were tied to experimental Tm performance. Source-task
 losses shaped the shared representation during training, but source-task
-validation errors were never used to pick checkpoints or hyperparameters.
+validation errors were not used to pick checkpoints or hyperparameters.
 
 \subsection*{Experimental Tm data set and split definitions}
 
@@ -19,17 +19,13 @@ Experimental Tm labels came from the public nanobody benchmark NbBench, which
 provides a thermo-seq task with predefined splits \citep{Zhang2025NbBench}. We
 deliberately assigned the smallest partition to training and the largest to the
 held-out test set, giving 57 training, 114 validation, and 396 test sequences.
-This places the model in the low-data regime that the study targets: scarce
-experimental Tm labels, not abundant ones, are the condition under which
-simulation-derived supervision is expected to help. The large test set is a
-direct benefit of this choice, because it makes paired error comparisons and
-label-count trends easier to resolve.
+This split places the model in the intended low-data regime while retaining a
+large test set for paired error comparisons and label-count analyses.
 
 \textbf{Split definitions.} The training split fit model parameters. The
-validation split drove checkpoint selection, early stopping, and hyperparameter
-choice. The test split stayed untouched until the settings were fixed and was
-used only for final reporting. The same rule held for Tm-only models and for
-multi-task transfer models.
+validation split determined checkpoint selection, early stopping, and
+hyperparameter choice. The test split was used only after settings were fixed.
+The same rule was applied to Tm-only models and to multi-task transfer models.
 
 \textbf{Target-label scaling.} The target CSV files held an amino-acid sequence
 column and a Tm label in degrees Celsius. During training, Tm labels were mapped
@@ -48,7 +44,7 @@ moves in the expected direction.
 
 \subsection*{Computational source-label data sets}
 
-Computational labels were loaded as source tasks, not as additional Tm
+Computational labels were loaded as source tasks rather than as additional Tm
 measurements.
 
 \textbf{Source-label classes.} The source labels were mutation free-energy
@@ -56,8 +52,8 @@ changes from alchemical free-energy perturbation (FEP), structure-based
 mutation-effect scores from Rosetta, learned mutation-effect scores from
 ThermoMPNN, Rosetta scores on ESM2-proposed and random variants, and an
 MD-derived Q-value summarizing native-contact persistence. All source labels
-were preprocessed to [0,1]-scaled regression targets and entered the model only
-through their own source-task heads.
+were preprocessed to [0,1]-scaled regression targets and entered the model
+through source-task heads.
 
 \textbf{Processed source-table sizes.} Mutation-effect sources were organized as
 two template-specific tables derived from the 1MEL and 4IDL nanobody structures.
@@ -81,12 +77,11 @@ transparency.
 count $n$, up to $n$ rows were sampled independently from each of the two
 template tables using the run seed, and the two tables were given separate task
 identifiers. For an MD-derived Q-value experiment with count $n$, $n$ rows were
-sampled from the single Q-value table. Sampled rows were then split 80/20 into
-source-training and source-validation rows with the same seed. The
-source-validation rows were kept for monitoring and control analyses, but in the
-reported protocol the validation data passed to the trainer for checkpoint
-selection and early stopping were filtered down to the experimental Tm
-validation rows.
+sampled from the single Q-value table. Sampled rows were split 80/20 into
+source-training and source-validation rows with the same seed. Source-validation
+rows were retained for monitoring and control analyses; in the reported protocol,
+checkpoint selection and early stopping used only the experimental Tm validation
+rows.
 
 \subsection*{SAbDab-derived MD simulations and Q-value labels}
 
@@ -124,16 +119,16 @@ Q-values were extracted from the 400 K production trajectories with MDTraj
 Amber parameter file and the native reference was frame 0 of production. A smooth
 native-contact fraction \citep{Best2013NativeContacts} was computed from
 backbone-heavy-atom contacts and averaged over the terminal portion of the
-trajectory, then min--max scaled to [0,1] before training. The exact contact
-selection, contact function, averaging window, and column convention are given in
-Supplementary Methods.
+trajectory, then min--max scaled to [0,1] before training. Supplementary Methods
+describe the contact selection, contact function, averaging window, and column
+convention.
 
 \subsection*{FEP mutation free-energy labels}
 
 The FEP source labels were mutation free-energy changes for variants of the 1MEL
 and 4IDL nanobody templates, computed with the same protocol as our related
-nanobody thermostability study. In brief, alchemical mutation simulations were
-run with NAMD 3 using GPU acceleration \citep{Phillips2020NAMD}. Input systems
+nanobody thermostability study. Alchemical mutation simulations were run with
+NAMD 3 using GPU acceleration \citep{Phillips2020NAMD}. Input systems
 were prepared in VMD \citep{Humphrey1996VMD} with a customized AlaScan workflow
 \citep{Ramadoss2016AlaScan}, and coordinates were initialized from AlphaFold 3
 models of the wild-type sequences \citep{Abramson2024AlphaFold3}. Systems used the
@@ -191,12 +186,11 @@ predicted the source labels from the same shared representation.
 The Tm-only baseline used the encoder, the shared trunk, and the Tm head with
 experimental Tm labels alone. Source-transfer models kept this target path and
 added source heads. The main FEP model used separate source heads for the two
-template-specific mutation-effect tasks, the best design in our source-head
-comparison. As controls we also tried a shared mutation-effect head, a shared
-head conditioned on a template embedding, and a shared head with
-template-specific affine calibration, along with residual and latent
-source-fusion variants; the main result used the original shared-trunk
-architecture.
+template-specific mutation-effect tasks, as selected in the source-head
+comparison. Controls included a shared mutation-effect head, a shared head
+conditioned on a template embedding, and a shared head with template-specific
+affine calibration, along with residual and latent source-fusion variants. The
+main result used the original shared-trunk architecture.
 
 \subsection*{Hot-encoder and frozen-encoder training}
 
@@ -243,10 +237,9 @@ on CUDA devices, with checkpoints saved and evaluated once per epoch.
 Within each run, the best checkpoint was the one with the lowest mean squared
 error on the experimental Tm validation examples, and early stopping used the
 same metric with a patience of 15 epochs. Source-label rows were present in the
-training set, but they were removed from the validation data passed to the
-trainer for checkpoint selection and early stopping. This is the
-implementation-level step that keeps reported checkpoints selected by target-task
-validation performance rather than by source-task performance.
+training set, but were excluded from the validation data used for checkpoint
+selection and early stopping. Thus, reported checkpoints were selected by
+target-task validation performance rather than by source-task performance.
 
 Hyperparameters were likewise selected on the experimental Tm validation split.
 Candidate settings varied the encoder learning rate, head learning rate, dropout,
@@ -255,7 +248,7 @@ search covered encoder learning rates of $3\times10^{-5}$, $1\times10^{-4}$, and
 $3\times10^{-4}$; a lower head learning rate of $1\times10^{-4}$ paired with
 encoder learning rate $3\times10^{-5}$; dropout rates of 0.05, 0.15, and 0.30;
 and fixed source-task loss weights where relevant. Each candidate was evaluated
-as a three-seed ensemble on the Tm validation split, and the selected setting for
+as a three-seed ensemble on the Tm validation split. The selected setting for
 each source class was then evaluated on the held-out test split as a ten-seed
 ensemble.
 
@@ -263,8 +256,8 @@ Independent run seeds controlled model initialization, target-training
 subsampling in the target-label scaling experiment, source-label sampling, and
 source-task train/validation splitting. Final comparisons used seeds 1--10. The
 label-count curves used fixed source-specific training recipes while varying the
-number of source labels, rather than retuning a separate model at every
-label-count point.
+number of source labels; a separate model was not retuned at each label-count
+point.
 
 \subsection*{Final evaluation and statistics}
 

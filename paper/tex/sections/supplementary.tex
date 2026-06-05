@@ -10,9 +10,9 @@ All target-task comparisons use the same NbBench thermo-seq endpoint
 \citep{Zhang2025NbBench}. The processed tables hold an amino-acid sequence field
 and a melting-temperature label in degrees Celsius. The split sizes are 57
 training, 114 validation, and 396 held-out test sequences. As described in
-Methods, we deliberately assigned the smallest NbBench partition to training and
-the largest to the test set so that the model sits in the low-data regime the
-study targets.
+Methods, the smallest NbBench partition was assigned to training and the largest
+to testing to create a low-data target setting with a fixed held-out evaluation
+set.
 
 \textbf{Split definitions.} The splits are fixed throughout. The 57 training
 examples fit network parameters, the validation split drives checkpoint
@@ -31,15 +31,16 @@ fitted transform.
 
 \textbf{Experimental-label scaling reference.} This reference uses the same
 training split but subsamples it to the requested number of labels with the run
-seed; the validation and test splits are never subsampled. It serves only as a
-positive control for the pipeline: adding true target labels should lower the Tm
+seed; the validation and test splits are not subsampled. It serves as a positive
+control for the pipeline, because additional target labels should lower Tm
 prediction error.
 
 \subsection*{Processed computational source-label tables}
 
 Computational labels are loaded as source tasks rather than appended to the Tm
-data as extra measurements. Table~\ref{tab:supp_data_sources} lists the processed
-target and source files used in the reported comparisons. Mutation-effect tables
+data as additional measurements. Table~\ref{tab:supp_data_sources} lists the
+processed target and source tables used in the reported comparisons.
+Mutation-effect tables
 carry sequence fields and [0,1]-scaled source-label fields. The MD-derived
 Q-value table uses the same processed format so that it can enter the same
 source-task loader; there, the scaled label is a min--max scaled Q-value rather
@@ -92,9 +93,9 @@ template tables using the run seed; the final FEP setting with $n=320$ therefore
 supplies 320 sampled 1MEL rows and 320 sampled 4IDL rows before the source-task
 split. For MD-derived Q-value experiments, the loader samples $n$ rows from the
 single Q-value table. Source rows are split 80/20 into source-training and
-source-validation rows with the same seed. The production training call then
-filters the validation data passed to the trainer so that checkpoint selection
-and early stopping depend only on the experimental Tm validation examples.
+source-validation rows with the same seed. In the reported training protocol,
+checkpoint selection and early stopping depend only on the experimental Tm
+validation examples.
 
 \subsection*{SAbDab-derived nanobody structure panel for MD}
 
@@ -105,7 +106,7 @@ antigen annotation, experimental method, resolution, species, and other fields.
 The manifest workflow matches this summary against the archived IMGT-renumbered
 PDB files.
 
-\textbf{Structure-selection rule.} The rule is deterministic. For each PDB
+\textbf{Structure-selection rule.} The selection rule is deterministic. For each PDB
 identifier with both a SAbDab summary row and an IMGT-renumbered PDB file, the
 workflow takes the first heavy-chain row in the SAbDab table and accepts the
 chain only if that chain identifier is present in the IMGT PDB file. The output
@@ -256,10 +257,9 @@ non-trainable and no encoder group is used.
 \textbf{Checkpoint selection.} Within each run, the best checkpoint has the
 lowest mean squared error on the experimental Tm validation rows, and early
 stopping monitors the same metric with patience 15 and threshold 0. Source-task
-validation rows are not passed to the trainer in the production protocol. This
-detail is central to the comparison: source labels shape the learned
-representation through the training loss, but they do not decide which checkpoint
-is used for target-task prediction.
+validation rows are not passed to the trainer in the production protocol. Thus,
+source labels shape the learned representation through the training loss, but
+they do not decide which checkpoint is used for target-task prediction.
 
 \subsection*{Candidate-setting selection and final evaluation}
 
@@ -318,13 +318,13 @@ are available. The FEP source-label curve tests something different---whether mo
 labels from a physically related but distinct computed quantity improve the same
 held-out Tm endpoint---while the MD Q-value curve tests whether simply adding more
 simulation-derived labels suffices when the source label measures a more indirect
-structural response. The decisive comparison is therefore not ``simulation versus
+structural response. The relevant comparison is therefore not ``simulation versus
 no simulation,'' but whether the source label carries physical information that
 transfers to the target property under target-centered model selection.
 
 \subsection*{Supplementary figure source tables}
 
-The supplementary figures are generated from tabular source files derived from the
+Supplementary figures are generated from tabular source files derived from the
 same run summaries as the main figures. The processed source tables, rendered
 supplementary figures, and figure-generation code will be distributed with the
 public analysis archive.
@@ -332,8 +332,8 @@ public analysis archive.
 \subsection*{Fig.-to-data and code mapping}
 
 The manuscript figures are regenerated from compact result summaries and source
-tables rather than from scratch run directories. The mapping below is the first
-place to check when auditing or extending a figure.
+tables rather than from full training run directories. Table~\ref{tab:supp_figure_mapping}
+summarizes the inputs used to audit or extend each figure.
 
 \begin{table*}[h]
 \centering
@@ -359,7 +359,7 @@ Figs.~3 and 4 and the frozen-encoder controls are recorded in generated
 supplementary tables, which list the selected architecture, validation-selected
 setting, source-label count, validation MAE, held-out test MAE, bootstrap
 interval, and run-summary reference for each condition. A panel-level mapping
-table for all supplementary figures is included in the public analysis archive.
+table for all supplementary figures is included in the analysis archive.
 
 \clearpage
 \section*{Supplementary Figs.}
