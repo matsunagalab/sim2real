@@ -1,0 +1,83 @@
+{
+  "method": "Minami et al. 2025 marginal rate of substitution (equivalent sample size); gradients from observed MAE curves",
+  "curves": {
+    "experimental_Tm": {
+      "counts": [
+        10.0,
+        20.0,
+        30.0,
+        40.0,
+        57.0
+      ],
+      "mae": [
+        7.553629894041545,
+        7.014873701120842,
+        7.035970845684081,
+        6.68697777291392,
+        6.618537981955337
+      ],
+      "n_max": 57.0,
+      "dMAE_dn_loglin_at_max": -0.009351416880388503,
+      "dMAE_dn_finite_diff_top": -0.004025870056387222
+    },
+    "FEP": {
+      "counts": [
+        10.0,
+        40.0,
+        80.0,
+        160.0,
+        320.0
+      ],
+      "mae": [
+        6.646768848394489,
+        6.516246497935008,
+        6.349142077314672,
+        6.499901170594848,
+        6.261138412134152
+      ],
+      "n_max": 320.0,
+      "dMAE_dn_loglin_at_max": -0.00029845011809146604,
+      "dMAE_dn_finite_diff_top": -0.0014922672403793525
+    },
+    "MD_Qvalue": {
+      "counts": [
+        10.0,
+        40.0,
+        80.0,
+        160.0,
+        320.0,
+        640.0
+      ],
+      "mae": [
+        6.910420660367693,
+        6.615187483943111,
+        6.6121563087703334,
+        6.764064649827661,
+        6.739023343618548,
+        6.6519288548287125
+      ],
+      "n_max": 640.0,
+      "dMAE_dn_loglin_at_max": -5.5982879114581526e-05,
+      "dMAE_dn_finite_diff_top": -0.0002721702774682366
+    }
+  },
+  "equivalent_sample_size": {
+    "FEP": {
+      "per_template_loglin": 31.33326580732856,
+      "total_loglin": 62.66653161465712,
+      "per_template_finite_diff": 6.2665832414918246,
+      "total_finite_diff": 12.533166482983649
+    },
+    "MD_Qvalue": {
+      "per_template_loglin": 167.04065650587083,
+      "total_loglin": 334.08131301174166,
+      "per_template_finite_diff": 34.358699882208306,
+      "total_finite_diff": 68.71739976441661
+    }
+  },
+  "dR_dm_experimental_at_max": -0.009351416880388503,
+  "operating_point": {
+    "m_experimental": 57.0,
+    "n_source_per_template_max": 320.0
+  }
+}

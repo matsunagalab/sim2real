@@ -14,7 +14,7 @@ by source:
 computational mutation-label tasks. `prepare.py` reads this file directly, so
 new manuscript source-label datasets should be added here rather than hard-coded
 in Python. The manifest is meant to answer three questions before a
-reviewer-round rerun:
+downstream rerun:
 
 1. Which `--ddg-source` argument selects this table?
 2. Which processed CSVs are the fixed source labels?

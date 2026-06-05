@@ -1,6 +1,6 @@
 # Supplementary Analysis Handoff
 
-This folder is intended to make reviewer-round follow-up analyses easy to
+This folder is intended to make follow-up analyses easy to
 extend.
 
 ## Files
@@ -8,7 +8,7 @@ extend.
 - `tables/*.tsv`: numerical source data for Supplementary Figs. 1-5.
 - `figures/*.pdf` and `figures/*.png`: rendered supplementary figures.
 - `MANIFEST.tsv`: panel-level index of figures, source tables, upstream result
-  summaries, generator functions, and reviewer-facing questions.
+  summaries, generator functions, and the question each panel answers.
 - `../../tex/figures/supp_fig*.pdf`: LaTeX-ready figure copies.
 - `../../../plot/make_supplementary_figures.py`: table and figure generator.
 
@@ -22,7 +22,7 @@ supplementary analysis. Each row corresponds to one figure panel and records:
 - the upstream source data or result summary;
 - the function in `plot/make_supplementary_figures.py` that builds the table;
 - the plotting function that renders the panel;
-- the reviewer question addressed by the panel.
+- the question addressed by the panel.
 
 ## Source-of-truth result summaries
 
@@ -40,10 +40,10 @@ The supplementary figure generator reads these result summaries:
 - `results/hparam_search/per_nmd_test_summary.json`
 
 These JSON files should be treated as immutable summaries for the current
-manuscript figures. New reviewer-round calculations should write new result
+manuscript figures. New analyses should write new result
 directories and new summary JSON files rather than overwriting these summaries.
 
-## Adding a reviewer-round analysis
+## Adding a new analysis
 
 1. Run the new training or evaluation job under `results/<analysis_name>/`.
 2. Save a compact summary JSON with resolved command-line arguments, selected

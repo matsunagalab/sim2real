@@ -34,7 +34,7 @@ manuscript training path:
 | `fep6LR7_192_processed.csv` | 192 | Available, not used by `prepare.py` |
 
 Add these to `data/source_labels/MANIFEST.tsv` if they become part of a
-reviewer-round analysis. `prepare.py` reads that manifest directly.
+new analysis. `prepare.py` reads that manifest directly.
 
 ## Provenance Notes
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Assemble supplementary figure panels and their numerical source tables.
 
-The script keeps the reviewer-round handoff simple:
+The script keeps the analysis handoff simple:
 
   1. read stable result summaries from results/
   2. write compact TSV tables to paper/analysis/supplementary/tables/
@@ -1044,7 +1044,7 @@ def write_manifest() -> None:
             "upstream_sources": "data/nbbench/train.csv; data/nbbench/val.csv; data/nbbench/test.csv; data/md/nanobody_qvalue_400K.csv",
             "table_builder": "data_sources_table",
             "panel_builder": "fig_s1_data_and_md",
-            "reviewer_question": "What target and source-label data sizes are used?",
+            "question": "What target and source-label data sizes are used?",
             "notes": "Processed row counts used by the reported comparisons.",
         },
         {
@@ -1056,7 +1056,7 @@ def write_manifest() -> None:
             "upstream_sources": "data/md/nanobody_qvalue_400K.csv",
             "table_builder": "md_q_summary_tables",
             "panel_builder": "fig_s1_data_and_md",
-            "reviewer_question": "What is the raw distribution of the MD Q-value source label?",
+            "question": "What is the raw distribution of the MD Q-value source label?",
             "notes": "Raw Q-values before min-max scaling.",
         },
         {
@@ -1068,7 +1068,7 @@ def write_manifest() -> None:
             "upstream_sources": "data/md/nanobody_qvalue_400K.csv",
             "table_builder": "md_q_summary_tables",
             "panel_builder": "fig_s1_data_and_md",
-            "reviewer_question": "Does MD Q-value mainly reflect sequence length?",
+            "question": "Does MD Q-value mainly reflect sequence length?",
             "notes": "Scatter of raw Q-value against sequence length.",
         },
         {
@@ -1080,7 +1080,7 @@ def write_manifest() -> None:
             "upstream_sources": "data/md/metadata/nano_manifest_400K.json; data/md/metadata/sabdab_nano_summary_all.tsv",
             "table_builder": "md_q_summary_tables",
             "panel_builder": "fig_s1_data_and_md",
-            "reviewer_question": "What experimental structure methods support the MD panel?",
+            "question": "What experimental structure methods support the MD panel?",
             "notes": "Falls back to stored counts if local MD metadata are unavailable.",
         },
         {
@@ -1092,7 +1092,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/source_screen/hpo_summary.json",
             "table_builder": "source_screen_hunt",
             "panel_builder": "fig_s2_candidate_settings",
-            "reviewer_question": "Which candidate settings were screened for hot-encoder source comparisons?",
+            "question": "Which candidate settings were screened for hot-encoder source comparisons?",
             "notes": "Diamonds mark the lowest experimental validation MAE per source.",
         },
         {
@@ -1104,7 +1104,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/source_screen/hpo_frozen_core_summary.json",
             "table_builder": "source_screen_hunt",
             "panel_builder": "fig_s2_candidate_settings",
-            "reviewer_question": "Which candidate settings were screened for frozen-encoder controls?",
+            "question": "Which candidate settings were screened for frozen-encoder controls?",
             "notes": "Frozen-encoder validation search for core source labels.",
         },
         {
@@ -1116,7 +1116,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/ddg_head_search/hpo_summary.json",
             "table_builder": "read_json",
             "panel_builder": "fig_s2_candidate_settings",
-            "reviewer_question": "Which FEP source-head designs were screened?",
+            "question": "Which FEP source-head designs were screened?",
             "notes": "Candidate source-head design search for FEP labels.",
         },
         {
@@ -1128,7 +1128,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/source_screen/final_source_screen_summary.json",
             "table_builder": "source_screen_final",
             "panel_builder": "fig_s2_candidate_settings",
-            "reviewer_question": "How do selected validation and final test errors relate?",
+            "question": "How do selected validation and final test errors relate?",
             "notes": "Target-validation selection is compared with held-out test performance.",
         },
         {
@@ -1140,7 +1140,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/source_screen/final_source_screen_summary.json; results/source_screen/final_frozen_core_summary.json",
             "table_builder": "encoder_controls",
             "panel_builder": "fig_s3_controls",
-            "reviewer_question": "Does the source-label effect depend on fine-tuning the encoder?",
+            "question": "Does the source-label effect depend on fine-tuning the encoder?",
             "notes": "Hot-encoder and frozen-encoder final test comparisons.",
         },
         {
@@ -1152,7 +1152,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/ddg_head_search/final_ddg_head_summary.json",
             "table_builder": "head_controls_table",
             "panel_builder": "fig_s3_controls",
-            "reviewer_question": "Which FEP source-head design is best with a hot encoder?",
+            "question": "Which FEP source-head design is best with a hot encoder?",
             "notes": "Final test evaluation of selected source-head designs.",
         },
         {
@@ -1164,7 +1164,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/ddg_head_search/frozen/final_ddg_head_summary.json",
             "table_builder": "head_controls_table",
             "panel_builder": "fig_s3_controls",
-            "reviewer_question": "Which FEP source-head design is best with a frozen encoder?",
+            "question": "Which FEP source-head design is best with a frozen encoder?",
             "notes": "Frozen-encoder source-head final test controls.",
         },
         {
@@ -1176,7 +1176,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/abcd_search/final_abcd_with_dq_summary.json",
             "table_builder": "abcd_table",
             "panel_builder": "fig_s3_controls",
-            "reviewer_question": "Do source combinations improve beyond FEP alone?",
+            "question": "Do source combinations improve beyond FEP alone?",
             "notes": "Tm-only, FEP-only, MD-only, and combined-source controls.",
         },
         {
@@ -1188,7 +1188,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/tm_ref_hot_mtl_tmselect/scaling.json; results/fep_hot_tmselect_enc3e-5/scaling.json; results/hot_q_400k_tmselect/scaling.json",
             "table_builder": "scaling_table",
             "panel_builder": "fig_s4_scaling",
-            "reviewer_question": "How does label-count scaling differ across target, FEP, and MD Q-value labels?",
+            "question": "How does label-count scaling differ across target, FEP, and MD Q-value labels?",
             "notes": "Main label-count curves collected in one table.",
         },
         {
@@ -1200,7 +1200,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/hparam_search/per_nmd_test_summary.json",
             "table_builder": "source_count_selected_table",
             "panel_builder": "fig_s4_scaling",
-            "reviewer_question": "Does MD Q-value scaling improve when candidate settings are selected separately for each label count?",
+            "question": "Does MD Q-value scaling improve when candidate settings are selected separately for each label count?",
             "notes": "Validation-selected MD Q-value controls by source-label count.",
         },
         {
@@ -1212,7 +1212,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/source_screen/final_source_screen_summary.json; results/size35_tm_shared_drop005/scaling.json; results/size35_ddg_fep_enc3e-5/scaling.json; results/size650_tm_shared_drop005/scaling.json; results/size650_ddg_fep_enc3e-5/scaling.json",
             "table_builder": "model_size_table",
             "panel_builder": "fig_s4_scaling",
-            "reviewer_question": "Is the FEP gain explained by ESM2 encoder size?",
+            "question": "Is the FEP gain explained by ESM2 encoder size?",
             "notes": "8M, 35M, and 650M encoder controls.",
         },
         {
@@ -1224,7 +1224,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/short_*/*scaling.json",
             "table_builder": "trajectory_length_table",
             "panel_builder": "fig_s4_scaling",
-            "reviewer_question": "Does the MD Q-value result depend on the terminal trajectory window?",
+            "question": "Does the MD Q-value result depend on the terminal trajectory window?",
             "notes": "Hot-encoder and frozen-encoder trajectory-window controls.",
         },
         {
@@ -1236,7 +1236,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/arch_search/feature_summary.json",
             "table_builder": "md_feature_table",
             "panel_builder": "fig_s5_md_features",
-            "reviewer_question": "Which alternative MD-derived features were screened?",
+            "question": "Which alternative MD-derived features were screened?",
             "notes": "Experimental validation MAE values for MD-feature candidates.",
         },
         {
@@ -1248,7 +1248,7 @@ def write_manifest() -> None:
             "upstream_sources": "results/arch_search/final_summary.json",
             "table_builder": "architecture_controls_table",
             "panel_builder": "fig_s5_md_features",
-            "reviewer_question": "Do architecture controls rescue MD-derived labels?",
+            "question": "Do architecture controls rescue MD-derived labels?",
             "notes": "Held-out test controls for selected architecture and shuffled-label settings.",
         },
         {
@@ -1260,7 +1260,7 @@ def write_manifest() -> None:
             "upstream_sources": "data/md/nanobody_qvalue_400K.csv; data/md/feat_q_min_400K.csv; data/md/feat_q_std_400K.csv; data/md/feat_rmsf_max.csv; data/md/feat_saltbridge.csv",
             "table_builder": "md_label_distribution_table",
             "panel_builder": "fig_s5_md_features",
-            "reviewer_question": "What are the distributions of representative MD-derived features?",
+            "question": "What are the distributions of representative MD-derived features?",
             "notes": "Boxplots of raw or scaled MD-derived feature values.",
         },
         {
@@ -1272,7 +1272,7 @@ def write_manifest() -> None:
             "upstream_sources": "data/md/nanobody_qvalue_400K.csv; data/md/feat_rmsf_max.csv; data/md/feat_saltbridge.csv",
             "table_builder": "md_label_distribution_table",
             "panel_builder": "fig_s5_md_features",
-            "reviewer_question": "How do summary statistics compare for representative MD-derived features?",
+            "question": "How do summary statistics compare for representative MD-derived features?",
             "notes": "Median, mean, and standard deviation are computed from the same long-form table.",
         },
     ]

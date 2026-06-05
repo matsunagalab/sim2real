@@ -36,8 +36,8 @@ labels and regenerates the downstream model results. It will take a long time.
 
 The workflow is manifest-driven. The stage definitions and expected outputs are
 stored in `reproduce/manuscript_results.yaml`; the runner is
-`scripts/reproduce_paper_results.py`. See `reproduce/README.md` for how to add
-new reviewer-round calculations.
+`scripts/reproduce_paper_results.py`. See `reproduce/README.md` and `EXTENDING.md`
+for how to add new calculations.
 
 The fixed computational mutation-label inputs are catalogued in
 `data/source_labels/MANIFEST.tsv`. That file records which processed CSVs are

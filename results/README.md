@@ -61,21 +61,31 @@ write a compact summary JSON with resolved settings, validation metrics, final
 test metrics, bootstrap intervals, and seed-level or example-level records when
 available.
 
-## Adding New Reviewer-Round Results
+## Derived Analyses
+
+Some quantities are computed directly from the tracked scaling summaries, with no
+new training. `plot/equivalent_sample_size.py` estimates the equivalent sample
+size (computational labels worth one experimental Tm label; Minami et al. 2025)
+from `tm_ref_hot_mtl_tmselect/scaling.json`,
+`fep_hot_tmselect_enc3e-5/scaling.json`, and `hot_q_400k_tmselect/scaling.json`,
+writing `results/equivalent_sample_size.json` and
+`results/equivalent_sample_size.md`.
+
+## Adding New Analysis Results
 
 1. Write new jobs under a new directory, for example
-   `results/reviewer_<question>/<run_name>/`.
+   `results/<analysis_name>/<run_name>/`.
 2. Preserve the command-line arguments, git commit, random seed, selected split,
    source-label file, encoder mode, loss weights, and checkpoint-selection
    criterion.
 3. Select candidate settings using only the experimental Tm validation split.
 4. Report final numbers on the held-out experimental Tm test split.
-5. Store a compact summary JSON in the reviewer directory.
+5. Store a compact summary JSON in the analysis directory.
 6. Add a table builder and manifest row in
    `plot/make_supplementary_figures.py`.
 7. Regenerate the supplementary analysis with
    `uv run python plot/make_supplementary_figures.py`.
 
 This convention keeps the paper outputs reproducible while allowing additional
-reviewer-round calculations to be added without overwriting the current result
+analyses to be added without overwriting the current result
 set.

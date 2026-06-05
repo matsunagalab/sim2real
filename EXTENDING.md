@@ -1,12 +1,8 @@
-# Reviewer-Round Analysis Workflow
+# Extending the Analysis
 
-This file is for the graduate student or maintainer who needs to add
-reviewer-requested calculations without breaking the current manuscript result
-set.
-
-For reproducing the current manuscript-facing results before adding new
-calculations, start with `REPRODUCE.md` and
-`scripts/reproduce_paper_results.py`.
+This guide is for anyone adding new calculations to the released analysis without
+breaking the published manuscript result set. To reproduce the existing results
+first, start with `REPRODUCE.md` and `scripts/reproduce_paper_results.py`.
 
 ## Non-Negotiable Protocol
 
@@ -26,10 +22,10 @@ calculations, start with `REPRODUCE.md` and
 
 ## Directory Pattern
 
-Use a new top-level directory for each reviewer question:
+Use a new top-level directory for each new analysis:
 
 ```text
-results/reviewer_<short_question>/
+results/<analysis_name>/
   README.md
   candidate_search/
   final_eval/
@@ -55,7 +51,7 @@ under `data/source_labels/` and add the two active processed CSVs to
 do not add new source-label paths by hard-coding them in Python.
 
 For target Tm data, keep the existing NbBench split files under
-`data/nbbench/`. Do not reshuffle these splits during reviewer-round analyses.
+`data/nbbench/`. Do not reshuffle these splits.
 
 ## Step 2: Candidate-Setting Search
 
@@ -95,7 +91,7 @@ setting is needed, document it as a new candidate search.
 2. Write the compact table under `paper/analysis/supplementary/tables/`.
 3. Add or update a plotting panel in the same script.
 4. Add a row to the `write_manifest()` output so each panel has a clear source
-   table, upstream summary, and reviewer question.
+   table, upstream summary, and the question it answers.
 5. Regenerate outputs:
 
 ```bash
@@ -105,11 +101,31 @@ uv run python plot/make_supplementary_figures.py
 6. If the manuscript figure set changes, update
    `paper/tex/sections/supplementary.tex` and typeset the PDF.
 
+## Derived Analyses Without Retraining
+
+Some quantities are computed directly from the tracked scaling summaries and need
+no new training. For example, the equivalent sample size -- how many computational
+labels are worth one experimental Tm label, following the marginal-rate-of
+-substitution definition of Minami et al. (2025) -- is computed by:
+
+```bash
+python plot/equivalent_sample_size.py
+```
+
+- Inputs: `results/tm_ref_hot_mtl_tmselect/scaling.json`,
+  `results/fep_hot_tmselect_enc3e-5/scaling.json`,
+  `results/hot_q_400k_tmselect/scaling.json`.
+- Outputs: `results/equivalent_sample_size.json` and
+  `results/equivalent_sample_size.md`.
+
 ## Useful Entry Points
 
 - `paper/analysis/supplementary/MANIFEST.tsv`: panel-to-source map.
 - `paper/analysis/supplementary/tables/`: compact numerical tables.
 - `plot/make_supplementary_figures.py`: supplementary table and figure builder.
+- `plot/make_outline_figures.py`: main figure builder.
+- `plot/equivalent_sample_size.py`: equivalent-sample-size estimate from the
+  scaling curves.
 - `results/README.md`: current source-of-truth summary list.
 - `paper/tex/sections/methods.tex`: main Methods description.
 - `paper/tex/sections/supplementary.tex`: detailed supplementary Methods and
@@ -117,17 +133,16 @@ uv run python plot/make_supplementary_figures.py
 
 ## Before Committing
 
-Run these checks from the repository root:
+Regenerate the supplementary outputs from the repository root:
 
 ```bash
 uv run python plot/make_supplementary_figures.py
 ```
 
-Then typeset from `paper/tex/`:
+Then typeset from `paper/tex/` with a standard TeX installation:
 
 ```bash
-mamba create -y -p /tmp/sim2real-latex -c conda-forge tectonic
-env XDG_CACHE_HOME=/tmp/tectonic-cache /tmp/sim2real-latex/bin/tectonic main.tex
+pdflatex main.tex && bibtex main && pdflatex main.tex && pdflatex main.tex
 ```
 
 Commit only the compact summary JSON files, generated paper tables/figures, and

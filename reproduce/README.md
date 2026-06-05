@@ -24,7 +24,7 @@ It records:
 
 `scripts/reproduce_paper_results.py` is intentionally a thin runner. It reads
 the manifest, expands matrix jobs such as trajectory-window controls, and runs
-the requested stage. Add new reviewer-round calculations to the YAML manifest
+the requested stage. Add new calculations to the YAML manifest
 instead of burying them in Python code.
 
 ## What Is Fixed Upstream
@@ -73,7 +73,7 @@ Regenerate figures and the manuscript PDF from existing summaries:
 uv run python scripts/reproduce_paper_results.py --stage figures --force
 ```
 
-## Adding A Reviewer-Round Calculation
+## Adding A New Calculation
 
 1. Add any new mutation-label dataset under `data/source_labels/` and register
    active `--ddg-source` inputs in `data/source_labels/MANIFEST.tsv`.

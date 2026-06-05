@@ -47,13 +47,12 @@ uv run python plot/make_supplementary_figures.py
 Then typeset from `paper/tex/`:
 
 ```bash
-mamba create -y -p /tmp/sim2real-latex -c conda-forge tectonic
-env XDG_CACHE_HOME=/tmp/tectonic-cache /tmp/sim2real-latex/bin/tectonic main.tex
+pdflatex main.tex && bibtex main && pdflatex main.tex && pdflatex main.tex
 ```
 
 The figure builders only read existing results and source data. They do not
 launch training jobs.
 
-For reviewer-round handoff, start from
+To add or audit an analysis, start from
 `supplementary/MANIFEST.tsv` to identify which result summary or source table
 feeds each panel.
