@@ -7,35 +7,28 @@
 \subsection*{Experimental target data and target-label scaling}
 
 All reported target-task comparisons use the same NbBench thermo-seq endpoint
-\citep{Zhang2025NbBench}. The processed experimental files are
-\texttt{\detokenize{data/nbbench/train.csv}},
-\texttt{\detokenize{data/nbbench/val.csv}}, and
-\texttt{\detokenize{data/nbbench/test.csv}}. These files contain the columns
-\texttt{\detokenize{text}} and \texttt{\detokenize{label}}, where
-\texttt{\detokenize{text}} is the amino-acid sequence and
-\texttt{\detokenize{label}} is the melting temperature in degrees Celsius. The
-processed split sizes are 57 training sequences, 114 validation sequences, and
-396 held-out test sequences.
+\citep{Zhang2025NbBench}. The processed experimental tables contain an
+amino-acid sequence field and a melting-temperature label in degrees Celsius.
+The processed split sizes are 57 training sequences, 114 validation sequences,
+and 396 held-out test sequences.
 
-The split definitions are fixed throughout the study. The 57 training examples
+\textbf{Split definitions.} The split definitions are fixed throughout the study. The 57 training examples
 are used to fit neural-network parameters. The validation split is used for
 checkpoint selection, early stopping, and selection among candidate model
 settings. The test split is held out until those choices have been fixed. The
 same rule is applied to Tm-only models and to models trained with computational
 source labels.
 
-The training code transforms the experimental Tm values to a scaled regression
-target before optimization. In \texttt{\detokenize{prepare.py}}, the scaler is
-fit only on the 57 training labels. The fitted transform is a
-\texttt{\detokenize{RobustScaler}} followed by a
-\texttt{\detokenize{MinMaxScaler}} with feature range [0,1]. Validation labels
-are transformed with this training-fitted scaler during model selection. Test
-predictions are averaged across seeds in scaled-label space and are then
-inverse-transformed to degrees Celsius before error metrics are computed. The
-validation and test label distributions therefore do not influence the fitted
-target-label transform.
+\textbf{Target-label scaling.} The training workflow transforms the experimental
+Tm values to a scaled regression target before optimization. The scaler is fit
+only on the 57 training labels, using a robust scaling step followed by
+min--max scaling to [0,1]. Validation labels are transformed with this
+training-fitted scaler during model selection. Test predictions are averaged
+across seeds in scaled-label space and are then inverse-transformed to degrees
+Celsius before error metrics are computed. The validation and test label
+distributions therefore do not influence the fitted target-label transform.
 
-The experimental-label scaling reference uses the same training split but
+\textbf{Experimental-label scaling reference.} The experimental-label scaling reference uses the same training split but
 subsamples it to the requested number of labels with the run seed. The
 validation and test splits are never subsampled. This experiment is used only as
 a positive control for the analysis pipeline: if more true target labels are
@@ -46,12 +39,10 @@ added, the Tm prediction error should improve.
 Computational labels are loaded as source tasks rather than appended to the Tm
 data set as additional Tm measurements. Table~\ref{tab:supp_data_sources}
 summarizes the processed target and source files used in the reported
-comparisons. Mutation-effect source tables use \texttt{\detokenize{seq}} as the
-sequence column and \texttt{\detokenize{ddg_scaled01}} as the [0,1]-scaled
-source-label column. The MD-derived Q-value table also uses
-\texttt{\detokenize{seq}} and \texttt{\detokenize{ddg_scaled01}} so that it can
-enter the same source-task loader; in that file,
-\texttt{\detokenize{ddg_scaled01}} is a min--max scaled Q-value, not a
+comparisons. Mutation-effect source tables contain sequence fields and
+[0,1]-scaled source-label fields. The MD-derived Q-value table is stored in the
+same processed-table format so that it can enter the same source-task loader;
+for that source, the scaled label is a min--max scaled Q-value, not a
 mutation-free-energy label.
 
 \begin{table}[htbp]
@@ -77,15 +68,14 @@ MD-derived Q-value & Source task & 1143 & Source comparison and scaling control 
 \end{tabular}
 \end{table}
 
-The source-task identifiers are assigned in the data loader. Experimental Tm is
-task 0. The two template-specific mutation-effect tables are tasks 1 and 2.
-The primary MD-derived Q-value source is task 3. The code also supports an
-optional second MD-derived source task, task 4, but the main figures use one
-MD-derived source at a time. The task identifier determines which scalar
-regression head is used and which task-specific loss term an example
-contributes to.
+\textbf{Source-task assignment.} The data loader assigns each experimental or
+computational row to a target or source task. Experimental Tm rows use the Tm
+head. The two template-specific mutation-effect tables use separate source
+heads in the main mutation-effect model, and the MD-derived Q-value table uses a
+single source head. This assignment determines which scalar regression head is
+used and which task-specific loss term an example contributes to.
 
-Exact sequence overlap was checked between the processed source-label tables
+\textbf{Sequence-overlap check.} Exact sequence overlap was checked between the processed source-label tables
 and the fixed NbBench splits. The processed FEP/Rosetta mutation-effect tables,
 random variants scored by Rosetta, and ESM2-proposed variants scored by Rosetta
 had no exact sequence matches to the NbBench training, validation, or test sequences.
@@ -96,50 +86,49 @@ sequences. This overlap is disclosed because it affects interpretation of the
 MD control; it cannot explain the positive FEP result, and the MD Q-value
 source did not improve held-out Tm prediction.
 
-For mutation-effect experiments with requested source-label count $n$, the
-loader samples up to $n$ rows independently from each of the two template tables
-with \texttt{\detokenize{random_state=seed}}. Thus, the final FEP setting with
-$n=320$ supplies 320 sampled 1MEL rows and 320 sampled 4IDL rows before the
-source-task train/validation split. For MD-derived Q-value experiments, the
+\textbf{Source-label sampling.} For mutation-effect experiments with requested
+source-label count $n$, the loader samples up to $n$ rows independently from
+each of the two template tables using the run seed. Thus, the final FEP setting
+with $n=320$ supplies 320 sampled 1MEL rows and 320 sampled 4IDL rows before
+the source-task train/validation split. For MD-derived Q-value experiments, the
 loader samples $n$ rows from the single processed Q-value table. Source rows are
-split 80/20 into source-training and source-validation rows using the same seed.
-The production training call then filters the validation data passed to the
-trainer so that checkpoint selection and early stopping are based only on the
-experimental Tm validation examples.
+split 80/20 into source-training and source-validation rows using the same
+seed. The production training call then filters the validation data passed to
+the trainer so that checkpoint selection and early stopping are based only on
+the experimental Tm validation examples.
 
 \subsection*{SAbDab-derived nanobody structure panel for MD}
 
 The MD source-label panel was constructed from SAbDab, the Structural Antibody
-Database \citep{Dunbar2014SAbDab}. The archived SAbDab nanobody summary table,
-\texttt{\detokenize{sabdab_nano_summary_all.tsv}}, contains 2422 rows with PDB
-identifier, heavy-chain assignment, light-chain assignment, model index,
-antigen annotation, experimental method, resolution, species, and other SAbDab
-fields. The manifest construction workflow matches this summary against the
-archived IMGT-renumbered PDB files.
+Database \citep{Dunbar2014SAbDab}. The archived SAbDab nanobody summary table
+contains 2422 rows with PDB identifier, heavy-chain assignment, light-chain
+assignment, model index, antigen annotation, experimental method, resolution,
+species, and other SAbDab fields. The manifest construction workflow matches
+this summary against the archived IMGT-renumbered PDB files.
 
-The selection rule is deterministic. For each PDB identifier with both a SAbDab
-summary row and a local IMGT-renumbered PDB file, the script picks the first
+\textbf{Structure-selection rule.} The selection rule is deterministic. For each PDB identifier with both a SAbDab
+summary row and an IMGT-renumbered PDB file, the workflow picks the first
 heavy-chain row encountered in the SAbDab table. The chain is accepted only if
 the same chain identifier is present in the IMGT PDB file. The output manifest
 contains one entry per PDB identifier, with fields for the manifest row number,
 PDB identifier, selected heavy chain, SAbDab TSV row, IMGT PDB path, and MD
 run directory. This initial one-per-PDB manifest contained 1177 structures.
 
-The 400 K MD campaign reused the systems prepared in the 300 K campaign and
+\textbf{400 K simulation panel.} The 400 K MD campaign reused the systems prepared in the 300 K campaign and
 created a 1146-entry 400 K manifest. The selected 400 K manifest consisted of
 798 X-ray structures, 345 electron-microscopy structures, and 3 NMR structures
-according to the SAbDab method field. All selected rows had
-\texttt{\detokenize{Lchain=NA}} in the SAbDab summary, consistent with a
-single-domain antibody panel. After trajectory and Q-value processing, 1143
-unique PDB identifiers yielded usable source-label rows.
+according to the SAbDab method field. All selected rows lacked an annotated
+light chain in the SAbDab summary, consistent with a single-domain antibody
+panel. After trajectory and Q-value processing, 1143 unique PDB identifiers
+yielded usable source-label rows.
 
 \subsection*{MD system preparation and simulation protocol}
 
-Each selected structure was prepared as a nanobody-only MD system. The script
-\texttt{\detokenize{run_prep_one_imgt.sh}}
-registers the IMGT-renumbered PDB as a local structure source, extracts the
-selected heavy chain, includes only protein atoms, and leaves termini uncapped.
-The preparation call uses pH 7.4. Protein chains are cleaned with PDBFixer, and
+\textbf{System preparation.} Each selected structure was prepared as a nanobody-only MD system. The
+preparation workflow uses the IMGT-renumbered PDB as the structure source,
+extracts the selected heavy chain, includes only protein atoms, and leaves
+termini uncapped. The preparation call uses pH 7.4. Protein chains are cleaned
+with PDBFixer, and
 pH-aware protonation is assigned through pdb2pqr/PROPKA when available
 \citep{Dolinsky2004PDB2PQR,Olsson2011PROPKA3};
 its fallback path uses AmberTools-based hydrogen assignment and Amber naming.
@@ -147,18 +136,15 @@ The resulting prepared chain is solvated with explicit OPC water, 15 \AA{}
 padding, and 0.15 M NaCl. Amber topology and coordinate files are built with
 ff19SB and OPC \citep{Case2023AmberTools,Tian2020ff19SB,Izadi2014OPC}.
 
-The base 300 K simulation branch uses OpenMM on CUDA devices
+\textbf{300 K equilibration branch.} The base 300 K simulation branch uses OpenMM on CUDA devices
 \citep{Eastman2017OpenMM}. It runs 1 ns of NVT equilibration followed by 1 ns
 of NPT equilibration at 300 K and 1 atm, with a 2-fs timestep and no
 hydrogen-mass repartitioning. Production at 300 K was generated for the broader
 MD campaign, but the source label used in this manuscript comes from the 400 K
 branch.
 
-The 400 K branch is encoded in the batch scripts
-\texttt{\detokenize{nano_eq_002_400K.sbatch}},
-\texttt{\detokenize{nano_eq_003_400K.sbatch}}, and
-\texttt{\detokenize{nano_prod_002_400K.sbatch}}.
-The first 400 K relaxation node restarts from the 300 K equilibrated state and
+\textbf{400 K production branch.} The first 400 K relaxation stage restarts
+from the 300 K equilibrated state and
 runs 1 ns of NVT at 400 K with C$\alpha$ restraints. The second relaxation node
 restarts from that state and repeats 1 ns of 400 K NVT with C$\alpha$
 restraints. Both relaxation stages use a 2-fs timestep and no hydrogen-mass
@@ -166,7 +152,7 @@ repartitioning. The production node runs 100 ns of restraint-free 400 K NVT,
 with hydrogen-mass repartitioning, 4 amu hydrogen mass, a 4-fs timestep, and
 coordinate/energy output every 100 ps.
 
-In the OpenMM implementation, explicit-solvent periodic systems use PME
+\textbf{Integrator and reporting settings.} In the OpenMM implementation, explicit-solvent periodic systems use PME
 electrostatics with a 1.0-nm nonbonded cutoff and constraints on bonds involving
 hydrogen atoms. NPT stages use a Monte Carlo barostat. NVT stages omit the
 barostat. The integrator is the Langevin middle integrator with friction
@@ -175,27 +161,20 @@ complete 100 ns production trajectory.
 
 \subsection*{MD-derived Q-value extraction}
 
-The processed MD source table was generated with
-\texttt{\detokenize{scripts/extract_q_values.py}} from the sim2real repository.
-The script scans the archived MD run directories
-\texttt{\detokenize{job_nano_*}} and uses the 400 K production node
-\texttt{\detokenize{prod_002}}. A job is eligible only if it contains a
-production trajectory
-\texttt{\detokenize{nodes/prod_002/artifacts/trajectory.dcd}}, a prepared
-reference PDB
-\texttt{\detokenize{nodes/prep_001/artifacts/merge/merged.pdb}}, and an Amber
-parameter file
-\texttt{\detokenize{nodes/topo_001/artifacts/system.parm7}}. The amino-acid
-sequence is extracted from the prepared PDB by reading the first C$\alpha$ atom
-for each residue. Sequences shorter than 50 residues are excluded.
+\textbf{Trajectory input requirements.} The processed MD source table was
+generated from the archived 400 K production trajectories. A system was eligible
+only if it contained a production trajectory, a prepared reference structure,
+and an Amber parameter file. The amino-acid sequence was extracted from the
+prepared structure by reading the first C$\alpha$ atom for each residue.
+Sequences shorter than 50 residues were excluded.
 
-Q-values are computed with MDTraj \citep{McGibbon2015MDTraj}. The topology is
-loaded from the Amber parameter file, and the native reference is frame 0 of the
-production trajectory. The contact calculation uses the atom selection
-\texttt{\detokenize{protein and backbone and not element H}}. Candidate native
-contacts must be separated by more than three residues, have a reference-frame
-distance below 0.45 nm, and include at least one atom from a hydrophilic residue
-(Asp, Glu, Gln, Asn, Arg, Lys, or His, including Amber protonation variants).
+\textbf{Native-contact definition.} Q-values are computed with MDTraj
+\citep{McGibbon2015MDTraj}. The topology is loaded from the Amber parameter
+file, and the native reference is frame 0 of the production trajectory. The
+contact calculation uses protein backbone heavy atoms. Candidate native contacts
+must be separated by more than three residues, have a reference-frame distance
+below 0.45 nm, and include at least one atom from a hydrophilic residue (Asp,
+Glu, Gln, Asn, Arg, Lys, or His, including Amber protonation variants).
 For a native-contact pair $(i,j)$ with reference distance $r^0_{ij}$ and
 instantaneous distance $r_{ij}$, the per-frame contribution is
 \[
@@ -207,7 +186,7 @@ form used in Best--Hummer-style Q-value analyses \citep{Best2013NativeContacts}.
 The frame-level Q-value is the mean of $q_{ij}$ over all selected native
 contacts.
 
-The trajectory-level label is the mean Q-value over the terminal portion of the
+\textbf{Trajectory-level Q-value label.} The trajectory-level label is the mean Q-value over the terminal portion of the
 production trajectory. For trajectories with more than 300 frames, the
 implementation uses the larger of 300 frames and one third of the available
 frames; for shorter trajectories it uses all available frames. For complete
@@ -216,39 +195,32 @@ approximately the final 33 ns. In the processed 400 K Q-value table, the number
 of frames used ranges from 66 to 333 with median 333. The number of native
 contacts ranges from 28 to 728 with median 173. The sequence length range is
 58--461 residues with median 122. Raw Q-values range from 0.0437 to 0.9994.
-These raw Q-values are min--max scaled to [0,1] and stored in the loader-facing
-column \texttt{\detokenize{ddg_scaled01}}.
+These raw Q-values are min--max scaled to [0,1] for source-task training.
 
 \subsection*{Sequence tokenization and encoder inputs}
 
 Sequences are tokenized with the ESM2 tokenizer associated with the selected
-encoder \citep{Lin2023Evolutionary}. The code uses truncation and fixed-length
-padding to \texttt{\detokenize{MAX_LENGTH}} = 160 residues. The tokenized
-fields are \texttt{\detokenize{input_ids}} and
-\texttt{\detokenize{attention_mask}}. The source-task column
-\texttt{\detokenize{task}} is renamed to
-\texttt{\detokenize{task_ids}} before training. For the production protocol, the
-trainer receives all target and sampled source rows for training, but its
-evaluation data are filtered to rows with \texttt{\detokenize{task_ids == 0}},
-which are the experimental Tm validation rows.
+encoder \citep{Lin2023Evolutionary}. The workflow uses truncation and
+fixed-length padding to 160 residues. For the production protocol, the trainer
+receives all target and sampled source rows for training, but its evaluation
+data are filtered to the experimental Tm validation rows.
 
-The hot-encoder setting keeps token IDs and attention masks in the
-training data and updates the ESM2 weights. The frozen-encoder setting calls
-\texttt{\detokenize{prepare.precompute_embeddings}} before training. In that
-setting, ESM2 is run once for each target and source sequence, the first-token
-embedding is stored as an \texttt{\detokenize{embedding}} field, and the
-subsequent optimizer updates only the regression trunk and task heads.
+\textbf{Hot-encoder input path.} The hot-encoder setting keeps tokenized
+sequence inputs in the training data and updates the ESM2 weights. In the
+frozen-encoder setting, ESM2 is run once for each target and source sequence to
+precompute first-token embeddings, and the subsequent optimizer updates only
+the regression trunk and task heads.
 
 \subsection*{Neural-network architecture}
 
-The default encoder is
-\texttt{\detokenize{facebook/esm2_t6_8M_UR50D}}. The model takes the first-token
-ESM2 representation as the sequence-level embedding. The shared regression trunk
-has dimensions hidden-size $\rightarrow$ 256 $\rightarrow$ 128 $\rightarrow$ 32,
-with ReLU activations and dropout after the first two hidden layers. The Tm head
-maps the 32-dimensional representation to one scaled scalar prediction.
+The default encoder is the 8M-parameter ESM2 model. The model takes the
+first-token ESM2 representation as the sequence-level embedding. The shared
+regression trunk has dimensions hidden-size $\rightarrow$ 256 $\rightarrow$
+128 $\rightarrow$ 32, with ReLU activations and dropout after the first two
+hidden layers. The Tm head maps the 32-dimensional representation to one scaled
+scalar prediction.
 
-The Tm-only baseline consists of the ESM2 encoder, the shared trunk, and the Tm
+\textbf{Target and source heads.} The Tm-only baseline consists of the ESM2 encoder, the shared trunk, and the Tm
 head. Source-transfer models keep this target path and add source heads. The
 main mutation-effect model uses separate source heads for the two
 template-specific tasks. The code also implements source-head controls with a
@@ -257,14 +229,14 @@ template-specific affine calibration on top of a shared head. These controls
 test whether the two template-specific mutation-effect sources require separate
 output calibration.
 
-Architecture controls in \texttt{\detokenize{train.py}} include residual,
-latent, and mixture-style source-fusion variants. In these variants, the source
-path can produce a correction to the Tm prediction, a latent interaction between
-Tm and source features, or a gate between a target-only expert and a
-source-informed expert. For the main reported FEP result, the selected model is
-the original shared-trunk architecture with separate template-specific source
-heads. The architecture controls are retained as sensitivity analyses rather
-than as the main claim.
+\textbf{Architecture sensitivity analyses.} Architecture controls include
+residual, latent, and mixture-style source-fusion variants. In these variants,
+the source path can produce a correction to the Tm prediction, a latent
+interaction between Tm and source features, or a gate between a target-only
+expert and a source-informed expert. For the main reported FEP result, the
+selected model is the original shared-trunk architecture with separate
+template-specific source heads. The architecture controls are retained as
+sensitivity analyses rather than as the main claim.
 
 \subsection*{Training objective, optimizer, and checkpoint selection}
 
@@ -282,7 +254,7 @@ minibatch. Fixed source-loss weights are also implemented and were included in
 the candidate-setting searches for source classes where loss balance could
 change validation performance.
 
-The optimizer is AdamW. The default head/trunk learning rate is
+\textbf{Optimizer and schedule.} The optimizer is AdamW. The default head/trunk learning rate is
 $3\times10^{-4}$, the default hot-encoder learning rate is
 $1\times10^{-4}$, weight decay is 0.04, dropout is 0.15, batch size is 16,
 warmup is 100 steps, and the schedule is cosine decay. Training runs for at
@@ -293,7 +265,7 @@ parameters and newly initialized trunk/head parameters. In the frozen-encoder
 setting, ESM2 parameters are non-trainable and no encoder optimizer group is
 used.
 
-Within each run, the best checkpoint is the checkpoint with the lowest mean
+\textbf{Checkpoint selection.} Within each run, the best checkpoint is the checkpoint with the lowest mean
 squared error on the experimental Tm validation rows. Early stopping monitors
 the same validation metric with patience 15 and threshold 0. Source-task
 validation rows are not passed to the trainer in the production protocol. This
@@ -316,14 +288,14 @@ comparison. MD-derived source candidates include fixed-weight settings because
 Q-value labels differ in scale and interpretation from mutation-free-energy
 labels.
 
-Each candidate is first evaluated as a three-seed ensemble on the Tm validation
+\textbf{Seeded candidate evaluation.} Each candidate is first evaluated as a three-seed ensemble on the Tm validation
 split. The selected setting for each source class is then evaluated on the
 held-out test split as a ten-seed ensemble. Final comparisons use seeds 1--10.
-The seed controls Python \texttt{\detokenize{random}}, NumPy, PyTorch, and CUDA
-randomness when CUDA is available; it also controls target-training subsampling
-in the target-label scaling experiment, source-row sampling, and source
-train/validation splitting. The label-count curves use fixed source-specific
-training recipes while the number of source labels is varied.
+The run seed controls Python, NumPy, PyTorch, and CUDA randomness when CUDA is
+available; it also controls target-training subsampling in the target-label
+scaling experiment, source-row sampling, and source train/validation splitting.
+The label-count curves use fixed source-specific training recipes while the
+number of source labels is varied.
 
 \subsection*{Statistics and stored outputs}
 
@@ -335,7 +307,7 @@ determination, Spearman correlation, and Pearson correlation are also computed
 by the evaluation code, but the figures emphasize MAE because it is directly
 interpretable as average temperature error.
 
-Single-condition confidence intervals are estimated by nonparametric bootstrap
+\textbf{Bootstrap intervals.} Single-condition confidence intervals are estimated by nonparametric bootstrap
 resampling over test examples. The absolute-error vector from the ten-seed
 ensemble is resampled with replacement 10,000 times using a fixed bootstrap
 seed. The reported 90\% interval is the 5th to 95th percentile range of the
@@ -344,26 +316,17 @@ the candidate and reference absolute-error vectors. The reported
 $\Delta$MAE is candidate minus reference, so negative values indicate lower
 error than the reference.
 
-Each call to \texttt{\detokenize{prepare.py}} writes a structured
-\texttt{\detokenize{scaling.json}} file in the result directory. This file
-records command-line arguments, relevant environment variables, resolved
-hyperparameters, per-label-count metrics, bootstrap intervals, per-example
-absolute errors, and paired bootstrap summaries. The main source comparison is
-summarized by
-\texttt{\detokenize{results/source_screen/final_source_screen_summary.json}}.
-The frozen-encoder source comparison is summarized by
-\texttt{\detokenize{results/source_screen/final_frozen_core_summary.json}}.
-The source-head controls are summarized by
-\texttt{\detokenize{results/ddg_head_search/final_ddg_head_summary.json}}.
-Additional source-combination controls are summarized by
-\texttt{\detokenize{results/abcd_search/final_abcd_summary.json}}. The figure
-set is assembled by \texttt{\detokenize{plot/make_outline_figures.py}}, which
-also writes
-\texttt{\detokenize{paper/tex/figures/outline_figure_source_screen.tsv}}.
+\textbf{Stored run summaries.} Each training and evaluation call writes a
+structured run summary that records command-line arguments, relevant environment
+variables, resolved model settings, per-label-count metrics, bootstrap
+intervals, per-example absolute errors, and paired bootstrap summaries. Compact
+summary tables derived from these run summaries provide the inputs for the main
+source comparison, frozen-encoder controls, source-head controls, and
+source-combination controls.
 
 \subsection*{Interpreting the label-count curves}
 
-The target-label scaling curve is an internal check on the pipeline. It asks
+\textbf{Target-label scaling reference.} The target-label scaling curve is a positive-control check on the pipeline. It asks
 whether the same model family and evaluation code detect the expected gain when
 more true experimental Tm labels are available. The FEP source-label curve asks
 a different question: whether more labels from a physically related but
@@ -377,15 +340,12 @@ selection.
 
 \subsection*{Supplementary figure source tables}
 
-The supplementary figures are generated from tabular source files stored in
-\texttt{\detokenize{paper/analysis/supplementary/tables/}}. These tables are
-written by \texttt{\detokenize{plot/make_supplementary_figures.py}} from the
-same result summaries used for the main figures. The corresponding rendered
-figures are stored in
-\texttt{\detokenize{paper/analysis/supplementary/figures/}} and copied to
-\texttt{\detokenize{paper/tex/figures/}} for typesetting.
+The supplementary figures are generated from tabular source files derived from
+the same run summaries used for the main figures. The processed source tables,
+rendered supplementary figures, and figure-generation code will be distributed
+with the public analysis archive.
 
-\subsection*{Figure-to-data and code mapping}
+\subsection*{Fig.-to-data and code mapping}
 
 The current manuscript figures are regenerated from compact result summaries and
 source tables rather than from scratch run directories. The mapping below is the
@@ -393,10 +353,13 @@ first place to check when auditing or extending a figure.
 
 \begin{table*}[h]
 \centering
+\caption{\textbf{Manuscript Fig.-to-data mapping.} The table identifies the
+processed summaries and scripts used to regenerate each display item.}
+\label{tab:supp_figure_mapping}
 \footnotesize
 \begin{tabular}{p{0.12\textwidth}p{0.30\textwidth}p{0.24\textwidth}p{0.22\textwidth}}
 \hline
-Figure & Inputs & Script & Primary comparison \\
+Display item & Inputs & Script & Primary comparison \\
 \hline
 Fig.~1 & Conceptual protocol & Main-figure script & Target-centered transfer-learning design \\
 Fig.~2 & Main scaling summaries & Main-figure script & Label-count scaling for Tm labels, FEP labels, and MD Q-value labels \\
@@ -407,23 +370,21 @@ Supplementary Figs.~1--5 & Supplementary manifest and generated TSV tables & Sup
 \end{tabular}
 \end{table*}
 
-The final source-screen settings used in Figs.~3 and 4 are recorded in
-\texttt{\detokenize{paper/analysis/supplementary/tables/final_source_screen.tsv}},
-and the frozen-encoder controls are recorded in
-\texttt{\detokenize{paper/analysis/supplementary/tables/encoder_controls.tsv}}.
-These tables include the selected architecture, validation-selected setting,
-source-label count, validation MAE, held-out test MAE, bootstrap interval, and
-the resolved \texttt{\detokenize{scaling.json}} path for each condition. The full
-panel-level mapping for all supplementary figures is stored in
-\texttt{\detokenize{paper/analysis/supplementary/MANIFEST.tsv}}.
+\textbf{Generated supplementary tables.} The final source-screen settings used
+in Figs.~3 and 4 and the frozen-encoder controls are recorded in generated
+supplementary tables. These tables include the selected architecture,
+validation-selected setting, source-label count, validation MAE, held-out test
+MAE, bootstrap interval, and the run-summary reference for each condition. A
+panel-level mapping table for all supplementary figures is included in the
+public analysis archive.
 
 \clearpage
-\section*{Supplementary Figures}
+\section*{Supplementary Figs.}
 
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth]{supp_fig01_data_and_md_label}
-\caption{\textbf{Supplementary Figure 1. Processed data sets and MD-derived
+\caption{\textbf{Supplementary Fig. 1. Processed data sets and MD-derived
 Q-value labels.}
 \textbf{(a)} Processed target and source-label row counts used in the reported
 experiments.
@@ -437,7 +398,7 @@ the 400 K MD panel.}
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth]{supp_fig02_candidate_setting_search}
-\caption{\textbf{Supplementary Figure 2. Candidate-setting searches and
+\caption{\textbf{Supplementary Fig. 2. Candidate-setting searches and
 target-validation selection.}
 \textbf{(a)} Experimental validation MAE values for hot-encoder source
 comparisons.
@@ -452,20 +413,20 @@ panels a--c.}
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth]{supp_fig03_model_controls}
-\caption{\textbf{Supplementary Figure 3. Model and source-combination controls.}
+\caption{\textbf{Supplementary Fig. 3. Model and source-combination controls.}
 \textbf{(a)} Frozen-encoder and hot-encoder comparisons for selected
 source labels.
 \textbf{(b)} Hot-encoder FEP source-head controls.
 \textbf{(c)} Frozen-encoder FEP source-head controls.
 \textbf{(d)} Source-combination controls comparing Tm-only, FEP-only,
-MD-Q-only, and combined-source settings.}
+MD Q-value-only, and combined-source settings.}
 \label{fig:supp_model_controls}
 \end{figure}
 
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth]{supp_fig04_scaling_and_size_controls}
-\caption{\textbf{Supplementary Figure 4. Scaling, encoder-size, and MD-window
+\caption{\textbf{Supplementary Fig. 4. Scaling, encoder-size, and MD-window
 controls.}
 \textbf{(a)} Label-count curves for experimental Tm labels, FEP labels, and MD
 Q-value labels.
@@ -479,7 +440,7 @@ separately for each label count on the experimental validation split.
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth]{supp_fig05_md_feature_controls}
-\caption{\textbf{Supplementary Figure 5. MD feature and architecture controls.}
+\caption{\textbf{Supplementary Fig. 5. MD feature and architecture controls.}
 \textbf{(a)} Experimental validation MAE values for alternative MD-derived
 features.
 \textbf{(b)} Held-out test MAE values for selected architecture and shuffled

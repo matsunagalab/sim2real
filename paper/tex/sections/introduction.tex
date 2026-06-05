@@ -50,20 +50,18 @@ useful protein representations from large sequence corpora
 deep sequence representations to predict protein or nanobody melting
 temperatures \citep{Blaabjerg2023Rapid,Li2023DeepTM,Alvarez2024TEMPRO}.
 High-throughput stability measurements are also changing the data landscape.
-Tsuboyama et al. introduced a cDNA-display proteolysis assay and used it to
-produce a mega-scale folding-stability dataset with approximately 776,000
-high-quality measurements from natural and designed protein domains
-\citep{Tsuboyama2023MegaScale}. That advance shows that experimental $\Delta G$
-can now be measured at unprecedented scale for suitable small domains. However,
-the curated measurements span 40--72 amino-acid domains, whereas nanobody VHH
+Tsuboyama et al. used cDNA-display proteolysis to generate approximately
+776,000 folding-stability measurements for natural and designed protein domains
+\citep{Tsuboyama2023MegaScale}. This advance shows that experimental
+$\Delta G$ can be measured at unprecedented scale for suitable small domains,
+but it does not yet solve the data problem for full-length nanobody VHH domains:
+the curated mega-scale domains span 40--72 amino acids, whereas nanobody VHH
 domains are typically much longer, and comparable high-throughput $\Delta G$
-measurements are not yet available for full-length nanobody VHH domains. A
-model fine-tuned on the mega-scale dataset also showed limited transfer to
-larger protein scaffolds: although it performed well on small protein domains,
-benchmarks on 177--501-residue proteins were substantially weaker than
-structure-based methods \citep{Chu2024EsmTherm}.
-Thus, large-scale $\Delta G$ data are powerful but do not remove the need for
-target-specific supervision and careful validation in nanobody Tm prediction
+measurements are not yet available for such scaffolds. Moreover, a model
+fine-tuned on the mega-scale dataset transferred less well to 177--501-residue
+proteins than to small domains \citep{Chu2024EsmTherm}. Large experimental
+stability resources are therefore powerful, but target-specific supervision and
+careful validation remain essential for nanobody Tm prediction
 \citep{ValdesTresanco2023NbThermo,Zhang2025NbBench,Schmirler2024FineTuning}.
 
 \subsection*{Study design and main finding}
@@ -85,13 +83,13 @@ experimental Tm test set with paired error comparisons. This design prevents
 high performance on a computational task from being mistaken for improved Tm
 prediction.
 
-The main result is that the benefit of simulation-derived supervision is highly
-source-dependent. Mutation free-energy labels from FEP provide the strongest
+The main result is that the benefit of simulation-derived supervision is
+source-dependent. Mutation free-energy labels from FEP provide the clearest
 improvement over training on Tm labels alone, whereas the MD-derived Q-value
-does not improve held-out Tm prediction under the same evaluation
-design. Rosetta-scored ESM2 proposal sets provide a weaker exploratory signal,
+does not improve held-out Tm prediction under the same evaluation design.
+Rosetta-scored ESM2 proposal sets provide a weaker exploratory signal,
 suggesting a possible connection to future generator--physics--predictor design
-loops, but not yet demonstrating closed-loop sequence optimization.
+loops without demonstrating closed-loop sequence optimization.
 Taken together, these results extend the Sim2Real argument from materials
 informatics to a biomolecular setting in which the source and target labels
 differ in physical meaning. Useful simulation data are not merely abundant; they

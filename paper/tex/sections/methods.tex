@@ -21,14 +21,15 @@ Experimental Tm labels were taken from a public nanobody benchmark data set,
 NbBench, which provides a thermo-seq task with predefined splits
 \citep{Zhang2025NbBench}.
 The processed files used in this study contained 57 training sequences, 114
-validation sequences, and 396 test sequences. The terms were used as follows.
-The training split was used to fit model parameters. The validation split was
-used for checkpoint selection, early stopping, and hyperparameter selection. The
-test split was held out until the selected settings were fixed and was used only
-for final reporting. This definition applies to both Tm-only models and
-multi-task transfer models.
+validation sequences, and 396 test sequences.
 
-The target CSV files contained an amino-acid sequence column and a Tm label in
+\textbf{Split definitions.} The training split was used to fit model parameters. The validation split was used
+for checkpoint selection, early stopping, and hyperparameter selection. The test
+split was held out until the selected settings were fixed and was used only for
+final reporting. This definition applies to both Tm-only models and multi-task
+transfer models.
+
+\textbf{Target-label scaling.} The target CSV files contained an amino-acid sequence column and a Tm label in
 degrees Celsius. During training, Tm labels were transformed to a scaled
 regression target. The scaler was fit only on the 57 training labels, using a
 robust scaling step followed by min--max scaling to [0,1]. The fitted scaler was
@@ -37,7 +38,7 @@ predictions were inverse-transformed back to degrees Celsius before computing
 errors. The validation and test label distributions were therefore not used to
 fit the target-label scaling transform.
 
-For the experimental-label scaling reference, the Tm training split was
+\textbf{Experimental-label scaling reference.} For the experimental-label scaling reference, the Tm training split was
 subsampled to the requested number of labels using the run seed. The validation
 and test splits were not subsampled. These experiments provide a target-label
 reference for interpreting whether computational source-label scaling behaves in
@@ -46,7 +47,9 @@ the expected direction.
 \subsection*{Computational source-label data sets}
 
 Computational labels were represented as source tasks rather than as additional
-Tm measurements. The source-label collection comprised mutation free-energy
+Tm measurements.
+
+\textbf{Source-label classes.} The source-label collection comprised mutation free-energy
 changes from alchemical free-energy perturbation (FEP), structure-based
 mutation-effect scores from Rosetta, learned mutation-effect scores from
 ThermoMPNN, Rosetta scores assigned to ESM2-proposed and random variants, and a
@@ -55,7 +58,7 @@ persistence. All source labels were
 preprocessed to [0,1]-scaled regression targets and were used only through
 their own source-task heads.
 
-Mutation-effect sources were organized as two template-specific tables derived
+\textbf{Processed source-table sizes.} Mutation-effect sources were organized as two template-specific tables derived
 from the 1MEL and 4IDL nanobody structures. FEP, Rosetta, and ThermoMPNN each
 contained 435 and 409 processed rows for the two templates. Variants proposed
 by ESM2 and random variants scored by Rosetta each contained 1000 and 1000
@@ -64,7 +67,7 @@ panel of simulated single-domain antibody structures selected from SAbDab, the
 Structural Antibody Database \citep{Dunbar2014SAbDab}. The processed MD table
 contained 1143 analysis-ready rows. Row counts exclude headers.
 
-We checked exact sequence overlap between source-label tables and the NbBench
+\textbf{Sequence-overlap check.} We checked exact sequence overlap between source-label tables and the NbBench
 splits. The mutation-effect source tables and Rosetta-scored variant source
 tables with explicit sequence columns had no exact overlap with the NbBench
 training, validation, or test sequences. The SAbDab-derived MD table contained
@@ -73,7 +76,7 @@ sequences; because the MD Q-value source did not improve final Tm prediction,
 this overlap does not support the positive FEP result but is reported for
 transparency.
 
-For a mutation-effect experiment with requested source-label count $n$, up to
+\textbf{Source-label sampling.} For a mutation-effect experiment with requested source-label count $n$, up to
 $n$ rows were sampled independently from each of the two template-specific
 source tables using the run seed. The two template-specific tables were assigned
 separate task identifiers. For an MD-derived Q-value experiment with requested
@@ -191,9 +194,9 @@ mutation-effect source tasks.
 
 All models used an ESM2 protein language-model encoder \citep{Lin2023Evolutionary}
 followed by lightweight regression heads. Unless otherwise stated, the encoder
-was \texttt{\detokenize{facebook/esm2_t6_8M_UR50D}}. Sequences were tokenized
-with truncation and padding to a maximum length of 160 residues. The first-token
-encoder representation was passed to a shared multilayer perceptron with hidden
+was the 8M-parameter ESM2 model. Sequences were tokenized with truncation and
+padding to a maximum length of 160 residues. The first-token encoder
+representation was passed to a shared multilayer perceptron with hidden
 dimensions 256, 128, and 32, ReLU activations, and dropout. A scalar Tm head
 predicted the scaled target Tm label. In source-transfer models, additional
 scalar source heads predicted the source-task labels from the same shared
@@ -303,17 +306,18 @@ candidate-minus-reference MAE difference was then computed for each bootstrap
 sample. This paired bootstrap preserves the matched-test-example structure of
 the comparison. In figures and result tables, $\Delta$MAE is candidate minus
 reference, so negative values indicate lower error than the reference. The
-one-sided tail probability stored in the result JSON is the fraction of paired
-bootstrap samples in which candidate-minus-reference $\Delta$MAE is greater
-than zero. The manuscript emphasizes effect sizes and 90\% confidence intervals.
+one-sided tail probability computed by the evaluation code is the fraction of
+paired bootstrap samples in which candidate-minus-reference $\Delta$MAE is
+greater than zero. The manuscript emphasizes effect sizes and 90\% confidence
+intervals.
 
 \subsection*{Implementation details}
 
-The training and evaluation pipeline is implemented in
-\texttt{\detokenize{prepare.py}} and \texttt{\detokenize{train.py}}. The data
-loader constructs target and source tasks, applies target-label scaling,
-performs seeded source-label sampling, filters validation data for target-task
-checkpoint selection, evaluates seed ensembles, and writes bootstrap statistics.
-Each result directory contains a machine-readable \texttt{\detokenize{scaling.json}}
-file with command-line arguments, resolved hyperparameters, per-point metrics,
-bootstrap intervals, and paired comparisons.
+The training and evaluation pipeline constructs target and source tasks, applies
+target-label scaling, performs seeded source-label sampling, filters validation
+data for target-task checkpoint selection, evaluates seed ensembles, and writes
+bootstrap statistics. Each run writes a machine-readable summary containing the
+command-line arguments, resolved model settings, per-point metrics, bootstrap
+intervals, and paired comparisons. These summaries are the direct inputs to the
+figure-generation workflow and will be archived with the processed data for
+reproducibility.

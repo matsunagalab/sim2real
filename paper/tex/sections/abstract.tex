@@ -2,27 +2,26 @@
 
 %TC:break Abstract
 \begin{abstract}
-Nanobody development often depends on thermal stability, but experimental
-melting-temperature (Tm) measurements remain scarce. Simulations and
-structure-based calculations can annotate many sequence variants, yet their
-labels usually describe related physical quantities rather than Tm itself. We
-asked whether such computational labels can improve low-data nanobody Tm
-prediction when every model choice is anchored to experimental Tm validation.
-Using a public nanobody Tm benchmark, we trained transfer-learning models that
-combined Tm prediction with one computational source task at a time. The source
-labels covered mutation free energies, structure-based scores, protein-language
-model proposal sets scored by Rosetta, and molecular-dynamics trajectory
+Thermal stability is a key constraint in nanobody development, but experimental
+melting-temperature (Tm) measurements are often sparse. Computational methods
+can label many more sequence variants, although they usually report quantities
+related to Tm rather than Tm itself. We tested whether such labels can improve
+low-data nanobody Tm prediction when model selection is based only on
+experimental Tm validation. Using a public benchmark with 57 training, 114
+validation, and 396 held-out test sequences, we trained multi-task transfer
+models in which the Tm predictor shared a protein-language-model sequence
+representation with one computational source task at a time. The source labels
+included mutation free energies, structure-based mutation scores, Rosetta scores
+for protein-language-model proposal sets, and molecular-dynamics trajectory
 summaries. Alchemical free-energy perturbation (FEP) gave the clearest benefit:
-held-out Tm mean absolute error decreased from 6.61 to 6.26$^\circ$C relative
-to training only on experimental Tm labels, with a paired improvement of
-0.35$^\circ$C (90\% confidence interval, 0.24--0.46$^\circ$C). The gain was not
-reproduced by increasing the ESM2 encoder size or by using the MD-derived
-Q-value. Rosetta-scored proposal sets were feasible as supervised source labels,
-but the direct advantage of ESM2-proposed variants over random variants remained
-exploratory.
-Thus, computational labels can improve nanobody Tm prediction when their
-physical meaning transfers to the experimental endpoint; mutation free energies
-complement sparse absolute Tm measurements.
+held-out Tm mean absolute error decreased from 6.61 to 6.26$^\circ$C compared
+with training only on experimental Tm labels, a small but consistent paired
+improvement of 0.35$^\circ$C (90\% confidence interval, 0.24--0.46$^\circ$C).
+The same gain was not reproduced by increasing the ESM2 encoder size or by using
+an MD-derived Q-value. Rosetta-scored proposal sets could be used as source
+labels, but their advantage over random variants remained exploratory. These
+results support the use of computational labels for nanobody Tm prediction when
+their physical meaning transfers to the experimental endpoint.
 \end{abstract}
 %TC:break main
 

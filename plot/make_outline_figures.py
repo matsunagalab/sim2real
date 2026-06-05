@@ -344,6 +344,8 @@ def save_figure(fig, stem: str) -> None:
                 fig.savefig(path, bbox_inches="tight", dpi=600)
             else:
                 fig.savefig(path, bbox_inches="tight")
+            if ext == "svg":
+                path.write_text("\n".join(line.rstrip() for line in path.read_text().splitlines()) + "\n")
     plt.close(fig)
     print(f"wrote {PLOT_DIR / (stem + '.pdf')}")
 
@@ -353,7 +355,7 @@ def horizontal_interval(ax, y, mid, lo, hi, color, marker="o", label=None, zorde
     ax.scatter([mid], [y], s=34, color=color, edgecolor="white", linewidth=0.6, zorder=zorder + 1, marker=marker, label=label)
 
 
-def scaling_errorbar(ax, data: pd.DataFrame, color: str, label: str) -> None:
+def scaling_errorbar(ax, data: pd.DataFrame, color: str, label: str, marker: str = "o") -> None:
     y = data["mae"].to_numpy(float)
     yerr = np.vstack(
         [
@@ -365,20 +367,20 @@ def scaling_errorbar(ax, data: pd.DataFrame, color: str, label: str) -> None:
         data["x"],
         y,
         yerr=yerr,
-        fmt="o-",
+        fmt=f"{marker}-",
         color=color,
         ecolor=color,
-        elinewidth=0.65,
-        capsize=2.0,
-        capthick=0.65,
-        alpha=0.28,
+        elinewidth=0.9,
+        capsize=0.0,
+        capthick=0.0,
+        alpha=0.24,
         markerfacecolor=color,
         markeredgecolor="white",
         markeredgewidth=0.5,
         label="_nolegend_",
         zorder=2,
     )
-    ax.plot(data["x"], y, marker="o", color=color, label=label, zorder=4)
+    ax.plot(data["x"], y, marker=marker, color=color, label=label, zorder=4)
 
 
 def ecdf_xy(values: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -450,51 +452,71 @@ def fig01_concept_protocol(rows: pd.DataFrame) -> None:
 
 def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(7.4, 6.2), constrained_layout=True)
+    scaling_ylim = (5.75, 7.90)
+    scaling_yticks = [6.0, 6.5, 7.0, 7.5]
+    x_ticks = [10, 20, 40, 80, 160, 320, 640]
+
+    tm_scale = load_scaling(SCALING_CURVES["Tm-only labels"]["path"])
+    baseline = rows.loc[rows["source"].astype(str) == "Tm_only"].iloc[0]["test_mae"]
+    fep_scale = load_scaling(SCALING_CURVES["FEP mutation-effect labels"]["path"])
+    md_scale = load_scaling(SCALING_CURVES["MD Q-value labels"]["path"])
+    curves = [
+        ("Tm labels only", tm_scale, COL["baseline"], "s"),
+        ("mutation free energy", fep_scale, COL["fep"], "o"),
+        ("MD Q-value", md_scale, COL["mdq"], "o"),
+    ]
 
     ax = axes[0, 0]
-    tm_scale = load_scaling(SCALING_CURVES["Tm-only labels"]["path"])
-    ax.fill_between(tm_scale["x"], tm_scale["ci_lo"], tm_scale["ci_hi"], color=COL["baseline"], alpha=0.10, lw=0)
-    ax.plot(tm_scale["x"], tm_scale["mae"], marker="o", color=COL["baseline"], label="Tm labels only")
-    ax.set_xlabel("experimental Tm labels")
+    for label, curve, color, marker in curves:
+        scaling_errorbar(ax, curve, color, label, marker=marker)
+    ax.set_xscale("log")
+    ax.set_xticks(x_ticks)
+    ax.set_xticklabels([str(x) for x in x_ticks])
+    ax.set_xlabel("labels used")
     ax.set_ylabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(8, 60)
-    ax.set_xticks([10, 20, 30, 40, 57])
-    ax.set_xticklabels(["10", "20", "30", "40", "57"])
-    ax.set_ylim(6.35, 7.85)
+    ax.set_xlim(8, 760)
+    ax.set_ylim(*scaling_ylim)
+    ax.set_yticks(scaling_yticks)
+    ax.legend(frameon=False, loc="upper right", handlelength=1.8)
     polish(ax, "both")
     panel_label(ax, "A")
 
     ax = axes[0, 1]
-    baseline = rows.loc[rows["source"].astype(str) == "Tm_only"].iloc[0]["test_mae"]
-    fep_scale = load_scaling(SCALING_CURVES["FEP mutation-effect labels"]["path"])
     ax.axhline(baseline, color=COL["baseline"], linestyle="--", linewidth=1.1, label="Tm labels only")
     scaling_errorbar(ax, fep_scale, COL["fep"], "mutation free energy")
+    scaling_errorbar(ax, md_scale, COL["mdq"], "MD Q-value")
     best_idx = int(fep_scale["mae"].argmin())
     ax.scatter([fep_scale.loc[best_idx, "x"]], [fep_scale.loc[best_idx, "mae"]], s=54, color=COL["fep"], edgecolor="white", zorder=5)
-    ax.text(0.96, 0.10, "best at largest\nlabel setting", transform=ax.transAxes, ha="right", va="bottom", fontsize=7.2, color=COL["fep"])
+    ax.text(0.96, 0.08, "best at largest\nlabel setting", transform=ax.transAxes, ha="right", va="bottom", fontsize=7.0, color=COL["fep"])
     ax.set_xscale("log")
-    ax.set_xticks([10, 40, 80, 160, 320])
-    ax.set_xticklabels(["10", "40", "80", "160", "320"])
-    ax.set_xlabel("mutation free-energy labels used")
+    ax.set_xticks(x_ticks)
+    ax.set_xticklabels([str(x) for x in x_ticks])
+    ax.set_xlabel("computed labels used")
     ax.set_ylabel("held-out Tm test MAE (deg C)")
-    ax.set_ylim(5.75, 7.18)
-    ax.legend(frameon=False, loc="upper left")
+    ax.set_xlim(8, 760)
+    ax.set_ylim(*scaling_ylim)
+    ax.set_yticks(scaling_yticks)
+    ax.legend(frameon=False, loc="upper right", handlelength=1.8)
     polish(ax, "both")
     panel_label(ax, "B")
 
     ax = axes[1, 0]
-    md_scale = load_scaling(SCALING_CURVES["MD Q-value labels"]["path"])
-    ax.axhline(baseline, color=COL["baseline"], linestyle="--", linewidth=1.1, label="Tm labels only")
-    scaling_errorbar(ax, md_scale, COL["mdq"], "MD Q-value")
-    best_idx = int(md_scale["mae"].argmin())
-    ax.scatter([md_scale.loc[best_idx, "x"]], [md_scale.loc[best_idx, "mae"]], s=54, color=COL["mdq"], edgecolor="white", zorder=5)
+    for label, curve, color, marker in curves:
+        delta = curve.copy()
+        delta["mae"] = delta["mae"] - baseline
+        delta["ci_lo"] = delta["ci_lo"] - baseline
+        delta["ci_hi"] = delta["ci_hi"] - baseline
+        scaling_errorbar(ax, delta, color, label, marker=marker)
+    ax.axhline(0, color=COL["black"], linewidth=0.9)
     ax.set_xscale("log")
-    ax.set_xticks([10, 40, 80, 160, 320, 640])
-    ax.set_xticklabels(["10", "40", "80", "160", "320", "640"])
-    ax.set_xlabel("MD Q-value labels used")
-    ax.set_ylabel("held-out Tm test MAE (deg C)")
-    ax.set_ylim(6.10, 7.45)
-    ax.legend(frameon=False, loc="upper right")
+    ax.set_xticks(x_ticks)
+    ax.set_xticklabels([str(x) for x in x_ticks])
+    ax.set_xlabel("labels used")
+    ax.set_ylabel("MAE change vs Tm labels only (deg C)")
+    ax.set_xlim(8, 760)
+    ax.set_ylim(-0.95, 1.35)
+    ax.set_yticks([-0.5, 0.0, 0.5, 1.0])
+    ax.legend(frameon=False, loc="upper right", handlelength=1.8)
     polish(ax, "both")
     panel_label(ax, "C")
 
@@ -653,12 +675,12 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
     fig, axes = plt.subplots(
         2,
         2,
-        figsize=(7.4, 4.9),
+        figsize=(7.4, 5.35),
         constrained_layout=True,
         gridspec_kw={"height_ratios": [1.0, 0.68]},
     )
     row_lookup = rows.set_index(rows["source"].astype(str))
-    design_sources = ["Tm_only", "rosetta_esm", "thermoMPNN", "rosetta_random", "rosetta"]
+    design_sources = ["Tm_only", "FEP", "rosetta_esm", "thermoMPNN", "rosetta_random", "rosetta"]
 
     ax = axes[0, 0]
     ordered = row_lookup.loc[design_sources].reset_index(drop=True)
@@ -678,7 +700,7 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_yticklabels(ordered["label_plot"])
     ax.invert_yaxis()
     ax.set_xlabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(6.25, 6.95)
+    ax.set_xlim(5.72, 7.05)
     polish(ax, "x")
     panel_label(ax, "A")
 
@@ -694,7 +716,7 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_yticklabels([SOURCE_LABEL[s] for s in delta_sources])
     ax.invert_yaxis()
     ax.set_xlabel("MAE change vs Tm labels only (deg C)")
-    ax.set_xlim(-0.36, 0.14)
+    ax.set_xlim(-0.55, 0.15)
     polish(ax, "x")
     panel_label(ax, "B")
 
@@ -707,7 +729,7 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_yticks([0])
     ax.set_yticklabels(["ESM2-proposed\nminus random"])
     ax.set_xlabel("ESM2-proposed minus random MAE (deg C)")
-    ax.set_xlim(-0.25, 0.16)
+    ax.set_xlim(-0.30, 0.20)
     ax.set_ylim(-0.55, 0.55)
     ax.text(mean, -0.22, f"{mean:+.2f}", ha="center", va="top", fontsize=7.3, color=COL["design"])
     ax.text(

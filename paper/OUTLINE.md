@@ -50,16 +50,17 @@ Student ORCID IDs are not treated as required placeholders unless the authors al
 
 Preferred:
 
-**Simulation-informed transfer learning improves low-data nanobody thermal stability prediction**
+**Mutation free-energy labels improve low-data nanobody thermal stability prediction**
 
 Alternatives:
 
 - **Learning from simulation data for experimental protein-property prediction**
-- **Mutation free-energy labels improve low-data nanobody thermal stability prediction**
 - **Multi-task transfer learning from computational stability labels for nanobody melting-temperature prediction**
 - **Free-energy-guided transfer of simulation labels to nanobody thermal stability prediction**
+- **Simulation-informed transfer learning improves low-data nanobody thermal stability prediction**
 
-The preferred title is broad enough for CSBJ while keeping the main technical contribution clear. Avoid title wording that implies generic simulation data always helps.
+The preferred title foregrounds the tested contribution rather than implying
+that generic simulation data always improves experimental prediction.
 
 ## Central Message
 
@@ -397,9 +398,9 @@ Main claim:
 
 The amount of source-label data matters, but data quantity alone does not explain improvement; label type matters.
 
-#### Result 3: Final selected-setting comparison identifies FEP as the strongest source label
+#### Result 3: All-atom simulation labels differ in their transfer to Tm prediction
 
-Figure: Fig. 3a,b.
+Figure: Fig. 3.
 
 Key numbers:
 
@@ -407,19 +408,26 @@ Key numbers:
 |---|---:|---:|---:|
 | Tm-only | 6.6145 | - | - |
 | FEP | 6.2611 | -0.3530 | [-0.4621, -0.2426] |
-| ESM2-proposed variants scored by Rosetta | 6.4484 | -0.1652 | [-0.3058, -0.0250] |
-| ThermoMPNN | 6.4607 | -0.1525 | [-0.2958, -0.0067] |
-| Random variants scored by Rosetta | 6.5130 | -0.0998 | [-0.2248, +0.0259] |
-| Rosetta | 6.5255 | -0.0880 | [-0.2008, +0.0247] |
 | MD-derived Q-value | 6.7304 | +0.1172 | [+0.0120, +0.2235] |
+
+Key points:
+
+- Fig. 3 should focus on all-atom simulation labels: FEP mutation free-energy
+  labels and the MD-derived Q-value.
+- FEP gives a small but consistent paired improvement over Tm-only learning.
+- The MD-derived Q-value does not improve the held-out Tm endpoint.
+- Frozen-encoder and hot-encoder controls indicate that FEP retains some benefit
+  with fixed embeddings, but the best absolute result requires encoder
+  adaptation.
 
 Main claim:
 
-FEP-derived mutation free-energy labels give the strongest and most statistically stable improvement over Tm-only learning.
+Among the all-atom simulation labels tested here, mutation free-energy labels
+transfer to Tm prediction while the tested Q-value descriptor does not.
 
 #### Result 4: The gain is not explained by simply using a larger encoder
 
-Figure: Fig. 3c,f.
+Figure: Supplementary Fig. 4 and the corresponding Results paragraph.
 
 Key points:
 
@@ -432,23 +440,31 @@ Main claim:
 
 The result supports physics-informed source-label supervision rather than model-size scaling as the primary driver in this regime.
 
-#### Result 5: The source-label signal is strongest when the encoder can adapt, but it is not entirely dependent on encoder updating
+#### Result 5: Structure-based labels and proposal-set scores are weaker source signals
 
-Figure: Fig. 3e.
+Figure: Fig. 4.
 
 Key points:
 
-- FEP improves both hot-encoder and frozen-encoder settings.
-- The hot-encoder setting gives the best absolute performance.
-- Rosetta mutation scores and the MD-derived Q-value remain weaker than FEP.
+- Rosetta mutation scores, ThermoMPNN stability scores, and Rosetta scores on
+  proposal/control variants are compared outside the all-atom FEP-versus-MD
+  figure.
+- FEP should also be included in Fig. 4 as a comparator, so readers can see the
+  weaker structure-based source signals relative to the main positive source.
+- ESM2-proposed variants scored by Rosetta improve over Tm-only learning, but
+  their direct advantage over random variants scored by Rosetta is exploratory.
+- These source labels are useful as context and future direction, but they are
+  not the main quantitative claim.
 
 Main claim:
 
-FEP contributes useful information to the representation, and limited encoder adaptation helps exploit it.
+Non-FEP structure-based labels provide weaker source signals; the proposal-set
+result motivates future generator--physics--predictor workflows without
+claiming closed-loop optimization.
 
 #### Result 6: Physics-labeled sequence proposals provide a design-loop bridge
 
-Figure: Fig. 3a,b and Discussion.
+Figure: Fig. 4c,d and Discussion.
 
 Key numbers:
 
@@ -459,11 +475,15 @@ Key numbers:
 
 Main claim:
 
-Rosetta scores assigned to ESM2-proposed variants improve over Tm-only training, but their superiority over random variants scored by Rosetta is not conclusive. This should be framed as a route toward future generator-physics-predictor design loops, not as proof that the sequence proposals are optimized.
+Rosetta scores assigned to ESM2-proposed variants improve over Tm-only
+training, but their superiority over random variants scored by Rosetta is not
+conclusive. This should be framed as a route toward future
+generator--physics--predictor design loops, not as evidence that the sequence
+proposals are already optimized.
 
 #### Result 7: Mutation free-energy labels complement sparse absolute Tm anchors
 
-Figure: Fig. 4.
+Figure: Discussion-level interpretation, supported by Figs. 2 and 3.
 
 Key points:
 
@@ -552,9 +572,11 @@ Purpose: show scaling behavior and motivate final source comparison.
 
 Panels:
 
-- (a) Experimental Tm-label scaling.
-- (b) FEP-label scaling.
-- (c) MD-derived Q-value label-count control.
+- (a) Experimental Tm-label, FEP-label, and MD-derived Q-value scaling curves
+  plotted together.
+- (b) Computed-label scaling for FEP and the MD-derived Q-value, with the
+  Tm-label-only reference shown as a dashed line.
+- (c) MAE change relative to the Tm-label-only reference.
 - (d) Best points from label-count sweeps.
 
 Claims:
@@ -564,42 +586,48 @@ Claims:
 - The MD-derived Q-value does not reproduce the FEP benefit.
 - Avoid claiming a strict monotonic law.
 
-### Fig. 3. Final held-out Tm performance across source labels and controls
+### Fig. 3. All-atom simulation labels differ in their transfer to Tm prediction
 
-Purpose: central quantitative result.
-
-Panels:
-
-- (a) Final test MAE with confidence intervals.
-- (b) Paired ΔMAE versus Tm-only.
-- (c) ESM2 size controls.
-- (d) Validation-set performance versus held-out test performance.
-- (e) Frozen versus hot encoder comparison.
-- (f) FEP gain across ESM2 sizes.
-
-Claims:
-
-- FEP is the strongest source label.
-- Rosetta scores assigned to ESM2-proposed variants are positive but weaker.
-- Larger ESM2 encoders do not improve this low-data regime.
-- Encoder fine-tuning improves absolute performance.
-
-### Fig. 4. Interpretation: absolute Tm anchors and mutation free-energy directions
-
-Purpose: interpret why FEP labels transfer while the MD-derived Q-value label does not.
+Purpose: central all-atom simulation comparison.
 
 Panels:
 
-- (a) Sparse absolute Tm anchors and local mutation-effect directions.
-- (b) FEP versus MD-derived Q-value performance contrast.
-- (c) Boundary condition for structural-dynamics labels.
-- (d) Take-home model: useful source labels encode transferable stability-change information.
+- (a) Final test MAE for Tm-only learning, FEP mutation free-energy labels, and
+  the MD-derived Q-value.
+- (b) Paired ΔMAE and per-example error changes versus Tm-only learning.
+- (c) Frozen versus hot encoder comparison for the same all-atom source labels.
+- (d) Cumulative distributions of held-out absolute errors.
 
 Claims:
 
-- Tm and mutation free energy are different observations of stability.
-- FEP labels help because they encode local mutation effects.
-- Generic simulation augmentation is not sufficient.
+- FEP is the clearest all-atom source label.
+- The tested MD-derived Q-value does not transfer to the held-out Tm endpoint.
+- Encoder adaptation improves absolute performance, although FEP retains a
+  smaller benefit in the frozen-encoder control.
+
+### Fig. 4. Structure-based labels and language-model-proposed variants
+
+Purpose: show non-FEP/non-MD source-label comparisons and the design-loop
+perspective.
+
+Panels:
+
+- (a) Final test MAE for Tm-only learning, FEP mutation free-energy labels,
+  Rosetta mutation scores, ThermoMPNN stability scores, random variants scored
+  by Rosetta, and ESM2-proposed variants scored by Rosetta.
+- (b) Paired ΔMAE versus Tm-only learning.
+- (c) Direct paired comparison between ESM2-proposed variants scored by Rosetta
+  and random variants scored by Rosetta.
+- (d) Perspective panel for future generator--physics--predictor loops.
+
+Claims:
+
+- Rosetta and ThermoMPNN source labels are weaker than FEP when plotted on the
+  same axis.
+- ESM2-proposed variants scored by Rosetta provide a useful supervised source
+  signal, but superiority over random variants remains unresolved.
+- The result motivates future closed-loop design, while the present paper tests
+  only supervised learning from scored proposal sets.
 
 ## Supplementary Material Plan
 
@@ -652,7 +680,7 @@ Additional paired comparison:
 
 - 2026-05-30: Initial MD-centered story was weakened after controlled comparison.
 - 2026-05-31: FEP mutation-effect labels identified as the robust main result.
-- 2026-05-31: Generated-variant result positioned as a bridge toward future design loops, not proof of optimized design.
+- 2026-05-31: ESM2-proposed-variant result positioned as a bridge toward future design loops, not evidence of optimized sequence design.
 - 2026-05-31: MD-derived Q-value positioned as a boundary condition showing that not all simulation-derived labels help.
 - 2026-05-31: Story reframed so the opening is about how to incorporate computational labels into Tm prediction; the Tm/ΔΔG relation is moved to the final interpretation.
 - 2026-06-01: Submission target fixed to CSBJ General section as a compact Research Article.
@@ -664,7 +692,7 @@ Additional paired comparison:
 - [ ] Present source-label training before discussing the Tm/ΔΔG relationship.
 - [ ] Keep FEP as the main quantitative result.
 - [ ] Use the MD-derived Q-value result to show source dependence.
-- [ ] Treat ESM2-proposed-vs-random results as a design-loop bridge, not as proof of optimized design.
+- [ ] Treat ESM2-proposed-vs-random results as a design-loop bridge, not as evidence of optimized sequence design.
 - [ ] Place the Tm/ΔΔG conceptual interpretation near the end of Results or in Discussion.
 - [ ] Add CSBJ-required statements: funding, author contributions, competing interests, data availability, code availability, and AI-use disclosure.
 - [ ] Convert figure panel labels to `(a)`, `(b)`, `(c)` style.
