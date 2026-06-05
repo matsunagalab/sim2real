@@ -4,126 +4,92 @@
 
 \subsection*{Source-label transfer is selective}
 
-This study asked how simulation-derived labels should be used when the
-experimental target is scarce and the simulated quantity is related to, but not
-identical with, that target. Using nanobody Tm prediction as a case study, we
-found that FEP mutation free-energy labels produced a small but consistent
-improvement in held-out experimental Tm prediction. The same improvement was not
-reproduced by the MD-derived Q-value descriptor tested here, nor was it
-explained by using a larger ESM2 encoder. These findings support a selective
-view of Sim2Real learning for biomolecules: simulation data are useful when the
-source label encodes physical information that transfers to the experimental
-phenotype under target-centered validation.
+We asked how simulation-derived labels should be used when the experimental
+target is scarce and the simulated quantity is related to, but not the same as,
+that target. In nanobody Tm prediction, FEP mutation free-energy labels gave a
+modest but consistent improvement in held-out Tm prediction, while an MD-derived
+Q-value did not, and a larger ESM2 encoder did not reproduce the FEP gain either.
+The picture is selective: simulation data help when the source label encodes
+physical information that transfers to the experimental phenotype under
+target-centered validation.
 
-\subsection*{Mutation free-energy labels connect relative and absolute stability}
+\subsection*{Why mutation free energies transfer}
 
-The helpful source label did not measure Tm itself. FEP estimates mutation
-free-energy changes, whereas Tm is an experimental phenotype reflecting the
-temperature at which folded and unfolded states are balanced under a particular
-assay condition. These are not interchangeable quantities. Nevertheless, both
-describe the same underlying stability landscape from different perspectives.
-Sparse Tm measurements anchor absolute thermal-stability values for observed
-sequences, while mutation free-energy labels provide local directions in
-sequence space. The FEP improvement therefore suggests that source labels can
-help even when they are not direct surrogates for the target, provided that they
-describe a physically relevant perturbation of the target property.
+The label that helped did not measure Tm. FEP estimates how a mutation changes
+free energy, whereas Tm is the temperature at which the folded and unfolded
+states balance under a given assay. These are not interchangeable quantities. Yet
+they describe the same stability landscape from different angles: sparse Tm
+measurements pin absolute stability for the sequences we observe, and mutation
+free energies supply local directions in sequence space. The FEP result suggests
+that a source label need not be a direct surrogate for the target, as long as it
+describes a physically relevant perturbation of the target property.
 
-\subsection*{Scaling behavior depends on the source label}
+\subsection*{What the controls rule out}
 
-These results extend the materials-informatics Sim2Real argument to a more
-heterogeneous biomolecular setting. In materials applications, transfer learning
-often links computational and experimental estimates of related material
-properties, and scaling behavior can quantify the downstream value of a growing
-computational database \citep{Minami2025Scaling}. In the present protein case,
-the most useful computational labels were not additional Tm measurements but
-mutation free energies. The label-count sweep for FEP was consistent with a
-benefit at the largest tested setting, but it was not smooth enough to claim a
-universal biomolecular scaling law. The stronger conclusion is source
-dependence: simulation-derived data should be evaluated by target-task
-performance, and source labels must be chosen for transferable physical content
-rather than availability alone.
+Three controls sharpen this reading. First, the FEP label-count sweep was
+consistent with a benefit at the largest setting but was not smooth enough to
+claim a biomolecular scaling law; the firmer conclusion is source dependence.
+This both echoes and complicates the materials-informatics case, where the
+transferred error scales with the size of a related computational database
+\citep{Minami2025Scaling}: in our protein setting, the useful labels were not
+extra Tm measurements but mutation free energies. Second, model size was not the
+lever. The 35M and 650M ESM2 encoders did not beat the 8M encoder in either the
+Tm-only or FEP settings, and the best model paired the 8M encoder with FEP labels,
+in line with the broader finding that fine-tuning rather than raw capacity drives
+PLM-based protein-property prediction \citep{Schmirler2024FineTuning}. Third, the
+frozen-encoder experiment locates the signal: FEP labels helped even with a fixed
+representation, but the best FEP model required updating the encoder. The labels
+work best when allowed to reshape the representation toward stability-relevant
+directions while still being selected on experimental Tm, which favors controlled
+encoder adaptation over either frozen feature extraction or unconstrained
+source-task optimization.
 
-\subsection*{Model-size controls}
-
-The encoder controls sharpen this conclusion. Prior work on PLMs has shown that
-fine-tuning can be critical for downstream protein-property prediction
-\citep{Schmirler2024FineTuning}, and related nanobody Tm analyses suggest that
-larger pretrained ESM2 models do not automatically produce better Tm predictors.
-Our own size controls reached the same practical conclusion: 35M and 650M ESM2
-encoders did not outperform the 8M encoder in either Tm-only or FEP-assisted
-settings. The best model used the 8M encoder with FEP source labels. Thus, in
-this dataset, increasing language-model capacity did not substitute for source
-labels carrying information about sequence-dependent stability changes.
-
-\subsection*{Encoder adaptation and descriptor choice}
-
-The frozen-encoder experiment further indicates how the source-label signal is
-used. FEP labels improved performance even when the encoder was fixed, showing
-that part of the signal can be captured by the existing sequence
-representation. However, the best FEP model required updating the encoder. This
-suggests that FEP labels help most when they are allowed to reshape the
-representation toward stability-relevant sequence directions while still being
-selected by experimental Tm performance. In practical terms, the result argues
-for controlled encoder adaptation rather than either fully fixed feature
-extraction or unconstrained source-task optimization.
-
-The MD-derived Q-value result should be interpreted with the same specificity.
-It should not be read as evidence that MD-derived descriptors are generally
-unhelpful. Rather, this particular high-temperature native-contact summary did
-not transfer to Tm prediction under the present model-selection protocol. The
-descriptor may still capture aspects of structural durability, but it compresses
-each trajectory to a single native-contact persistence statistic and may miss
-mutation-specific energetic effects that determine how sequence changes alter
-the stability landscape. A simulation campaign optimized for target transfer
-should therefore choose descriptors whose physical meaning is expected to
-transfer to the experimental endpoint, rather than maximizing label count alone.
+The MD Q-value result calls for the same specificity. It is not evidence that
+MD-derived descriptors are generally unhelpful; this particular high-temperature
+native-contact summary simply did not transfer under our protocol. By compressing
+each trajectory to a single native-contact persistence statistic, it may miss the
+mutation-specific energetics that govern how sequence changes shift stability. A
+simulation campaign aimed at target transfer should choose descriptors for their
+expected physical relevance to the endpoint, not for how many labels they yield.
 
 \subsection*{Physics-scored sequence proposals as a future direction}
 
-The Rosetta-scored proposal-set result is best viewed as a feasibility test for
-future design workflows. Rosetta scores assigned to ESM2-proposed variants
-improved Tm prediction relative to Tm-only learning, but the direct comparison
-with random variants remained exploratory because its confidence interval
-crossed zero. We therefore do not interpret this result as evidence that the
-current proposal model has already optimized nanobody thermostability. The
-useful point is more limited: sequences proposed by a protein language model can
-be annotated by a physics-based score and then used as supervised source data
-for a Tm predictor.
+The Rosetta-scored proposal-set result is best read as a feasibility test for
+design workflows. Rosetta scores on ESM2-proposed variants improved Tm prediction
+over Tm-only learning, but the direct comparison with random variants stayed
+within noise, so we do not claim that the present generator has already optimized
+nanobody thermostability. The narrower, solid point is that language-model
+proposals can be annotated by a physics-based score and used as supervised source
+data for a Tm predictor.
 
-That supervised-scoring step is the only part of a design loop tested here. In a
-future closed loop, a sequence generator could propose variants, physics-based
-calculations could annotate them, the Tm predictor could update its estimate of
-experimental stability, and the resulting score could be used as a reward or
-selection signal for the next round of proposals. Such a workflow would connect
-the present transfer-learning result to active learning or reinforcement
-learning, but those closed-loop steps and the experimental validation of newly
-proposed high-Tm nanobodies remain outside the scope of this paper.
+That supervised-scoring step is the only part of a design loop we tested. A full
+loop would let a generator propose variants, physics-based calculations annotate
+them, the Tm predictor update its estimate of experimental stability, and that
+estimate drive the next round of proposals---connecting this transfer-learning
+result to active or reinforcement learning. Those closed-loop steps, and
+experimental validation of newly proposed high-Tm nanobodies, are beyond the
+present scope.
 
 \subsection*{Limitations}
 
-Several limitations should guide interpretation. First, the experimental Tm
-training set is small, and the conclusions should be tested on additional
-nanobody collections and other protein families. Second, the source-label
-comparison is limited to the computational labels available here. Other
-free-energy protocols, stability predictors, trajectory summaries, or
-structure-based descriptors may transfer differently. Third, the FEP curve does
-not establish a clean power-law scaling relation; it supports a beneficial trend
-at the largest tested setting, but not a universal scaling exponent. Fourth, no
-new experimental measurements were performed to validate high-stability
-candidates. Finally, raw simulation trajectories may be too large to deposit
-fully, so reproducibility will depend on processed data, scripts, and clear
-reporting of the simulation protocol.
+Several limitations bound the interpretation. The experimental Tm training set is
+small, so the conclusions should be retested on other nanobody collections and
+protein families. The source-label comparison covers only the labels available
+here; other free-energy protocols, stability predictors, or trajectory
+descriptors may transfer differently. The FEP curve supports a beneficial trend
+at the largest setting but does not establish a clean scaling exponent. No new
+experimental measurements were made to validate high-stability candidates. And
+because raw trajectories may be too large to deposit in full, reproducibility will
+rely on processed data, scripts, and a clearly reported simulation protocol.
 
 \subsection*{Outlook}
 
-For low-data experimental protein-property prediction, simulation labels should
-be treated as design choices rather than as generic data augmentation. The
-relevant question is not whether simulations can produce many labels, but
-whether those labels encode information that improves the target task under a
-target-centered validation protocol. In this study, mutation free-energy labels
-provided that information for nanobody Tm prediction. The broader strategy is
-therefore to use experimental data to define the target phenotype, use
-simulation to annotate physically meaningful perturbations around that
-phenotype, and evaluate the combined model only on held-out experimental data.
-This provides a practical path from simulation-assisted prediction toward future
-closed-loop protein engineering.
+For low-data experimental protein-property prediction, simulation labels are best
+treated as design choices rather than generic data augmentation. The question is
+not whether simulation can produce many labels, but whether those labels encode
+information that improves the target task under target-centered validation. Here,
+mutation free energies did that for nanobody Tm. The general recipe follows: use
+experimental data to define the target phenotype, use simulation to annotate
+physically meaningful perturbations around it, and judge the combined model only
+on held-out experimental data. That is a practical route from simulation-assisted
+prediction toward closed-loop protein engineering.

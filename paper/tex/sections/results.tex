@@ -4,23 +4,21 @@
 
 \subsection*{A target-centered framework for using simulation labels in Tm prediction}
 
-\textbf{Framework.} We first established an evaluation framework for asking whether
-simulation-derived labels improve experimental Tm prediction. The target task
-was nanobody Tm regression from amino-acid sequence. Computational labels were
-treated as source prediction tasks rather than as substitutes for experimental
-Tm. Each model used a pretrained protein sequence model, ESM2, to convert a
-sequence into a learned representation. The representation was shared by a Tm
-prediction head and a computed-label head, allowing the computational task to
-influence the representation while keeping the final objective anchored to
-experimental Tm prediction (Fig.~\ref{fig:learning_framework}).
+We first set up an evaluation framework for a single question: do
+simulation-derived labels improve experimental Tm prediction? The target task was
+nanobody Tm regression from amino-acid sequence, and computational labels were
+treated as source prediction tasks, not as stand-ins for experimental Tm. Each
+model used the pretrained protein sequence model ESM2 to turn a sequence into a
+learned representation, which a Tm head and a computed-label head shared. The
+source task could therefore reshape the representation while the final objective
+stayed anchored to experimental Tm (Fig.~\ref{fig:learning_framework}).
 
-\textbf{Target-centered evaluation.} All candidate settings were
-selected using an experimental Tm validation set, and the final numbers were
-computed only on a held-out experimental Tm test set. Improvements were assessed
-by paired differences in absolute error on the same test examples. This design
-addresses a common ambiguity in simulation-to-experiment learning: a
-computational task can be learnable and physically meaningful without improving
-the target experimental phenotype.
+Every candidate setting was selected on an experimental Tm validation set, and
+the final numbers came only from a held-out experimental Tm test set;
+improvements were measured as paired differences in absolute error on the same
+test examples. This guards against a trap specific to simulation-to-experiment
+learning: a computational task can be learnable and physically sensible yet do
+nothing for the experimental phenotype.
 
 \begin{figure*}[t]
 \centering
@@ -41,27 +39,24 @@ paired error statistics.}
 
 \subsection*{Scaling depends on the physical label}
 
-\textbf{Label-count sweeps.} We next varied the number of experimental and computational labels to determine
-whether more source data translated into better Tm prediction. As expected,
-increasing the number of experimental Tm labels improved the model trained only
-on Tm measurements (Fig.~\ref{fig:scaling}). The target-label sweep used 10,
-20, 30, 40, and 57 experimental Tm training labels. The FEP sweep used 10, 40,
-80, 160, and 320 rows per template-specific source table, and the MD Q-value
-sweep used 10, 40, 80, 160, 320, and 640 rows from the single MD source table.
-Mutation free-energy labels from FEP calculations showed a beneficial trend:
-the largest FEP label-count setting tested gave the best held-out Tm error
-among the FEP settings. The curve was not strictly monotonic, so we do not
-interpret it as a clean power law. Instead, the largest tested setting is
-consistent with a benefit from additional mutation free-energy labels when
-models are selected and evaluated through the experimental Tm endpoint.
+We next varied the number of experimental and computational labels to see whether
+more source data meant better Tm prediction. Adding experimental Tm labels helped
+the Tm-only model, as expected (Fig.~\ref{fig:scaling}). The target-label sweep
+used 10, 20, 30, 40, and 57 experimental Tm training labels; the FEP sweep used
+10, 40, 80, 160, and 320 rows per template-specific source table; and the MD
+Q-value sweep used 10, 40, 80, 160, 320, and 640 rows from the single MD source
+table. FEP mutation free-energy labels showed a beneficial trend: the largest
+FEP setting gave the best held-out Tm error among the FEP points. The curve was
+not strictly monotonic, so we do not read it as a clean power law. The consistent
+reading is that more mutation free-energy labels help when models are selected
+and judged through the experimental Tm endpoint.
 
-\textbf{MD-derived Q-value scaling.} The MD-derived Q-value label behaved differently. This label measured how
-strongly native contacts persisted during high-temperature MD trajectories.
-Increasing the number of these labels did not yield a robust improvement over
-learning from Tm measurements alone, even though the computed labels were also
-generated from simulations. The label-count experiment therefore points to the
-central comparison tested below: the number of computed labels is not
-sufficient by itself; the transferable physical content of the label matters.
+The MD-derived Q-value behaved differently. This label measures how well native
+contacts persist during high-temperature MD trajectories. Adding more of these
+labels did not reliably beat learning from Tm measurements alone, even though
+they too came from simulation. The sweep thus sets up the central comparison
+below: label count alone is not enough; what matters is the transferable physical
+content of the label.
 
 \begin{figure*}[t]
 \centering
@@ -83,28 +78,23 @@ estimates to compare the experimental-only, FEP, and MD Q-value references.}
 
 \subsection*{All-atom simulation labels differ in their transfer to Tm prediction}
 
-\textbf{All-atom source-label comparison.} We then focused on two source labels derived from all-atom simulations. Training
-on the experimental Tm labels alone achieved a held-out test MAE of
-6.61$^\circ$C. Adding FEP mutation free-energy labels reduced the MAE to
-6.26$^\circ$C, corresponding to a small but consistent paired $\Delta$MAE of
--0.35$^\circ$C
-(90\% confidence interval, -0.46 to -0.24$^\circ$C;
-Fig.~\ref{fig:simulation_comparison}). Negative paired changes indicate lower
-error than the Tm-only reference. In contrast, the MD-derived Q-value worsened
-the final test error to 6.73$^\circ$C (paired change, +0.12$^\circ$C; 90\%
-confidence interval, +0.01 to +0.22$^\circ$C). Both labels came from
-atomistic simulations, but only the mutation free-energy label improved the
-experimental endpoint.
+We then focused on two all-atom source labels. Training on experimental Tm alone
+reached a held-out test MAE of 6.61$^\circ$C. Adding FEP mutation free-energy
+labels cut this to 6.26$^\circ$C, a consistent paired $\Delta$MAE of
+-0.35$^\circ$C (90\% confidence interval, -0.46 to -0.24$^\circ$C;
+Fig.~\ref{fig:simulation_comparison}); negative paired changes mean lower error
+than the Tm-only reference. The MD-derived Q-value went the other way, raising
+the test error to 6.73$^\circ$C (paired change, +0.12$^\circ$C; 90\% confidence
+interval, +0.01 to +0.22$^\circ$C). Both labels came from atomistic simulation,
+yet only the mutation free energy improved the experimental endpoint.
 
-\textbf{Encoder adaptation.} The encoder controls supported this source-label distinction. In a frozen-encoder
-control, overall errors increased, but FEP still improved over the frozen
-experimental-only baseline: frozen Tm-only learning achieved 7.38$^\circ$C MAE,
-whereas frozen FEP achieved 7.20$^\circ$C MAE. The improvement was smaller than
-in the hot-encoder setting, and the frozen FEP model remained worse than the
-hot-encoder FEP model. The MD Q-value did not provide the same benefit in either
-encoder regime. These results indicate that FEP labels carry useful information
-even when the representation is fixed, but encoder adaptation is important for
-extracting the largest target-task benefit observed here.
+The encoder controls reinforced this split. With a frozen encoder, errors rose
+overall, but FEP still beat the frozen Tm-only baseline: 7.20$^\circ$C versus
+7.38$^\circ$C MAE. The gain was smaller than with a hot encoder, and the frozen
+FEP model stayed worse than the hot-encoder FEP model. The MD Q-value helped in
+neither regime. FEP labels therefore carry useful information even when the
+representation is fixed, but adapting the encoder is what extracts the largest
+target-task gain.
 
 \begin{figure*}[t]
 \centering
@@ -125,38 +115,37 @@ conditions.
 
 \subsection*{The FEP gain is not explained by sequence-model size alone}
 
-\textbf{Encoder-size control.} Because the size of a protein language model can affect downstream performance,
-we tested whether the benefit of FEP labels could be reproduced simply by using
-a larger sequence encoder. It could not. In the experimental-only setting,
-larger 35M and 650M encoders did not improve held-out performance relative to
-the 8M encoder. In the FEP setting, the 35M and 650M encoders reached 6.50 and
-6.65$^\circ$C MAE, respectively, both worse than the 8M FEP model. FEP labels
-remained beneficial within each size comparison, but the best absolute
-performance was obtained with the smallest encoder and FEP labels. Within the
-tested settings, the gain was therefore associated with the physical source
-label rather than with scaling the language model (Supplementary Fig.~4).
+Because a protein language model's size can drive downstream performance, we
+asked whether a larger encoder alone could reproduce the FEP benefit. It could
+not. In the Tm-only setting, the 35M and 650M encoders did not beat the 8M
+encoder on held-out performance. In the FEP setting, the 35M and 650M encoders
+reached 6.50 and 6.65$^\circ$C MAE, both worse than the 8M FEP model. FEP labels
+stayed beneficial within each size comparison, but the best absolute performance
+came from the smallest encoder paired with FEP labels. Within the tested range,
+the gain tracked the physical source label, not the scale of the language model
+(Supplementary Fig.~4).
 
 \subsection*{Structure-based labels provide weaker source signals}
 
-\textbf{Other structure-based source labels.} We next compared computational labels that did not come from the FEP or MD
-Q-value pipelines. Rosetta scores for ESM2-proposed variants reached
-6.45$^\circ$C MAE (paired change, -0.17$^\circ$C; 90\% confidence interval,
--0.31 to -0.03$^\circ$C), and ThermoMPNN stability scores reached
-6.46$^\circ$C MAE (paired change, -0.15$^\circ$C; 90\% confidence interval,
--0.30 to -0.01$^\circ$C; Fig.~\ref{fig:variant_sources}). Rosetta mutation
-scores reached 6.53$^\circ$C MAE (paired change, -0.09$^\circ$C; 90\%
-confidence interval, -0.20 to +0.02$^\circ$C), and random variants scored by
-Rosetta reached 6.51$^\circ$C MAE (paired change, -0.10$^\circ$C; 90\%
-confidence interval, -0.22 to +0.03$^\circ$C). These sources were weaker than
-FEP, and the confidence intervals for the two Rosetta controls crossed zero.
+We next looked at computational labels outside the FEP and MD pipelines. Rosetta
+scores on ESM2-proposed variants reached 6.45$^\circ$C MAE (paired change,
+-0.17$^\circ$C; 90\% confidence interval, -0.31 to -0.03$^\circ$C), and
+ThermoMPNN stability scores reached 6.46$^\circ$C MAE (paired change,
+-0.15$^\circ$C; 90\% confidence interval, -0.30 to -0.01$^\circ$C;
+Fig.~\ref{fig:variant_sources}). Rosetta mutation scores reached 6.53$^\circ$C
+MAE (paired change, -0.09$^\circ$C; 90\% confidence interval, -0.20 to
++0.02$^\circ$C), and random variants scored by Rosetta reached 6.51$^\circ$C MAE
+(paired change, -0.10$^\circ$C; 90\% confidence interval, -0.22 to
++0.03$^\circ$C). All were weaker than FEP, and the two Rosetta controls had
+confidence intervals that crossed zero.
 
-\textbf{Proposal-set comparison.} The ESM2-proposed variants scored by Rosetta were slightly better than random
-variants scored by Rosetta, with a paired MAE difference of -0.07$^\circ$C in
-favor of the ESM2-proposed set. The confidence interval crossed zero, so this
-comparison should be interpreted as exploratory rather than as evidence that
-the present generator improves variant selection. It nevertheless shows that
-sequence proposals can be annotated by physics-based scoring and used as source
-labels for the Tm predictor, a feasibility point revisited in the Discussion.
+The ESM2-proposed variants scored by Rosetta edged out the random variants, with
+a paired MAE difference of -0.07$^\circ$C in favor of the ESM2-proposed set. The
+confidence interval crossed zero, so we read this as exploratory rather than as
+evidence that the present generator improves variant selection. It does show,
+though, that language-model proposals can be annotated by physics-based scoring
+and used as source labels for the Tm predictor---a feasibility point we return to
+in the Discussion.
 
 \begin{figure*}[t]
 \centering
@@ -175,9 +164,8 @@ supervised-scoring step and does not perform closed-loop optimization.}
 \label{fig:variant_sources}
 \end{figure*}
 
-\textbf{Overall pattern.} Across the source labels tested here, the strongest and most consistent
-improvement within this benchmark came from FEP mutation free energies. Other
-structure-based labels and proposal-set scores produced weaker gains, while the
-MD-derived Q-value did not improve held-out Tm prediction. The resulting pattern
-is selective rather than additive: computational labels help only when the
-information they provide transfers to the experimental Tm endpoint.
+Across the labels we tested, the strongest and most consistent improvement came
+from FEP mutation free energies. Other structure-based labels and proposal-set
+scores gave weaker gains, and the MD-derived Q-value gave none. The pattern is
+selective, not additive: a computational label helps only when the information it
+carries transfers to the experimental Tm endpoint.

@@ -684,6 +684,9 @@ Additional paired comparison:
 - 2026-05-31: MD-derived Q-value positioned as a boundary condition showing that not all simulation-derived labels help.
 - 2026-05-31: Story reframed so the opening is about how to incorporate computational labels into Tm prediction; the Tm/ΔΔG relation is moved to the final interpretation.
 - 2026-06-01: Submission target fixed to CSBJ General section as a compact Research Article.
+- 2026-06-05: Train/test split was deliberately reassigned from NbBench's default to a low-data setting (57 train / 114 val / 396 test). Rationale: source-label transfer and label-count scaling effects are easier to see when experimental Tm training data are scarce; abundant Tm labels would wash out the simulation-label benefit. Rationale now stated in Methods (split definitions).
+- 2026-06-05: Full manuscript prose rewrite (abstract, introduction, methods, results, discussion, supplementary) to remove AI-style phrasing and make the logic flow plainly; numbers, claims, citations, figure refs unchanged. Introduction subsection headers removed (continuous narrative); discussion subsections consolidated.
+- 2026-06-05: Confirmed CSBJ AI policy (cover letter + acknowledgments disclosure required; AI not an author). Acknowledgments disclosure already compliant; cover-letter disclosure remains a pre-submission TODO.
 
 ## Drafting Checklist
 
