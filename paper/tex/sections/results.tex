@@ -4,8 +4,7 @@
 
 \subsection*{A target-centered framework for using simulation labels in Tm prediction}
 
-We first set up an evaluation framework for a single question: do
-simulation-derived labels improve experimental Tm prediction? The target task was
+We first built the evaluation framework. The target task was
 nanobody Tm regression from amino-acid sequence, and computational labels were
 treated as source prediction tasks, not as stand-ins for experimental Tm. Each
 model used the pretrained protein sequence model ESM2 to turn a sequence into a
@@ -116,7 +115,7 @@ conditions.
 \subsection*{The FEP gain is not explained by sequence-model size alone}
 
 Because a protein language model's size can drive downstream performance, we
-asked whether a larger encoder alone could reproduce the FEP benefit. It could
+checked whether a larger encoder alone could reproduce the FEP benefit. It could
 not. In the Tm-only setting, the 35M and 650M encoders did not beat the 8M
 encoder on held-out performance. In the FEP setting, the 35M and 650M encoders
 reached 6.50 and 6.65$^\circ$C MAE, both worse than the 8M FEP model. FEP labels

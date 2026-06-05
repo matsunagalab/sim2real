@@ -5,14 +5,13 @@
 Thermal stability limits how far a nanobody can be engineered, yet experimental
 melting-temperature (Tm) measurements are scarce. Simulations and physics-based
 calculations can label far more sequence variants, but they report quantities
-related to Tm rather than Tm itself. We asked whether such labels improve Tm
-prediction in the low-data regime when models are selected only against
-experimental Tm. On a public benchmark of 57 training, 114 validation, and 396
+related to Tm rather than Tm itself. We tested these labels as auxiliary supervision
+for low-data Tm prediction, with model selection tied only to experimental Tm. On a public benchmark of 57 training, 114 validation, and 396
 held-out test sequences, we trained multi-task models in which a Tm predictor
 shared a protein-language-model representation with one computational source
-task at a time: mutation free energies, structure-based mutation scores, Rosetta
-scores for language-model-proposed variants, or molecular-dynamics trajectory
-summaries. Alchemical free-energy perturbation (FEP) helped most. It lowered
+task at a time. The source tasks ranged from mutation free energies and
+structure-based mutation scores to Rosetta scores for language-model-proposed
+variants and molecular-dynamics (MD) trajectory summaries. Alchemical free-energy perturbation (FEP) helped most. It lowered
 held-out Tm mean absolute error from 6.61 to 6.26$^\circ$C, a consistent paired
 gain of 0.35$^\circ$C (90\% confidence interval, 0.24--0.46$^\circ$C). Enlarging
 the ESM2 encoder did not reproduce this gain, and an MD-derived Q-value did not
