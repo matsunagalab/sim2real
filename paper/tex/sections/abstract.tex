@@ -3,22 +3,29 @@
 %TC:break Abstract
 \begin{abstract}
 Thermal stability limits how far a nanobody can be engineered, yet experimental
-melting-temperature (Tm) measurements are scarce. Simulations and physics-based
-calculations can label far more sequence variants, but they report quantities
-related to Tm rather than Tm itself. We tested these labels as auxiliary supervision
-for low-data Tm prediction, with model selection tied only to experimental Tm. On a public benchmark of 57 training, 114 validation, and 396
-held-out test sequences, we trained multi-task models in which a Tm predictor
-shared a protein-language-model representation with one computational source
-task at a time. The source tasks ranged from mutation free energies and
-structure-based mutation scores to Rosetta scores for language-model-proposed
-variants and molecular-dynamics (MD) trajectory summaries. Alchemical free-energy perturbation (FEP) helped most. It lowered
-held-out Tm mean absolute error from 6.61 to 6.26$^\circ$C, a consistent paired
-gain of 0.35$^\circ$C (90\% confidence interval, 0.24--0.46$^\circ$C). Enlarging
-the ESM2 encoder did not reproduce this gain, and an MD-derived Q-value did not
-deliver it at all. Rosetta-scored proposal sets also worked as source labels,
-but their edge over random variants stayed within noise. The value of a
-computational label therefore depends on whether its physical meaning carries
-over to the experimental endpoint, not on how many labels it supplies.
+melting-temperature (Tm) measurements are scarce. Mutation free energies and
+related stability quantities can be computed, or now measured, at far larger
+scale, yet they are usually treated as a prediction problem separate from Tm. A
+relative, per-mutation free-energy change is not an absolute melting temperature,
+and there is no a priori reason that learning one should help predict the other.
+We tested whether such labels, used as auxiliary tasks, transfer to low-data Tm
+prediction when models are selected only against experimental Tm. On a public
+benchmark of 57 training, 114 validation, and 396 held-out test sequences, we
+trained multi-task models in which a Tm predictor shared a
+protein-language-model representation with one computational source task at a
+time, ranging from mutation free energies and structure-based mutation scores to
+Rosetta scores for language-model-proposed variants and molecular-dynamics (MD)
+trajectory summaries. Mutation free energies from alchemical free-energy
+perturbation (FEP) transferred best, lowering held-out Tm mean absolute error
+from 6.61 to 6.26$^\circ$C, a consistent paired gain of 0.35$^\circ$C (90\%
+confidence interval, 0.24--0.46$^\circ$C). The transfer was selective rather than
+generic. An MD-derived Q-value did not help at all, and enlarging the ESM2
+encoder did not reproduce the FEP gain, so the benefit tracks the physical
+relatedness of the source label rather than added data or capacity.
+Rosetta-scored proposal sets also worked as source labels, but their edge over
+random variants stayed within noise. Free-energy labels can therefore supply
+transferable supervision for the scarce Tm phenotype when their physical meaning
+carries over to it.
 \end{abstract}
 %TC:break main
 

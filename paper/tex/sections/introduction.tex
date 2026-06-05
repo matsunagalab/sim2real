@@ -19,24 +19,31 @@ measurement it stands in for.
 Protein engineering has the same bottleneck with an extra complication.
 Experimental measurements are expensive and sparse, while simulations and
 physics-based calculations can label many designed or mutated sequences. But the
-simulated quantity is often not the experimental target. A protein's melting
-temperature (Tm)---the temperature at which half of the molecules are unfolded
-under a given assay---is one such target. What is tractable to compute is usually
-something adjacent: how much a mutation shifts stability, a structure-based
-stability score, or a summary of a molecular-dynamics trajectory. The question is
+simulated quantity is usually not the experimental target, and is often handled
+as its own prediction problem. A protein's melting temperature (Tm)---the
+absolute temperature at which half of the molecules are unfolded under a given
+assay---is one such target. What can be computed or measured at scale is usually
+something adjacent: a mutation's free-energy change ($\Delta\Delta G$), a
+structure-based stability score, or a summary of a molecular-dynamics trajectory.
+A quantity such as $\Delta\Delta G$ is relative and per-mutation, evaluated on its
+own datasets, and there is no a priori reason that supervising a model with it
+should improve an absolute Tm measured on different sequences. The question is
 therefore not whether simulation data can be added to training, but which
-simulated quantities transfer to the experimental phenotype.
+simulated quantities actually transfer to the experimental phenotype.
 
 We study this question in nanobodies. These single-domain VHH antibodies are
 appealing scaffolds---small, modular, and robust binders
 \citep{Muyldermans2013Nanobodies,Alexander2024Discovery}---but their use in
-expression, storage, and formulation hinges on thermal stability, and measuring
-or simulating that stability directly is costly \citep{Bekker2019Thermal}.
+expression, storage, and formulation hinges on thermal stability
+\citep{Kunz2018-qt,Mezzasalma2007-ci,Kumar2000-te}, and measuring or simulating
+that stability directly is costly
+\citep{Bekker2019Thermal,Higashida2021-lt,Mohseni2019-lx,Tomimoto2023-ww}.
 Sequence-based predictors built on protein language models (PLMs) are an
 attractive shortcut: models such as ESM2 learn general-purpose representations
-from large sequence corpora \citep{Rives2021Biological,Lin2023Evolutionary}, and
+from large sequence corpora \citep{Rives2021Biological,Lin2023Evolutionary,Hayes2025-pd}, and
 several methods now read Tm out of such representations
-\citep{Blaabjerg2023Rapid,Li2023DeepTM,Alvarez2024TEMPRO}. High-throughput
+\citep{Blaabjerg2023Rapid,Li2023DeepTM,Alvarez2024TEMPRO,Savojardo2024-tv,Ramon2025-oy,Mao2026-yf}.
+High-throughput
 assays are reshaping the data landscape as well: Tsuboyama et al. used
 cDNA-display proteolysis to measure folding stability for roughly 776{,}000
 natural and designed domains \citep{Tsuboyama2023MegaScale}. That scale is
@@ -62,12 +69,14 @@ set and every final number comes from the same held-out experimental Tm test
 set, using paired error comparisons. This prevents a model that excels at a
 computational task from being mistaken for a better Tm predictor.
 
-The benefit turns out to be source-dependent. FEP mutation free energies give the
-clearest improvement over training on Tm alone, whereas the MD-derived Q-value
-gives none under the same protocol. Rosetta-scored ESM2 proposals give a weaker,
-exploratory signal that points toward future generator--physics--predictor design
-loops without demonstrating closed-loop optimization. Together these results
-carry the materials-informatics Sim2Real argument into a setting where the source
-and target labels differ in physical meaning: useful simulation data are not
-merely abundant, they encode a quantity that transfers to the experimental
-property of interest.
+The benefit turns out to be source-dependent, and it crosses a task boundary that
+is usually kept separate. Mutation free energies from FEP---a relative,
+per-mutation quantity---give the clearest improvement in absolute Tm prediction
+over training on Tm alone, whereas the MD-derived Q-value, though equally
+simulation-derived, gives none under the same protocol. Rosetta-scored ESM2
+proposals give a weaker, exploratory signal that points toward future
+generator--physics--predictor design loops without demonstrating closed-loop
+optimization. Together these results carry the materials-informatics Sim2Real
+argument into a setting where the source and target labels differ in physical
+meaning: useful simulation data are not merely abundant, they encode a quantity
+that transfers to the experimental property of interest.
