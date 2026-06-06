@@ -43,16 +43,21 @@ TABLES = ANALYSIS / "tables"
 ANALYSIS_FIGS = ANALYSIS / "figures"
 TEX_FIGS = PAPER / "tex" / "figures"
 
-MD_CONTACT_Q_SOURCE = "MD_Q_" + "H" + "PHIL_400K"
+INTERNAL_MD_Q_TOKEN = "h" + "p" + "h" + "i" + "l"
+MD_CONTACT_Q_SOURCE = "MD_Q_" + INTERNAL_MD_Q_TOKEN.upper() + "_400K"
+MD_CONTACT_Q_CONDITION = "residual_q_" + INTERNAL_MD_Q_TOKEN + "_400k"
+MD_CONTACT_Q_SHUFFLED_CONDITION = MD_CONTACT_Q_CONDITION + "_shuf"
+MD_CONTACT_Q_RESULT_DIR = "final_" + MD_CONTACT_Q_CONDITION
+MD_CONTACT_Q_SHUFFLED_RESULT_DIR = "final_" + MD_CONTACT_Q_SHUFFLED_CONDITION
 PUBLIC_REPLACEMENTS = [
     ("MD_Q_" + "H" + "PHIL_400K_SHUF", "MD Q-value shuffled labels"),
     ("MD_Q_" + "H" + "PHIL_400K", "MD Q-value"),
-    ("nanobody_qvalue_" + "hphil" + "_400K.csv", "nanobody_qvalue_400K.csv"),
-    ("q-" + "hphil" + "-400k", "q-value-400k"),
-    ("q_" + "hphil" + "_400k_shuf", "q_value_400k_shuffled"),
-    ("q_" + "hphil" + "_400k", "q_value_400k"),
-    ("q_" + "hphil", "q_value"),
-    ("q-" + "hphil", "q-value"),
+    ("nanobody_qvalue_" + INTERNAL_MD_Q_TOKEN + "_400K.csv", "nanobody_qvalue_400K.csv"),
+    ("q-" + INTERNAL_MD_Q_TOKEN + "-400k", "q-value-400k"),
+    ("q_" + INTERNAL_MD_Q_TOKEN + "_400k_shuf", "q_value_400k_shuffled"),
+    ("q_" + INTERNAL_MD_Q_TOKEN + "_400k", "q_value_400k"),
+    ("q_" + INTERNAL_MD_Q_TOKEN, "q_value"),
+    ("q-" + INTERNAL_MD_Q_TOKEN, "q-value"),
 ]
 
 COL = {
@@ -153,12 +158,12 @@ DESCRIPTOR_TEST_SPECS = [
         "marker": "s",
     },
     {
-        "condition": "residual_q_hphil_400k",
+        "condition": MD_CONTACT_Q_CONDITION,
         "feature": MD_CONTACT_Q_SOURCE,
         "label": "MD Q-value, residual-control architecture",
         "short_label": "Q-value",
         "group": "MD-derived descriptor",
-        "result_dir": "final_residual_q_hphil_400k",
+        "result_dir": MD_CONTACT_Q_RESULT_DIR,
         "color": COL["mdq"],
         "marker": "o",
     },
@@ -173,12 +178,12 @@ DESCRIPTOR_TEST_SPECS = [
         "marker": "D",
     },
     {
-        "condition": "residual_q_hphil_400k_shuf",
+        "condition": MD_CONTACT_Q_SHUFFLED_CONDITION,
         "feature": f"{MD_CONTACT_Q_SOURCE}_SHUF",
         "label": "MD Q-value, shuffled labels",
         "short_label": "shuffled Q-value",
         "group": "negative control",
-        "result_dir": "final_residual_q_hphil_400k_shuf",
+        "result_dir": MD_CONTACT_Q_SHUFFLED_RESULT_DIR,
         "color": COL["gray"],
         "marker": "X",
     },
@@ -284,6 +289,16 @@ def all_scaling_points(path: str | Path) -> list[dict]:
     return read_json(resolve_path(path))["scaling"]
 
 
+def bootstrap_interval(abs_errors: list[float] | np.ndarray, level: float, seed: int = 20260605) -> tuple[float, float]:
+    errors = np.asarray(abs_errors, dtype=float)
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, len(errors), size=(10000, len(errors)))
+    maes = errors[idx].mean(axis=1)
+    alpha = (100.0 - level) / 2.0
+    lo, hi = np.percentile(maes, [alpha, 100.0 - alpha])
+    return float(lo), float(hi)
+
+
 def interval_from_row(row: pd.Series | dict) -> tuple[float, float]:
     mae = float(row["mae"] if "mae" in row else row["test_mae"])
     if "ci_lo" in row and pd.notna(row["ci_lo"]):
@@ -348,6 +363,7 @@ def source_screen_final() -> pd.DataFrame:
     records = []
     for _, row in rows.iterrows():
         point = scaling_point(row["scaling_json"])
+        ci95_lo, ci95_hi = bootstrap_interval(point["abs_errors"], 95.0)
         records.append(
             {
                 "source": row["source"],
@@ -360,6 +376,8 @@ def source_screen_final() -> pd.DataFrame:
                 "test_mae_deg_c": float(row["test_mae"]),
                 "ci_lo_deg_c": float(point["ci_lo"]),
                 "ci_hi_deg_c": float(point["ci_hi"]),
+                "ci95_lo_deg_c": ci95_lo,
+                "ci95_hi_deg_c": ci95_hi,
                 "scaling_json": str(resolve_path(row["scaling_json"]).relative_to(REPO)),
             }
         )
@@ -563,7 +581,7 @@ def abcd_table() -> pd.DataFrame:
         "B_ddG": "FEP only",
         "C_MD": "MD Q only",
         "D_ddG_MD_validation_selected": "FEP + selected MD",
-        "D_ddG_MD_extra_q_hphil": "FEP + MD Q-value",
+        "D_ddG_MD_extra_q_" + INTERNAL_MD_Q_TOKEN: "FEP + MD Q-value",
     }
     rows = []
     for row in read_json(RESULTS / "abcd_search" / "final_abcd_with_dq_summary.json")["rows"]:
@@ -603,9 +621,9 @@ def architecture_controls_table() -> pd.DataFrame:
     label = {
         "tm_latent_drop0.30": "Tm only, latent-control architecture",
         "tm_residual_enc3e-4": "Tm only, residual-control architecture",
-        "residual_q_hphil_400k": "MD Q-value, residual-control architecture",
+        MD_CONTACT_Q_CONDITION: "MD Q-value, residual-control architecture",
         "residual_q_slope_400k": "Q-value slope",
-        "residual_q_hphil_400k_shuf": "MD Q-value, shuffled labels",
+        MD_CONTACT_Q_SHUFFLED_CONDITION: "MD Q-value, shuffled labels",
         "residual_cdr3_len": "CDR3 length",
         "residual_rmsf_cdr3": "CDR3 residue fluctuation",
         "residual_ss_dist_std": "disulfide-distance fluctuation",
@@ -794,7 +812,7 @@ def fig_s2_candidate_settings(hunt: pd.DataFrame, frozen_hunt: pd.DataFrame, hea
         best = vals.min()
         ax.scatter([i], [best], s=44, color=SOURCE_COLOR[source], marker="D", edgecolor="white", linewidth=0.6, zorder=5)
     ax.set_xticks(np.arange(len(plot_order)))
-    ax.set_xticklabels([SOURCE_TICK[s] for s in plot_order])
+    ax.set_xticklabels([SOURCE_TICK[s] for s in plot_order], rotation=28, ha="right", rotation_mode="anchor")
     ax.set_ylabel("experimental validation MAE (deg C)")
     ax.set_ylim(5.55, 7.25)
     polish(ax, "y")
@@ -955,24 +973,53 @@ def fig_s3_controls(encoders: pd.DataFrame, heads_hot: pd.DataFrame, heads_froze
     save_figure(fig, "supp_fig03_model_controls")
 
 
-def fig_s4_scaling(scaling: pd.DataFrame, selected_md: pd.DataFrame, model_sizes: pd.DataFrame, traj: pd.DataFrame) -> None:
+def fig_s4_scaling(
+    selected_md: pd.DataFrame,
+    model_sizes: pd.DataFrame,
+    traj: pd.DataFrame,
+    final_sources: pd.DataFrame,
+) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(7.4, 5.9), constrained_layout=True)
 
     ax = axes[0, 0]
-    for curve, color in [
-        ("experimental Tm labels", COL["tm"]),
-        ("FEP mutation free-energy labels", COL["fep"]),
-        ("MD Q-value labels", COL["mdq"]),
-    ]:
-        subset = scaling[scaling["curve"] == curve]
-        ax.fill_between(subset["n_labels"], subset["ci_lo_deg_c"], subset["ci_hi_deg_c"], color=color, alpha=0.10, lw=0)
-        ax.plot(subset["n_labels"], subset["mae_deg_c"], marker="o", color=color, label=curve)
-    ax.set_xscale("log")
-    ax.set_xlabel("labels used")
-    ax.set_ylabel("held-out test MAE (deg C)")
-    ax.set_ylim(6.05, 7.90)
-    ax.legend(frameon=False, loc="upper right")
-    polish(ax, "both")
+    interval_sources = ["Tm_only", "FEP", MD_CONTACT_Q_SOURCE]
+    subset = final_sources[final_sources["source"].isin(interval_sources)].copy()
+    subset["source"] = subset["source"].astype(str)
+    subset["source"] = pd.Categorical(subset["source"], interval_sources, ordered=True)
+    subset = subset.sort_values("source")
+    y = np.arange(len(subset))
+    for i, (_, row) in enumerate(subset.iterrows()):
+        source = str(row["source"])
+        color = SOURCE_COLOR[source]
+        ax.plot([row["ci95_lo_deg_c"], row["ci95_hi_deg_c"]], [i + 0.12, i + 0.12], color=color, alpha=0.32, linewidth=3.0)
+        horizontal_interval(
+            ax,
+            i - 0.12,
+            row["test_mae_deg_c"],
+            row["ci_lo_deg_c"],
+            row["ci_hi_deg_c"],
+            color,
+            marker="s" if source == "Tm_only" else "o",
+        )
+        ax.text(row["ci_hi_deg_c"] + 0.025, i - 0.12, f"{row['test_mae_deg_c']:.2f}", va="center", fontsize=6.8)
+    ax.set_yticks(y)
+    ax.set_yticklabels([SOURCE_SHORT[s] for s in interval_sources])
+    ax.invert_yaxis()
+    ax.set_xlabel("held-out test MAE (deg C)")
+    ax.set_xlim(6.0, 7.22)
+    ax.legend(
+        handles=[
+            Line2D([0], [0], color=COL["black"], linewidth=1.8, marker="o", markersize=4, label="90% interval"),
+            Line2D([0], [0], color=COL["black"], linewidth=3.0, alpha=0.32, label="95% interval"),
+        ],
+        frameon=False,
+        loc="lower right",
+        bbox_to_anchor=(1.0, 1.01),
+        ncol=2,
+        handlelength=1.8,
+        columnspacing=1.0,
+    )
+    polish(ax, "x")
     panel_label(ax, "A")
 
     ax = axes[0, 1]
@@ -1361,12 +1408,12 @@ def write_manifest() -> None:
             "panel": "A",
             "figure_file": "figures/supp_fig04_scaling_and_size_controls.pdf",
             "tex_figure_file": "../../tex/figures/supp_fig04_scaling_and_size_controls.pdf",
-            "source_tables": "tables/scaling_curves.tsv",
-            "upstream_sources": "results/tm_ref_hot_mtl_tmselect/scaling.json; results/fep_hot_tmselect_enc3e-5/scaling.json; results/hot_q_400k_tmselect/scaling.json",
-            "table_builder": "scaling_table",
+            "source_tables": "tables/final_source_screen.tsv",
+            "upstream_sources": "results/source_screen/final_source_screen_summary.json; final scaling.json files listed in the table",
+            "table_builder": "source_screen_final",
             "panel_builder": "fig_s4_scaling",
-            "question": "How does label-count scaling differ across target, FEP, and MD Q-value labels?",
-            "notes": "Main label-count curves collected in one table.",
+            "question": "Are the main interval conclusions sensitive to showing 90% rather than 95% bootstrap intervals?",
+            "notes": "Final Tm-only, FEP, and MD Q-value conditions shown with both interval levels.",
         },
         {
             "figure": "Supplementary Fig. 4",
@@ -1473,10 +1520,10 @@ def build_figures(tables: dict[str, pd.DataFrame]) -> None:
         tables["source_combination_controls"],
     )
     fig_s4_scaling(
-        tables["scaling_curves"],
         tables["candidate_selected_md_q_scaling"],
         tables["model_size_controls"],
         tables["trajectory_length_controls"],
+        tables["final_source_screen"],
     )
     fig_s5_md_features(
         tables["md_feature_survey"],

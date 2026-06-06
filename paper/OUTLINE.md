@@ -648,9 +648,11 @@ Expected supplementary components:
 - Supplementary Table 1: dataset split sizes and label counts.
 - Supplementary Table 2: hyperparameter search space and selected settings.
 - Supplementary Table 3: run-level final metrics by seed.
-- Supplementary Fig. 1: all label-count sweeps with confidence intervals.
-- Supplementary Fig. 2: additional source comparisons and negative controls.
-- Supplementary Fig. 3: encoder-size and frozen-encoder controls, if not fully clear in the main figure.
+- Supplementary Fig. 1: processed source-label data and MD Q-value distributions.
+- Supplementary Fig. 2: candidate-setting searches and validation-to-test behavior.
+- Supplementary Fig. 3: encoder-mode, FEP source-head, and source-combination controls.
+- Supplementary Fig. 4: interval sensitivity, per-count MD setting selection, ESM2 size, and MD-window controls.
+- Supplementary Fig. 5: MD-derived descriptor controls and descriptor relationships.
 - Supplementary Data: processed inputs and plotting tables used for the figures.
 
 Keep the main paper compact and put reproducibility details here.

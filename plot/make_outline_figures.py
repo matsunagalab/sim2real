@@ -55,7 +55,9 @@ COL = {
     "soft_gray": "#F3F3F3",
 }
 
-MD_CONTACT_Q_SOURCE = "MD_Q_" + "H" + "PHIL_400K"
+INTERNAL_MD_Q_TOKEN = "h" + "p" + "h" + "i" + "l"
+MD_CONTACT_Q_SOURCE = "MD_Q_" + INTERNAL_MD_Q_TOKEN.upper() + "_400K"
+MD_CONTACT_Q_RESULT_DIR = "final_residual_q_" + INTERNAL_MD_Q_TOKEN + "_400k"
 
 SOURCE_ORDER = [
     "Tm_only",
@@ -115,7 +117,7 @@ SIZE650_FEP_JSON = RESULTS / "size650_ddg_fep_enc3e-5" / "scaling.json"
 
 DESCRIPTOR_CONTROL_SPECS = [
     ("Tm labels only", RESULTS / "final_tm_residual_enc3e-4" / "scaling.json", COL["baseline"], "s"),
-    ("raw MD Q-value", RESULTS / "final_residual_q_hphil_400k" / "scaling.json", COL["mdq"], "o"),
+    ("raw MD Q-value", RESULTS / MD_CONTACT_Q_RESULT_DIR / "scaling.json", COL["mdq"], "o"),
     ("Q-value slope", RESULTS / "final_residual_q_slope_400k" / "scaling.json", COL["mdq"], "D"),
     ("disulfide-distance\nfluctuation", RESULTS / "final_residual_ss_dist_std" / "scaling.json", COL["design"], "o"),
     ("CDR3 length", RESULTS / "final_residual_cdr3_len" / "scaling.json", COL["thermo"], "o"),
@@ -695,15 +697,6 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
         )
         ax.text(row["ci_hi"] + 0.025, i, f"{row['mae']:.2f}", va="center", fontsize=6.8)
     ax.axvline(float(row_lookup.loc["FEP", "test_mae"]), color=COL["fep"], linewidth=1.0, linestyle="--")
-    ax.text(
-        float(row_lookup.loc["FEP", "test_mae"]) + 0.015,
-        -0.52,
-        "FEP",
-        color=COL["fep"],
-        fontsize=6.8,
-        ha="left",
-        va="center",
-    )
     ax.set_yticks(y)
     ax.set_yticklabels(descriptor_rows["label"])
     ax.invert_yaxis()

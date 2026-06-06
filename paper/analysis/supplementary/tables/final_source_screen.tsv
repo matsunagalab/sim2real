@@ -1,8 +1,8 @@
-source	label	architecture	selected_setting	n_ddg	n_md	validation_mae_deg_c	test_mae_deg_c	ci_lo_deg_c	ci_hi_deg_c	scaling_json
-Tm_only	Tm only	shared	drop0.05	0	0	5.991735227038186	6.614527141761442	6.182964691780551	7.05073546722566	results/sourcefinal_tm_shared_drop0.05/scaling.json
-FEP	FEP	shared	enc3e-5	320	0	5.8738843708806785	6.261138412134152	5.852657398669069	6.670841141457817	results/sourcefinal_ddg_fep_enc3e-5/scaling.json
-rosetta_esm	ESM2-proposed/Rosetta	shared	enc3e-5	320	0	5.8048373747101865	6.448386942318477	6.0233879466739415	6.8806255371096325	results/sourcefinal_ddg_rosetta-esm_enc3e-5/scaling.json
-thermoMPNN	ThermoMPNN	shared	enc3e-5	320	0	6.1772982968783285	6.460685393297409	6.043263850619003	6.885170766416242	results/sourcefinal_ddg_thermompnn_enc3e-5/scaling.json
-rosetta_random	random/Rosetta	shared	enc3e-5	320	0	5.9561455624064825	6.513027388391662	6.089201183358025	6.938742137602935	results/sourcefinal_ddg_rosetta-random_enc3e-5/scaling.json
-rosetta	Rosetta	shared	lr1e-4_enc3e-5	320	0	5.875935316852555	6.52551594085576	6.105443617465455	6.950773206428591	results/sourcefinal_ddg_rosetta_lr1e-4_enc3e-5/scaling.json
-MD Q-value	MD Q-value	residual	lr1e-4_enc3e-5	0	640	5.942478148144567	6.730357691204784	6.306871872180277	7.153715017605893	results/sourcefinal_md_q-value-400k_lr1e-4_enc3e-5/scaling.json
+source	label	architecture	selected_setting	n_ddg	n_md	validation_mae_deg_c	test_mae_deg_c	ci_lo_deg_c	ci_hi_deg_c	ci95_lo_deg_c	ci95_hi_deg_c	scaling_json
+Tm_only	Tm only	shared	drop0.05	0	0	5.991735227038186	6.614527141761442	6.182964691780551	7.05073546722566	6.101316997472496	7.142267537170925	results/sourcefinal_tm_shared_drop0.05/scaling.json
+FEP	FEP	shared	enc3e-5	320	0	5.8738843708806785	6.261138412134152	5.852657398669069	6.670841141457817	5.774095226509171	6.762361999452638	results/sourcefinal_ddg_fep_enc3e-5/scaling.json
+rosetta_esm	ESM2-proposed/Rosetta	shared	enc3e-5	320	0	5.8048373747101865	6.448386942318477	6.0233879466739415	6.8806255371096325	5.944512211636409	6.965312042807459	results/sourcefinal_ddg_rosetta-esm_enc3e-5/scaling.json
+thermoMPNN	ThermoMPNN	shared	enc3e-5	320	0	6.1772982968783285	6.460685393297409	6.043263850619003	6.885170766416242	5.957076397647253	6.981763409693566	results/sourcefinal_ddg_thermompnn_enc3e-5/scaling.json
+rosetta_random	random/Rosetta	shared	enc3e-5	320	0	5.9561455624064825	6.513027388391662	6.089201183358025	6.938742137602935	6.007770500829392	7.0321252335054405	results/sourcefinal_ddg_rosetta-random_enc3e-5/scaling.json
+rosetta	Rosetta	shared	lr1e-4_enc3e-5	320	0	5.875935316852555	6.52551594085576	6.105443617465455	6.950773206428591	6.023060903900052	7.038323412200942	results/sourcefinal_ddg_rosetta_lr1e-4_enc3e-5/scaling.json
+MD Q-value	MD Q-value	residual	lr1e-4_enc3e-5	0	640	5.942478148144567	6.730357691204784	6.306871872180277	7.153715017605893	6.2233469539688615	7.248289871675135	results/sourcefinal_md_q-value-400k_lr1e-4_enc3e-5/scaling.json
