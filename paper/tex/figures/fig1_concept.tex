@@ -1,0 +1,74 @@
+% fig1_concept.tex  — Concept figure (DRAFT)
+% Sim2Real multitask transfer for nanobody Tm + the three "what simulation works?" axes.
+% Requires in preamble (see main.tex):
+%   \usepackage{tikz}
+%   \usetikzlibrary{positioning,arrows.meta,fit,backgrounds,shapes.geometric,calc}
+%
+% Include with:  \input{figures/fig1_concept}   inside a figure(*) environment.
+\begin{tikzpicture}[
+    font=\small,
+    >={Stealth[length=2.2mm]},
+    box/.style={draw, rounded corners=1.5pt, minimum height=7mm, minimum width=20mm,
+                align=center, inner sep=3pt},
+    enc/.style={box, fill=blue!12},
+    shared/.style={box, fill=blue!22, minimum width=26mm},
+    head/.style={box, fill=blue!30, minimum width=16mm},
+    data/.style={box, fill=gray!10, minimum width=20mm},
+    out/.style={box, fill=orange!25, minimum width=14mm},
+    axis/.style={draw, rounded corners=2pt, fill=teal!8, align=left, inner sep=5pt,
+                 minimum width=40mm, text width=40mm},
+    flow/.style={->, thick, gray!70},
+    lbl/.style={font=\footnotesize\itshape, gray!60!black},
+]
+
+% ---------- (a) Multitask transfer architecture ----------
+\node[data] (seq) {VHH sequence\\\texttt{VQWATV...}};
+\node[enc, right=9mm of seq] (esm) {ESM-2 encoder\\\scriptsize(frozen \emph{or} fine-tuned)};
+\node[shared, right=9mm of esm] (mlp) {shared MLP\\\scriptsize(latent representation)};
+
+% task heads (stacked)
+\node[head, right=12mm of mlp, yshift=12mm] (htm)  {Tm head};
+\node[head, right=12mm of mlp]             (hddg) {ddG head};
+\node[head, right=12mm of mlp, yshift=-12mm](hmd)  {MD-feature\\head};
+
+\node[out, right=8mm of htm]  (otm)  {$T_m$};
+\node[out, right=8mm of hddg] (oddg) {$\Delta\Delta G$};
+\node[out, right=8mm of hmd]  (omd)  {MD\,$Q$};
+
+\draw[flow] (seq) -- (esm);
+\draw[flow] (esm) -- (mlp);
+\draw[flow] (mlp.east) -- (htm.west);
+\draw[flow] (mlp.east) -- (hddg.west);
+\draw[flow] (mlp.east) -- (hmd.west);
+\draw[flow] (htm)  -- (otm);
+\draw[flow] (hddg) -- (oddg);
+\draw[flow] (hmd)  -- (omd);
+
+% data-source annotations on the heads
+\node[lbl, above=1mm of htm]  {experimental (scarce, $n\!\approx\!57$)};
+\node[lbl, below=1mm of hmd]  {simulation (auxiliary, abundant)};
+
+% brace grouping the auxiliary heads
+\node[lbl, right=2mm of oddg, text width=22mm] {auxiliary\\transfer tasks};
+
+% panel (a) label + title
+\node[anchor=west, font=\bfseries] at ([yshift=10mm]seq.north west) {(a)\ \ Sim2Real multitask transfer learning};
+
+% ---------- (b) The three design axes studied ----------
+\node[axis, below=16mm of seq.south west, anchor=north west] (ax1)
+    {\textbf{Source}\\physics $\Delta\Delta G$ (FEP/Rosetta)\\\emph{vs.} conventional MD $Q$};
+\node[axis, right=6mm of ax1] (ax2)
+    {\textbf{Temperature}\\$300\,$K \emph{vs.} $400\,$K\\(near vs.\ above $T_m$)};
+\node[axis, right=6mm of ax2] (ax3)
+    {\textbf{Feature}\\contact $Q$-value\\\emph{vs.} geometric (RMSF, SS, CDR3)};
+
+\node[anchor=west, font=\bfseries] at ([yshift=7mm]ax1.north west)
+    {(b)\ \ Which simulation data transfers? — three axes};
+
+% ---------- (c) Evaluation: scaling + MRS ----------
+\node[axis, fill=orange!8, below=10mm of ax2, anchor=north, text width=86mm, minimum width=86mm] (ev)
+    {\textbf{(c)\ \ Evaluation:} data-scaling law $\mathrm{MAE}(n)=a\,n^{b}+c$ over \#simulation
+     samples, compared against the \emph{experimental-data} scaling reference
+     $\Rightarrow$ marginal rate of substitution (sim samples per 1 real $T_m$).};
+
+\end{tikzpicture}

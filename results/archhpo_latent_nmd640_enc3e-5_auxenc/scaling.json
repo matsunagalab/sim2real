@@ -1,0 +1,101 @@
+{
+  "exp_name": "archhpo_latent_nmd640_enc3e-5_auxenc",
+  "timestamp": "2026-05-30T20:34:29",
+  "git_commit": "407b668",
+  "args": {
+    "ddg_source": "none",
+    "n_ddg_list": "20,80,280",
+    "md_source": "MD_Q_HPHIL_400K",
+    "md_aux_source": "none",
+    "n_md_list": "640",
+    "n_tm_list": "",
+    "n_runs": 3,
+    "result_dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_enc3e-5_auxenc",
+    "train_mode": "mtl",
+    "selection_scope": "tm",
+    "encoder_mode": "hot",
+    "base_model": null,
+    "model_arch": "latent",
+    "mtl_weight_mode": null,
+    "md_weight": null,
+    "learning_rate": null,
+    "encoder_lr": 3e-05,
+    "weight_decay": null,
+    "dropout_rate": null,
+    "batch_size": null,
+    "warmup_steps": null,
+    "num_train_epochs": null,
+    "early_stopping_patience": null,
+    "final_eval_split": "val",
+    "exp_name": "archhpo_latent_nmd640_enc3e-5_auxenc"
+  },
+  "env": {
+    "ENCODER_MODE": "hot",
+    "BASE_MODEL_NAME": null,
+    "MTL_WEIGHT_MODE": null,
+    "MD_WEIGHT": null,
+    "MODEL_ARCH": "latent",
+    "DETACH_AUX_ENCODER": "false",
+    "LEARNING_RATE": null,
+    "ENCODER_LR": "3e-05",
+    "WEIGHT_DECAY": null,
+    "DROPOUT_RATE": null,
+    "BATCH_SIZE": null,
+    "WARMUP_STEPS": null,
+    "NUM_TRAIN_EPOCHS": null,
+    "EARLY_STOPPING_PATIENCE": null
+  },
+  "resolved_encoder_mode": "hot",
+  "hparams": {
+    "num_train_epochs": 400,
+    "batch_size": 16,
+    "learning_rate": 0.0003,
+    "encoder_lr": 3e-05,
+    "weight_decay": 0.04,
+    "dropout_rate": 0.15,
+    "early_stopping_patience": 15,
+    "early_stopping_threshold": 0.0,
+    "warmup_steps": 100,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "use_lora": false,
+    "encoder_mode": "hot",
+    "base_model_name": "facebook/esm2_t6_8M_UR50D",
+    "mtl_weight_mode": "uncertainty",
+    "md_weight": 1.0,
+    "model_arch": "latent",
+    "detach_aux_encoder": false
+  },
+  "scaling": [
+    {
+      "n": 640,
+      "mae": 5.884954557352929,
+      "ci_lo": 5.1667525615057475,
+      "ci_hi": 6.6214888601618425,
+      "ci_width": 1.454736298656095
+    }
+  ],
+  "best": {
+    "n": 640,
+    "mae": 5.884954557352929,
+    "ci_width": 1.454736298656095
+  },
+  "summary": {
+    "slope": null,
+    "ci_width_avg": 1.454736298656095,
+    "mae_avg": 5.884954557352929,
+    "elapsed_s": 571.5696289539337
+  },
+  "paired_bootstrap": {
+    "ref_n": 640,
+    "per_n": [],
+    "full_range": {
+      "from": 640,
+      "to": 640,
+      "delta_mae": NaN,
+      "delta_ci_lo": NaN,
+      "delta_ci_hi": NaN,
+      "p_positive": NaN
+    }
+  }
+}

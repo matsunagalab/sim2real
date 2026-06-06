@@ -1,0 +1,2054 @@
+[
+  {
+    "arch": "latent",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "default",
+    "aux_mode": "noaux",
+    "exp": "archhpo_latent_nmd0_default_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "exp-name": "archhpo_latent_nmd0_default_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd0_default_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd0_default_noaux.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "enc3e-5",
+    "aux_mode": "noaux",
+    "exp": "archhpo_latent_nmd0_enc3e-5_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_latent_nmd0_enc3e-5_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd0_enc3e-5_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd0_enc3e-5_noaux.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "enc3e-4",
+    "aux_mode": "noaux",
+    "exp": "archhpo_latent_nmd0_enc3e-4_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "encoder-lr": "3e-4",
+      "exp-name": "archhpo_latent_nmd0_enc3e-4_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd0_enc3e-4_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd0_enc3e-4_noaux.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "lr1e-4_enc3e-5",
+    "aux_mode": "noaux",
+    "exp": "archhpo_latent_nmd0_lr1e-4_enc3e-5_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "learning-rate": "1e-4",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_latent_nmd0_lr1e-4_enc3e-5_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd0_lr1e-4_enc3e-5_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd0_lr1e-4_enc3e-5_noaux.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "drop0.05",
+    "aux_mode": "noaux",
+    "exp": "archhpo_latent_nmd0_drop0.05_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "dropout-rate": "0.05",
+      "exp-name": "archhpo_latent_nmd0_drop0.05_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd0_drop0.05_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd0_drop0.05_noaux.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "drop0.30",
+    "aux_mode": "noaux",
+    "exp": "archhpo_latent_nmd0_drop0.30_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "dropout-rate": "0.30",
+      "exp-name": "archhpo_latent_nmd0_drop0.30_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd0_drop0.30_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd0_drop0.30_noaux.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "default",
+    "aux_mode": "detach",
+    "exp": "archhpo_latent_nmd640_default_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "exp-name": "archhpo_latent_nmd640_default_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_default_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_default_detach.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "default",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_latent_nmd640_default_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "exp-name": "archhpo_latent_nmd640_default_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_default_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_default_auxenc.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "enc3e-5",
+    "aux_mode": "detach",
+    "exp": "archhpo_latent_nmd640_enc3e-5_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_latent_nmd640_enc3e-5_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_enc3e-5_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_enc3e-5_detach.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "enc3e-5",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_latent_nmd640_enc3e-5_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_latent_nmd640_enc3e-5_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_enc3e-5_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_enc3e-5_auxenc.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "enc3e-4",
+    "aux_mode": "detach",
+    "exp": "archhpo_latent_nmd640_enc3e-4_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "encoder-lr": "3e-4",
+      "exp-name": "archhpo_latent_nmd640_enc3e-4_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_enc3e-4_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_enc3e-4_detach.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "enc3e-4",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_latent_nmd640_enc3e-4_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "encoder-lr": "3e-4",
+      "exp-name": "archhpo_latent_nmd640_enc3e-4_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_enc3e-4_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_enc3e-4_auxenc.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "lr1e-4_enc3e-5",
+    "aux_mode": "detach",
+    "exp": "archhpo_latent_nmd640_lr1e-4_enc3e-5_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "learning-rate": "1e-4",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_latent_nmd640_lr1e-4_enc3e-5_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_lr1e-4_enc3e-5_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_lr1e-4_enc3e-5_detach.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "lr1e-4_enc3e-5",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_latent_nmd640_lr1e-4_enc3e-5_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "learning-rate": "1e-4",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_latent_nmd640_lr1e-4_enc3e-5_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_lr1e-4_enc3e-5_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_lr1e-4_enc3e-5_auxenc.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "drop0.05",
+    "aux_mode": "detach",
+    "exp": "archhpo_latent_nmd640_drop0.05_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "dropout-rate": "0.05",
+      "exp-name": "archhpo_latent_nmd640_drop0.05_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_drop0.05_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_drop0.05_detach.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "drop0.05",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_latent_nmd640_drop0.05_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "dropout-rate": "0.05",
+      "exp-name": "archhpo_latent_nmd640_drop0.05_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_drop0.05_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_drop0.05_auxenc.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "drop0.30",
+    "aux_mode": "detach",
+    "exp": "archhpo_latent_nmd640_drop0.30_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "dropout-rate": "0.30",
+      "exp-name": "archhpo_latent_nmd640_drop0.30_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_drop0.30_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_drop0.30_detach.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "drop0.30",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_latent_nmd640_drop0.30_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "dropout-rate": "0.30",
+      "exp-name": "archhpo_latent_nmd640_drop0.30_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_drop0.30_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_drop0.30_auxenc.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.05",
+    "aux_mode": "detach",
+    "exp": "archhpo_latent_nmd640_fixed_w0.05_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.05",
+      "exp-name": "archhpo_latent_nmd640_fixed_w0.05_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_fixed_w0.05_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_fixed_w0.05_detach.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.05",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_latent_nmd640_fixed_w0.05_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.05",
+      "exp-name": "archhpo_latent_nmd640_fixed_w0.05_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_fixed_w0.05_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_fixed_w0.05_auxenc.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.10",
+    "aux_mode": "detach",
+    "exp": "archhpo_latent_nmd640_fixed_w0.10_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.10",
+      "exp-name": "archhpo_latent_nmd640_fixed_w0.10_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_fixed_w0.10_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_fixed_w0.10_detach.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.10",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_latent_nmd640_fixed_w0.10_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.10",
+      "exp-name": "archhpo_latent_nmd640_fixed_w0.10_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_fixed_w0.10_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_fixed_w0.10_auxenc.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.25",
+    "aux_mode": "detach",
+    "exp": "archhpo_latent_nmd640_fixed_w0.25_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.25",
+      "exp-name": "archhpo_latent_nmd640_fixed_w0.25_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_fixed_w0.25_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_fixed_w0.25_detach.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.25",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_latent_nmd640_fixed_w0.25_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.25",
+      "exp-name": "archhpo_latent_nmd640_fixed_w0.25_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_fixed_w0.25_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_fixed_w0.25_auxenc.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.50",
+    "aux_mode": "detach",
+    "exp": "archhpo_latent_nmd640_fixed_w0.50_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.50",
+      "exp-name": "archhpo_latent_nmd640_fixed_w0.50_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_fixed_w0.50_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_fixed_w0.50_detach.log"
+  },
+  {
+    "arch": "latent",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.50",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_latent_nmd640_fixed_w0.50_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "latent",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.50",
+      "exp-name": "archhpo_latent_nmd640_fixed_w0.50_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_latent_nmd640_fixed_w0.50_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_latent_nmd640_fixed_w0.50_auxenc.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "default",
+    "aux_mode": "noaux",
+    "exp": "archhpo_moe_nmd0_default_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "exp-name": "archhpo_moe_nmd0_default_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd0_default_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd0_default_noaux.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "enc3e-5",
+    "aux_mode": "noaux",
+    "exp": "archhpo_moe_nmd0_enc3e-5_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_moe_nmd0_enc3e-5_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd0_enc3e-5_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd0_enc3e-5_noaux.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "enc3e-4",
+    "aux_mode": "noaux",
+    "exp": "archhpo_moe_nmd0_enc3e-4_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "encoder-lr": "3e-4",
+      "exp-name": "archhpo_moe_nmd0_enc3e-4_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd0_enc3e-4_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd0_enc3e-4_noaux.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "lr1e-4_enc3e-5",
+    "aux_mode": "noaux",
+    "exp": "archhpo_moe_nmd0_lr1e-4_enc3e-5_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "learning-rate": "1e-4",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_moe_nmd0_lr1e-4_enc3e-5_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd0_lr1e-4_enc3e-5_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd0_lr1e-4_enc3e-5_noaux.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "drop0.05",
+    "aux_mode": "noaux",
+    "exp": "archhpo_moe_nmd0_drop0.05_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "dropout-rate": "0.05",
+      "exp-name": "archhpo_moe_nmd0_drop0.05_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd0_drop0.05_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd0_drop0.05_noaux.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "drop0.30",
+    "aux_mode": "noaux",
+    "exp": "archhpo_moe_nmd0_drop0.30_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "dropout-rate": "0.30",
+      "exp-name": "archhpo_moe_nmd0_drop0.30_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd0_drop0.30_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd0_drop0.30_noaux.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "default",
+    "aux_mode": "detach",
+    "exp": "archhpo_moe_nmd640_default_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "exp-name": "archhpo_moe_nmd640_default_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_default_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_default_detach.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "default",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_moe_nmd640_default_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "exp-name": "archhpo_moe_nmd640_default_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_default_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_default_auxenc.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "enc3e-5",
+    "aux_mode": "detach",
+    "exp": "archhpo_moe_nmd640_enc3e-5_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_moe_nmd640_enc3e-5_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_enc3e-5_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_enc3e-5_detach.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "enc3e-5",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_moe_nmd640_enc3e-5_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_moe_nmd640_enc3e-5_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_enc3e-5_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_enc3e-5_auxenc.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "enc3e-4",
+    "aux_mode": "detach",
+    "exp": "archhpo_moe_nmd640_enc3e-4_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "encoder-lr": "3e-4",
+      "exp-name": "archhpo_moe_nmd640_enc3e-4_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_enc3e-4_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_enc3e-4_detach.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "enc3e-4",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_moe_nmd640_enc3e-4_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "encoder-lr": "3e-4",
+      "exp-name": "archhpo_moe_nmd640_enc3e-4_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_enc3e-4_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_enc3e-4_auxenc.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "lr1e-4_enc3e-5",
+    "aux_mode": "detach",
+    "exp": "archhpo_moe_nmd640_lr1e-4_enc3e-5_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "learning-rate": "1e-4",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_moe_nmd640_lr1e-4_enc3e-5_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_lr1e-4_enc3e-5_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_lr1e-4_enc3e-5_detach.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "lr1e-4_enc3e-5",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_moe_nmd640_lr1e-4_enc3e-5_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "learning-rate": "1e-4",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_moe_nmd640_lr1e-4_enc3e-5_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_lr1e-4_enc3e-5_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_lr1e-4_enc3e-5_auxenc.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "drop0.05",
+    "aux_mode": "detach",
+    "exp": "archhpo_moe_nmd640_drop0.05_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "dropout-rate": "0.05",
+      "exp-name": "archhpo_moe_nmd640_drop0.05_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_drop0.05_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_drop0.05_detach.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "drop0.05",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_moe_nmd640_drop0.05_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "dropout-rate": "0.05",
+      "exp-name": "archhpo_moe_nmd640_drop0.05_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_drop0.05_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_drop0.05_auxenc.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "drop0.30",
+    "aux_mode": "detach",
+    "exp": "archhpo_moe_nmd640_drop0.30_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "dropout-rate": "0.30",
+      "exp-name": "archhpo_moe_nmd640_drop0.30_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_drop0.30_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_drop0.30_detach.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "drop0.30",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_moe_nmd640_drop0.30_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "dropout-rate": "0.30",
+      "exp-name": "archhpo_moe_nmd640_drop0.30_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_drop0.30_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_drop0.30_auxenc.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.05",
+    "aux_mode": "detach",
+    "exp": "archhpo_moe_nmd640_fixed_w0.05_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.05",
+      "exp-name": "archhpo_moe_nmd640_fixed_w0.05_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_fixed_w0.05_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_fixed_w0.05_detach.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.05",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_moe_nmd640_fixed_w0.05_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.05",
+      "exp-name": "archhpo_moe_nmd640_fixed_w0.05_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_fixed_w0.05_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_fixed_w0.05_auxenc.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.10",
+    "aux_mode": "detach",
+    "exp": "archhpo_moe_nmd640_fixed_w0.10_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.10",
+      "exp-name": "archhpo_moe_nmd640_fixed_w0.10_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_fixed_w0.10_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_fixed_w0.10_detach.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.10",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_moe_nmd640_fixed_w0.10_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.10",
+      "exp-name": "archhpo_moe_nmd640_fixed_w0.10_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_fixed_w0.10_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_fixed_w0.10_auxenc.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.25",
+    "aux_mode": "detach",
+    "exp": "archhpo_moe_nmd640_fixed_w0.25_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.25",
+      "exp-name": "archhpo_moe_nmd640_fixed_w0.25_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_fixed_w0.25_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_fixed_w0.25_detach.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.25",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_moe_nmd640_fixed_w0.25_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.25",
+      "exp-name": "archhpo_moe_nmd640_fixed_w0.25_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_fixed_w0.25_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_fixed_w0.25_auxenc.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.50",
+    "aux_mode": "detach",
+    "exp": "archhpo_moe_nmd640_fixed_w0.50_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.50",
+      "exp-name": "archhpo_moe_nmd640_fixed_w0.50_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_fixed_w0.50_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_fixed_w0.50_detach.log"
+  },
+  {
+    "arch": "moe",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.50",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_moe_nmd640_fixed_w0.50_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "moe",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.50",
+      "exp-name": "archhpo_moe_nmd640_fixed_w0.50_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_moe_nmd640_fixed_w0.50_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_moe_nmd640_fixed_w0.50_auxenc.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "default",
+    "aux_mode": "noaux",
+    "exp": "archhpo_residual_nmd0_default_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "exp-name": "archhpo_residual_nmd0_default_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd0_default_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd0_default_noaux.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "enc3e-5",
+    "aux_mode": "noaux",
+    "exp": "archhpo_residual_nmd0_enc3e-5_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_residual_nmd0_enc3e-5_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd0_enc3e-5_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd0_enc3e-5_noaux.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "enc3e-4",
+    "aux_mode": "noaux",
+    "exp": "archhpo_residual_nmd0_enc3e-4_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "encoder-lr": "3e-4",
+      "exp-name": "archhpo_residual_nmd0_enc3e-4_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd0_enc3e-4_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd0_enc3e-4_noaux.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "lr1e-4_enc3e-5",
+    "aux_mode": "noaux",
+    "exp": "archhpo_residual_nmd0_lr1e-4_enc3e-5_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "learning-rate": "1e-4",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_residual_nmd0_lr1e-4_enc3e-5_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd0_lr1e-4_enc3e-5_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd0_lr1e-4_enc3e-5_noaux.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "drop0.05",
+    "aux_mode": "noaux",
+    "exp": "archhpo_residual_nmd0_drop0.05_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "dropout-rate": "0.05",
+      "exp-name": "archhpo_residual_nmd0_drop0.05_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd0_drop0.05_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd0_drop0.05_noaux.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd0",
+    "n_md": 0,
+    "label": "drop0.30",
+    "aux_mode": "noaux",
+    "exp": "archhpo_residual_nmd0_drop0.30_noaux",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "dropout-rate": "0.30",
+      "exp-name": "archhpo_residual_nmd0_drop0.30_noaux",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd0_drop0.30_noaux",
+      "md-source": "none",
+      "n-tm-list": "57"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd0_drop0.30_noaux.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "default",
+    "aux_mode": "detach",
+    "exp": "archhpo_residual_nmd640_default_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "exp-name": "archhpo_residual_nmd640_default_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_default_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_default_detach.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "default",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_residual_nmd640_default_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "exp-name": "archhpo_residual_nmd640_default_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_default_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_default_auxenc.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "enc3e-5",
+    "aux_mode": "detach",
+    "exp": "archhpo_residual_nmd640_enc3e-5_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_residual_nmd640_enc3e-5_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_enc3e-5_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_enc3e-5_detach.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "enc3e-5",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_residual_nmd640_enc3e-5_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_residual_nmd640_enc3e-5_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_enc3e-5_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_enc3e-5_auxenc.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "enc3e-4",
+    "aux_mode": "detach",
+    "exp": "archhpo_residual_nmd640_enc3e-4_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "encoder-lr": "3e-4",
+      "exp-name": "archhpo_residual_nmd640_enc3e-4_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_enc3e-4_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_enc3e-4_detach.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "enc3e-4",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_residual_nmd640_enc3e-4_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "encoder-lr": "3e-4",
+      "exp-name": "archhpo_residual_nmd640_enc3e-4_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_enc3e-4_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_enc3e-4_auxenc.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "lr1e-4_enc3e-5",
+    "aux_mode": "detach",
+    "exp": "archhpo_residual_nmd640_lr1e-4_enc3e-5_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "learning-rate": "1e-4",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_residual_nmd640_lr1e-4_enc3e-5_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_lr1e-4_enc3e-5_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_lr1e-4_enc3e-5_detach.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "lr1e-4_enc3e-5",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_residual_nmd640_lr1e-4_enc3e-5_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "learning-rate": "1e-4",
+      "encoder-lr": "3e-5",
+      "exp-name": "archhpo_residual_nmd640_lr1e-4_enc3e-5_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_lr1e-4_enc3e-5_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_lr1e-4_enc3e-5_auxenc.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "drop0.05",
+    "aux_mode": "detach",
+    "exp": "archhpo_residual_nmd640_drop0.05_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "dropout-rate": "0.05",
+      "exp-name": "archhpo_residual_nmd640_drop0.05_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_drop0.05_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_drop0.05_detach.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "drop0.05",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_residual_nmd640_drop0.05_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "dropout-rate": "0.05",
+      "exp-name": "archhpo_residual_nmd640_drop0.05_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_drop0.05_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_drop0.05_auxenc.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "drop0.30",
+    "aux_mode": "detach",
+    "exp": "archhpo_residual_nmd640_drop0.30_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "dropout-rate": "0.30",
+      "exp-name": "archhpo_residual_nmd640_drop0.30_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_drop0.30_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_drop0.30_detach.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "drop0.30",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_residual_nmd640_drop0.30_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "dropout-rate": "0.30",
+      "exp-name": "archhpo_residual_nmd640_drop0.30_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_drop0.30_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_drop0.30_auxenc.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.05",
+    "aux_mode": "detach",
+    "exp": "archhpo_residual_nmd640_fixed_w0.05_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.05",
+      "exp-name": "archhpo_residual_nmd640_fixed_w0.05_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_fixed_w0.05_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_fixed_w0.05_detach.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.05",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_residual_nmd640_fixed_w0.05_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.05",
+      "exp-name": "archhpo_residual_nmd640_fixed_w0.05_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_fixed_w0.05_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_fixed_w0.05_auxenc.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.10",
+    "aux_mode": "detach",
+    "exp": "archhpo_residual_nmd640_fixed_w0.10_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.10",
+      "exp-name": "archhpo_residual_nmd640_fixed_w0.10_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_fixed_w0.10_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_fixed_w0.10_detach.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.10",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_residual_nmd640_fixed_w0.10_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.10",
+      "exp-name": "archhpo_residual_nmd640_fixed_w0.10_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_fixed_w0.10_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_fixed_w0.10_auxenc.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.25",
+    "aux_mode": "detach",
+    "exp": "archhpo_residual_nmd640_fixed_w0.25_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.25",
+      "exp-name": "archhpo_residual_nmd640_fixed_w0.25_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_fixed_w0.25_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_fixed_w0.25_detach.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.25",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_residual_nmd640_fixed_w0.25_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.25",
+      "exp-name": "archhpo_residual_nmd640_fixed_w0.25_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_fixed_w0.25_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_fixed_w0.25_auxenc.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.50",
+    "aux_mode": "detach",
+    "exp": "archhpo_residual_nmd640_fixed_w0.50_detach",
+    "env": {
+      "DETACH_AUX_ENCODER": "true"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.50",
+      "exp-name": "archhpo_residual_nmd640_fixed_w0.50_detach",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_fixed_w0.50_detach",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_fixed_w0.50_detach.log"
+  },
+  {
+    "arch": "residual",
+    "condition": "nmd640",
+    "n_md": 640,
+    "label": "fixed_w0.50",
+    "aux_mode": "auxenc",
+    "exp": "archhpo_residual_nmd640_fixed_w0.50_auxenc",
+    "env": {
+      "DETACH_AUX_ENCODER": "false"
+    },
+    "options": {
+      "n-runs": "3",
+      "train-mode": "mtl",
+      "selection-scope": "tm",
+      "final-eval-split": "val",
+      "encoder-mode": "hot",
+      "ddg-source": "none",
+      "model-arch": "residual",
+      "mtl-weight-mode": "fixed",
+      "md-weight": "0.50",
+      "exp-name": "archhpo_residual_nmd640_fixed_w0.50_auxenc",
+      "result-dir": "/home/yasu/tmp/sim2real/results/arch_search/archhpo_residual_nmd640_fixed_w0.50_auxenc",
+      "md-source": "MD_Q_HPHIL_400K",
+      "n-md-list": "640"
+    },
+    "log": "/home/yasu/tmp/sim2real/logs/arch_search/archhpo_residual_nmd640_fixed_w0.50_auxenc.log"
+  }
+]

@@ -1,0 +1,11 @@
+% Standalone preview of Fig.1 concept diagram.
+% Build (e.g. on Overleaf or any TeX install):
+%   pdflatex fig1_concept_standalone.tex
+% Then view fig1_concept_standalone.pdf. This is only for checking the drawing;
+% the paper itself includes figures/fig1_concept.tex via \input inside a figure env.
+\documentclass[border=6pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds,shapes.geometric,calc}
+\begin{document}
+\input{fig1_concept}
+\end{document}

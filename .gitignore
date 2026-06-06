@@ -1,5 +1,6 @@
 # Local artifacts (large, reproducible)
 data/md/rosetta_traj/
+zenodo/
 models/esm2_t6_8M_vhh/checkpoint-*
 models/esm2_t6_8M_vhh/*.safetensors
 models/esm2_t6_8M_vhh/training_args.bin
@@ -18,9 +19,19 @@ plot/*.pdf
 !plot/fig_*.pdf
 logs/
 # results/ contains structured per-experiment JSON sidecars (small, reproducibility-valuable);
-# we keep scaling.json but exclude bulky checkpoints if any drop here.
+# keep summaries such as scaling.json, but exclude bulky checkpoints.
 results/*/checkpoints/
 results/*/supervised/
+results/**/checkpoints/
+results/**/supervised/
+results/**/checkpoint-*/
+results/**/*.safetensors
+results/**/optimizer.pt
+results/**/rng_state.pth
+results/**/scaler.pt
+results/**/scheduler.pt
+results/**/training_args.bin
+results/_smoke_*/
 
 # Editor / OS
 .DS_Store
