@@ -21,6 +21,7 @@ The reproducible downstream scope includes:
 The workflow entry point is:
 
 ```bash
+uv sync
 uv run python scripts/reproduce_paper_results.py --stage all --gpus 0,1,2,3,4,5,6
 ```
 
@@ -62,6 +63,7 @@ uv run python scripts/reproduce_paper_results.py --stage all --force --dry-run
 Regenerate only the figures and PDF from existing summary JSON files:
 
 ```bash
+uv sync
 uv run python scripts/reproduce_paper_results.py --stage figures
 ```
 
@@ -113,3 +115,18 @@ model explicitly before a full rerun.
 All output claims should be made from tracked summary JSON files and the
 generated tables under `paper/analysis/supplementary/tables/`, not from
 untracked scratch run directories.
+
+## Environment
+
+`uv sync` installs the packages needed for the manuscript-facing workflow:
+model training, candidate-setting searches, summary aggregation, figure
+generation, and MD-feature extraction from raw trajectories. Notebook support is
+optional and can be installed with:
+
+```bash
+uv sync --extra notebooks
+```
+
+The PDF typesetting step is launched through `scripts/typeset_paper.py`. It
+uses `tectonic` from `PATH` or from the `TECTONIC` environment variable. If
+Tectonic is unavailable, it falls back to `pdflatex` plus `bibtex`.

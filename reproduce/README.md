@@ -39,6 +39,7 @@ downstream work.
 Check fixed inputs:
 
 ```bash
+uv sync
 uv run python scripts/reproduce_paper_results.py --stage preflight
 ```
 
@@ -72,6 +73,10 @@ Regenerate figures and the manuscript PDF from existing summaries:
 ```bash
 uv run python scripts/reproduce_paper_results.py --stage figures --force
 ```
+
+PDF typesetting is handled by `scripts/typeset_paper.py`. The script uses
+`tectonic` from `PATH` or `TECTONIC=/path/to/tectonic`; if Tectonic is not
+available, it tries `pdflatex` plus `bibtex`.
 
 ## Adding A New Calculation
 

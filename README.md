@@ -22,20 +22,76 @@
 [uv](https://docs.astral.sh/uv/) で依存関係を管理しています。
 
 ```bash
-uv sync                # 仮想環境作成 + 依存関係インストール
-uv sync --extra plot   # 可視化用 (matplotlib, seaborn, jupyter) も含める
+uv sync                    # 仮想環境作成 + 解析・学習・図生成の依存関係をインストール
+uv sync --extra notebooks  # notebook を使う場合のみ
 ```
 
-GPU は CUDA 12.4 系を想定。pyproject.toml の `[[tool.uv.index]]` で PyTorch cu124 を指定済み。
+Linux x86_64 の GPU 環境では PyTorch cu124 wheel を使います。Mac などの非 Linux 環境では
+通常の PyPI wheel を使う設定にしてあります。
+`uv sync` には、論文の下流再現に使う学習・集計・図生成パッケージに加えて、
+raw trajectory から MD-derived 特徴量を再抽出するための `mdtraj` と `MDAnalysis` も含めています。
 
 ## クイックスタート
 
-### 1. データ準備（MD 系を使う場合のみ）
+### 0. 論文解析・図の再現
 
-NbBench/DDG データはリポジトリに同梱済み。MD-derived 特徴量は MD trajectory から抽出する必要あり：
+新しいマシンでは、まず以下を実行します。
 
 ```bash
-# 上流の MD パイプライン (/home/yasu/tmp/mdclaw/job_nano_*) から特徴量を一括抽出
+git clone https://github.com/matsunagalab/sim2real.git
+cd sim2real
+uv sync
+uv run python scripts/reproduce_paper_results.py --check-only
+```
+
+`--check-only` は、論文解析に必要な固定入力テーブルと、現在の論文図を作るための
+集計済み出力が揃っているかだけを確認します。raw trajectory は確認対象ではありません。
+
+GitHub に含まれる集計結果から、main figures、supplementary figures/tables、
+manuscript PDF を再生成するには以下を使います。
+
+```bash
+uv run python scripts/reproduce_paper_results.py --stage figures --force
+```
+
+既存の `results/*/scaling.json` から集計JSONと図を作り直す場合：
+
+```bash
+uv run python scripts/reproduce_paper_results.py \
+  --stage source-screen,ddg-head,md-candidate,abcd,architecture \
+  --collect-only
+uv run python scripts/reproduce_paper_results.py --stage figures --force
+```
+
+固定入力CSVからモデル学習、モデル選択、held-out test評価、解析集計、
+図作成まで下流計算をすべて再実行する場合：
+
+```bash
+uv run python scripts/reproduce_paper_results.py --stage all --gpus 0,1,2,3,4,5,6 --force
+```
+
+この full rerun は長時間かかります。ESM2 650M controls も含むため、GPU memory が
+不足するマシンでは失敗する可能性があります。`--gpus` には利用するGPU IDを
+カンマ区切りで指定します。単一GPUなら `--gpus 0` です。
+
+この workflow は、raw MD/FEP/Rosetta/ThermoMPNN 計算そのものは再実行しません。
+それらから作った処理済みCSVを固定入力として、学習・モデル選択・テスト評価・図生成を再実行します。
+PDF生成には `tectonic` か `pdflatex`/`bibtex` がPATH上に必要です。`tectonic` の
+場所を明示したい場合は `TECTONIC=/path/to/tectonic` を設定します。
+
+再現workflowの定義は `reproduce/manuscript_results.yaml`、実行器は
+`scripts/reproduce_paper_results.py` です。各supplementary panelがどの表から作られるかは
+`paper/analysis/supplementary/MANIFEST.tsv` に記録されます。
+
+### 1. データ準備（MD 系を使う場合のみ）
+
+NbBench、mutation-effect source labels、MD-derived 特徴量CSVはリポジトリに同梱済みです。
+論文図の再生成や下流学習の再実行だけなら、Zenodo の raw trajectory は不要です。
+
+raw trajectory から MD-derived 特徴量CSV自体を再抽出する場合のみ、Zenodo の raw data を
+配置してから以下を実行します。
+
+```bash
 uv run python scripts/extract_all_features.py
 ```
 

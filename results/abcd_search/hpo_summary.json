@@ -24,8 +24,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_latent_default.log",
-    "gpu": "0",
-    "rc": 0,
     "val_mae": 6.538730471663684,
     "ci_width": 1.50019470427881,
     "best_n": 320,
@@ -79,8 +77,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_latent_drop0.05.log",
-    "gpu": "4",
-    "rc": 0,
     "val_mae": 6.363491863827411,
     "ci_width": 1.488379643234782,
     "best_n": 320,
@@ -134,8 +130,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_latent_drop0.30.log",
-    "gpu": "5",
-    "rc": 0,
     "val_mae": 6.488691936247819,
     "ci_width": 1.5820748455174893,
     "best_n": 320,
@@ -189,8 +183,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_latent_enc3e-4.log",
-    "gpu": "2",
-    "rc": 0,
     "val_mae": 6.704469037476979,
     "ci_width": 1.5494829865558275,
     "best_n": 320,
@@ -244,8 +236,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_latent_enc3e-5.log",
-    "gpu": "1",
-    "rc": 0,
     "val_mae": 6.097047092843461,
     "ci_width": 1.4341409519269348,
     "best_n": 320,
@@ -299,8 +289,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_latent_fixed.log",
-    "gpu": "6",
-    "rc": 0,
     "val_mae": 6.736004230878185,
     "ci_width": 1.614705325987364,
     "best_n": 320,
@@ -355,8 +343,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_latent_lr1e-4_enc3e-5.log",
-    "gpu": "3",
-    "rc": 0,
     "val_mae": 5.971543993390232,
     "ci_width": 1.4473036100094134,
     "best_n": 320,
@@ -409,8 +395,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_residual_default.log",
-    "gpu": "0",
-    "rc": 0,
     "val_mae": 6.714780594963499,
     "ci_width": 1.5148271849800174,
     "best_n": 320,
@@ -464,8 +448,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_residual_drop0.05.log",
-    "gpu": "4",
-    "rc": 0,
     "val_mae": 6.396742606608214,
     "ci_width": 1.5547203750636944,
     "best_n": 320,
@@ -519,8 +501,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_residual_drop0.30.log",
-    "gpu": "5",
-    "rc": 0,
     "val_mae": 6.412469932604371,
     "ci_width": 1.4905397046692048,
     "best_n": 320,
@@ -574,8 +554,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_residual_enc3e-4.log",
-    "gpu": "2",
-    "rc": 0,
     "val_mae": 6.917352487414932,
     "ci_width": 1.499696810028051,
     "best_n": 320,
@@ -629,8 +607,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_residual_enc3e-5.log",
-    "gpu": "1",
-    "rc": 0,
     "val_mae": 6.005870989788632,
     "ci_width": 1.4185351296700492,
     "best_n": 320,
@@ -684,8 +660,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_residual_fixed.log",
-    "gpu": "6",
-    "rc": 0,
     "val_mae": 6.564039063026688,
     "ci_width": 1.5528533176356492,
     "best_n": 320,
@@ -740,8 +714,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_residual_lr1e-4_enc3e-5.log",
-    "gpu": "3",
-    "rc": 0,
     "val_mae": 6.174611850322193,
     "ci_width": 1.4755769311368416,
     "best_n": 320,
@@ -794,8 +766,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_shared_default.log",
-    "gpu": "0",
-    "rc": 0,
     "val_mae": 6.434275753815822,
     "ci_width": 1.4676079679787462,
     "best_n": 320,
@@ -849,8 +819,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_shared_drop0.05.log",
-    "gpu": "4",
-    "rc": 0,
     "val_mae": 6.281046137587658,
     "ci_width": 1.5282292681164202,
     "best_n": 320,
@@ -904,8 +872,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_shared_drop0.30.log",
-    "gpu": "5",
-    "rc": 0,
     "val_mae": 6.496049723207019,
     "ci_width": 1.4593918342570928,
     "best_n": 320,
@@ -959,8 +925,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_shared_enc3e-4.log",
-    "gpu": "2",
-    "rc": 0,
     "val_mae": 6.561218833645692,
     "ci_width": 1.460942872220392,
     "best_n": 320,
@@ -1014,8 +978,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_shared_enc3e-5.log",
-    "gpu": "1",
-    "rc": 0,
     "val_mae": 5.8738843708806785,
     "ci_width": 1.4542103454885016,
     "best_n": 320,
@@ -1069,8 +1031,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_shared_fixed.log",
-    "gpu": "6",
-    "rc": 0,
     "val_mae": 6.142408570500959,
     "ci_width": 1.5429994342127582,
     "best_n": 320,
@@ -1125,8 +1085,6 @@
       "md-source": "none"
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_B_ddg320_shared_lr1e-4_enc3e-5.log",
-    "gpu": "3",
-    "rc": 0,
     "val_mae": 6.228217776860959,
     "ci_width": 1.4438100368909934,
     "best_n": 320,
@@ -1180,8 +1138,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_default.log",
-    "gpu": "6",
-    "rc": 0,
     "val_mae": 7.041806749057206,
     "ci_width": 1.5009340323697504,
     "best_n": 640,
@@ -1236,8 +1192,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_drop0.05.log",
-    "gpu": "3",
-    "rc": 0,
     "val_mae": 6.617139766490235,
     "ci_width": 1.5180036161500343,
     "best_n": 640,
@@ -1292,8 +1246,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_drop0.30.log",
-    "gpu": "4",
-    "rc": 0,
     "val_mae": 6.53084361409878,
     "ci_width": 1.5055832295915739,
     "best_n": 640,
@@ -1348,8 +1300,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_enc3e-4.log",
-    "gpu": "1",
-    "rc": 0,
     "val_mae": 7.252180175506869,
     "ci_width": 1.526398679645336,
     "best_n": 640,
@@ -1404,8 +1354,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_enc3e-5.log",
-    "gpu": "0",
-    "rc": 0,
     "val_mae": 6.062633766445788,
     "ci_width": 1.404723992269104,
     "best_n": 640,
@@ -1461,8 +1409,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_fixed_w0.05.log",
-    "gpu": "5",
-    "rc": 0,
     "val_mae": 6.67815630804955,
     "ci_width": 1.6601426757585855,
     "best_n": 640,
@@ -1518,8 +1464,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_fixed_w0.10.log",
-    "gpu": "6",
-    "rc": 0,
     "val_mae": 6.472593477563561,
     "ci_width": 1.6387561294420099,
     "best_n": 640,
@@ -1575,8 +1519,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_fixed_w0.25.log",
-    "gpu": "0",
-    "rc": 0,
     "val_mae": 6.645692882734026,
     "ci_width": 1.5488272432020231,
     "best_n": 640,
@@ -1632,8 +1574,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_fixed_w0.50.log",
-    "gpu": "1",
-    "rc": 0,
     "val_mae": 6.5854115324645015,
     "ci_width": 1.468386766558023,
     "best_n": 640,
@@ -1689,8 +1629,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_latent_lr1e-4_enc3e-5.log",
-    "gpu": "2",
-    "rc": 0,
     "val_mae": 6.2293835135396876,
     "ci_width": 1.4705144526273806,
     "best_n": 640,
@@ -1744,8 +1682,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_default.log",
-    "gpu": "2",
-    "rc": 0,
     "val_mae": 6.828238822680669,
     "ci_width": 1.5883599362358725,
     "best_n": 640,
@@ -1800,8 +1736,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_drop0.05.log",
-    "gpu": "6",
-    "rc": 0,
     "val_mae": 6.412699753706247,
     "ci_width": 1.5026382610234155,
     "best_n": 640,
@@ -1856,8 +1790,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_drop0.30.log",
-    "gpu": "0",
-    "rc": 0,
     "val_mae": 6.760431404968741,
     "ci_width": 1.4542603906360245,
     "best_n": 640,
@@ -1912,8 +1844,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_enc3e-4.log",
-    "gpu": "4",
-    "rc": 0,
     "val_mae": 7.142180130430853,
     "ci_width": 1.5370997213823916,
     "best_n": 640,
@@ -1968,8 +1898,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_enc3e-5.log",
-    "gpu": "3",
-    "rc": 0,
     "val_mae": 6.055061744171258,
     "ci_width": 1.4932814592952361,
     "best_n": 640,
@@ -2025,8 +1953,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_fixed_w0.05.log",
-    "gpu": "1",
-    "rc": 0,
     "val_mae": 6.561120530096439,
     "ci_width": 1.6228230482536414,
     "best_n": 640,
@@ -2082,8 +2008,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_fixed_w0.10.log",
-    "gpu": "2",
-    "rc": 0,
     "val_mae": 6.757681394029981,
     "ci_width": 1.5985360260311898,
     "best_n": 640,
@@ -2139,8 +2063,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_fixed_w0.25.log",
-    "gpu": "3",
-    "rc": 0,
     "val_mae": 6.909147148256614,
     "ci_width": 1.4836718378654918,
     "best_n": 640,
@@ -2196,8 +2118,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_fixed_w0.50.log",
-    "gpu": "4",
-    "rc": 0,
     "val_mae": 6.77120550258979,
     "ci_width": 1.6368013036852345,
     "best_n": 640,
@@ -2253,8 +2173,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_latent_lr1e-4_enc3e-5.log",
-    "gpu": "5",
-    "rc": 0,
     "val_mae": 6.085969323649333,
     "ci_width": 1.4782792613412452,
     "best_n": 640,
@@ -2308,8 +2226,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_default.log",
-    "gpu": "0",
-    "rc": 0,
     "val_mae": 6.937136529561965,
     "ci_width": 1.581465793249654,
     "best_n": 640,
@@ -2364,8 +2280,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_drop0.05.log",
-    "gpu": "4",
-    "rc": 0,
     "val_mae": 7.056148761418814,
     "ci_width": 1.6279641850193238,
     "best_n": 640,
@@ -2420,8 +2334,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_drop0.30.log",
-    "gpu": "5",
-    "rc": 0,
     "val_mae": 6.446198939118453,
     "ci_width": 1.5401009715191414,
     "best_n": 640,
@@ -2476,8 +2388,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_enc3e-4.log",
-    "gpu": "2",
-    "rc": 0,
     "val_mae": 7.213316170160299,
     "ci_width": 1.5729586895159047,
     "best_n": 640,
@@ -2532,8 +2442,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_enc3e-5.log",
-    "gpu": "1",
-    "rc": 0,
     "val_mae": 5.753996148153012,
     "ci_width": 1.4012500861984583,
     "best_n": 640,
@@ -2589,8 +2497,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_fixed_w0.05.log",
-    "gpu": "6",
-    "rc": 0,
     "val_mae": 6.817933487758615,
     "ci_width": 1.49863078651829,
     "best_n": 640,
@@ -2646,8 +2552,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_fixed_w0.10.log",
-    "gpu": "0",
-    "rc": 0,
     "val_mae": 6.288460106277917,
     "ci_width": 1.4736950286074215,
     "best_n": 640,
@@ -2703,8 +2607,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_fixed_w0.25.log",
-    "gpu": "1",
-    "rc": 0,
     "val_mae": 6.851476509341137,
     "ci_width": 1.542804261081626,
     "best_n": 640,
@@ -2760,8 +2662,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_fixed_w0.50.log",
-    "gpu": "2",
-    "rc": 0,
     "val_mae": 6.664497653963649,
     "ci_width": 1.5893046200457839,
     "best_n": 640,
@@ -2817,8 +2717,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_q-hphil-400k_residual_lr1e-4_enc3e-5.log",
-    "gpu": "3",
-    "rc": 0,
     "val_mae": 6.276029725210823,
     "ci_width": 1.4254333596095314,
     "best_n": 640,
@@ -2872,8 +2770,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_default.log",
-    "gpu": "3",
-    "rc": 0,
     "val_mae": 7.366455865613577,
     "ci_width": 1.5258027294009722,
     "best_n": 640,
@@ -2928,8 +2824,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_drop0.05.log",
-    "gpu": "0",
-    "rc": 0,
     "val_mae": 6.710999115123933,
     "ci_width": 1.537597976585685,
     "best_n": 640,
@@ -2984,8 +2878,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_drop0.30.log",
-    "gpu": "1",
-    "rc": 0,
     "val_mae": 6.717051891262448,
     "ci_width": 1.5596154820991144,
     "best_n": 640,
@@ -3040,8 +2932,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_enc3e-4.log",
-    "gpu": "5",
-    "rc": 0,
     "val_mae": 7.168157203967487,
     "ci_width": 1.4873056501909723,
     "best_n": 640,
@@ -3096,8 +2986,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_enc3e-5.log",
-    "gpu": "4",
-    "rc": 0,
     "val_mae": 6.2200134728739,
     "ci_width": 1.3886387687105772,
     "best_n": 640,
@@ -3153,8 +3041,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_fixed_w0.05.log",
-    "gpu": "2",
-    "rc": 0,
     "val_mae": 6.481125899459951,
     "ci_width": 1.6007439330435416,
     "best_n": 640,
@@ -3210,8 +3096,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_fixed_w0.10.log",
-    "gpu": "3",
-    "rc": 0,
     "val_mae": 6.833055927428745,
     "ci_width": 1.6680525700308397,
     "best_n": 640,
@@ -3267,8 +3151,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_fixed_w0.25.log",
-    "gpu": "4",
-    "rc": 0,
     "val_mae": 6.483385943994698,
     "ci_width": 1.5564927624854494,
     "best_n": 640,
@@ -3324,8 +3206,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_fixed_w0.50.log",
-    "gpu": "5",
-    "rc": 0,
     "val_mae": 6.793023869350276,
     "ci_width": 1.586781172951719,
     "best_n": 640,
@@ -3381,8 +3261,6 @@
       "n-md-list": 640
     },
     "log": "/home/yasu/tmp/sim2real/logs/abcd_search/abcdhpo_D_ddg320_md640_rmsf-max_residual_lr1e-4_enc3e-5.log",
-    "gpu": "6",
-    "rc": 0,
     "val_mae": 6.276935653599061,
     "ci_width": 1.4196449065414463,
     "best_n": 640,

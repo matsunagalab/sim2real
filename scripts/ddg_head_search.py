@@ -122,7 +122,7 @@ def build_final_jobs(
     for mode in modes:
         candidates = [
             r for r in rows
-            if r.get("ddg_head_mode") == mode and r.get("rc") == 0 and "val_mae" in r
+            if r.get("ddg_head_mode") == mode and r.get("rc", 0) == 0 and "val_mae" in r
         ]
         if not candidates:
             continue
@@ -164,6 +164,8 @@ def collect_job_result(job: dict, gpu: str | None = None, rc: int | None = None)
 
     json_path = scaling_json_path(job["exp"])
     if json_path.exists():
+        if rc is None:
+            row["rc"] = 0
         data = json.loads(json_path.read_text())
         metric_key = "test_mae" if data["args"].get("final_eval_split") == "test" else "val_mae"
         row[metric_key] = data["best"]["mae"]

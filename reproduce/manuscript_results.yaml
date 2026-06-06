@@ -521,12 +521,7 @@ stages:
 
     - name: LaTeX typesetting
       type: command
-      workdir: paper/tex
-      command:
-        - env
-        - XDG_CACHE_HOME=/tmp/tectonic-cache
-        - /tmp/sim2real-latex/bin/tectonic
-        - main.tex
+      command: [uv, run, python, scripts/typeset_paper.py]
       outputs:
         - paper/tex/main.pdf
 

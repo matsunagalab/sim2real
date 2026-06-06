@@ -34,6 +34,7 @@ To rebuild all manuscript-facing outputs downstream of those fixed inputs, run
 from the repository root:
 
 ```bash
+uv sync
 uv run python scripts/reproduce_paper_results.py --stage all --gpus 0,1,2,3,4,5,6
 ```
 
@@ -47,7 +48,7 @@ uv run python plot/make_supplementary_figures.py
 Then typeset from `paper/tex/`:
 
 ```bash
-pdflatex main.tex && bibtex main && pdflatex main.tex && pdflatex main.tex
+uv run python scripts/typeset_paper.py
 ```
 
 The figure builders only read existing results and source data. They do not

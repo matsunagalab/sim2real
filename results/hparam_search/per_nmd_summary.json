@@ -17,8 +17,6 @@
       "md-source": "none",
       "n-tm-list": "57"
     },
-    "gpu": "2",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd0_enc3e-4.log",
     "best_n": 57,
     "val_mae": 6.037089014818779,
@@ -64,8 +62,6 @@
       "md-source": "none",
       "n-tm-list": "57"
     },
-    "gpu": "4",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd0_drop0.05.log",
     "best_n": 57,
     "val_mae": 6.171636347063002,
@@ -112,8 +108,6 @@
       "md-source": "none",
       "n-tm-list": "57"
     },
-    "gpu": "6",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd0_fixed_w0.05.log",
     "best_n": 57,
     "val_mae": 6.2711583642976425,
@@ -160,8 +154,6 @@
       "md-source": "none",
       "n-tm-list": "57"
     },
-    "gpu": "0",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd0_fixed_w0.10.log",
     "best_n": 57,
     "val_mae": 6.2711583642976425,
@@ -208,8 +200,6 @@
       "md-source": "none",
       "n-tm-list": "57"
     },
-    "gpu": "1",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd0_fixed_w0.25.log",
     "best_n": 57,
     "val_mae": 6.2711583642976425,
@@ -256,8 +246,6 @@
       "md-source": "none",
       "n-tm-list": "57"
     },
-    "gpu": "2",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd0_fixed_w0.50.log",
     "best_n": 57,
     "val_mae": 6.2711583642976425,
@@ -302,8 +290,6 @@
       "md-source": "none",
       "n-tm-list": "57"
     },
-    "gpu": "0",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd0_default.log",
     "best_n": 57,
     "val_mae": 6.298761604407492,
@@ -349,8 +335,6 @@
       "md-source": "none",
       "n-tm-list": "57"
     },
-    "gpu": "5",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd0_drop0.30.log",
     "best_n": 57,
     "val_mae": 6.333882913124259,
@@ -397,8 +381,6 @@
       "md-source": "none",
       "n-tm-list": "57"
     },
-    "gpu": "3",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd0_lr1e-4_enc3e-5.log",
     "best_n": 57,
     "val_mae": 6.3908145168803845,
@@ -444,8 +426,6 @@
       "md-source": "none",
       "n-tm-list": "57"
     },
-    "gpu": "1",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd0_enc3e-5.log",
     "best_n": 57,
     "val_mae": 6.477950848078367,
@@ -492,8 +472,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "10"
     },
-    "gpu": "3",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd10_fixed_w0.10.log",
     "best_n": 10,
     "val_mae": 5.8594143037656,
@@ -540,8 +518,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "10"
     },
-    "gpu": "4",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd10_fixed_w0.25.log",
     "best_n": 10,
     "val_mae": 6.031883931982266,
@@ -588,8 +564,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "10"
     },
-    "gpu": "5",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd10_fixed_w0.50.log",
     "best_n": 10,
     "val_mae": 6.277976465774654,
@@ -634,8 +608,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "10"
     },
-    "gpu": "3",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd10_default.log",
     "best_n": 10,
     "val_mae": 6.301851542805878,
@@ -682,8 +654,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "10"
     },
-    "gpu": "2",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd10_fixed_w0.05.log",
     "best_n": 10,
     "val_mae": 6.3659729894212544,
@@ -729,8 +699,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "10"
     },
-    "gpu": "1",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd10_drop0.30.log",
     "best_n": 10,
     "val_mae": 6.464070031624731,
@@ -776,8 +744,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "10"
     },
-    "gpu": "4",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd10_enc3e-5.log",
     "best_n": 10,
     "val_mae": 6.47355691977641,
@@ -824,8 +790,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "10"
     },
-    "gpu": "6",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd10_lr1e-4_enc3e-5.log",
     "best_n": 10,
     "val_mae": 6.638574177296132,
@@ -871,8 +835,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "10"
     },
-    "gpu": "5",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd10_enc3e-4.log",
     "best_n": 10,
     "val_mae": 6.650551841715304,
@@ -918,8 +880,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "10"
     },
-    "gpu": "0",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd10_drop0.05.log",
     "best_n": 10,
     "val_mae": 6.713092673611861,
@@ -966,8 +926,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "40"
     },
-    "gpu": "1",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd40_fixed_w0.50.log",
     "best_n": 40,
     "val_mae": 6.0208548425080295,
@@ -1012,8 +970,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "40"
     },
-    "gpu": "6",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd40_default.log",
     "best_n": 40,
     "val_mae": 6.0752277475263305,
@@ -1059,8 +1015,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "40"
     },
-    "gpu": "3",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd40_drop0.05.log",
     "best_n": 40,
     "val_mae": 6.147812291553784,
@@ -1107,8 +1061,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "40"
     },
-    "gpu": "5",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd40_fixed_w0.05.log",
     "best_n": 40,
     "val_mae": 6.207982511047324,
@@ -1155,8 +1107,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "40"
     },
-    "gpu": "6",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd40_fixed_w0.10.log",
     "best_n": 40,
     "val_mae": 6.220797808230887,
@@ -1202,8 +1152,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "40"
     },
-    "gpu": "4",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd40_drop0.30.log",
     "best_n": 40,
     "val_mae": 6.246529351292914,
@@ -1249,8 +1197,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "40"
     },
-    "gpu": "0",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd40_enc3e-5.log",
     "best_n": 40,
     "val_mae": 6.297628631970974,
@@ -1297,8 +1243,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "40"
     },
-    "gpu": "0",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd40_fixed_w0.25.log",
     "best_n": 40,
     "val_mae": 6.30598947849855,
@@ -1344,8 +1288,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "40"
     },
-    "gpu": "1",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd40_enc3e-4.log",
     "best_n": 40,
     "val_mae": 6.361154592575848,
@@ -1392,8 +1334,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "40"
     },
-    "gpu": "2",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd40_lr1e-4_enc3e-5.log",
     "best_n": 40,
     "val_mae": 6.386425512175013,
@@ -1440,8 +1380,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "80"
     },
-    "gpu": "3",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd80_fixed_w0.25.log",
     "best_n": 80,
     "val_mae": 6.101212445500243,
@@ -1487,8 +1425,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "80"
     },
-    "gpu": "6",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd80_drop0.05.log",
     "best_n": 80,
     "val_mae": 6.150079503313083,
@@ -1535,8 +1471,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "80"
     },
-    "gpu": "4",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd80_fixed_w0.50.log",
     "best_n": 80,
     "val_mae": 6.195503441970581,
@@ -1583,8 +1517,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "80"
     },
-    "gpu": "5",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd80_lr1e-4_enc3e-5.log",
     "best_n": 80,
     "val_mae": 6.226080301519794,
@@ -1629,8 +1561,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "80"
     },
-    "gpu": "2",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd80_default.log",
     "best_n": 80,
     "val_mae": 6.260171943363243,
@@ -1676,8 +1606,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "80"
     },
-    "gpu": "3",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd80_enc3e-5.log",
     "best_n": 80,
     "val_mae": 6.2910483643995425,
@@ -1724,8 +1652,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "80"
     },
-    "gpu": "1",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd80_fixed_w0.05.log",
     "best_n": 80,
     "val_mae": 6.303347202684976,
@@ -1772,8 +1698,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "80"
     },
-    "gpu": "2",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd80_fixed_w0.10.log",
     "best_n": 80,
     "val_mae": 6.340986479572217,
@@ -1819,8 +1743,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "80"
     },
-    "gpu": "4",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd80_enc3e-4.log",
     "best_n": 80,
     "val_mae": 6.569183560494252,
@@ -1866,8 +1788,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "80"
     },
-    "gpu": "0",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd80_drop0.30.log",
     "best_n": 80,
     "val_mae": 6.729959593960445,
@@ -1914,8 +1834,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "160"
     },
-    "gpu": "4",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd160_fixed_w0.05.log",
     "best_n": 160,
     "val_mae": 5.926905107067588,
@@ -1962,8 +1880,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "160"
     },
-    "gpu": "5",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd160_fixed_w0.10.log",
     "best_n": 160,
     "val_mae": 6.1815392630783705,
@@ -2009,8 +1925,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "160"
     },
-    "gpu": "2",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd160_drop0.05.log",
     "best_n": 160,
     "val_mae": 6.192084276018814,
@@ -2057,8 +1971,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "160"
     },
-    "gpu": "6",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd160_fixed_w0.25.log",
     "best_n": 160,
     "val_mae": 6.196473343057441,
@@ -2104,8 +2016,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "160"
     },
-    "gpu": "3",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd160_drop0.30.log",
     "best_n": 160,
     "val_mae": 6.216698887390933,
@@ -2152,8 +2062,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "160"
     },
-    "gpu": "1",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd160_lr1e-4_enc3e-5.log",
     "best_n": 160,
     "val_mae": 6.2488722063484525,
@@ -2198,8 +2106,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "160"
     },
-    "gpu": "5",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd160_default.log",
     "best_n": 160,
     "val_mae": 6.299540236939444,
@@ -2245,8 +2151,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "160"
     },
-    "gpu": "0",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd160_enc3e-4.log",
     "best_n": 160,
     "val_mae": 6.36099728326341,
@@ -2292,8 +2196,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "160"
     },
-    "gpu": "6",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd160_enc3e-5.log",
     "best_n": 160,
     "val_mae": 6.404054224338956,
@@ -2340,8 +2242,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "160"
     },
-    "gpu": "0",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd160_fixed_w0.50.log",
     "best_n": 160,
     "val_mae": 6.535224402160744,
@@ -2387,8 +2287,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "320"
     },
-    "gpu": "2",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd320_enc3e-5.log",
     "best_n": 320,
     "val_mae": 6.087377805250499,
@@ -2435,8 +2333,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "320"
     },
-    "gpu": "0",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd320_fixed_w0.05.log",
     "best_n": 320,
     "val_mae": 6.1854085683457765,
@@ -2483,8 +2379,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "320"
     },
-    "gpu": "3",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd320_fixed_w0.50.log",
     "best_n": 320,
     "val_mae": 6.186213690042775,
@@ -2530,8 +2424,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "320"
     },
-    "gpu": "5",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd320_drop0.05.log",
     "best_n": 320,
     "val_mae": 6.248876506385363,
@@ -2578,8 +2470,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "320"
     },
-    "gpu": "1",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd320_fixed_w0.10.log",
     "best_n": 320,
     "val_mae": 6.3775773572275885,
@@ -2626,8 +2516,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "320"
     },
-    "gpu": "4",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd320_lr1e-4_enc3e-5.log",
     "best_n": 320,
     "val_mae": 6.381232963256131,
@@ -2673,8 +2561,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "320"
     },
-    "gpu": "6",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd320_drop0.30.log",
     "best_n": 320,
     "val_mae": 6.415669638962974,
@@ -2721,8 +2607,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "320"
     },
-    "gpu": "2",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd320_fixed_w0.25.log",
     "best_n": 320,
     "val_mae": 6.431898030952517,
@@ -2768,8 +2652,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "320"
     },
-    "gpu": "3",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd320_enc3e-4.log",
     "best_n": 320,
     "val_mae": 6.448842594749164,
@@ -2814,8 +2696,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "320"
     },
-    "gpu": "1",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd320_default.log",
     "best_n": 320,
     "val_mae": 6.48878905707753,
@@ -2862,8 +2742,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "640"
     },
-    "gpu": "6",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd640_fixed_w0.50.log",
     "best_n": 640,
     "val_mae": 6.066590905525559,
@@ -2909,8 +2787,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "640"
     },
-    "gpu": "1",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd640_drop0.05.log",
     "best_n": 640,
     "val_mae": 6.133022461988052,
@@ -2955,8 +2831,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "640"
     },
-    "gpu": "4",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd640_default.log",
     "best_n": 640,
     "val_mae": 6.284268692803864,
@@ -3002,8 +2876,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "640"
     },
-    "gpu": "2",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd640_drop0.30.log",
     "best_n": 640,
     "val_mae": 6.289452013652235,
@@ -3049,8 +2921,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "640"
     },
-    "gpu": "5",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd640_enc3e-5.log",
     "best_n": 640,
     "val_mae": 6.316274248651229,
@@ -3097,8 +2967,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "640"
     },
-    "gpu": "0",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd640_lr1e-4_enc3e-5.log",
     "best_n": 640,
     "val_mae": 6.3270242359268165,
@@ -3145,8 +3013,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "640"
     },
-    "gpu": "5",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd640_fixed_w0.25.log",
     "best_n": 640,
     "val_mae": 6.475760047876047,
@@ -3193,8 +3059,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "640"
     },
-    "gpu": "3",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd640_fixed_w0.05.log",
     "best_n": 640,
     "val_mae": 6.7935840951900826,
@@ -3240,8 +3104,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "640"
     },
-    "gpu": "6",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd640_enc3e-4.log",
     "best_n": 640,
     "val_mae": 6.8355591616132045,
@@ -3288,8 +3150,6 @@
       "md-source": "MD_Q_HPHIL_400K",
       "n-md-list": "640"
     },
-    "gpu": "4",
-    "rc": 0,
     "log": "/home/yasu/tmp/sim2real/logs/hparam_search/hpo_nmd640_fixed_w0.10.log",
     "best_n": 640,
     "val_mae": 6.963152657313423,
