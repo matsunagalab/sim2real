@@ -68,60 +68,44 @@ paired-change estimates and intervals show 90\% bootstrap intervals.}
 \label{fig:scaling}
 \end{figure*}
 
-\subsection*{All-atom simulation labels differ in their transfer to Tm prediction}
+\subsection*{All-atom source labels depend on the simulated quantity}
 
-We then focused on two all-atom source labels. Training on experimental Tm alone
-reached a held-out test MAE of 6.61$^\circ$C. Adding FEP mutation free-energy
-labels cut this to 6.26$^\circ$C, a consistent paired $\Delta$MAE of
--0.35$^\circ$C (90\% confidence interval, -0.46 to -0.24$^\circ$C;
-Fig.~\ref{fig:simulation_comparison}); negative paired changes mean lower error
-than the Tm-only reference. The MD-derived Q-value went the other way, raising
-the test error to 6.73$^\circ$C (paired change, +0.12$^\circ$C; 90\% confidence
-interval, +0.01 to +0.22$^\circ$C). Both labels came from atomistic simulation,
-yet only the mutation free energy improved the experimental endpoint.
+The overview comparison showed a clear split between two all-atom source labels:
+FEP mutation free energies improved Tm prediction, whereas the simple MD-derived
+Q-value did not. We therefore asked whether the MD result reflected the
+trajectories themselves or the scalar label extracted from them. Fig.~\ref{fig:simulation_comparison}a
+places the main Tm-only and FEP reference points on the same held-out test scale
+as selected MD-derived descriptor controls. The Tm-only reference reached
+6.62$^\circ$C MAE, and the FEP reference reached 6.26$^\circ$C MAE. Among the
+descriptor controls, 300 K disulfide-distance fluctuation gave the lowest test
+error (6.48$^\circ$C MAE), followed by the sequence-only CDR3-length control
+(6.52$^\circ$C MAE). The 400 K Q-value and Q-value slope controls remained
+weaker, at 6.67$^\circ$C and 6.66$^\circ$C MAE, respectively.
 
-The encoder controls reinforced this split. With a frozen encoder, errors rose
-overall, but FEP still beat the frozen Tm-only baseline, with 7.20$^\circ$C
-versus 7.38$^\circ$C MAE (Fig.~\ref{fig:simulation_comparison}c). The gain was
-smaller than with a hot encoder, and the frozen FEP model stayed worse than the
-hot-encoder FEP model. The MD Q-value did not provide a comparable all-atom
-source label. FEP labels therefore carry useful information even when the
-representation is fixed, but adapting the encoder extracts the largest
-target-task gain.
-
-The failure of a terminal Q-value did not mean that all MD-derived descriptors
-were equivalent. We tested a small sensitivity set chosen to separate
-the time trend of Q-value, local geometric variability from the trajectories,
-and a nanobody-specific sequence descriptor. These controls
-used the same residual-control architecture and were evaluated on the held-out
-Tm test set. In this sensitivity model, the source path acts as a learned
-correction to the Tm prediction rather than as a separate stand-alone predictor.
-The Q-value slope, which summarizes the
-terminal trajectory trend rather than its mean contact persistence, was slightly
-better than the raw Q-value (6.66 versus 6.67$^\circ$C MAE) but still did not
-reach the FEP reference. Disulfide-distance fluctuation, an MD-derived measure
-of disulfide geometry variability, gave the lowest error among these controls
-(6.48$^\circ$C MAE). CDR3 length, included as a nanobody-specific descriptor
-rather than an MD label, also performed better than the raw Q-value
-(6.52$^\circ$C MAE). These controls show that the source-label definition
-matters, even when the underlying data come from the same structural panel.
+These results narrow the interpretation of the MD comparison. The negative
+result for a terminal Q-value should not be read as evidence that trajectory
+information is useless. Rather, it shows that the transfer-learning model is
+sensitive to how an MD trajectory is compressed into a source label. Panel b
+shows the normalized source-label distributions for matched descriptors
+computed from 300 K and 400 K trajectories. The temperature and descriptor
+choice change the label distributions seen by the model, so the scientific
+design problem is not only to run MD but also to choose which dynamical quantity
+should supervise the target predictor. In the present screen, FEP remained the
+strongest all-atom source label, but the descriptor controls show that MD-derived
+labels can move closer to the useful regime when they encode the appropriate
+structural variation.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline03_design_bridge}
-\caption{\textbf{All-atom simulation labels differ in their transfer to Tm
-prediction.}
-(a) Final test MAE for experimental Tm labels alone, FEP mutation
-free-energy labels, and the MD-derived Q-value. Intervals show bootstrap
-confidence intervals over test-set absolute errors.
-(b) Per-example and paired changes in absolute error relative to
-training on Tm labels alone. Negative values indicate lower error than the
-reference.
-(c) Frozen-encoder and hot-encoder comparisons for the same three
-conditions.
-(d) Held-out test MAE for selected MD-derived and nanobody-specific
-descriptor controls in the residual-control architecture. The dashed line marks
-the FEP reference from panel a.}
+\caption{\textbf{MD descriptor choice controls transfer to Tm prediction.}
+(a) Held-out test MAE for the Tm-only and FEP-assisted reference conditions from
+the main label-count screen, selected MD-derived descriptors, and a
+sequence-length control. Points and intervals show ensemble MAE and 90\%
+bootstrap intervals over held-out test absolute errors.
+(b) Distributions of normalized source-label values extracted from 300 K and
+400 K MD trajectory descriptors. Box plots show interquartile ranges and
+medians; points are sampled for display.}
 \label{fig:simulation_comparison}
 \end{figure*}
 

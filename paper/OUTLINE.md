@@ -114,13 +114,12 @@ Terminology rules:
 
 Main-figure story adjustment:
 
-- Fig. 3 should not stop at raw MD Q-value failure. Panel d should show selected
+- Fig. 3 should not stop at raw MD Q-value failure. It should show selected
   descriptor controls on the held-out Tm test set, because this directly
   addresses how MD-derived information is turned into a useful source label.
-- Supplementary Fig. 5 should support this panel by showing the candidate
-  validation screen, the validation-to-test relationship for carried-forward
-  descriptors, model-facing source-label distributions, and descriptor
-  correlations.
+- Supplementary figures should support this panel by showing additional
+  candidate screens, validation-to-test behavior for carried-forward
+  descriptors, source-label distributions, and descriptor correlations.
 
 ## CSBJ Fit
 
@@ -415,32 +414,41 @@ The amount of source-label data matters, but data quantity and model size alone
 do not explain improvement; the physical source label and encoder adaptation
 matter.
 
-#### Result 3: All-atom simulation labels differ in their transfer to Tm prediction
+#### Result 3: All-atom source labels depend on the simulated quantity
 
 Display: Fig. 3.
 
 Key numbers:
 
-| condition | test MAE | ΔMAE vs Tm-only | 90% paired CI |
-|---|---:|---:|---:|
-| Tm-only | 6.6145 | - | - |
-| FEP | 6.2611 | -0.3530 | [-0.4621, -0.2426] |
-| MD-derived Q-value | 6.7304 | +0.1172 | [+0.0120, +0.2235] |
+| condition | test MAE |
+|---|---:|
+| Tm labels only reference | 6.6185 |
+| FEP mutation free-energy reference | 6.2611 |
+| 300 K disulfide-distance fluctuation | 6.4827 |
+| sequence CDR3 length | 6.5183 |
+| 400 K Q-value slope | 6.6555 |
+| 400 K MD Q-value | 6.6714 |
 
 Key points:
 
-- Fig. 3 should focus on all-atom simulation labels: FEP mutation free-energy
-  labels and the MD-derived Q-value.
-- FEP gives a small but consistent paired improvement over Tm-only learning.
-- The MD-derived Q-value does not improve the held-out Tm endpoint.
-- Frozen-encoder and hot-encoder controls indicate that FEP retains some benefit
-  with fixed embeddings, but the best absolute result requires encoder
-  adaptation.
+- Fig. 3 should focus on how all-atom simulation information is converted into
+  source labels for Tm prediction.
+- Panel a should plot held-out test MAE only. It should include Tm labels only,
+  FEP mutation free energy, selected 300 K and 400 K MD-derived descriptors,
+  and the sequence-only CDR3-length control.
+- FEP is a plotted comparator, not a vertical reference line, and uses the same
+  green color as Fig. 2.
+- The terminal 400 K Q-value does not improve the held-out Tm endpoint, but
+  other descriptors move closer to the useful regime.
+- Panel b should compare normalized source-label distributions for matched
+  300 K and 400 K trajectory descriptors.
 
 Main claim:
 
-Among the all-atom simulation labels tested here, mutation free-energy labels
-transfer to Tm prediction while the tested Q-value descriptor does not.
+The useful source signal depends on the simulated physical quantity and the
+descriptor used to summarize it. In this screen, FEP remains the strongest
+all-atom source label, while MD-derived labels improve only when the descriptor
+captures transferable structural variation.
 
 #### Result 4: Structure-based labels and proposal-set scores are weaker source signals
 
@@ -597,24 +605,27 @@ Claims:
   a frozen encoder.
 - Avoid claiming a strict monotonic law.
 
-### Fig. 3. All-atom simulation labels differ in their transfer to Tm prediction
+### Fig. 3. MD descriptor choice controls transfer to Tm prediction
 
-Purpose: central all-atom simulation comparison.
+Purpose: central all-atom simulation comparison, moving beyond the raw Q-value
+failure to ask which simulated quantities produce useful source labels.
 
 Panels:
 
-- (a) Final test MAE for Tm-only learning, FEP mutation free-energy labels, and
-  the MD-derived Q-value.
-- (b) Paired ΔMAE and per-example error changes versus Tm-only learning.
-- (c) Frozen versus hot encoder comparison for the same all-atom source labels.
-- (d) Cumulative distributions of held-out absolute errors.
+- (a) Held-out test MAE for Tm labels only, FEP mutation free-energy labels,
+  selected 300 K and 400 K MD-derived descriptors, and the sequence-only
+  CDR3-length control.
+- (b) Distributions of normalized source-label values for matched descriptors
+  computed from 300 K and 400 K trajectories.
 
 Claims:
 
 - FEP is the clearest all-atom source label.
-- The tested MD-derived Q-value does not transfer to the held-out Tm endpoint.
-- Encoder adaptation improves absolute performance, although FEP retains a
-  smaller benefit in the frozen-encoder control.
+- The tested terminal Q-value is not enough, but the descriptor screen shows
+  that the MD result depends on which dynamical quantity becomes the source
+  label.
+- Temperature and descriptor choice change the source-label distributions seen
+  by the model.
 
 ### Fig. 4. Structure-based labels and language-model-proposed variants
 
