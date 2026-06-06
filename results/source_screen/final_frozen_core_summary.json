@@ -52,7 +52,7 @@
         "ddg_context_dim": 4,
         "detach_aux_encoder": true
       },
-      "scaling_json": "/Users/yasu/tmp/sim2real/results/sourcefinal_frozen_tm_shared_drop0.30/scaling.json",
+      "scaling_json": "/home/yasu/tmp/sim2real/results/sourcefinal_frozen_tm_shared_drop0.30/scaling.json",
       "selected_from": "frozen_sourcehpo_tm_shared_drop0.30",
       "selected_val_mae": 6.961082132962038,
       "test_mae": 7.377377426314388
@@ -109,7 +109,7 @@
         "ddg_context_dim": 4,
         "detach_aux_encoder": true
       },
-      "scaling_json": "/Users/yasu/tmp/sim2real/results/sourcefinal_frozen_ddg_fep_default/scaling.json",
+      "scaling_json": "/home/yasu/tmp/sim2real/results/sourcefinal_frozen_ddg_fep_default/scaling.json",
       "selected_from": "frozen_sourcehpo_ddg_fep_default",
       "selected_val_mae": 6.443909248971213,
       "test_mae": 7.201965523148467
@@ -166,7 +166,7 @@
         "ddg_context_dim": 4,
         "detach_aux_encoder": true
       },
-      "scaling_json": "/Users/yasu/tmp/sim2real/results/sourcefinal_frozen_ddg_rosetta_default/scaling.json",
+      "scaling_json": "/home/yasu/tmp/sim2real/results/sourcefinal_frozen_ddg_rosetta_default/scaling.json",
       "selected_from": "frozen_sourcehpo_ddg_rosetta_default",
       "selected_val_mae": 6.594275504540308,
       "test_mae": 7.281415108406488
@@ -224,7 +224,7 @@
         "ddg_context_dim": 4,
         "detach_aux_encoder": true
       },
-      "scaling_json": "/Users/yasu/tmp/sim2real/results/sourcefinal_frozen_md_q-hphil-400k_drop0.30/scaling.json",
+      "scaling_json": "/home/yasu/tmp/sim2real/results/sourcefinal_frozen_md_q-hphil-400k_drop0.30/scaling.json",
       "selected_from": "frozen_sourcehpo_md_q-hphil-400k_drop0.30",
       "selected_val_mae": 6.884064043610095,
       "test_mae": 7.327979031419028
