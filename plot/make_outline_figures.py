@@ -113,6 +113,15 @@ SIZE35_FEP_JSON = RESULTS / "size35_ddg_fep_enc3e-5" / "scaling.json"
 SIZE650_TM_JSON = RESULTS / "size650_tm_shared_drop005" / "scaling.json"
 SIZE650_FEP_JSON = RESULTS / "size650_ddg_fep_enc3e-5" / "scaling.json"
 
+DESCRIPTOR_CONTROL_SPECS = [
+    ("Tm labels only", RESULTS / "final_tm_residual_enc3e-4" / "scaling.json", COL["baseline"], "s"),
+    ("raw MD Q-value", RESULTS / "final_residual_q_hphil_400k" / "scaling.json", COL["mdq"], "o"),
+    ("Q-value slope", RESULTS / "final_residual_q_slope_400k" / "scaling.json", COL["mdq"], "D"),
+    ("disulfide-distance\nfluctuation", RESULTS / "final_residual_ss_dist_std" / "scaling.json", COL["design"], "o"),
+    ("CDR3 length", RESULTS / "final_residual_cdr3_len" / "scaling.json", COL["thermo"], "o"),
+    ("CDR3 residue\nfluctuation", RESULTS / "final_residual_rmsf_cdr3" / "scaling.json", COL["rosetta"], "o"),
+]
+
 
 def configure_style() -> None:
     plt.rcParams.update(
@@ -199,6 +208,25 @@ def encoder_core_rows() -> pd.DataFrame:
                 }
             )
     return pd.DataFrame.from_records(records)
+
+
+def descriptor_control_rows() -> pd.DataFrame:
+    records = []
+    for label, path, color, marker in DESCRIPTOR_CONTROL_SPECS:
+        if not path.exists():
+            continue
+        point = read_json(path)["scaling"][0]
+        records.append(
+            {
+                "label": label,
+                "mae": float(point["mae"]),
+                "ci_lo": float(point["ci_lo"]),
+                "ci_hi": float(point["ci_hi"]),
+                "color": color,
+                "marker": marker,
+            }
+        )
+    return pd.DataFrame.from_records(records).sort_values("mae").reset_index(drop=True)
 
 
 def model_size_rows(rows: pd.DataFrame) -> pd.DataFrame:
@@ -653,19 +681,35 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
     panel_label(ax, "C")
 
     ax = axes[1, 1]
-    for label, values, color in [
-        ("Tm labels only", tm_abs, COL["baseline"]),
-        ("FEP mutation free energy", fep_abs, COL["fep"]),
-        ("MD Q-value", md_abs, COL["mdq"]),
-    ]:
-        x, y = ecdf_xy(values)
-        ax.plot(x, y, color=color, label=label, linewidth=1.8)
-    ax.set_xlabel("absolute test error (deg C)")
-    ax.set_ylabel("fraction of test examples")
-    ax.set_xlim(0, 18)
-    ax.set_ylim(0, 1.02)
-    ax.legend(frameon=False, loc="lower right")
-    polish(ax, "both")
+    descriptor_rows = descriptor_control_rows()
+    y = np.arange(len(descriptor_rows))
+    for i, row in descriptor_rows.iterrows():
+        horizontal_interval(
+            ax,
+            i,
+            row["mae"],
+            row["ci_lo"],
+            row["ci_hi"],
+            row["color"],
+            marker=row["marker"],
+        )
+        ax.text(row["ci_hi"] + 0.025, i, f"{row['mae']:.2f}", va="center", fontsize=6.8)
+    ax.axvline(float(row_lookup.loc["FEP", "test_mae"]), color=COL["fep"], linewidth=1.0, linestyle="--")
+    ax.text(
+        float(row_lookup.loc["FEP", "test_mae"]) + 0.015,
+        -0.52,
+        "FEP",
+        color=COL["fep"],
+        fontsize=6.8,
+        ha="left",
+        va="center",
+    )
+    ax.set_yticks(y)
+    ax.set_yticklabels(descriptor_rows["label"])
+    ax.invert_yaxis()
+    ax.set_xlabel("held-out Tm test MAE (deg C)")
+    ax.set_xlim(6.0, 7.45)
+    polish(ax, "x")
     panel_label(ax, "D")
 
     save_figure(fig, "fig_outline03_design_bridge")

@@ -1,0 +1,9 @@
+condition	feature	label	short_label	group	test_mae_deg_c	ci_lo_deg_c	ci_hi_deg_c	ci_width_deg_c	scaling_json
+residual_ss_dist_std	MD_SS_DIST_STD	disulfide-distance fluctuation	disulfide fluct.	MD-derived descriptor	6.482686393541031	6.060967619434327	6.90598392030838	0.845016300874053	results/final_residual_ss_dist_std/scaling.json
+residual_cdr3_len	MD_CDR3_LEN	CDR3 length	CDR3 length	nanobody descriptor	6.518261573481856	6.088146183549431	6.9471948456073465	0.8590486620579156	results/final_residual_cdr3_len/scaling.json
+residual_q_value_400k_shuffled	MD Q-value shuffled labels	MD Q-value, shuffled labels	shuffled Q-value	negative control	6.616153758058271	6.194478579488197	7.043376588679288	0.8488980091910907	results/final_residual_q_value_400k_shuffled/scaling.json
+residual_rmsf_max	MD_RMSF_MAX	maximum residue fluctuation	max residue fluct.	MD-derived descriptor	6.6484205447939075	6.202692750264039	7.096442373718806	0.8937496234547666	results/final_residual_rmsf_max/scaling.json
+residual_q_slope_400k	MD_Q_SLOPE_400K	Q-value slope	Q-value slope	MD-derived descriptor	6.655533533392758	6.224148522636049	7.084253061023499	0.8601045383874499	results/final_residual_q_slope_400k/scaling.json
+residual_rmsf_cdr3	MD_RMSF_CDR3	CDR3 residue fluctuation	CDR3 residue fluct.	MD-derived descriptor	6.657632526939643	6.223875413714464	7.085781409064681	0.8619059953502166	results/final_residual_rmsf_cdr3/scaling.json
+residual_q_value_400k	MD Q-value	MD Q-value, residual-control architecture	Q-value	MD-derived descriptor	6.671378922355807	6.232547432127428	7.104380834103662	0.8718334019762333	results/final_residual_q_value_400k/scaling.json
+tm_residual_enc3e-4		Tm labels only, residual-control architecture	Tm labels only	target reference	6.9356672827205585	6.515605657372643	7.353977796874709	0.8383721395020656	results/final_tm_residual_enc3e-4/scaling.json

@@ -423,12 +423,15 @@ separately for each label count on the experimental validation split.
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth]{supp_fig05_md_feature_controls}
-\caption{\textbf{Supplementary Fig. 5. MD feature and architecture controls.}
-\textbf{(a)} Experimental validation MAE values for alternative MD-derived
-features.
-\textbf{(b)} Held-out test MAE values for selected architecture and shuffled
-label controls.
-\textbf{(c)} Distributions of representative MD-derived feature values.
-\textbf{(d)} Summary statistics for representative MD-derived feature values.}
+\caption{\textbf{Supplementary Fig. 5. Descriptor controls for MD-derived
+source labels.}
+\textbf{(a)} Held-out test MAE values for selected MD-derived and
+nanobody-specific descriptor controls. The dashed line marks the FEP reference.
+\textbf{(b)} Relationship between candidate validation MAE and held-out test
+MAE for descriptor controls that were carried forward to final evaluation.
+\textbf{(c)} Distributions of the model-facing scaled source labels for the
+selected descriptors.
+\textbf{(d)} Spearman correlations among the selected source labels over shared
+sequences.}
 \label{fig:supp_md_feature_controls}
 \end{figure}

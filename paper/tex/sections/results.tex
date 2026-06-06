@@ -95,6 +95,15 @@ neither regime. FEP labels therefore carry useful information even when the
 representation is fixed, but adapting the encoder is what extracts the largest
 target-task gain.
 
+The failure of a terminal Q-value did not mean that all MD-derived descriptors
+were equivalent. We therefore carried selected descriptor controls into the
+same residual-control architecture and evaluated them on the held-out Tm test
+set. Q-value slope was slightly better than the raw Q-value but did not reach
+the FEP reference. Disulfide-distance fluctuation and CDR3 length gave the
+lowest errors among these controls, indicating that the useful signal depends
+on how the simulation or nanobody-specific descriptor is converted into a
+source label.
+
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline03_design_bridge}
@@ -108,7 +117,9 @@ training on Tm labels alone. Negative values indicate lower error than the
 reference.
 \textbf{(c)} Frozen-encoder and hot-encoder comparisons for the same three
 conditions.
-\textbf{(d)} Cumulative distributions of held-out absolute errors.}
+\textbf{(d)} Held-out test MAE for selected MD-derived and nanobody-specific
+descriptor controls in the residual-control architecture. The dashed line marks
+the FEP reference from panel a.}
 \label{fig:simulation_comparison}
 \end{figure*}
 

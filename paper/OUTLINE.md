@@ -78,7 +78,7 @@ The answer developed in this case study is:
 - Evaluate all claims on a held-out experimental Tm test set.
 - Compare source labels by paired errors on the same test examples.
 
-The main result is that FEP-derived mutation free-energy labels provide the clearest improvement over Tm-only training. Rosetta scores assigned to variants proposed by ESM2 provide a weaker but positive signal. A simple MD-derived Q-value label does not improve the held-out Tm prediction. Therefore, the message is not that adding simulation data is generically beneficial; rather, the computational label must encode information that transfers to the target phenotype.
+The main result is that FEP-derived mutation free-energy labels provide the clearest improvement over Tm-only training. Rosetta scores assigned to variants proposed by ESM2 provide a weaker but positive signal. A simple MD-derived Q-value label does not improve the held-out Tm prediction. Descriptor controls then sharpen the interpretation: Q-value slope is slightly better than the raw Q-value, while disulfide-distance fluctuation and CDR3 length perform better among tested descriptor controls but still do not reach the FEP reference. Therefore, the message is not that adding simulation data is generically beneficial; rather, the computational label must encode information that transfers to the target phenotype, and the conversion from simulation trajectory or nanobody descriptor to source label is part of the scientific design problem.
 
 The relation between Tm and mutation free energy is the final interpretation, not the opening premise. Sparse experimental Tm labels anchor the absolute stability scale, while mutation free-energy labels provide local stability-change information over sequence perturbations.
 
@@ -111,6 +111,16 @@ Terminology rules:
 - In figures, use reader-facing labels such as "Tm labels only", "mutation
   free energy", "Rosetta mutation score", "ThermoMPNN stability score",
   "ESM2-proposed variants scored by Rosetta", and "MD Q-value".
+
+Main-figure story adjustment:
+
+- Fig. 3 should not stop at raw MD Q-value failure. Panel d should show selected
+  descriptor controls on the held-out Tm test set, because this directly
+  addresses how MD-derived information is turned into a useful source label.
+- Supplementary Fig. 5 should support this panel by showing the candidate
+  validation screen, the validation-to-test relationship for carried-forward
+  descriptors, model-facing source-label distributions, and descriptor
+  correlations.
 
 ## CSBJ Fit
 

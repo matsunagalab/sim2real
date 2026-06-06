@@ -141,6 +141,97 @@ MD_FEATURE_LABEL = {
     "MD_CDR3_LEN": "CDR3 length",
 }
 
+DESCRIPTOR_TEST_SPECS = [
+    {
+        "condition": "tm_residual_enc3e-4",
+        "feature": "",
+        "label": "Tm labels only, residual-control architecture",
+        "short_label": "Tm labels only",
+        "group": "target reference",
+        "result_dir": "final_tm_residual_enc3e-4",
+        "color": COL["tm"],
+        "marker": "s",
+    },
+    {
+        "condition": "residual_q_hphil_400k",
+        "feature": MD_CONTACT_Q_SOURCE,
+        "label": "MD Q-value, residual-control architecture",
+        "short_label": "Q-value",
+        "group": "MD-derived descriptor",
+        "result_dir": "final_residual_q_hphil_400k",
+        "color": COL["mdq"],
+        "marker": "o",
+    },
+    {
+        "condition": "residual_q_slope_400k",
+        "feature": "MD_Q_SLOPE_400K",
+        "label": "Q-value slope",
+        "short_label": "Q-value slope",
+        "group": "MD-derived descriptor",
+        "result_dir": "final_residual_q_slope_400k",
+        "color": COL["mdq"],
+        "marker": "D",
+    },
+    {
+        "condition": "residual_q_hphil_400k_shuf",
+        "feature": f"{MD_CONTACT_Q_SOURCE}_SHUF",
+        "label": "MD Q-value, shuffled labels",
+        "short_label": "shuffled Q-value",
+        "group": "negative control",
+        "result_dir": "final_residual_q_hphil_400k_shuf",
+        "color": COL["gray"],
+        "marker": "X",
+    },
+    {
+        "condition": "residual_ss_dist_std",
+        "feature": "MD_SS_DIST_STD",
+        "label": "disulfide-distance fluctuation",
+        "short_label": "disulfide fluct.",
+        "group": "MD-derived descriptor",
+        "result_dir": "final_residual_ss_dist_std",
+        "color": COL["design"],
+        "marker": "o",
+    },
+    {
+        "condition": "residual_rmsf_max",
+        "feature": "MD_RMSF_MAX",
+        "label": "maximum residue fluctuation",
+        "short_label": "max residue fluct.",
+        "group": "MD-derived descriptor",
+        "result_dir": "final_residual_rmsf_max",
+        "color": COL["rmsf"],
+        "marker": "o",
+    },
+    {
+        "condition": "residual_rmsf_cdr3",
+        "feature": "MD_RMSF_CDR3",
+        "label": "CDR3 residue fluctuation",
+        "short_label": "CDR3 residue fluct.",
+        "group": "MD-derived descriptor",
+        "result_dir": "final_residual_rmsf_cdr3",
+        "color": COL["rmsf"],
+        "marker": "^",
+    },
+    {
+        "condition": "residual_cdr3_len",
+        "feature": "MD_CDR3_LEN",
+        "label": "CDR3 length",
+        "short_label": "CDR3 length",
+        "group": "nanobody descriptor",
+        "result_dir": "final_residual_cdr3_len",
+        "color": COL["thermo"],
+        "marker": "o",
+    },
+]
+
+DESCRIPTOR_VALUE_SPECS = [
+    ("Q-value", MD_QVALUE_TABLE, "ddg_scaled01"),
+    ("Q-value slope", DATA / "md" / "feat_q_slope_400K.csv", "ddg_scaled01"),
+    ("disulfide-distance fluctuation", DATA / "md" / "feat_ss_dist_std.csv", "ddg_scaled01"),
+    ("CDR3 length", DATA / "md" / "feat_cdr3_len.csv", "ddg_scaled01"),
+    ("CDR3 residue fluctuation", DATA / "md" / "feat_rmsf_cdr3.csv", "ddg_scaled01"),
+]
+
 
 def configure_style() -> None:
     plt.rcParams.update(
@@ -513,6 +604,7 @@ def architecture_controls_table() -> pd.DataFrame:
         "tm_latent_drop0.30": "Tm only, latent-control architecture",
         "tm_residual_enc3e-4": "Tm only, residual-control architecture",
         "residual_q_hphil_400k": "MD Q-value, residual-control architecture",
+        "residual_q_slope_400k": "Q-value slope",
         "residual_q_hphil_400k_shuf": "MD Q-value, shuffled labels",
         "residual_cdr3_len": "CDR3 length",
         "residual_rmsf_cdr3": "CDR3 residue fluctuation",
@@ -536,6 +628,30 @@ def architecture_controls_table() -> pd.DataFrame:
             }
         )
     return pd.DataFrame(rows)
+
+
+def descriptor_test_controls_table() -> pd.DataFrame:
+    rows = []
+    for spec in DESCRIPTOR_TEST_SPECS:
+        path = RESULTS / spec["result_dir"] / "scaling.json"
+        if not path.exists():
+            continue
+        point = read_json(path)["scaling"][0]
+        rows.append(
+            {
+                "condition": spec["condition"],
+                "feature": spec["feature"],
+                "label": spec["label"],
+                "short_label": spec["short_label"],
+                "group": spec["group"],
+                "test_mae_deg_c": float(point["mae"]),
+                "ci_lo_deg_c": float(point["ci_lo"]),
+                "ci_hi_deg_c": float(point["ci_hi"]),
+                "ci_width_deg_c": float(point["ci_hi"]) - float(point["ci_lo"]),
+                "scaling_json": str(path.relative_to(REPO)),
+            }
+        )
+    return pd.DataFrame(rows).sort_values("test_mae_deg_c").reset_index(drop=True)
 
 
 def trajectory_length_table() -> pd.DataFrame:
@@ -566,19 +682,20 @@ def trajectory_length_table() -> pd.DataFrame:
 
 
 def md_label_distribution_table() -> pd.DataFrame:
-    specs = [
-        ("Q-value, 400 K", MD_QVALUE_TABLE, "q_value_raw"),
-        ("minimum Q-value, 400 K", DATA / "md" / "feat_q_min_400K.csv", "q_min"),
-        ("Q-value fluctuation, 400 K", DATA / "md" / "feat_q_std_400K.csv", "q_std"),
-        ("maximum residue fluctuation", DATA / "md" / "feat_rmsf_max.csv", "rmsf_max"),
-        ("salt-bridge persistence", DATA / "md" / "feat_saltbridge.csv", "saltbridge"),
-    ]
     rows = []
-    for label, path, preferred in specs:
+    for label, path, preferred in DESCRIPTOR_VALUE_SPECS:
         df = pd.read_csv(path)
         col = preferred if preferred in df.columns else "ddg_scaled01"
-        for val in df[col].dropna().to_numpy(dtype=float):
-            rows.append({"label": label, "value": float(val), "source_file": str(path.relative_to(REPO))})
+        for _, row in df.dropna(subset=[col]).iterrows():
+            rows.append(
+                {
+                    "label": label,
+                    "seq": row.get("seq", ""),
+                    "pdb_id": row.get("pdb_id", ""),
+                    "value": float(row[col]),
+                    "source_file": str(path.relative_to(REPO)),
+                }
+            )
     return pd.DataFrame(rows)
 
 
@@ -926,49 +1043,103 @@ def fig_s4_scaling(scaling: pd.DataFrame, selected_md: pd.DataFrame, model_sizes
     save_figure(fig, "supp_fig04_scaling_and_size_controls")
 
 
-def fig_s5_md_features(features: pd.DataFrame, arch: pd.DataFrame, md_dist: pd.DataFrame) -> None:
+def fig_s5_md_features(features: pd.DataFrame, descriptor_tests: pd.DataFrame, md_dist: pd.DataFrame) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(7.4, 7.0), constrained_layout=True)
 
     ax = axes[0, 0]
-    top = features.sort_values("validation_mae_deg_c").reset_index(drop=True)
-    y = np.arange(len(top))
-    colors = [COL["mdq"] if "Q-value" in label else COL["rmsf"] if "fluctuation" in label or "residue" in label else COL["other"] for label in top["label"]]
-    ax.barh(y, top["validation_mae_deg_c"], color=colors, edgecolor="white", linewidth=0.4)
+    test_plot = descriptor_tests.sort_values("test_mae_deg_c").reset_index(drop=True)
+    spec_lookup = {spec["condition"]: spec for spec in DESCRIPTOR_TEST_SPECS}
+    y = np.arange(len(test_plot))
+    for i, row in test_plot.iterrows():
+        spec = spec_lookup.get(row["condition"], {})
+        color = spec.get("color", COL["other"])
+        marker = spec.get("marker", "o")
+        horizontal_interval(
+            ax,
+            i,
+            row["test_mae_deg_c"],
+            row["ci_lo_deg_c"],
+            row["ci_hi_deg_c"],
+            color,
+            marker=marker,
+        )
+        ax.text(row["ci_hi_deg_c"] + 0.018, i, f"{row['test_mae_deg_c']:.2f}", va="center", fontsize=6.8)
+    final_sources = source_screen_final().set_index("source")
+    fep_mae = float(final_sources.loc["FEP", "test_mae_deg_c"])
+    ax.axvline(fep_mae, color=COL["fep"], linestyle="--", linewidth=1.0)
+    ax.text(fep_mae + 0.012, -0.55, "FEP", color=COL["fep"], fontsize=6.8, ha="left", va="center")
     ax.set_yticks(y)
-    ax.set_yticklabels(top["label"])
+    ax.set_yticklabels(test_plot["short_label"])
     ax.invert_yaxis()
-    ax.set_xlabel("experimental validation MAE (deg C)")
-    ax.set_xlim(5.65, 6.35)
+    ax.set_xlabel("held-out Tm test MAE (deg C)")
+    ax.set_xlim(6.0, 7.42)
     polish(ax, "x")
     panel_label(ax, "A")
 
     ax = axes[0, 1]
-    order = [
-        "Tm only, latent-control architecture",
-        "MD Q-value, residual-control architecture",
-        "MD Q-value, shuffled labels",
-        "maximum residue fluctuation",
-        "disulfide-distance fluctuation",
-    ]
-    plot = arch.set_index("label").loc[order].reset_index()
-    y = np.arange(len(plot))
-    for i, (_, row) in enumerate(plot.iterrows()):
-        color = COL["tm"] if "Tm only" in row["label"] else COL["mdq"] if "Q-value" in row["label"] else COL["rmsf"]
-        horizontal_interval(ax, i, row["test_mae_deg_c"], row["ci_lo_approx_deg_c"], row["ci_hi_approx_deg_c"], color)
-        ax.text(row["ci_hi_approx_deg_c"] + 0.015, i, f"{row['test_mae_deg_c']:.2f}", va="center", fontsize=6.8)
-    ax.set_yticks(y)
-    ax.set_yticklabels(plot["label"])
-    ax.invert_yaxis()
-    ax.set_xlabel("held-out test MAE (deg C)")
-    ax.set_xlim(6.20, 7.05)
-    polish(ax, "x")
+    screened = descriptor_tests[descriptor_tests["feature"].astype(bool)].merge(
+        features[["feature", "validation_mae_deg_c"]],
+        on="feature",
+        how="left",
+    )
+    text_offsets = {
+        "Q-value": (0.006, 0.010, "left"),
+        "Q-value slope": (0.006, -0.004, "left"),
+        "shuffled Q-value": (-0.006, 0.012, "right"),
+        "disulfide fluct.": (0.006, -0.016, "left"),
+        "max residue fluct.": (0.006, -0.028, "left"),
+        "CDR3 residue fluct.": (0.006, 0.012, "left"),
+        "CDR3 length": (0.006, 0.008, "left"),
+    }
+    point_labels = {
+        "Q-value": "Q",
+        "Q-value slope": "Q slope",
+        "shuffled Q-value": "shuf Q",
+        "disulfide fluct.": "SS fluct.",
+        "max residue fluct.": "max RMSF",
+        "CDR3 residue fluct.": "CDR3 RMSF",
+        "CDR3 length": "CDR3 len",
+    }
+    for _, row in screened.iterrows():
+        spec = spec_lookup.get(row["condition"], {})
+        ax.scatter(
+            row["validation_mae_deg_c"],
+            row["test_mae_deg_c"],
+            s=34,
+            color=spec.get("color", COL["other"]),
+            marker=spec.get("marker", "o"),
+            edgecolor="white",
+            linewidth=0.5,
+            zorder=3,
+        )
+        dx, dy, ha = text_offsets.get(row["short_label"], (0.004, 0.006, "left"))
+        ax.text(
+            row["validation_mae_deg_c"] + dx,
+            row["test_mae_deg_c"] + dy,
+            point_labels.get(row["short_label"], row["short_label"]),
+            fontsize=5.9,
+            ha=ha,
+            va="bottom",
+        )
+    ax.set_xlabel("candidate validation MAE (deg C)")
+    ax.set_ylabel("held-out Tm test MAE (deg C)")
+    ax.set_xlim(5.84, 6.13)
+    ax.set_ylim(6.45, 6.72)
+    polish(ax, "both")
     panel_label(ax, "B")
 
     ax = axes[1, 0]
-    keep = ["Q-value, 400 K", "minimum Q-value, 400 K", "Q-value fluctuation, 400 K", "maximum residue fluctuation", "salt-bridge persistence"]
+    keep = [label for label, _, _ in DESCRIPTOR_VALUE_SPECS]
+    compact = {
+        "Q-value": "Q-value",
+        "Q-value slope": "Q-value\nslope",
+        "disulfide-distance fluctuation": "disulfide\nfluct.",
+        "CDR3 length": "CDR3\nlength",
+        "CDR3 residue fluctuation": "CDR3 residue\nfluct.",
+    }
     data = [md_dist.loc[md_dist["label"] == k, "value"].to_numpy(float) for k in keep]
     bp = ax.boxplot(data, patch_artist=True, showfliers=False, widths=0.58)
-    for patch, color in zip(bp["boxes"], [COL["mdq"], COL["mdq"], COL["mdq"], COL["rmsf"], COL["other"]]):
+    for patch, color in zip(bp["boxes"], [COL["mdq"], COL["mdq"], COL["design"], COL["thermo"], COL["rmsf"]]):
         patch.set_facecolor(color)
         patch.set_alpha(0.65)
         patch.set_edgecolor("white")
@@ -977,23 +1148,28 @@ def fig_s5_md_features(features: pd.DataFrame, arch: pd.DataFrame, md_dist: pd.D
             artist.set_color(COL["black"])
             artist.set_linewidth(0.8)
     ax.set_xticks(np.arange(1, len(keep) + 1))
-    ax.set_xticklabels(keep, rotation=30, ha="right")
-    ax.set_ylabel("raw or scaled feature value")
+    ax.set_xticklabels([compact[k] for k in keep], rotation=30, ha="right")
+    ax.set_ylabel("model-facing scaled source label")
+    ax.set_ylim(-0.03, 1.03)
     polish(ax, "y")
     panel_label(ax, "C")
 
     ax = axes[1, 1]
-    q = md_dist[md_dist["label"].isin(["Q-value, 400 K", "maximum residue fluctuation", "salt-bridge persistence"])].copy()
-    summary = q.groupby("label")["value"].agg(["median", "mean", "std"]).reset_index()
-    y = np.arange(len(summary))
-    ax.barh(y - 0.12, summary["median"], height=0.22, color=COL["black"], alpha=0.85, label="median")
-    ax.barh(y + 0.12, summary["std"], height=0.22, color=COL["light_gray"], edgecolor=COL["gray"], label="standard deviation")
-    ax.set_yticks(y)
-    ax.set_yticklabels(summary["label"])
-    ax.invert_yaxis()
-    ax.set_xlabel("summary statistic")
-    ax.legend(frameon=False, loc="lower right")
-    polish(ax, "x")
+    pivot = md_dist.pivot_table(index="seq", columns="label", values="value", aggfunc="mean")
+    corr = pivot[keep].corr(method="spearman")
+    im = ax.imshow(corr.to_numpy(), vmin=-1, vmax=1, cmap="RdBu_r")
+    ax.set_xticks(np.arange(len(keep)))
+    ax.set_yticks(np.arange(len(keep)))
+    ax.set_xticklabels([compact[k] for k in keep], rotation=35, ha="right")
+    ax.set_yticklabels([compact[k] for k in keep])
+    for i in range(len(keep)):
+        for j in range(len(keep)):
+            value = corr.iloc[i, j]
+            ax.text(j, i, f"{value:.2f}", ha="center", va="center", fontsize=6.1, color="white" if abs(value) > 0.55 else COL["black"])
+    cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.02)
+    cb.set_label("Spearman correlation")
+    for spine in ax.spines.values():
+        spine.set_visible(False)
     panel_label(ax, "D")
 
     save_figure(fig, "supp_fig05_md_feature_controls")
@@ -1017,6 +1193,7 @@ def build_all_tables() -> dict[str, pd.DataFrame]:
         "source_combination_controls": abcd_table(),
         "md_feature_survey": md_feature_table(),
         "architecture_controls": architecture_controls_table(),
+        "md_descriptor_test_controls": descriptor_test_controls_table(),
         "trajectory_length_controls": trajectory_length_table(),
         "md_label_distributions": md_label_distribution_table(),
     }
@@ -1232,24 +1409,24 @@ def write_manifest() -> None:
             "panel": "A",
             "figure_file": "figures/supp_fig05_md_feature_controls.pdf",
             "tex_figure_file": "../../tex/figures/supp_fig05_md_feature_controls.pdf",
-            "source_tables": "tables/md_feature_survey.tsv",
-            "upstream_sources": "results/arch_search/feature_summary.json",
-            "table_builder": "md_feature_table",
+            "source_tables": "tables/md_descriptor_test_controls.tsv",
+            "upstream_sources": "results/final_*/*scaling.json",
+            "table_builder": "descriptor_test_controls_table",
             "panel_builder": "fig_s5_md_features",
-            "question": "Which alternative MD-derived features were screened?",
-            "notes": "Experimental validation MAE values for MD-feature candidates.",
+            "question": "Which selected MD-derived and nanobody-specific descriptors improve held-out Tm prediction?",
+            "notes": "Held-out test MAE values for selected descriptor controls.",
         },
         {
             "figure": "Supplementary Fig. 5",
             "panel": "B",
             "figure_file": "figures/supp_fig05_md_feature_controls.pdf",
             "tex_figure_file": "../../tex/figures/supp_fig05_md_feature_controls.pdf",
-            "source_tables": "tables/architecture_controls.tsv",
-            "upstream_sources": "results/arch_search/final_summary.json",
-            "table_builder": "architecture_controls_table",
+            "source_tables": "tables/md_feature_survey.tsv; tables/md_descriptor_test_controls.tsv",
+            "upstream_sources": "results/arch_search/feature_summary.json; results/final_*/*scaling.json",
+            "table_builder": "md_feature_table; descriptor_test_controls_table",
             "panel_builder": "fig_s5_md_features",
-            "question": "Do architecture controls rescue MD-derived labels?",
-            "notes": "Held-out test controls for selected architecture and shuffled-label settings.",
+            "question": "How did validation-screened descriptor candidates behave on the held-out test set?",
+            "notes": "Candidate validation MAE is compared with final test MAE for descriptors that were carried forward.",
         },
         {
             "figure": "Supplementary Fig. 5",
@@ -1257,11 +1434,11 @@ def write_manifest() -> None:
             "figure_file": "figures/supp_fig05_md_feature_controls.pdf",
             "tex_figure_file": "../../tex/figures/supp_fig05_md_feature_controls.pdf",
             "source_tables": "tables/md_label_distributions.tsv",
-            "upstream_sources": "data/md/nanobody_qvalue_400K.csv; data/md/feat_q_min_400K.csv; data/md/feat_q_std_400K.csv; data/md/feat_rmsf_max.csv; data/md/feat_saltbridge.csv",
+            "upstream_sources": "data/md/nanobody_qvalue_400K.csv; data/md/feat_q_slope_400K.csv; data/md/feat_ss_dist_std.csv; data/md/feat_cdr3_len.csv; data/md/feat_rmsf_cdr3.csv",
             "table_builder": "md_label_distribution_table",
             "panel_builder": "fig_s5_md_features",
-            "question": "What are the distributions of representative MD-derived features?",
-            "notes": "Boxplots of raw or scaled MD-derived feature values.",
+            "question": "What source-label distributions were presented to the multi-task model?",
+            "notes": "Boxplots of min-max scaled source labels used by the model.",
         },
         {
             "figure": "Supplementary Fig. 5",
@@ -1269,11 +1446,11 @@ def write_manifest() -> None:
             "figure_file": "figures/supp_fig05_md_feature_controls.pdf",
             "tex_figure_file": "../../tex/figures/supp_fig05_md_feature_controls.pdf",
             "source_tables": "tables/md_label_distributions.tsv",
-            "upstream_sources": "data/md/nanobody_qvalue_400K.csv; data/md/feat_rmsf_max.csv; data/md/feat_saltbridge.csv",
+            "upstream_sources": "data/md/nanobody_qvalue_400K.csv; data/md/feat_q_slope_400K.csv; data/md/feat_ss_dist_std.csv; data/md/feat_cdr3_len.csv; data/md/feat_rmsf_cdr3.csv",
             "table_builder": "md_label_distribution_table",
             "panel_builder": "fig_s5_md_features",
-            "question": "How do summary statistics compare for representative MD-derived features?",
-            "notes": "Median, mean, and standard deviation are computed from the same long-form table.",
+            "question": "Do the selected source labels encode redundant or distinct descriptor information?",
+            "notes": "Spearman correlations are computed across sequences shared by the selected descriptor tables.",
         },
     ]
     path = ANALYSIS / "MANIFEST.tsv"
@@ -1303,7 +1480,7 @@ def build_figures(tables: dict[str, pd.DataFrame]) -> None:
     )
     fig_s5_md_features(
         tables["md_feature_survey"],
-        tables["architecture_controls"],
+        tables["md_descriptor_test_controls"],
         tables["md_label_distributions"],
     )
 

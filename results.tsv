@@ -1078,3 +1078,4 @@ timestamp	commit	slope	ci_width	mae_mean	n_ddg_list	n_runs	ddg_source	time_s
 2026-06-04T22:46:07	009a4fc	nan	0.892526	7.218334		10	none	484	MD_Q_HPHIL_400K_T50	640	frozen	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	short_frozen_t50
 2026-06-04T23:06:33	009a4fc	nan	0.861906	6.657633		3	none	367	MD_RMSF_CDR3	640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	final_residual_rmsf_cdr3
 2026-06-04T23:10:28	009a4fc	nan	0.859049	6.518262		3	none	606	MD_CDR3_LEN	640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	final_residual_cdr3_len
+2026-06-06T02:07:50	7b10daa	nan	0.860105	6.655534		3	none	415	MD_Q_SLOPE_400K	640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	final_residual_q_slope_400k
