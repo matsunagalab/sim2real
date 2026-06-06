@@ -393,7 +393,7 @@ Main claim:
 
 The design permits computational labels to influence representation learning while preserving target-task evaluation.
 
-#### Result 2: FEP labels show label-count-dependent improvement, unlike the MD-derived Q-value boundary condition
+#### Result 2: Source-label transfer depends on label content, model size, and encoder adaptation
 
 Display: Fig. 2.
 
@@ -403,10 +403,16 @@ Key points:
 - FEP labels improve best held-out Tm performance when the full source label set is used.
 - The FEP curve is not perfectly monotonic; do not claim a clean power law.
 - The MD-derived Q-value does not show a reproducible improvement over Tm-only training.
+- ESM2 size controls compare 8M, 35M, and 650M encoders.
+- Larger ESM2 encoders do not improve absolute performance in this small-Tm-data setting.
+- Frozen-encoder and hot-encoder controls show that FEP transfers in both
+  regimes, with the largest gain when the encoder is updated.
 
 Main claim:
 
-The amount of source-label data matters, but data quantity alone does not explain improvement; label type matters.
+The amount of source-label data matters, but data quantity and model size alone
+do not explain improvement; the physical source label and encoder adaptation
+matter.
 
 #### Result 3: All-atom simulation labels differ in their transfer to Tm prediction
 
@@ -435,22 +441,7 @@ Main claim:
 Among the all-atom simulation labels tested here, mutation free-energy labels
 transfer to Tm prediction while the tested Q-value descriptor does not.
 
-#### Result 4: The gain is not explained by simply using a larger encoder
-
-Display: Supplementary Fig. 4 and the corresponding Results paragraph.
-
-Key points:
-
-- ESM2 size controls compare 8M, 35M, and 650M encoders.
-- Larger ESM2 encoders do not improve absolute performance in this small-Tm-data setting.
-- FEP remains beneficial within each size comparison, but the best absolute result is the 8M hot encoder with FEP labels.
-- This agrees with the related Murakami et al. observation that model-size scaling alone did not solve nanobody Tm prediction.
-
-Main claim:
-
-The result supports physics-informed source-label supervision rather than model-size scaling as the primary driver in this regime.
-
-#### Result 5: Structure-based labels and proposal-set scores are weaker source signals
+#### Result 4: Structure-based labels and proposal-set scores are weaker source signals
 
 Display: Fig. 4.
 
@@ -472,7 +463,7 @@ Non-FEP structure-based labels provide weaker source signals; the proposal-set
 result motivates future generator, physics, and predictor workflows without
 claiming closed-loop optimization.
 
-#### Result 6: Physics-labeled sequence proposals provide a design-loop bridge
+#### Result 5: Physics-labeled sequence proposals provide a design-loop bridge
 
 Display: Fig. 4c,d and Discussion.
 
@@ -491,7 +482,7 @@ conclusive. This should be framed as a route toward future
 generator, physics, and predictor design loops, not as evidence that the sequence
 proposals are already optimized.
 
-#### Result 7: Mutation free-energy labels complement sparse absolute Tm anchors
+#### Result 6: Mutation free-energy labels complement sparse absolute Tm anchors
 
 Display: Discussion-level interpretation, supported by Figs. 2 and 3.
 
@@ -577,24 +568,29 @@ CSBJ figure rules:
 - Use lower-case panel labels in parentheses.
 - Put explanatory text in the legend.
 
-### Fig. 2. Label-count sweeps for experimental and computational supervision
+### Fig. 2. Overview of source-label transfer in the low-data Tm setting
 
-Purpose: show label-count behavior and motivate final source comparison without claiming a clean scaling law.
+Purpose: show the overview controls before the detailed all-atom and lower-cost
+source-label comparisons.
 
 Panels:
 
 - (a) Experimental Tm-label, FEP-label, and MD-derived Q-value count-sweep curves
   plotted together.
-- (b) Computed-label count sweeps for FEP and the MD-derived Q-value, with the
-  Tm-label-only reference shown as a dashed line.
-- (c) MAE change relative to the Tm-label-only reference.
-- (d) Best points from label-count sweeps.
+- (b) Best points within the label-count sweeps, replotted as interval
+  estimates.
+- (c) ESM2 encoder-size controls for Tm-only and FEP-assisted training.
+- (d) Paired MAE changes for FEP and MD Q-value labels relative to the
+  encoder-matched Tm-only reference, comparing frozen and hot encoders.
 
 Claims:
 
 - Experimental Tm labels show the expected low-data count response.
 - FEP reaches the best held-out Tm MAE at the full label set, but the curve is noisy.
 - The MD-derived Q-value does not reproduce the FEP benefit.
+- Larger ESM2 encoders do not explain the FEP gain.
+- Encoder updating improves the FEP gain, but FEP retains a smaller benefit with
+  a frozen encoder.
 - Avoid claiming a strict monotonic law.
 
 ### Fig. 3. All-atom simulation labels differ in their transfer to Tm prediction
@@ -651,7 +647,7 @@ Expected supplementary components:
 - Supplementary Fig. 1: processed source-label data and MD Q-value distributions.
 - Supplementary Fig. 2: candidate-setting searches and validation-to-test behavior.
 - Supplementary Fig. 3: encoder-mode, FEP source-head, and source-combination controls.
-- Supplementary Fig. 4: interval sensitivity, per-count MD setting selection, ESM2 size, and MD-window controls.
+- Supplementary Fig. 4: interval sensitivity, per-count MD setting selection, and MD-window controls.
 - Supplementary Fig. 5: MD-derived descriptor controls and descriptor relationships.
 - Supplementary Data: processed inputs and plotting tables used for the figures.
 

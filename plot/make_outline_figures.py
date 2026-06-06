@@ -212,6 +212,57 @@ def encoder_core_rows() -> pd.DataFrame:
     return pd.DataFrame.from_records(records)
 
 
+def encoder_delta_rows() -> pd.DataFrame:
+    records = []
+    for encoder, path in [("frozen", FROZEN_SUMMARY_JSON), ("hot", SUMMARY_JSON)]:
+        comparisons = read_json(path)["paired_comparisons"]
+        for source in ["FEP", MD_CONTACT_Q_SOURCE]:
+            comp = comparisons[paired_key(source)]
+            records.append(
+                {
+                    "encoder": encoder,
+                    "source": source,
+                    "delta_mae": float(comp["delta_mae"]),
+                    "delta_ci_lo": float(comp["delta_ci_lo"]),
+                    "delta_ci_hi": float(comp["delta_ci_hi"]),
+                }
+            )
+    return pd.DataFrame.from_records(records)
+
+
+def model_size_rows(rows: pd.DataFrame) -> pd.DataFrame:
+    row_lookup = rows.set_index(rows["source"].astype(str))
+    specs = [
+        ("8M", "Tm labels only", None, "Tm_only"),
+        ("8M", "FEP mutation free energy", None, "FEP"),
+        ("35M", "Tm labels only", SIZE35_TM_JSON, None),
+        ("35M", "FEP mutation free energy", SIZE35_FEP_JSON, None),
+        ("650M", "Tm labels only", SIZE650_TM_JSON, None),
+        ("650M", "FEP mutation free energy", SIZE650_FEP_JSON, None),
+    ]
+    records = []
+    for size, condition, path, source in specs:
+        if path is None:
+            row = row_lookup.loc[source]
+            point = {
+                "mae": float(row["test_mae"]),
+                "ci_lo": float(row["ci_lo"]),
+                "ci_hi": float(row["ci_hi"]),
+            }
+        else:
+            point = read_json(path)["scaling"][0]
+        records.append(
+            {
+                "esm2_size": size,
+                "condition": condition,
+                "test_mae": float(point["mae"]),
+                "ci_lo": float(point["ci_lo"]),
+                "ci_hi": float(point["ci_hi"]),
+            }
+        )
+    return pd.DataFrame.from_records(records)
+
+
 def descriptor_control_rows() -> pd.DataFrame:
     records = []
     for label, path, color, marker in DESCRIPTOR_CONTROL_SPECS:
@@ -229,46 +280,6 @@ def descriptor_control_rows() -> pd.DataFrame:
             }
         )
     return pd.DataFrame.from_records(records).sort_values("mae").reset_index(drop=True)
-
-
-def model_size_rows(rows: pd.DataFrame) -> pd.DataFrame:
-    records = []
-    source_lookup = rows.set_index(rows["source"].astype(str))
-    for size, condition, row in [
-        ("8M", "Tm-only", source_lookup.loc["Tm_only"]),
-        ("8M", "FEP", source_lookup.loc["FEP"]),
-    ]:
-        records.append(
-            {
-                "size": size,
-                "condition": condition,
-                "mae": float(row["test_mae"]),
-                "ci_lo": float(row["ci_lo"]),
-                "ci_hi": float(row["ci_hi"]),
-                "abs_errors": np.asarray(row["abs_errors"], dtype=float),
-            }
-        )
-    for size, condition, path in [
-        ("35M", "Tm-only", SIZE35_TM_JSON),
-        ("35M", "FEP", SIZE35_FEP_JSON),
-        ("650M", "Tm-only", SIZE650_TM_JSON),
-        ("650M", "FEP", SIZE650_FEP_JSON),
-    ]:
-        point = read_json(path)["scaling"][0]
-        records.append(
-            {
-                "size": size,
-                "condition": condition,
-                "mae": float(point["mae"]),
-                "ci_lo": float(point["ci_lo"]),
-                "ci_hi": float(point["ci_hi"]),
-                "abs_errors": np.asarray(point["abs_errors"], dtype=float),
-            }
-        )
-    out = pd.DataFrame.from_records(records)
-    out["size"] = pd.Categorical(out["size"], ["8M", "35M", "650M"], ordered=True)
-    out["condition"] = pd.Categorical(out["condition"], ["Tm-only", "FEP"], ordered=True)
-    return out.sort_values(["size", "condition"]).reset_index(drop=True)
 
 
 def paired_delta_ci(a: np.ndarray, b: np.ndarray, n_boot: int = 10000) -> tuple[float, float, float]:
@@ -492,7 +503,7 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     md_scale = load_scaling(SCALING_CURVES["MD Q-value labels"]["path"])
     curves = [
         ("Tm labels only", tm_scale, COL["baseline"], "s"),
-        ("mutation free energy", fep_scale, COL["fep"], "o"),
+        ("FEP mutation free energy", fep_scale, COL["fep"], "o"),
         ("MD Q-value", md_scale, COL["mdq"], "o"),
     ]
 
@@ -512,45 +523,6 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     panel_label(ax, "A")
 
     ax = axes[0, 1]
-    ax.axhline(baseline, color=COL["baseline"], linestyle="--", linewidth=1.1, label="Tm labels only")
-    scaling_errorbar(ax, fep_scale, COL["fep"], "mutation free energy")
-    scaling_errorbar(ax, md_scale, COL["mdq"], "MD Q-value")
-    best_idx = int(fep_scale["mae"].argmin())
-    ax.scatter([fep_scale.loc[best_idx, "x"]], [fep_scale.loc[best_idx, "mae"]], s=54, color=COL["fep"], edgecolor="white", zorder=5)
-    ax.text(0.96, 0.08, "best at largest\nlabel setting", transform=ax.transAxes, ha="right", va="bottom", fontsize=7.0, color=COL["fep"])
-    ax.set_xscale("log")
-    ax.set_xticks(x_ticks)
-    ax.set_xticklabels([str(x) for x in x_ticks])
-    ax.set_xlabel("computed labels used")
-    ax.set_ylabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(8, 760)
-    ax.set_ylim(*scaling_ylim)
-    ax.set_yticks(scaling_yticks)
-    ax.legend(frameon=False, loc="upper right", handlelength=1.8)
-    polish(ax, "both")
-    panel_label(ax, "B")
-
-    ax = axes[1, 0]
-    for label, curve, color, marker in curves:
-        delta = curve.copy()
-        delta["mae"] = delta["mae"] - baseline
-        delta["ci_lo"] = delta["ci_lo"] - baseline
-        delta["ci_hi"] = delta["ci_hi"] - baseline
-        scaling_errorbar(ax, delta, color, label, marker=marker)
-    ax.axhline(0, color=COL["black"], linewidth=0.9)
-    ax.set_xscale("log")
-    ax.set_xticks(x_ticks)
-    ax.set_xticklabels([str(x) for x in x_ticks])
-    ax.set_xlabel("labels used")
-    ax.set_ylabel("MAE change vs Tm labels only (deg C)")
-    ax.set_xlim(8, 760)
-    ax.set_ylim(-0.95, 1.35)
-    ax.set_yticks([-0.5, 0.0, 0.5, 1.0])
-    ax.legend(frameon=False, loc="upper right", handlelength=1.8)
-    polish(ax, "both")
-    panel_label(ax, "C")
-
-    ax = axes[1, 1]
     labels = ["Tm labels\nonly", "FEP mutation\nfree energy", "MD\nQ-value"]
     best_points = [
         ("Tm labels\nonly", tm_scale.iloc[-1], COL["baseline"], "s"),
@@ -560,12 +532,84 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     y = np.arange(len(best_points))
     for i, (label, point, col, marker) in enumerate(best_points):
         horizontal_interval(ax, i, point["mae"], point["ci_lo"], point["ci_hi"], col, marker=marker)
-        ax.text(point["ci_hi"] + 0.015, i, f"{point['mae']:.2f}", va="center", fontsize=7.3)
+        ax.text(point["ci_hi"] + 0.025, i, f"{point['mae']:.2f}", va="center", fontsize=7.3)
     ax.set_yticks(y)
     ax.set_yticklabels(labels)
     ax.invert_yaxis()
     ax.set_xlabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(6.05, 6.85)
+    ax.set_xlim(5.75, 7.30)
+    polish(ax, "x")
+    panel_label(ax, "B")
+
+    ax = axes[1, 0]
+    size_rows = model_size_rows(rows)
+    sizes = ["8M", "35M", "650M"]
+    xpos = np.arange(len(sizes))
+    x_offsets = {"Tm labels only": -0.08, "FEP mutation free energy": 0.08}
+    colors = {"Tm labels only": COL["baseline"], "FEP mutation free energy": COL["fep"]}
+    markers = {"Tm labels only": "s", "FEP mutation free energy": "o"}
+    for condition in ["Tm labels only", "FEP mutation free energy"]:
+        subset = size_rows[size_rows["condition"] == condition].set_index("esm2_size").loc[sizes]
+        x = xpos + x_offsets[condition]
+        yvals = subset["test_mae"].to_numpy(float)
+        yerr = np.vstack([yvals - subset["ci_lo"].to_numpy(float), subset["ci_hi"].to_numpy(float) - yvals])
+        ax.errorbar(
+            x,
+            yvals,
+            yerr=yerr,
+            fmt=markers[condition] + "-",
+            color=colors[condition],
+            ecolor=colors[condition],
+            elinewidth=1.0,
+            capsize=0,
+            label=condition,
+        )
+    ax.set_xticks(xpos)
+    ax.set_xticklabels(sizes)
+    ax.set_xlabel("ESM2 encoder size")
+    ax.set_ylabel("held-out Tm test MAE (deg C)")
+    ax.set_ylim(5.75, 7.35)
+    ax.legend(frameon=False, loc="upper left", handlelength=1.8)
+    polish(ax, "y")
+    panel_label(ax, "C")
+
+    ax = axes[1, 1]
+    delta_rows = encoder_delta_rows()
+    delta_sources = ["FEP", MD_CONTACT_Q_SOURCE]
+    ypos = np.arange(len(delta_sources))
+    y_offsets = {"frozen": -0.12, "hot": 0.12}
+    markers = {"frozen": "s", "hot": "o"}
+    encoder_labels = {"frozen": "frozen encoder", "hot": "hot encoder"}
+    for encoder in ["frozen", "hot"]:
+        subset = delta_rows[delta_rows["encoder"] == encoder].set_index("source")
+        for i, source in enumerate(delta_sources):
+            row = subset.loc[source]
+            horizontal_interval(
+                ax,
+                i + y_offsets[encoder],
+                row["delta_mae"],
+                row["delta_ci_lo"],
+                row["delta_ci_hi"],
+                SOURCE_COLOR[source],
+                marker=markers[encoder],
+            )
+    ax.axvline(0, color=COL["black"], linewidth=0.9)
+    ax.set_yticks(ypos)
+    ax.set_yticklabels(["FEP mutation\nfree energy", "MD Q-value"])
+    ax.invert_yaxis()
+    ax.set_xlabel("MAE change vs matched Tm only (deg C)")
+    ax.set_xlim(-0.55, 0.24)
+    ax.legend(
+        handles=[
+            Line2D([0], [0], marker="s", color=COL["black"], linestyle="none", markersize=5, label=encoder_labels["frozen"]),
+            Line2D([0], [0], marker="o", color=COL["black"], linestyle="none", markersize=5, label=encoder_labels["hot"]),
+        ],
+        frameon=False,
+        loc="lower center",
+        bbox_to_anchor=(0.54, 1.01),
+        ncol=2,
+        borderaxespad=0.0,
+    )
     polish(ax, "x")
     panel_label(ax, "D")
 
