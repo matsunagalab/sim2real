@@ -63,6 +63,23 @@ candidate setting is selected on experimental Tm validation data, and every
 final claim is evaluated on the same held-out experimental Tm test set with
 paired error statistics.
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_outline01_concept_protocol}
+\caption{\textbf{Multi-task transfer-learning framework for using simulation data in
+experimental Tm prediction.}
+(a) Experimental Tm labels are scarce, whereas simulation and
+physics-based calculations can provide larger computed-label pools.
+(b) Nanobody Tm prediction is used as a concrete case in which the
+computed labels are related to, but not identical with, the experimental target.
+(c) The model shares a pretrained protein sequence representation
+between the Tm target head and a computed-label head.
+(d) Model settings are selected on an experimental validation set,
+and final claims are evaluated on held-out experimental Tm test examples using
+paired error statistics.}
+\label{fig:learning_framework}
+\end{figure*}
+
 The results are source-dependent. FEP mutation free energies, although relative
 and mutation-level, give the clearest improvement in absolute Tm prediction,
 whereas an MD-derived Q-value does not improve under the same protocol.

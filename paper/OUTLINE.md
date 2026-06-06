@@ -378,7 +378,8 @@ The Results should follow the figures and keep interpretation controlled.
 
 #### Result 1: A framework for using simulation labels in experimental protein-property prediction
 
-Display: Fig. 1.
+Display: Fig. 1, introduced before the Results section and used as the
+framework reference for the first Results subsection.
 
 Key points:
 
@@ -554,6 +555,9 @@ Known placeholders still to fill later:
 ### Fig. 1. Multi-task transfer-learning framework for using simulation data in experimental Tm prediction
 
 Purpose: introduce the general problem of using simulation labels for an experimental target, then instantiate it as nanobody Tm prediction. Do not introduce the Tm/ΔΔG interpretation here.
+
+Placement: show this figure before the Results section so that the transfer-learning
+architecture is visible before the source-label comparisons.
 
 Panels:
 

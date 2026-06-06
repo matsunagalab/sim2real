@@ -529,13 +529,13 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
         ("FEP mutation\nfree energy", fep_scale.iloc[int(fep_scale["mae"].argmin())], COL["fep"], "o"),
         ("MD\nQ-value", md_scale.iloc[int(md_scale["mae"].argmin())], COL["mdq"], "o"),
     ]
-    y = np.arange(len(best_points))
+    y = np.arange(len(best_points)) * 1.35
     for i, (label, point, col, marker) in enumerate(best_points):
-        horizontal_interval(ax, i, point["mae"], point["ci_lo"], point["ci_hi"], col, marker=marker)
-        ax.text(point["ci_hi"] + 0.025, i, f"{point['mae']:.2f}", va="center", fontsize=7.3)
+        horizontal_interval(ax, y[i], point["mae"], point["ci_lo"], point["ci_hi"], col, marker=marker)
+        ax.text(point["ci_hi"] + 0.025, y[i], f"{point['mae']:.2f}", va="center", fontsize=7.3)
     ax.set_yticks(y)
     ax.set_yticklabels(labels)
-    ax.invert_yaxis()
+    ax.set_ylim(y[-1] + 0.55, -0.55)
     ax.set_xlabel("held-out Tm test MAE (deg C)")
     ax.set_xlim(5.75, 7.30)
     polish(ax, "x")
@@ -576,8 +576,8 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     ax = axes[1, 1]
     delta_rows = encoder_delta_rows()
     delta_sources = ["FEP", MD_CONTACT_Q_SOURCE]
-    ypos = np.arange(len(delta_sources))
-    y_offsets = {"frozen": -0.12, "hot": 0.12}
+    ypos = np.arange(len(delta_sources)) * 1.45
+    y_offsets = {"frozen": -0.18, "hot": 0.18}
     markers = {"frozen": "s", "hot": "o"}
     encoder_labels = {"frozen": "frozen encoder", "hot": "hot encoder"}
     for encoder in ["frozen", "hot"]:
@@ -586,7 +586,7 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
             row = subset.loc[source]
             horizontal_interval(
                 ax,
-                i + y_offsets[encoder],
+                ypos[i] + y_offsets[encoder],
                 row["delta_mae"],
                 row["delta_ci_lo"],
                 row["delta_ci_hi"],
@@ -596,7 +596,7 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     ax.axvline(0, color=COL["black"], linewidth=0.9)
     ax.set_yticks(ypos)
     ax.set_yticklabels(["FEP mutation\nfree energy", "MD Q-value"])
-    ax.invert_yaxis()
+    ax.set_ylim(ypos[-1] + 0.60, -0.60)
     ax.set_xlabel("MAE change vs matched Tm only (deg C)")
     ax.set_xlim(-0.55, 0.24)
     ax.legend(
