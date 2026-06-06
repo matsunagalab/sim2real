@@ -24,13 +24,13 @@ nothing for the experimental phenotype.
 \includegraphics[width=\textwidth]{fig_outline01_concept_protocol}
 \caption{\textbf{Multi-task transfer-learning framework for using simulation data in
 experimental Tm prediction.}
-\textbf{(a)} Experimental Tm labels are scarce, whereas simulation and
+(a) Experimental Tm labels are scarce, whereas simulation and
 physics-based calculations can provide larger computed-label pools.
-\textbf{(b)} Nanobody Tm prediction is used as a concrete case in which the
+(b) Nanobody Tm prediction is used as a concrete case in which the
 computed labels are related to, but not identical with, the experimental target.
-\textbf{(c)} The model shares a pretrained protein sequence representation
+(c) The model shares a pretrained protein sequence representation
 between the Tm target head and a computed-label head.
-\textbf{(d)} Model settings are selected on an experimental validation set,
+(d) Model settings are selected on an experimental validation set,
 and final claims are evaluated on held-out experimental Tm test examples using
 paired error statistics.}
 \label{fig:learning_framework}
@@ -62,15 +62,15 @@ content of the label.
 \includegraphics[width=\textwidth]{fig_outline02_source_screen}
 \caption{\textbf{Label-count scaling of experimental and computational
 supervision.}
-\textbf{(a)} Experimental Tm-label scaling, FEP mutation free-energy scaling,
+(a) Experimental Tm-label scaling, FEP mutation free-energy scaling,
 and MD Q-value scaling are plotted together to compare the direction of
 label-count effects.
-\textbf{(b)} Computed-label scaling for FEP and the MD Q-value, with the
+(b) Computed-label scaling for FEP and the MD Q-value, with the
 Tm-label-only reference shown as a dashed line.
-\textbf{(c)} The same curves shown as MAE changes relative to the Tm-label-only
+(c) The same curves shown as MAE changes relative to the Tm-label-only
 reference. In panels a--c, points show ensemble MAE values and thin vertical
 intervals show 90\% bootstrap intervals.
-\textbf{(d)} Best points from the label-count sweeps are replotted as interval
+(d) Best points from the label-count sweeps are replotted as interval
 estimates to compare the experimental-only, FEP, and MD Q-value references.}
 \label{fig:scaling}
 \end{figure*}
@@ -109,15 +109,15 @@ source label.
 \includegraphics[width=\textwidth]{fig_outline03_design_bridge}
 \caption{\textbf{All-atom simulation labels differ in their transfer to Tm
 prediction.}
-\textbf{(a)} Final test MAE for experimental Tm labels alone, FEP mutation
+(a) Final test MAE for experimental Tm labels alone, FEP mutation
 free-energy labels, and the MD-derived Q-value. Intervals show bootstrap
 confidence intervals over test-set absolute errors.
-\textbf{(b)} Per-example and paired changes in absolute error relative to
+(b) Per-example and paired changes in absolute error relative to
 training on Tm labels alone. Negative values indicate lower error than the
 reference.
-\textbf{(c)} Frozen-encoder and hot-encoder comparisons for the same three
+(c) Frozen-encoder and hot-encoder comparisons for the same three
 conditions.
-\textbf{(d)} Held-out test MAE for selected MD-derived and nanobody-specific
+(d) Held-out test MAE for selected MD-derived and nanobody-specific
 descriptor controls in the residual-control architecture. The dashed line marks
 the FEP reference from panel a.}
 \label{fig:simulation_comparison}
@@ -161,14 +161,14 @@ in the Discussion.
 \centering
 \includegraphics[width=\textwidth]{fig_outline04_mdq_boundary}
 \caption{\textbf{Structure-based labels and language-model-proposed variants.}
-\textbf{(a)} Final test MAE for Tm-only learning, FEP, and structure-based
+(a) Final test MAE for Tm-only learning, FEP, and structure-based
 source labels.
-\textbf{(b)} Paired $\Delta$MAE estimates relative to Tm-only learning.
+(b) Paired $\Delta$MAE estimates relative to Tm-only learning.
 Negative values indicate improvement.
-\textbf{(c)} Direct paired comparison between ESM2-proposed variants scored by
+(c) Direct paired comparison between ESM2-proposed variants scored by
 Rosetta and random variants scored by Rosetta. Negative values favor the
 ESM2-proposed set.
-\textbf{(d)} The proposal-set analysis motivates future tests of a
+(d) The proposal-set analysis motivates future tests of a
 generator--physics--predictor loop, but the present study evaluates only the
 supervised-scoring step and does not perform closed-loop optimization.}
 \label{fig:variant_sources}

@@ -2,6 +2,25 @@
 
 \section*{Discussion}
 
+\subsection*{Related work and positioning}
+
+Existing nanobody Tm predictors rely on PLM fine-tuning alone or on
+structure-based feature engineering, without leveraging
+simulation-derived labels as auxiliary tasks
+\citep{Zhang2025NbBench}. The present study goes beyond this
+baseline by showing that augmenting with physically matched simulation labels
+(FEP $\Delta\Delta G$) improves held-out Tm prediction, and that this
+improvement is selective---not all simulation data transfer to the experimental
+phenotype. This result connects the materials-informatics Sim2Real framework
+\citep{Minami2025Scaling} to protein engineering, where the source label
+($\Delta\Delta G$) and the target label (Tm) differ in physical meaning yet
+share a common stability landscape. Unlike prior multi-task learning
+applications for protein property prediction that combine tasks with similar
+input-output structure, our setting asks whether a computationally abundant
+quantity can substitute for a scarce experimental phenotype when their physical
+relationship is indirect. The answer is yes, but only when the source label is
+chosen for its physical relatedness rather than its availability.
+
 \subsection*{Source-label transfer is selective}
 
 This study set out to clarify how simulation-derived labels should be used when
@@ -135,6 +154,19 @@ be designed to report mutation-specific energetics rather than a global stabilit
 proxy. Enlarging the language model is likewise not a substitute for physically
 matched labels.
 
+A supplementary control confirms this selectivity: combining FEP and MD
+Q-value labels in the same model did not improve over FEP alone
+(Supplementary Fig.~3d), reinforcing that source-task selection should
+prioritize quality over quantity. Conversely, when the MD Q-value model
+was tuned separately at each label count on the experimental validation
+split, its performance improved and crossed the Tm-only baseline at the
+largest setting (Supplementary Fig.~4b). This suggests that the failure
+of MD labels under our default protocol is partly methodological---a
+fixed hyperparameter recipe that disadvantaged the MD source---rather
+than purely physical. The FEP result remains robust because it held
+under the same fixed recipe and the validation-tuned FEP model matched
+it.
+
 These costs become interpretable once they are weighed against experimental
 value. Minami et al. quantify that value as an equivalent sample size---the number
 of simulation labels worth one experimental label, read off as the marginal rate
@@ -183,3 +215,16 @@ experimental data to define the target phenotype, use simulation to annotate
 physically meaningful perturbations around it, and judge the combined model only
 on held-out experimental data. That is a practical route from simulation-assisted
 prediction toward closed-loop protein engineering.
+
+\subsection*{Conclusions}
+
+We have shown that simulation-to-real transfer learning improves low-data
+nanobody Tm prediction when the source label is physically matched to the
+target, and that the benefit is selective rather than generic. FEP mutation
+free energies gave a consistent 0.35$^\circ$C improvement in held-out Tm MAE,
+while an MD-derived Q-value did not transfer under the same protocol, and
+enlarging the ESM2 encoder did not reproduce the FEP gain. These results
+provide a practical rule for allocating simulation effort in protein
+engineering: prioritize source labels whose physical content is related to
+the experimental endpoint, validate under target-centered model selection,
+and scale the most informative labels rather than all available ones.

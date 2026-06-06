@@ -286,7 +286,7 @@ def panel_label(ax, label: str) -> None:
     ax.text(
         -0.10,
         1.06,
-        label,
+        f"({label.lower()})",
         transform=ax.transAxes,
         fontsize=11,
         fontweight="bold",
