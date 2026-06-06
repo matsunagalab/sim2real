@@ -152,7 +152,7 @@ This manuscript should mirror that logic, but with a biological case:
 1. Protein engineering also faces scarce experimental property labels.
 2. Biomolecular simulations and physics-based calculations can generate many more labels than experiments.
 3. Unlike many materials examples, the source labels here are often not the same property as the target. In the main case, the experimental target is Tm, while the most useful source labels are mutation free energies.
-4. Therefore, the central question is not only whether simulation data scale, but which simulated physical quantity transfers to the experimental target.
+4. The paper should first ask which simulated physical quantity transfers to the experimental target, then discuss whether useful source labels show label-count behavior.
 5. Nanobody Tm prediction is the concrete case study for this broader question.
 6. The main result extends the Sim2Real argument: simulation data are useful when the source label encodes transferable physical content, but not every simulation-derived label helps.
 
@@ -291,9 +291,9 @@ Paragraph plan:
 4. Transfer this question to biomolecular design: protein engineering also has scarce experimental property labels, while simulations and physics-based calculations can generate many labels for variants.
 5. Introduce the key additional difficulty in this paper: for biomolecules, the simulated label may differ from the experimental target not only by domain gap but also by physical quantity. In this case, Tm is the target, while FEP supplies mutation free-energy labels.
 6. Present nanobody thermal stability as the concrete case: Tm is important for engineering, developability, storage, and downstream screening, but experimental Tm data are limited.
-7. Acknowledge high-throughput experimental stability data: Tsuboyama et al. introduced the Nature 2023 mega-scale folding-stability dataset using cDNA-display proteolysis, with approximately 776,000 high-quality measurements for 40--72 amino-acid domains.
+7. Acknowledge high-throughput experimental stability data: Tsuboyama et al. introduced the Nature 2023 mega-scale folding-stability dataset using cDNA-display proteolysis, with approximately 776,000 high-quality measurements for 40 to 72 amino-acid domains.
 8. Explain why this does not solve the present problem directly: nanobody VHH domains are longer than the small domains covered by that dataset, and direct large-scale experimental Delta G measurements are not yet available at that nanobody length scale.
-9. Cite the separate ESMtherm study by Chu et al. 2024: fine-tuning on the mega-scale dataset works well for small domains but transferred poorly to larger 177--501-residue proteins, motivating target-specific supervision for longer scaffolds.
+9. Cite the separate ESMtherm study by Chu et al. 2024: fine-tuning on the mega-scale dataset works well for small domains but transferred poorly to larger 177 to 501-residue proteins, motivating target-specific supervision for longer scaffolds.
 10. Protein language models provide useful representations, and prior nanobody Tm work shows that supervised fine-tuning is important for extracting Tm-relevant representations.
 11. However, that prior work also suggests that simply increasing ESM2 size does not automatically improve nanobody Tm prediction, motivating information sources beyond model-size scaling.
 12. We use a shared-encoder multi-task transfer-learning framework and evaluate all claims on held-out experimental Tm examples.
@@ -317,7 +317,7 @@ Subsection plan:
    - Experimental Tm is the target task.
    - Computational labels are source tasks.
    - All final claims use the same held-out experimental Tm test set.
-   - Figure 1 summarizes the design.
+   - Fig. 1 summarizes the design.
 
 2. **Experimental Tm dataset**
    - Dataset origin.
@@ -364,7 +364,7 @@ Subsection plan:
    - Confidence intervals.
    - Paired bootstrap on per-example absolute errors.
    - Validation-set versus test-set comparison.
-   - Label-count scaling analysis.
+   - Label-count sweep analysis.
    - Software versions and hardware.
 
 8. **Data and code availability**
@@ -378,7 +378,7 @@ The Results should follow the figures and keep interpretation controlled.
 
 #### Result 1: A framework for using simulation labels in experimental protein-property prediction
 
-Figure: Fig. 1.
+Display: Fig. 1.
 
 Key points:
 
@@ -395,14 +395,14 @@ The design permits computational labels to influence representation learning whi
 
 #### Result 2: FEP labels show label-count-dependent improvement, unlike the MD-derived Q-value boundary condition
 
-Figure: Fig. 2.
+Display: Fig. 2.
 
 Key points:
 
-- Experimental Tm-label scaling establishes the low-data regime.
+- Experimental Tm-label count response establishes the low-data regime.
 - FEP labels improve best held-out Tm performance when the full source label set is used.
 - The FEP curve is not perfectly monotonic; do not claim a clean power law.
-- The MD-derived Q-value does not show robust improvement over Tm-only training.
+- The MD-derived Q-value does not show a reproducible improvement over Tm-only training.
 
 Main claim:
 
@@ -410,7 +410,7 @@ The amount of source-label data matters, but data quantity alone does not explai
 
 #### Result 3: All-atom simulation labels differ in their transfer to Tm prediction
 
-Figure: Fig. 3.
+Display: Fig. 3.
 
 Key numbers:
 
@@ -437,7 +437,7 @@ transfer to Tm prediction while the tested Q-value descriptor does not.
 
 #### Result 4: The gain is not explained by simply using a larger encoder
 
-Figure: Supplementary Fig. 4 and the corresponding Results paragraph.
+Display: Supplementary Fig. 4 and the corresponding Results paragraph.
 
 Key points:
 
@@ -452,7 +452,7 @@ The result supports physics-informed source-label supervision rather than model-
 
 #### Result 5: Structure-based labels and proposal-set scores are weaker source signals
 
-Figure: Fig. 4.
+Display: Fig. 4.
 
 Key points:
 
@@ -469,12 +469,12 @@ Key points:
 Main claim:
 
 Non-FEP structure-based labels provide weaker source signals; the proposal-set
-result motivates future generator--physics--predictor workflows without
+result motivates future generator, physics, and predictor workflows without
 claiming closed-loop optimization.
 
 #### Result 6: Physics-labeled sequence proposals provide a design-loop bridge
 
-Figure: Fig. 4c,d and Discussion.
+Display: Fig. 4c,d and Discussion.
 
 Key numbers:
 
@@ -488,12 +488,12 @@ Main claim:
 Rosetta scores assigned to ESM2-proposed variants improve over Tm-only
 training, but their superiority over random variants scored by Rosetta is not
 conclusive. This should be framed as a route toward future
-generator--physics--predictor design loops, not as evidence that the sequence
+generator, physics, and predictor design loops, not as evidence that the sequence
 proposals are already optimized.
 
 #### Result 7: Mutation free-energy labels complement sparse absolute Tm anchors
 
-Figure: Discussion-level interpretation, supported by Figs. 2 and 3.
+Display: Discussion-level interpretation, supported by Figs. 2 and 3.
 
 Key points:
 
@@ -504,7 +504,7 @@ Key points:
 
 Main claim:
 
-The useful source labels are not simply more labels; they encode stability changes relevant to the target phenotype.
+The useful source labels encode stability changes relevant to the target phenotype.
 
 ### Discussion
 
@@ -519,6 +519,7 @@ Paragraph plan:
 7. Limitations:
    - small experimental Tm train set;
    - nanobody-specific dataset;
+   - small number of exact NbBench sequence overlaps in the MD source table;
    - no new experimental validation of high-Tm candidates;
    - ESM2-proposed-vs-random comparison remains exploratory;
    - raw simulation data may be large and difficult to deposit fully.
@@ -545,7 +546,7 @@ Draft statement placeholders:
 
 - Data availability: Processed data required to reproduce the main and supplementary figures will be deposited in Zenodo at `ZENODO_DATA_DOI_PLACEHOLDER`. Raw simulation trajectories are large and will be made available at `RAW_DATA_LOCATION_OR_REQUEST_POLICY_PLACEHOLDER`.
 - Code availability: Analysis, training, and figure-generation code will be available on GitHub at `GITHUB_REPOSITORY_URL_PLACEHOLDER`; an archival release will be deposited in Zenodo at `ZENODO_CODE_DOI_PLACEHOLDER`.
-- Competing interests: The authors declare that they have no competing interests.
+- Competing interests: Use the statement in `paper/tex/sections/acknowledgments.tex`.
 - Author contributions: Use the CRediT-style draft in `paper/tex/sections/acknowledgments.tex` and confirm before submission.
 - Funding: Use the JSPS KAKENHI and Fugaku support statement in `paper/tex/sections/acknowledgments.tex` and confirm grant details before submission.
 - AI-use disclosure: Use the draft disclosure in `paper/tex/sections/acknowledgments.tex` and adjust to the journal's final submission form.
@@ -557,7 +558,7 @@ Known placeholders still to fill later:
 - Final GitHub URL and Zenodo DOI for code.
 - Suggested reviewers for submission.
 
-## Figure Plan
+## Fig. Plan
 
 ### Fig. 1. Multi-task transfer-learning framework for using simulation data in experimental Tm prediction
 
@@ -576,22 +577,22 @@ CSBJ figure rules:
 - Use lower-case panel labels in parentheses.
 - Put explanatory text in the legend.
 
-### Fig. 2. Label-count scaling of experimental and computational supervision
+### Fig. 2. Label-count sweeps for experimental and computational supervision
 
-Purpose: show scaling behavior and motivate final source comparison.
+Purpose: show label-count behavior and motivate final source comparison without claiming a clean scaling law.
 
 Panels:
 
-- (a) Experimental Tm-label, FEP-label, and MD-derived Q-value scaling curves
+- (a) Experimental Tm-label, FEP-label, and MD-derived Q-value count-sweep curves
   plotted together.
-- (b) Computed-label scaling for FEP and the MD-derived Q-value, with the
+- (b) Computed-label count sweeps for FEP and the MD-derived Q-value, with the
   Tm-label-only reference shown as a dashed line.
 - (c) MAE change relative to the Tm-label-only reference.
 - (d) Best points from label-count sweeps.
 
 Claims:
 
-- Experimental Tm labels show the expected low-data scaling behavior.
+- Experimental Tm labels show the expected low-data count response.
 - FEP reaches the best held-out Tm MAE at the full label set, but the curve is noisy.
 - The MD-derived Q-value does not reproduce the FEP benefit.
 - Avoid claiming a strict monotonic law.
@@ -628,7 +629,7 @@ Panels:
 - (b) Paired ΔMAE versus Tm-only learning.
 - (c) Direct paired comparison between ESM2-proposed variants scored by Rosetta
   and random variants scored by Rosetta.
-- (d) Perspective panel for future generator--physics--predictor loops.
+- (d) Perspective panel for future generator, physics, and predictor loops.
 
 Claims:
 
@@ -647,9 +648,9 @@ Expected supplementary components:
 - Supplementary Table 1: dataset split sizes and label counts.
 - Supplementary Table 2: hyperparameter search space and selected settings.
 - Supplementary Table 3: run-level final metrics by seed.
-- Supplementary Figure 1: all label-count sweeps with confidence intervals.
-- Supplementary Figure 2: additional source comparisons and negative controls.
-- Supplementary Figure 3: encoder-size and frozen-encoder controls, if not fully clear in the main figure.
+- Supplementary Fig. 1: all label-count sweeps with confidence intervals.
+- Supplementary Fig. 2: additional source comparisons and negative controls.
+- Supplementary Fig. 3: encoder-size and frozen-encoder controls, if not fully clear in the main figure.
 - Supplementary Data: processed inputs and plotting tables used for the figures.
 
 Keep the main paper compact and put reproducibility details here.
@@ -689,9 +690,9 @@ Additional paired comparison:
 ## Decision Log
 
 - 2026-05-30: Initial MD-centered story was weakened after controlled comparison.
-- 2026-05-31: FEP mutation-effect labels identified as the robust main result.
-- 2026-05-31: ESM2-proposed-variant result positioned as a bridge toward future design loops, not evidence of optimized sequence design.
-- 2026-05-31: MD-derived Q-value positioned as a boundary condition showing that not all simulation-derived labels help.
+- 2026-05-31: FEP mutation-effect labels identified as the main positive result.
+- 2026-05-31: ESM2-proposed-variant result positioned as a bridge toward future design loops while avoiding a claim of optimized sequence design.
+- 2026-05-31: MD-derived Q-value positioned as a boundary condition showing that source-label transfer is selective.
 - 2026-05-31: Story reframed so the opening is about how to incorporate computational labels into Tm prediction; the Tm/ΔΔG relation is moved to the final interpretation.
 - 2026-06-01: Submission target fixed to CSBJ General section as a compact Research Article.
 - 2026-06-05: Train/test split was deliberately reassigned from NbBench's default to a low-data setting (57 train / 114 val / 396 test). Rationale: source-label transfer and label-count scaling effects are easier to see when experimental Tm training data are scarce; abundant Tm labels would wash out the simulation-label benefit. Rationale now stated in Methods (split definitions).

@@ -6,7 +6,7 @@
 
 The study tests whether a computational source label can improve experimental
 nanobody Tm prediction when that label is physically related to Tm but not
-identical to it. We used a multi-task transfer-learning design: experimental Tm
+identical to it. We used a multi-task transfer-learning design in which experimental Tm
 prediction was the target task, and each computational label was a source task
 that shared part of the network with the target. Throughout, model selection and
 every reported number were tied to experimental Tm performance. Source-task
@@ -19,7 +19,7 @@ Experimental Tm labels came from the public nanobody benchmark NbBench, which
 provides a thermo-seq task with predefined splits \citep{Zhang2025NbBench}. We
 deliberately assigned the smallest partition to training and the largest to the
 held-out test set, giving 57 training, 114 validation, and 396 test sequences.
-This places the model in the low-data regime that the study targets: scarce
+This places the model in the low-data regime that the study targets. Scarce
 experimental Tm labels, not abundant ones, are the condition under which
 simulation-derived supervision is expected to help. The large test set is a
 direct benefit of this choice, because it makes paired error comparisons and
@@ -33,8 +33,8 @@ multi-task transfer models.
 
 \textbf{Target-label scaling.} The target CSV files held an amino-acid sequence
 column and a Tm label in degrees Celsius. During training, Tm labels were mapped
-to a scaled regression target: a robust scaling step followed by min--max
-scaling to [0,1], with the scaler fit only on the 57 training labels. The fitted
+to a scaled regression target by robust scaling followed by linear rescaling to
+[0,1], with the scaler fit only on the 57 training labels. The fitted
 scaler was then applied to validation labels during training. At evaluation,
 predictions were inverse-transformed back to degrees Celsius before errors were
 computed, so the validation and test label distributions never entered the
@@ -112,7 +112,7 @@ Trajectories were run with OpenMM on CUDA devices \citep{Eastman2017OpenMM}. Eac
 system was equilibrated at 300 K with 1 ns NVT and 1 ns NPT at 1 atm, using a
 2-fs timestep without hydrogen-mass repartitioning. The 400 K branch was then
 started from the 300 K equilibrated state through two restrained NVT relaxation
-stages---1 ns at 400 K with C$\alpha$ restraints, then a second 1 ns 400 K
+stages. The first was 1 ns at 400 K with C$\alpha$ restraints, followed by a second 1 ns 400 K
 restrained NVT. Production ran 100 ns of restraint-free 400 K NVT with
 hydrogen-mass repartitioning (4 amu hydrogen mass), a 4-fs timestep,
 Langevin middle integration at a 1 ps$^{-1}$ collision rate, PME electrostatics
@@ -124,7 +124,7 @@ Q-values were extracted from the 400 K production trajectories with MDTraj
 Amber parameter file and the native reference was frame 0 of production. A smooth
 native-contact fraction \citep{Best2013NativeContacts} was computed from
 backbone-heavy-atom contacts and averaged over the terminal portion of the
-trajectory, then min--max scaled to [0,1] before training. The exact contact
+trajectory, then scaled to [0,1] before training. The exact contact
 selection, contact function, averaging window, and column convention are given in
 Supplementary Methods.
 
@@ -150,7 +150,7 @@ constrained with SHAKE \citep{Ryckaert1977SHAKE}, and long-range electrostatics
 used particle mesh Ewald \citep{Essmann1995PME}. Relative free energies were
 estimated with the Bennett acceptance ratio \citep{Bennett1976BAR}. The processed
 tables retain the raw mutation free-energy value, its negated value, and the
-min--max scaled label used by the network; under this convention, larger
+network-facing [0,1]-scaled label; under this convention, larger
 processed labels correspond to more favorable mutation free energies.
 
 \subsection*{Rosetta and ThermoMPNN mutation-effect labels}
@@ -216,14 +216,14 @@ FEP settings with 35M- and 650M-parameter ESM2 encoders.
 
 \subsection*{Loss function and multi-task objective}
 
-Each training example was a triple $(x_i,y_i,t_i)$: sequence $x_i$, scaled label
-$y_i$, and task identifier $t_i$. The target Tm task had one identifier, and each
-source task had its own. A minibatch could mix target and source examples, but
+Each training example consisted of a sequence $x_i$, scaled label $y_i$, and task
+identifier $t_i$. The target Tm task had one identifier, and each source task had
+its own. A minibatch could mix target and source examples, but
 every example contributed loss only through the head for its task.
 
 The per-task regression loss was Huber loss with $\delta=1.0$ on scaled labels.
 The default multi-task objective used learnable task-uncertainty weights
-\citep{Kendall2018Uncertainty}: for task $k$ with loss $L_k$ and learned
+\citep{Kendall2018Uncertainty}. For task $k$ with loss $L_k$ and learned
 log-scale $s_k$, the contribution was
 \[
   \frac{L_k}{2\exp(2s_k)} + s_k ,
@@ -261,7 +261,7 @@ ensemble.
 
 Independent run seeds controlled model initialization, target-training
 subsampling in the target-label scaling experiment, source-label sampling, and
-source-task train/validation splitting. Final comparisons used seeds 1--10. The
+source-task train/validation splitting. Final comparisons used seeds 1 to 10. The
 label-count curves used fixed source-specific training recipes while varying the
 number of source labels, rather than retuning a separate model at every
 label-count point.
@@ -280,8 +280,11 @@ error.
 Confidence intervals came from nonparametric bootstrap resampling over held-out
 test proteins. For a single condition, the absolute-error vector from the
 ten-seed ensemble was resampled with replacement 10,000 times using a fixed
-random seed, and the reported 90\% interval is the 5th--95th percentile range of
-the bootstrapped MAE values.
+random seed, and the reported 90\% interval is the 5th to 95th percentile range of
+the bootstrapped MAE values. We report 90\% intervals because the comparisons are
+directional, paired, and intended to emphasize effect sizes rather than binary
+significance thresholds; the bootstrap summaries retained by the analysis code
+allow other interval levels to be recomputed from the same resamples.
 
 For paired comparisons, the same bootstrap indices were applied to the
 absolute-error vectors of the candidate and reference conditions, and the
@@ -289,8 +292,8 @@ candidate-minus-reference MAE difference was computed for each bootstrap sample.
 This paired bootstrap preserves the matched-test-example structure of the
 comparison. Throughout, $\Delta$MAE is candidate minus reference, so negative
 values mean lower error than the reference. The evaluation code also reports the
-one-sided tail probability---the fraction of paired bootstrap samples with
-$\Delta$MAE above zero---but we emphasize effect sizes and 90\% confidence
+one-sided tail probability, defined as the fraction of paired bootstrap samples with
+$\Delta$MAE above zero, but we emphasize effect sizes and 90\% confidence
 intervals.
 
 \subsection*{Implementation details}
