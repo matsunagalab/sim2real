@@ -567,18 +567,19 @@ Purpose: introduce the general problem of using simulation labels for an experim
 Placement: show this figure before the Results section so that the transfer-learning
 architecture is visible before the source-label comparisons.
 
-Panels:
+Design (figure_1_concept_protocol_v2.png, single-panel architecture schematic):
 
-- (a) General setting: scarce experimental target labels and larger simulation-derived source-label pools.
-- (b) Case study: low-data nanobody Tm prediction with non-Tm computational labels.
-- (c) Shared sequence encoder with Tm target head and source label head.
-- (d) Evaluation workflow: fixed Tm train/validation/test split, validation-set model selection, held-out test comparison.
+- Two input streams: experimental sequence data (left) and computational sequence data (right).
+- Shared ESM2 protein language model encoder (flame/snowflake = fine-tuned hot vs. frozen) producing per-sequence embeddings.
+- Shared multilayer perceptron, then a split into a Tm head (→ predicted experimental Tm) and a source head (→ predicted computational scores: ΔΔG / Q-value).
+- Caption carries the explanatory text; no specific layer dimensions are stated in prose.
 
 CSBJ figure rules:
 
 - No in-panel title.
-- Use lower-case panel labels in parentheses.
 - Put explanatory text in the legend.
+
+TODO (figure image): the placed v2 PNG shows the last shared layer as Linear(64) and the heads as "Linear(32)". The actual code (train.py) and Methods/Supplementary use shared 256→128→32 with Tm/source heads mapping the 32-dim representation to a scalar. The figure image needs correcting (64 → 32; head boxes should not read as 32-unit layers). Caption deliberately omits these numbers so the prose is not contradicted in the meantime.
 
 ### Fig. 2. Overview of source-label transfer in the low-data Tm setting
 
@@ -711,6 +712,7 @@ Additional paired comparison:
 - 2026-06-05: Train/test split was deliberately reassigned from NbBench's default to a low-data setting (57 train / 114 val / 396 test). Rationale: source-label transfer and label-count scaling effects are easier to see when experimental Tm training data are scarce; abundant Tm labels would wash out the simulation-label benefit. Rationale now stated in Methods (split definitions).
 - 2026-06-05: Full manuscript prose rewrite (abstract, introduction, methods, results, discussion, supplementary) to remove AI-style phrasing and make the logic flow plainly; numbers, claims, citations, figure refs unchanged. Introduction subsection headers removed (continuous narrative); discussion subsections consolidated.
 - 2026-06-05: Confirmed CSBJ AI policy (cover letter + acknowledgments disclosure required; AI not an author). Acknowledgments disclosure already compliant; cover-letter disclosure remains a pre-submission TODO.
+- 2026-06-07: Fig. 1 replaced with figure_1_concept_protocol_v2.png, a single-panel architecture schematic (was a 4-panel a–d concept figure). Caption rewritten to describe the architecture (shared ESM2 encoder → shared MLP → Tm head + source head) without panel labels or specific layer dimensions; results.tex terminology aligned to "source head". Open TODO: the figure image's layer numbers (shared Linear(64), "Linear(32)" heads) contradict the code/Methods (shared 256→128→32, head 32→scalar) — figure image to be corrected; Methods/Supplementary left unchanged (code is authoritative).
 
 ## Drafting Checklist
 

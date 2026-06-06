@@ -8,7 +8,7 @@ We first built the evaluation framework. The target task was
 nanobody Tm regression from amino-acid sequence, and computational labels were
 treated as source prediction tasks, not as stand-ins for experimental Tm. Each
 model used the pretrained protein sequence model ESM2 to turn a sequence into a
-learned representation, which a Tm head and a computed-label head shared. The
+learned representation, which a Tm head and a source head shared. The
 source task could reshape the representation while the final objective
 stayed anchored to experimental Tm (Fig.~\ref{fig:learning_framework}).
 

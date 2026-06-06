@@ -65,18 +65,20 @@ paired error statistics.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth]{fig_outline01_concept_protocol}
-\caption{\textbf{Multi-task transfer-learning framework for using simulation data in
-experimental Tm prediction.}
-(a) Experimental Tm labels are scarce, whereas simulation and
-physics-based calculations can provide larger computed-label pools.
-(b) Nanobody Tm prediction is used as a concrete case in which the
-computed labels are related to, but not identical with, the experimental target.
-(c) The model shares a pretrained protein sequence representation
-between the Tm target head and a computed-label head.
-(d) Model settings are selected on an experimental validation set,
-and final claims are evaluated on held-out experimental Tm test examples using
-paired error statistics.}
+\includegraphics[width=\textwidth]{figure_1_concept_protocol_v2}
+\caption{\textbf{Multi-task transfer-learning architecture for using simulation
+data in experimental Tm prediction.}
+Experimental sequence data (left) and computational sequence data (right) are
+encoded by a shared ESM2 protein language model into per-sequence embeddings.
+The embeddings pass through a shared multilayer perceptron and then split into
+two task-specific heads: a Tm head that predicts the experimental melting
+temperature, and a source head that predicts the computational scores
+(mutation $\Delta\Delta G$ values or an MD-derived Q-value). Only the
+experimental Tm head defines the final objective, while the source head lets the
+simulation-derived labels reshape the shared representation during training.
+Flame and snowflake icons mark trainable and frozen parameters, respectively;
+the ESM2 encoder is either fine-tuned (hot) or kept frozen depending on the
+configuration.}
 \label{fig:learning_framework}
 \end{figure*}
 
