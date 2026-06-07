@@ -82,7 +82,7 @@ descriptor error came from 300 K disulfide-distance fluctuation (6.48$^\circ$C
 MAE), followed by the sequence-only CDR3-length control (6.52$^\circ$C MAE).
 Temperature mattered in a descriptor-specific way: the Q-value transferred
 slightly better at 400 K than at 300 K (6.67 versus 6.72$^\circ$C MAE),
-consistent with its wider dynamic range at the higher temperature (panel b),
+consistent with its wider dynamic range at the higher temperature,
 whereas the structural-fluctuation descriptors were simulated at 300 K, where
 native-state motions are defined (disulfide-distance 6.48$^\circ$C, RMSF max 6.65
 versus 6.69$^\circ$C at 400 K, CDR3-residue fluctuation 6.66$^\circ$C). Across
@@ -93,10 +93,11 @@ These results narrow the interpretation of the MD comparison. The negative
 result for a terminal Q-value should not be read as evidence that trajectory
 information is useless. Rather, it shows that the transfer-learning model is
 sensitive to how an MD trajectory is compressed into a computational label. Panel b
-shows the raw MD Q-value distribution at 300 K and 400 K: at 300 K the folded
-ensembles sit near one with little spread, whereas the 400 K trajectories resolve
-a range of contact persistence. The temperature and descriptor choice change the
-label distribution seen by the model, so the design problem is not only to run MD
+shows that adding more MD Q-value labels does not systematically lower held-out Tm
+error at either temperature: the 300 K Q-value is saturated near one (folded
+ensembles, little usable variation), and even the more variable 400 K Q-value
+fails to scale toward the FEP regime. The temperature and descriptor choice change
+the information available to the model, so the design problem is not only to run MD
 but also to choose which dynamical quantity, at which temperature, should
 supervise the target predictor. In the present screen, FEP remained the strongest
 all-atom computational label, but the descriptor controls show that MD-derived
@@ -116,10 +117,11 @@ panel is a like-for-like descriptor comparison; its absolute values come from a
 different training series than the source-screen models in Fig.~\ref{fig:scaling}
 and Fig.~\ref{fig:variant_sources} and are not meant for cross-figure numerical
 comparison. Points and intervals show ensemble MAE and 90\% bootstrap intervals.
-(b) Distribution of the raw MD Q-value (fraction of native contacts) per
-nanobody at 300 K and 400 K. At 300 K the Q-value is saturated near one, whereas
-at 400 K it spreads to lower values; box plots show interquartile ranges and
-medians, with per-nanobody points overlaid.}
+(b) Held-out test MAE versus the number of MD Q-value labels for trajectories at
+300 K and 400 K, with Tm-only as a dashed reference (hot encoder; the 400 K curve
+is the sweep also shown in Fig.~\ref{fig:scaling}). Adding more Q-value labels does
+not systematically reduce Tm error at either temperature. Points and intervals show
+ensemble MAE and 90\% bootstrap intervals.}
 \label{fig:simulation_comparison}
 \end{figure*}
 

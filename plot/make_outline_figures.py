@@ -136,6 +136,12 @@ FIG3_DESCRIPTORS = [
 
 TEMP_COLOR = {300: COL["design"], 400: COL["mdq"], None: COL["thermo"]}
 
+# Fig. 3b: MD Q-value label-count scaling at 300 K vs 400 K (same hot/shared setup).
+FIG3B_QSCALING = [
+    (RESULTS / "hot_q_300k_tmselect" / "scaling.json", COL["design"], "o", "300 K"),
+    (RESULTS / "hot_q_400k_tmselect" / "scaling.json", COL["mdq"], "o", "400 K"),
+]
+
 # Fig. 4b: label-count scaling curves for the mutation-effect / variant sources.
 # FEP reuses the existing sweep; the others are dedicated label-count sweeps.
 FIG4_SCALING = [
@@ -781,43 +787,22 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
     panel_label(ax, "A")
 
     ax = axes[1]
-    qrows = qvalue_temperature_rows()
-    temp_specs = [(300, COL["design"], "300 K"), (400, COL["mdq"], "400 K")]
-    positions = [0, 1]
-    rng = np.random.default_rng(11)
-    grouped = [qrows[qrows["temperature"] == t]["value"].to_numpy(float) for t, _, _ in temp_specs]
-    for pos, (temperature, color, label), values in zip(positions, temp_specs, grouped):
-        boxplots = ax.boxplot(
-            [values],
-            positions=[pos],
-            widths=0.5,
-            patch_artist=True,
-            showfliers=False,
-            medianprops={"color": COL["black"], "linewidth": 1.0},
-            whiskerprops={"color": color, "linewidth": 0.9},
-            capprops={"color": color, "linewidth": 0.9},
-            boxprops={"facecolor": color, "edgecolor": color, "alpha": 0.23, "linewidth": 0.9},
-        )
-        for patch in boxplots["boxes"]:
-            patch.set_facecolor(color)
-            patch.set_alpha(0.23)
-        sample = values if len(values) <= 300 else rng.choice(values, size=300, replace=False)
-        jitter = rng.uniform(-0.12, 0.12, size=len(sample))
-        ax.scatter(
-            np.full(len(sample), pos) + jitter,
-            sample,
-            s=5.0,
-            color=color,
-            alpha=0.18,
-            edgecolor="none",
-            rasterized=True,
-        )
-    ax.set_xticks(positions)
-    ax.set_xticklabels(["300 K", "400 K"])
-    ax.set_xlim(-0.6, 1.6)
-    ax.set_ylabel("MD Q-value (fraction native contacts)")
-    ax.set_ylim(-0.04, 1.04)
-    polish(ax, "y")
+    tm_ref = float(rows.set_index(rows["source"].astype(str)).loc["Tm_only", "test_mae"])
+    ax.axhline(tm_ref, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
+    ax.text(640, tm_ref + 0.012, "Tm labels only", fontsize=6.6, color=COL["baseline"], ha="right", va="bottom")
+    x_ticks = [10, 20, 40, 80, 160, 320, 640]
+    for path, color, marker, label in FIG3B_QSCALING:
+        if not path.exists():
+            continue
+        scaling_errorbar(ax, load_scaling(path), color, label, marker=marker)
+    ax.set_xscale("log")
+    ax.set_xticks(x_ticks)
+    ax.set_xticklabels([str(x) for x in x_ticks])
+    ax.set_xlabel("MD Q-value labels")
+    ax.set_ylabel("held-out Tm test MAE (deg C)")
+    ax.set_xlim(8, 760)
+    ax.legend(frameon=False, loc="upper right", fontsize=7, handlelength=1.5, title="trajectory $T$")
+    polish(ax, "both")
     panel_label(ax, "B")
 
     save_figure(fig, "fig_outline03_design_bridge")
