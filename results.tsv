@@ -1089,3 +1089,4 @@ timestamp	commit	slope	ci_width	mae_mean	n_ddg_list	n_runs	ddg_source	time_s
 2026-06-07T16:54:26	f59a85e	-0.516406	0.843703	6.519902	10,40,80,160,320	10	thermoMPNN	6625	none		hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	sweep_ddg_thermompnn
 2026-06-07T20:35:12	f59a85e	-0.073525	0.856087	6.656275	10,40,80,160,320	10	rosetta_random	13240	none		hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	sweep_ddg_rosetta_random
 2026-06-07T21:45:25	f59a85e	-0.517397	0.853962	6.576748	10,40,80,160,320	10	rosetta	4206	none		hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	sweep_ddg_rosetta
+2026-06-08T01:27:57	555ee6e	-2.904298	0.857869	6.762309		10	none	72	MD_Q_HPHIL	10,40,80,160,320,640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	hot_q_300k_tmselect
