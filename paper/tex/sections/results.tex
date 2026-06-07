@@ -74,24 +74,32 @@ The overview comparison showed a clear split between two all-atom computational 
 FEP mutation free energies improved Tm prediction, whereas the simple MD-derived
 Q-value did not. We therefore asked whether the MD result reflected the
 trajectories themselves or the scalar label extracted from them. Fig.~\ref{fig:simulation_comparison}a
-places the main Tm-only and FEP reference points on the same held-out test scale
-as selected MD-derived descriptor controls. The Tm-only reference reached
-6.62$^\circ$C MAE, and the FEP reference reached 6.26$^\circ$C MAE. Among the
-descriptor controls, 300 K disulfide-distance fluctuation gave the lowest test
-error (6.48$^\circ$C MAE), followed by the sequence-only CDR3-length control
-(6.52$^\circ$C MAE). The 400 K Q-value and Q-value slope controls remained
-weaker, at 6.67$^\circ$C and 6.66$^\circ$C MAE, respectively.
+places the Tm-only and FEP reference points on the same held-out test scale as
+each MD-derived descriptor, now evaluated at both 300 K and 400 K wherever
+trajectory data exist. The Tm-only reference reached 6.62$^\circ$C MAE, and the
+FEP reference reached 6.26$^\circ$C MAE. No MD descriptor matched FEP. The lowest
+descriptor error came from 300 K disulfide-distance fluctuation (6.48$^\circ$C
+MAE), followed by the sequence-only CDR3-length control (6.52$^\circ$C MAE).
+Temperature mattered in a descriptor-specific way: the Q-value transferred
+slightly better at 400 K than at 300 K (6.67 versus 6.72$^\circ$C MAE),
+consistent with its wider dynamic range at the higher temperature (panel b),
+whereas the structural-fluctuation descriptors were simulated at 300 K, where
+native-state motions are defined (disulfide-distance 6.48$^\circ$C, RMSF max 6.65
+versus 6.69$^\circ$C at 400 K, CDR3-residue fluctuation 6.66$^\circ$C). Across
+descriptors these temperature shifts were small relative to the bootstrap
+intervals.
 
 These results narrow the interpretation of the MD comparison. The negative
 result for a terminal Q-value should not be read as evidence that trajectory
 information is useless. Rather, it shows that the transfer-learning model is
 sensitive to how an MD trajectory is compressed into a computational label. Panel b
-shows the normalized computational-label distributions for matched descriptors
-computed from 300 K and 400 K trajectories. The temperature and descriptor
-choice change the label distributions seen by the model, so the scientific
-design problem is not only to run MD but also to choose which dynamical quantity
-should supervise the target predictor. In the present screen, FEP remained the
-strongest all-atom computational label, but the descriptor controls show that MD-derived
+shows the raw MD Q-value distribution at 300 K and 400 K: at 300 K the folded
+ensembles sit near one with little spread, whereas the 400 K trajectories resolve
+a range of contact persistence. The temperature and descriptor choice change the
+label distribution seen by the model, so the design problem is not only to run MD
+but also to choose which dynamical quantity, at which temperature, should
+supervise the target predictor. In the present screen, FEP remained the strongest
+all-atom computational label, but the descriptor controls show that MD-derived
 labels can move closer to the useful regime when they encode the appropriate
 structural variation.
 
@@ -99,10 +107,15 @@ structural variation.
 \centering
 \includegraphics[width=\textwidth]{fig_outline03_design_bridge}
 \caption{\textbf{MD descriptor choice controls transfer to Tm prediction.}
-(a) Held-out test MAE for the Tm-only and FEP-assisted reference conditions from
-the main label-count screen, selected MD-derived descriptors, and a
-sequence-length control. Points and intervals show ensemble MAE and 90\%
-bootstrap intervals over held-out test absolute errors.
+(a) Held-out test MAE for each MD-derived descriptor used as the sole auxiliary
+task, evaluated at 300 K (blue) and 400 K (orange) wherever trajectory data
+exist; disulfide-distance and CDR3-residue fluctuations were simulated only at
+300 K, and CDR3 length is sequence-derived. Tm-only and FEP conditions are shown
+as references. All descriptors share the same residual multi-task setup, so this
+panel is a like-for-like descriptor comparison; its absolute values come from a
+different training series than the source-screen models in Fig.~\ref{fig:scaling}
+and Fig.~\ref{fig:variant_sources} and are not meant for cross-figure numerical
+comparison. Points and intervals show ensemble MAE and 90\% bootstrap intervals.
 (b) Distribution of the raw MD Q-value (fraction of native contacts) per
 nanobody at 300 K and 400 K. At 300 K the Q-value is saturated near one, whereas
 at 400 K it spreads to lower values; box plots show interquartile ranges and

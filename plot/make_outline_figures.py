@@ -116,16 +116,25 @@ SIZE35_FEP_JSON = RESULTS / "size35_ddg_fep_enc3e-5" / "scaling.json"
 SIZE650_TM_JSON = RESULTS / "size650_tm_shared_drop005" / "scaling.json"
 SIZE650_FEP_JSON = RESULTS / "size650_ddg_fep_enc3e-5" / "scaling.json"
 
-FIG3_TRANSFER_SPECS = [
+# Fig. 3a references (Tm-only and FEP) shown as comparison baselines.
+FIG3_REFERENCES = [
     ("Tm labels only", RESULTS / "tm_ref_hot_mtl_tmselect" / "scaling.json", COL["baseline"], "s", "max_n"),
     ("FEP mutation\nfree energy", RESULTS / "fep_hot_tmselect_enc3e-5" / "scaling.json", COL["fep"], "o", "best_mae"),
-    ("300 K disulfide-distance\nfluctuation", RESULTS / "final_residual_ss_dist_std" / "scaling.json", COL["design"], "o", "single"),
-    ("300 K RMSF max", RESULTS / "final_residual_rmsf_max" / "scaling.json", COL["design"], "^", "single"),
-    ("300 K CDR3 residue\nfluctuation", RESULTS / "final_residual_rmsf_cdr3" / "scaling.json", COL["design"], "v", "single"),
-    ("400 K MD Q-value", RESULTS / MD_CONTACT_Q_RESULT_DIR / "scaling.json", COL["mdq"], "o", "single"),
-    ("400 K Q-value slope", RESULTS / "final_residual_q_slope_400k" / "scaling.json", COL["mdq"], "D", "single"),
-    ("sequence CDR3 length", RESULTS / "final_residual_cdr3_len" / "scaling.json", COL["thermo"], "s", "single"),
 ]
+
+# Fig. 3a MD descriptors: each trained as the sole MD auxiliary in the same
+# residual setup, at 300 K and/or 400 K. (disulfide-distance and CDR3-residue
+# fluctuation have no 400 K trajectory data; CDR3 length is temperature-free.)
+FIG3_DESCRIPTORS = [
+    ("MD Q-value",                      {300: "final_residual_q_hphil_300k", 400: "final_residual_q_hphil_400k"}),
+    ("Q-value slope",                   {300: "final_residual_q_slope_300k", 400: "final_residual_q_slope_400k"}),
+    ("RMSF max",                        {300: "final_residual_rmsf_max",     400: "final_residual_rmsf_max_400k"}),
+    ("disulfide-distance\nfluctuation", {300: "final_residual_ss_dist_std"}),
+    ("CDR3 residue\nfluctuation",       {300: "final_residual_rmsf_cdr3"}),
+    ("sequence CDR3 length",            {None: "final_residual_cdr3_len"}),
+]
+
+TEMP_COLOR = {300: COL["design"], 400: COL["mdq"], None: COL["thermo"]}
 
 MD_TEMPERATURE_DISTRIBUTION_SPECS = [
     ("MD Q-value", 300, DATA_MD / f"nanobody_qvalue_{INTERNAL_MD_Q_TOKEN}.csv"),
@@ -314,9 +323,9 @@ def select_scaling_point(path: Path, mode: str) -> dict:
     return point
 
 
-def fig3_transfer_rows() -> pd.DataFrame:
+def fig3_reference_rows() -> pd.DataFrame:
     records = []
-    for label, path, color, marker, mode in FIG3_TRANSFER_SPECS:
+    for label, path, color, marker, mode in FIG3_REFERENCES:
         if not path.exists():
             continue
         point = select_scaling_point(path, mode)
@@ -331,6 +340,21 @@ def fig3_transfer_rows() -> pd.DataFrame:
             }
         )
     return pd.DataFrame.from_records(records)
+
+
+def fig3_descriptor_rows() -> list:
+    """For each MD descriptor, the held-out test MAE at each available temperature."""
+    out = []
+    for label, temp_dirs in FIG3_DESCRIPTORS:
+        points = {}
+        for temp, stem in temp_dirs.items():
+            path = RESULTS / stem / "scaling.json"
+            if not path.exists():
+                continue
+            point = select_scaling_point(path, "single")
+            points[temp] = (float(point["mae"]), float(point["ci_lo"]), float(point["ci_hi"]))
+        out.append((label, points))
+    return out
 
 
 def md_temperature_distribution_rows() -> pd.DataFrame:
@@ -700,31 +724,49 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
     fig, axes = plt.subplots(
         1,
         2,
-        figsize=(7.4, 3.9),
+        figsize=(7.4, 4.7),
         constrained_layout=True,
-        gridspec_kw={"width_ratios": [1.25, 1.0]},
+        gridspec_kw={"width_ratios": [1.32, 1.0]},
     )
 
     ax = axes[0]
-    transfer_rows = fig3_transfer_rows()
-    y = np.arange(len(transfer_rows))
-    for i, row in transfer_rows.iterrows():
-        horizontal_interval(
-            ax,
-            i,
-            row["mae"],
-            row["ci_lo"],
-            row["ci_hi"],
-            row["color"],
-            marker=row["marker"],
-        )
-        ax.text(row["ci_hi"] + 0.025, i, f"{row['mae']:.2f}", va="center", fontsize=6.8)
-    ax.axhline(1.5, color=COL["grid"], linewidth=0.8)
-    ax.set_yticks(y)
-    ax.set_yticklabels(transfer_rows["label"])
-    ax.invert_yaxis()
+    refs = fig3_reference_rows()
+    descriptors = fig3_descriptor_rows()
+    yticks, yticklabels = [], []
+    idx = 0
+    for _, row in refs.iterrows():
+        horizontal_interval(ax, idx, row["mae"], row["ci_lo"], row["ci_hi"], row["color"], marker=row["marker"])
+        ax.text(row["ci_hi"] + 0.03, idx, f"{row['mae']:.2f}", va="center", fontsize=6.4)
+        yticks.append(idx)
+        yticklabels.append(row["label"])
+        idx += 1
+    sep = idx - 0.5
+    temp_offset = {300: -0.18, 400: 0.18, None: 0.0}
+    for label, points in descriptors:
+        for temp in sorted(points, key=lambda t: (t is None, t)):
+            mae, lo, hi = points[temp]
+            marker = "s" if temp is None else "o"
+            horizontal_interval(ax, idx + temp_offset[temp], mae, lo, hi, TEMP_COLOR[temp], marker=marker)
+            ax.text(hi + 0.03, idx + temp_offset[temp], f"{mae:.2f}", va="center", fontsize=5.9)
+        yticks.append(idx)
+        yticklabels.append(label)
+        idx += 1
+    ax.axhline(sep, color=COL["grid"], linewidth=0.8)
+    ax.set_yticks(yticks)
+    ax.set_yticklabels(yticklabels)
+    ax.set_ylim(idx - 0.4, -0.7)
     ax.set_xlabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(5.75, 7.55)
+    ax.set_xlim(5.75, 7.75)
+    ax.legend(
+        handles=[
+            Line2D([0], [0], marker="o", color=TEMP_COLOR[300], linestyle="none", markersize=5, label="300 K"),
+            Line2D([0], [0], marker="o", color=TEMP_COLOR[400], linestyle="none", markersize=5, label="400 K"),
+        ],
+        frameon=False,
+        loc="lower right",
+        fontsize=7,
+        handlelength=1.2,
+    )
     polish(ax, "x")
     panel_label(ax, "A")
 

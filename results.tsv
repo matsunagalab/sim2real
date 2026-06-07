@@ -1079,3 +1079,9 @@ timestamp	commit	slope	ci_width	mae_mean	n_ddg_list	n_runs	ddg_source	time_s
 2026-06-04T23:06:33	009a4fc	nan	0.861906	6.657633		3	none	367	MD_RMSF_CDR3	640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	final_residual_rmsf_cdr3
 2026-06-04T23:10:28	009a4fc	nan	0.859049	6.518262		3	none	606	MD_CDR3_LEN	640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	final_residual_cdr3_len
 2026-06-06T02:07:50	7b10daa	nan	0.860105	6.655534		3	none	415	MD_Q_SLOPE_400K	640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	final_residual_q_slope_400k
+2026-06-07T13:02:42	4717828	nan	0.877785	6.717382		3	none	388	MD_Q_HPHIL	640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	anonymous
+2026-06-07T13:08:36	4717828	nan	0.852845	6.570179		3	none	349	MD_Q_SLOPE	640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	anonymous
+2026-06-07T13:16:18	4717828	nan	0.851263	6.689363		3	none	457	MD_RMSF_MAX_400K	640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	anonymous
+2026-06-07T13:18:06	4717828	nan	0.877785	6.717382		3	none	5	MD_Q_HPHIL	640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	final_residual_q_hphil_300k
+2026-06-07T13:18:14	4717828	nan	0.852845	6.570179		3	none	5	MD_Q_SLOPE	640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	final_residual_q_slope_300k
+2026-06-07T13:18:23	4717828	nan	0.851263	6.689363		3	none	5	MD_RMSF_MAX_400K	640	hot	facebook/esm2_t6_8M_UR50D	none	uncertainty	1.0	final_residual_rmsf_max_400k
