@@ -7,11 +7,11 @@ melting-temperature (Tm) measurements remain scarce. Computed stability labels
 can be generated more readily, yet they usually describe quantities other than
 Tm, such as mutation-level free-energy changes or structural scores. We asked
 whether such labels can improve low-data Tm prediction when they are used as
-source tasks but models are selected only by experimental Tm performance. Using
+computational tasks but models are selected only by experimental Tm performance. Using
 a public nanobody benchmark with 57 training, 114 validation, and 396 held-out
 test sequences, we trained multi-task models that shared an ESM2 sequence
-representation between a Tm target head and one computational source task at a
-time. The source labels included alchemical free-energy perturbation (FEP)
+representation between a Tm target head and one computational task at a
+time. The computational labels included alchemical free-energy perturbation (FEP)
 mutation free energies, Rosetta and ThermoMPNN mutation scores, Rosetta scores
 for language-model-proposed variants, and molecular-dynamics (MD) trajectory
 summaries. FEP labels gave the strongest transfer, lowering held-out Tm mean
@@ -21,7 +21,7 @@ reproduced by an MD-derived Q-value or by larger ESM2 encoders. Rosetta-scored
 proposal sets gave weaker gains that remained close to random-variant controls.
 These results
 show that simulation-derived labels can support scarce experimental Tm
-prediction, but only when the source label carries physical information that
+prediction, but only when the computational label carries physical information that
 transfers to the target phenotype.
 \end{abstract}
 %TC:break main

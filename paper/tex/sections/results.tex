@@ -6,10 +6,10 @@
 
 We first built the evaluation framework. The target task was
 nanobody Tm regression from amino-acid sequence, and computational labels were
-treated as source prediction tasks, not as stand-ins for experimental Tm. Each
+treated as computational prediction tasks, not as stand-ins for experimental Tm. Each
 model used the pretrained protein sequence model ESM2 to turn a sequence into a
-learned representation, which a Tm head and a source head shared. The
-source task could reshape the representation while the final objective
+learned representation, which a Tm head and a computational head shared. The
+computational task could reshape the representation while the final objective
 stayed anchored to experimental Tm (Fig.~\ref{fig:learning_framework}).
 
 We used the benchmark split as a deliberately low-data target setting, with 57
@@ -21,19 +21,19 @@ This target-centered protocol guards against a trap specific to
 simulation-to-experiment learning. A computational task can be learnable and
 physically sensible yet do nothing for the experimental phenotype.
 
-\subsection*{Source-label transfer depends on the label, not only on data volume}
+\subsection*{Transfer depends on label content, not data volume}
 
 We next varied the number of experimental and computational labels to see whether
-more source data meant better Tm prediction. Adding experimental Tm labels helped
+more computational data meant better Tm prediction. Adding experimental Tm labels helped
 the Tm-only model, as expected (Fig.~\ref{fig:scaling}). The target-label sweep
 used 10, 20, 30, 40, and 57 experimental Tm training labels; the FEP sweep used
-10, 40, 80, 160, and 320 rows per template-specific source table; and the MD
-Q-value sweep used 10, 40, 80, 160, 320, and 640 rows from the single MD source
+10, 40, 80, 160, and 320 rows per template-specific computational table; and the MD
+Q-value sweep used 10, 40, 80, 160, 320, and 640 rows from the single MD computational-label
 table. FEP mutation free-energy labels showed a beneficial trend. The largest
 FEP setting gave the best held-out Tm error among the FEP points. The curve was
 not strictly monotonic, so it does not establish a clean scaling law. The
 supported conclusion is narrower. In this low-data Tm setting, the largest
-tested FEP source pool transferred best when models were selected and judged
+tested FEP computational-label pool transferred best when models were selected and judged
 through the experimental Tm endpoint.
 
 The MD-derived Q-value behaved differently. This label measures how well native
@@ -41,36 +41,36 @@ contacts persist during high-temperature MD trajectories. Adding more of these
 labels did not reproduce the FEP trend, even though they too came from
 atomistic simulation. The best point within the MD Q-value sweep was close to
 the Tm-only reference, whereas the best FEP point was lower. Thus, label count
-alone was not enough; the source label had to encode information that
+alone was not enough; the computational label had to encode information that
 transferred to the experimental endpoint.
 
-Two controls further separated source-label content from model capacity. First,
+Two controls further separated computational-label content from model capacity. First,
 increasing the ESM2 encoder from 8M to 35M or 650M parameters did not improve
 held-out Tm accuracy in the Tm-only setting and did not reproduce the 8M FEP
 result in the FEP setting. Second, comparing frozen and hot encoders showed that
 FEP improved over the corresponding Tm-only baseline in both regimes, with the
 larger gain when the encoder was updated. The MD Q-value did not show the same
 consistent behavior. These overview results motivated the all-atom comparison
-in Fig.~\ref{fig:simulation_comparison} and the lower-cost source-label
+in Fig.~\ref{fig:simulation_comparison} and the lower-cost computational-label
 comparison in Fig.~\ref{fig:variant_sources}.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline02_source_screen}
-\caption{\textbf{Overview of source-label transfer in the low-data Tm setting.}
+\caption{\textbf{Overview of computational-label transfer in the low-data Tm setting.}
 (a) Label-count sweeps for experimental Tm labels, FEP mutation free-energy
 labels, and MD Q-value labels.
-(b) Best points within the label-count sweeps, replotted as interval estimates.
+(b) Held-out test MAE of the final validation-selected model for each condition.
 (c) ESM2 encoder-size controls for Tm-only and FEP-assisted training.
-(d) Paired MAE changes for FEP and MD Q-value labels relative to the
-encoder-matched Tm-only reference. In all panels, points show ensemble MAE or
-paired-change estimates and intervals show 90\% bootstrap intervals.}
+(d) Held-out test MAE for Tm-only, FEP, and MD Q-value labels under frozen and
+hot encoders. In all panels, points show ensemble MAE and intervals show 90\%
+bootstrap intervals.}
 \label{fig:scaling}
 \end{figure*}
 
-\subsection*{All-atom source labels depend on the simulated quantity}
+\subsection*{All-atom computational labels depend on the simulated quantity}
 
-The overview comparison showed a clear split between two all-atom source labels:
+The overview comparison showed a clear split between two all-atom computational labels:
 FEP mutation free energies improved Tm prediction, whereas the simple MD-derived
 Q-value did not. We therefore asked whether the MD result reflected the
 trajectories themselves or the scalar label extracted from them. Fig.~\ref{fig:simulation_comparison}a
@@ -85,13 +85,13 @@ weaker, at 6.67$^\circ$C and 6.66$^\circ$C MAE, respectively.
 These results narrow the interpretation of the MD comparison. The negative
 result for a terminal Q-value should not be read as evidence that trajectory
 information is useless. Rather, it shows that the transfer-learning model is
-sensitive to how an MD trajectory is compressed into a source label. Panel b
-shows the normalized source-label distributions for matched descriptors
+sensitive to how an MD trajectory is compressed into a computational label. Panel b
+shows the normalized computational-label distributions for matched descriptors
 computed from 300 K and 400 K trajectories. The temperature and descriptor
 choice change the label distributions seen by the model, so the scientific
 design problem is not only to run MD but also to choose which dynamical quantity
 should supervise the target predictor. In the present screen, FEP remained the
-strongest all-atom source label, but the descriptor controls show that MD-derived
+strongest all-atom computational label, but the descriptor controls show that MD-derived
 labels can move closer to the useful regime when they encode the appropriate
 structural variation.
 
@@ -103,13 +103,14 @@ structural variation.
 the main label-count screen, selected MD-derived descriptors, and a
 sequence-length control. Points and intervals show ensemble MAE and 90\%
 bootstrap intervals over held-out test absolute errors.
-(b) Distributions of normalized source-label values extracted from 300 K and
-400 K MD trajectory descriptors. Box plots show interquartile ranges and
-medians; points are sampled for display.}
+(b) Distribution of the raw MD Q-value (fraction of native contacts) per
+nanobody at 300 K and 400 K. At 300 K the Q-value is saturated near one, whereas
+at 400 K it spreads to lower values; box plots show interquartile ranges and
+medians, with per-nanobody points overlaid.}
 \label{fig:simulation_comparison}
 \end{figure*}
 
-\subsection*{Structure-based labels provide weaker source signals}
+\subsection*{Structure-based and proposal labels transfer weakly}
 
 We next looked at computational labels outside the FEP and MD pipelines. Rosetta
 scores on ESM2-proposed variants reached 6.45$^\circ$C MAE (paired change,
@@ -128,7 +129,7 @@ a paired MAE difference of -0.07$^\circ$C in favor of the ESM2-proposed set. The
 confidence interval crossed zero, so we read this as exploratory rather than as
 evidence that the present generator improves variant selection. It does show,
 though, that language-model proposals can be annotated by physics-based scoring
-and used as source labels for the Tm predictor. We return to this feasibility point
+and used as computational labels for the Tm predictor. We return to this feasibility point
 in the Discussion.
 
 \begin{figure*}[t]
@@ -136,15 +137,12 @@ in the Discussion.
 \includegraphics[width=\textwidth]{fig_outline04_mdq_boundary}
 \caption{\textbf{Structure-based labels and language-model-proposed variants.}
 (a) Final test MAE for Tm-only learning, FEP, and structure-based
-source labels.
+computational labels.
 (b) Paired $\Delta$MAE estimates relative to Tm-only learning.
 Negative values indicate improvement.
 (c) Direct paired comparison between ESM2-proposed variants scored by
 Rosetta and random variants scored by Rosetta. Negative values favor the
-ESM2-proposed set.
-(d) The proposal-set analysis motivates future tests of a
-generator, physics, and predictor loop, but the present study evaluates only the
-supervised-scoring step and does not perform closed-loop optimization.}
+ESM2-proposed set.}
 \label{fig:variant_sources}
 \end{figure*}
 

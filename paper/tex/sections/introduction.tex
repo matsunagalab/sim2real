@@ -17,7 +17,7 @@ sampling, and domain gaps can separate a computed label from the experimental
 property it is meant to support.
 
 Protein engineering has the same label bottleneck, but the relation between
-source and target is often less direct. Experimental measurements are sparse, whereas
+computational and experimental labels is often less direct. Experimental measurements are sparse, whereas
 simulations and structure-based calculations can label many designed or mutated
 sequences. Those computed labels, however, rarely measure the target phenotype
 itself. For thermal stability, the experimental target may be the melting
@@ -53,8 +53,8 @@ target-specific data and target-centered validation remain essential
 
 Here, we test whether computed stability labels can supply useful supervision
 when experimental nanobody Tm labels are scarce. We treat Tm prediction as the
-target task and each computed label as a source task that shares an ESM2-based
-sequence representation \citep{Lin2023Evolutionary}. The source labels include
+target task and each computed label as a computational task that shares an ESM2-based
+sequence representation \citep{Lin2023Evolutionary}. The computational labels include
 mutation free energies from alchemical free-energy perturbation (FEP), Rosetta
 mutation scores, ThermoMPNN stability scores, Rosetta scores on variants
 proposed by ESM2 or sampled at random, and an MD-derived Q-value that summarizes
@@ -65,16 +65,16 @@ paired error statistics.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth]{figure_1_concept_protocol_v2}
+\includegraphics[width=0.66\textwidth]{figure_1_concept_protocol_v2}
 \caption{\textbf{Multi-task transfer-learning architecture for using simulation
 data in experimental Tm prediction.}
 Experimental sequence data (left) and computational sequence data (right) are
 encoded by a shared ESM2 protein language model into per-sequence embeddings.
 The embeddings pass through a shared multilayer perceptron and then split into
 two task-specific heads: a Tm head that predicts the experimental melting
-temperature, and a source head that predicts the computational scores
+temperature, and a computational head that predicts the computational scores
 (mutation $\Delta\Delta G$ values or an MD-derived Q-value). Only the
-experimental Tm head defines the final objective, while the source head lets the
+experimental Tm head defines the final objective, while the computational head lets the
 simulation-derived labels reshape the shared representation during training.
 Flame and snowflake icons mark trainable and frozen parameters, respectively;
 the ESM2 encoder is either fine-tuned (hot) or kept frozen depending on the
@@ -82,11 +82,11 @@ configuration.}
 \label{fig:learning_framework}
 \end{figure*}
 
-The results are source-dependent. FEP mutation free energies, although relative
+The results are label-dependent. FEP mutation free energies, although relative
 and mutation-level, give the clearest improvement in absolute Tm prediction,
 whereas an MD-derived Q-value does not improve under the same protocol.
 Rosetta-scored ESM2 proposals provide only a weaker exploratory signal. These
 results extend the Sim2Real argument to a protein-engineering setting in which
-the source and target labels differ in physical meaning. In this setting,
+the computational and experimental labels differ in physical meaning. In this setting,
 computed data are useful only when they encode information that transfers to the
 experimental property of interest.

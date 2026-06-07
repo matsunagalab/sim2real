@@ -138,6 +138,11 @@ MD_TEMPERATURE_DISTRIBUTION_SPECS = [
     ("Rg fluctuation", 400, DATA_MD / "feat_rg_std_400K.csv"),
 ]
 
+QVALUE_TEMPERATURE_SPECS = [
+    (300, DATA_MD / f"nanobody_qvalue_{INTERNAL_MD_Q_TOKEN}.csv"),
+    (400, DATA_MD / f"nanobody_qvalue_{INTERNAL_MD_Q_TOKEN}_400K.csv"),
+]
+
 
 def configure_style() -> None:
     plt.rcParams.update(
@@ -167,6 +172,17 @@ def read_json(path: Path) -> dict:
     return json.loads(path.read_text())
 
 
+def rebase_results(path_str: str) -> Path:
+    """Map an absolute scaling_json path stored on another machine
+    (e.g. /home/.../results/<dir>/scaling.json) onto the local results tree,
+    so figures regenerate on any checkout."""
+    parts = Path(path_str).parts
+    if "results" in parts:
+        idx = len(parts) - 1 - parts[::-1].index("results")
+        return RESULTS.joinpath(*parts[idx + 1:])
+    return Path(path_str)
+
+
 def source_rows() -> pd.DataFrame:
     summary = read_json(SUMMARY_JSON)
     rows = pd.DataFrame(summary["rows"])
@@ -178,7 +194,7 @@ def source_rows() -> pd.DataFrame:
     rows["ci_hi"] = np.nan
     rows["abs_errors"] = None
     for i, row in rows.iterrows():
-        scaling = read_json(Path(row["scaling_json"]))["scaling"][0]
+        scaling = read_json(rebase_results(row["scaling_json"]))["scaling"][0]
         rows.at[i, "ci_lo"] = float(scaling["ci_lo"])
         rows.at[i, "ci_hi"] = float(scaling["ci_hi"])
         rows.at[i, "abs_errors"] = np.asarray(scaling["abs_errors"], dtype=float)
@@ -213,7 +229,7 @@ def encoder_core_rows() -> pd.DataFrame:
             source = str(row["source"])
             if source not in ["Tm_only", "FEP", "rosetta", MD_CONTACT_Q_SOURCE]:
                 continue
-            scaling = read_json(Path(row["scaling_json"]))["scaling"][0]
+            scaling = read_json(rebase_results(row["scaling_json"]))["scaling"][0]
             records.append(
                 {
                     "encoder": encoder,
@@ -322,7 +338,7 @@ def md_temperature_distribution_rows() -> pd.DataFrame:
     for descriptor, temperature, path in MD_TEMPERATURE_DISTRIBUTION_SPECS:
         df = pd.read_csv(path)
         if "ddg_scaled01" not in df.columns:
-            raise ValueError(f"{path} does not contain the normalized source-label column")
+            raise ValueError(f"{path} does not contain the normalized computational-label column")
         for value in df["ddg_scaled01"].dropna().to_numpy(float):
             records.append(
                 {
@@ -331,6 +347,17 @@ def md_temperature_distribution_rows() -> pd.DataFrame:
                     "value": float(value),
                 }
             )
+    return pd.DataFrame.from_records(records)
+
+
+def qvalue_temperature_rows() -> pd.DataFrame:
+    """Raw MD Q-value (fraction of native contacts) per nanobody at 300 K and 400 K."""
+    records = []
+    for temperature, path in QVALUE_TEMPERATURE_SPECS:
+        df = pd.read_csv(path)
+        col = "q_value_raw" if "q_value_raw" in df.columns else "ddg_scaled01"
+        for value in df[col].dropna().to_numpy(float):
+            records.append({"temperature": temperature, "value": float(value)})
     return pd.DataFrame.from_records(records)
 
 
@@ -537,7 +564,7 @@ def fig01_concept_protocol(rows: pd.DataFrame) -> None:
         if i < len(xs) - 1:
             arrow(ax, (xx + 0.085, 0.56), (xs[i + 1] - 0.085, 0.56), color=COL["black"])
     ax.text(0.50, 0.28, "Final claims use held-out Tm test errors", ha="center", fontsize=8.0)
-    ax.text(0.50, 0.18, "All sources are compared on the same test examples", ha="center", fontsize=7.5, color=COL["gray"])
+    ax.text(0.50, 0.18, "All computational labels are compared on the same test examples", ha="center", fontsize=7.5, color=COL["gray"])
     panel_label(ax, "D")
 
     save_figure(fig, "fig_outline01_concept_protocol")
@@ -575,18 +602,20 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     panel_label(ax, "A")
 
     ax = axes[0, 1]
-    labels = ["Tm labels\nonly", "FEP mutation\nfree energy", "MD\nQ-value"]
+    # Final validation-selected models (canonical source-screen summary), so the
+    # numbers match panel (d), Fig. 3a, Fig. 4, and the body text.
+    core = rows.set_index(rows["source"].astype(str))
     best_points = [
-        ("Tm labels\nonly", tm_scale.iloc[-1], COL["baseline"], "s"),
-        ("FEP mutation\nfree energy", fep_scale.iloc[int(fep_scale["mae"].argmin())], COL["fep"], "o"),
-        ("MD\nQ-value", md_scale.iloc[int(md_scale["mae"].argmin())], COL["mdq"], "o"),
+        ("Tm labels\nonly", core.loc["Tm_only"], COL["baseline"], "s"),
+        ("FEP mutation\nfree energy", core.loc["FEP"], COL["fep"], "o"),
+        ("MD\nQ-value", core.loc[MD_CONTACT_Q_SOURCE], COL["mdq"], "o"),
     ]
     y = np.arange(len(best_points)) * 1.35
     for i, (label, point, col, marker) in enumerate(best_points):
-        horizontal_interval(ax, y[i], point["mae"], point["ci_lo"], point["ci_hi"], col, marker=marker)
-        ax.text(point["ci_hi"] + 0.025, y[i], f"{point['mae']:.2f}", va="center", fontsize=7.3)
+        horizontal_interval(ax, y[i], point["test_mae"], point["ci_lo"], point["ci_hi"], col, marker=marker)
+        ax.text(point["ci_hi"] + 0.025, y[i], f"{point['test_mae']:.2f}", va="center", fontsize=7.3)
     ax.set_yticks(y)
-    ax.set_yticklabels(labels)
+    ax.set_yticklabels([b[0] for b in best_points])
     ax.set_ylim(y[-1] + 0.55, -0.55)
     ax.set_xlabel("held-out Tm test MAE (deg C)")
     ax.set_xlim(5.75, 7.30)
@@ -626,31 +655,30 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     panel_label(ax, "C")
 
     ax = axes[1, 1]
-    delta_rows = encoder_delta_rows()
-    delta_sources = ["FEP", MD_CONTACT_Q_SOURCE]
-    ypos = np.arange(len(delta_sources)) * 1.45
+    core_rows = encoder_core_rows()
+    abs_sources = ["Tm_only", "FEP", MD_CONTACT_Q_SOURCE]
+    ypos = np.arange(len(abs_sources)) * 1.45
     y_offsets = {"frozen": -0.18, "hot": 0.18}
     markers = {"frozen": "s", "hot": "o"}
     encoder_labels = {"frozen": "frozen encoder", "hot": "hot encoder"}
     for encoder in ["frozen", "hot"]:
-        subset = delta_rows[delta_rows["encoder"] == encoder].set_index("source")
-        for i, source in enumerate(delta_sources):
+        subset = core_rows[core_rows["encoder"] == encoder].set_index("source")
+        for i, source in enumerate(abs_sources):
             row = subset.loc[source]
             horizontal_interval(
                 ax,
                 ypos[i] + y_offsets[encoder],
-                row["delta_mae"],
-                row["delta_ci_lo"],
-                row["delta_ci_hi"],
+                row["test_mae"],
+                row["ci_lo"],
+                row["ci_hi"],
                 SOURCE_COLOR[source],
                 marker=markers[encoder],
             )
-    ax.axvline(0, color=COL["black"], linewidth=0.9)
     ax.set_yticks(ypos)
-    ax.set_yticklabels(["FEP mutation\nfree energy", "MD Q-value"])
+    ax.set_yticklabels(["Tm labels\nonly", "FEP mutation\nfree energy", "MD Q-value"])
     ax.set_ylim(ypos[-1] + 0.60, -0.60)
-    ax.set_xlabel("MAE change vs matched Tm only (deg C)")
-    ax.set_xlim(-0.55, 0.24)
+    ax.set_xlabel("held-out Tm test MAE (deg C)")
+    ax.set_xlim(5.7, 8.0)
     ax.legend(
         handles=[
             Line2D([0], [0], marker="s", color=COL["black"], linestyle="none", markersize=5, label=encoder_labels["frozen"]),
@@ -701,61 +729,42 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
     panel_label(ax, "A")
 
     ax = axes[1]
-    distribution_rows = md_temperature_distribution_rows()
-    descriptor_order = ["MD Q-value", "Q-value slope", "RMSF max", "Rg fluctuation"]
+    qrows = qvalue_temperature_rows()
     temp_specs = [(300, COL["design"], "300 K"), (400, COL["mdq"], "400 K")]
-    x = np.arange(len(descriptor_order))
-    offsets = {300: -0.15, 400: 0.15}
+    positions = [0, 1]
     rng = np.random.default_rng(11)
-    for temperature, color, label in temp_specs:
-        grouped = [
-            distribution_rows[
-                (distribution_rows["descriptor"] == descriptor) & (distribution_rows["temperature"] == temperature)
-            ]["value"].to_numpy(float)
-            for descriptor in descriptor_order
-        ]
-        positions = x + offsets[temperature]
+    grouped = [qrows[qrows["temperature"] == t]["value"].to_numpy(float) for t, _, _ in temp_specs]
+    for pos, (temperature, color, label), values in zip(positions, temp_specs, grouped):
         boxplots = ax.boxplot(
-            grouped,
-            positions=positions,
-            widths=0.22,
+            [values],
+            positions=[pos],
+            widths=0.5,
             patch_artist=True,
             showfliers=False,
-            medianprops={"color": COL["black"], "linewidth": 0.9},
-            whiskerprops={"color": color, "linewidth": 0.8},
-            capprops={"color": color, "linewidth": 0.8},
-            boxprops={"facecolor": color, "edgecolor": color, "alpha": 0.23, "linewidth": 0.8},
+            medianprops={"color": COL["black"], "linewidth": 1.0},
+            whiskerprops={"color": color, "linewidth": 0.9},
+            capprops={"color": color, "linewidth": 0.9},
+            boxprops={"facecolor": color, "edgecolor": color, "alpha": 0.23, "linewidth": 0.9},
         )
         for patch in boxplots["boxes"]:
             patch.set_facecolor(color)
             patch.set_alpha(0.23)
-        for xi, values in zip(positions, grouped):
-            sample = values if len(values) <= 220 else rng.choice(values, size=220, replace=False)
-            jitter = rng.uniform(-0.055, 0.055, size=len(sample))
-            ax.scatter(
-                np.full(len(sample), xi) + jitter,
-                sample,
-                s=4.0,
-                color=color,
-                alpha=0.12,
-                edgecolor="none",
-                rasterized=True,
-            )
-    ax.set_xticks(x)
-    ax.set_xticklabels(["MD\nQ-value", "Q-value\nslope", "RMSF\nmax", "Rg\nfluctuation"])
-    ax.set_ylabel("normalized source-label value")
+        sample = values if len(values) <= 300 else rng.choice(values, size=300, replace=False)
+        jitter = rng.uniform(-0.12, 0.12, size=len(sample))
+        ax.scatter(
+            np.full(len(sample), pos) + jitter,
+            sample,
+            s=5.0,
+            color=color,
+            alpha=0.18,
+            edgecolor="none",
+            rasterized=True,
+        )
+    ax.set_xticks(positions)
+    ax.set_xticklabels(["300 K", "400 K"])
+    ax.set_xlim(-0.6, 1.6)
+    ax.set_ylabel("MD Q-value (fraction native contacts)")
     ax.set_ylim(-0.04, 1.04)
-    ax.legend(
-        handles=[
-            Line2D([0], [0], marker="s", color=color, linestyle="none", markersize=5, label=label)
-            for _, color, label in temp_specs
-        ],
-        frameon=False,
-        loc="upper left",
-        bbox_to_anchor=(0.00, 1.02),
-        ncol=2,
-        borderaxespad=0.0,
-    )
     polish(ax, "y")
     panel_label(ax, "B")
 
@@ -763,17 +772,16 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
 
 
 def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
-    fig, axes = plt.subplots(
-        2,
-        2,
-        figsize=(7.4, 5.35),
+    fig, axes = plt.subplot_mosaic(
+        [["a", "b"], ["c", "c"]],
+        figsize=(7.4, 4.7),
         constrained_layout=True,
-        gridspec_kw={"height_ratios": [1.0, 0.68]},
+        gridspec_kw={"height_ratios": [1.0, 0.5]},
     )
     row_lookup = rows.set_index(rows["source"].astype(str))
     design_sources = ["Tm_only", "FEP", "rosetta_esm", "thermoMPNN", "rosetta_random", "rosetta"]
 
-    ax = axes[0, 0]
+    ax = axes["a"]
     ordered = row_lookup.loc[design_sources].reset_index(drop=True)
     y = np.arange(len(ordered))
     for i, row in ordered.iterrows():
@@ -795,7 +803,7 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
     polish(ax, "x")
     panel_label(ax, "A")
 
-    ax = axes[0, 1]
+    ax = axes["b"]
     delta_sources = [s for s in design_sources if s != "Tm_only"]
     y = np.arange(len(delta_sources))
     for i, source in enumerate(delta_sources):
@@ -811,7 +819,7 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
     polish(ax, "x")
     panel_label(ax, "B")
 
-    ax = axes[1, 0]
+    ax = axes["c"]
     random_abs = np.asarray(row_lookup.loc["rosetta_random", "abs_errors"], dtype=float)
     esm_abs = np.asarray(row_lookup.loc["rosetta_esm", "abs_errors"], dtype=float)
     mean, lo, hi = paired_delta_ci(random_abs, esm_abs)
@@ -835,20 +843,6 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
     )
     polish(ax, "x")
     panel_label(ax, "C")
-
-    ax = axes[1, 1]
-    hide_axes(ax)
-    box(ax, (0.05, 0.60), (0.25, 0.18), "sequence\nproposal", fc=COL["soft_blue"], ec=COL["design"], weight="bold", fontsize=7.2)
-    box(ax, (0.375, 0.60), (0.25, 0.18), "physics-based\nscoring", fc=COL["soft_orange"], ec=COL["rosetta"], weight="bold", fontsize=7.2)
-    box(ax, (0.70, 0.60), (0.25, 0.18), "Tm\npredictor", fc=COL["soft_gray"], ec=COL["baseline"], weight="bold", fontsize=7.2)
-    box(ax, (0.375, 0.24), (0.25, 0.18), "future\nexperimental\nfeedback", fc="white", ec=COL["black"], fontsize=7.0)
-    arrow(ax, (0.30, 0.69), (0.375, 0.69), color=COL["design"])
-    arrow(ax, (0.625, 0.69), (0.70, 0.69), color=COL["rosetta"])
-    arrow(ax, (0.82, 0.60), (0.54, 0.42), color=COL["baseline"])
-    arrow(ax, (0.40, 0.33), (0.18, 0.60), color=COL["black"], style="--")
-    ax.text(0.50, 0.08, "current study tests the supervised-scoring step,\nnot a closed-loop reinforcement-learning experiment",
-            ha="center", va="center", fontsize=7.0, color=COL["gray"])
-    panel_label(ax, "D")
 
     save_figure(fig, "fig_outline04_mdq_boundary")
 

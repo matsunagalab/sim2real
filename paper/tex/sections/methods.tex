@@ -4,13 +4,13 @@
 
 \subsection*{Experimental and technical design}
 
-The study tests whether a computational source label can improve experimental
+The study tests whether a computational label can improve experimental
 nanobody Tm prediction when that label is physically related to Tm but not
 identical to it. We used a multi-task transfer-learning design in which experimental Tm
-prediction was the target task, and each computational label was a source task
+prediction was the target task, and each computational label was a computational task
 that shared part of the network with the target. Throughout, model selection and
-every reported number were tied to experimental Tm performance. Source-task
-losses shaped the shared representation during training, but source-task
+every reported number were tied to experimental Tm performance. Computational-task
+losses shaped the shared representation during training, but computational-task
 validation errors were never used to pick checkpoints or hyperparameters.
 
 \subsection*{Experimental Tm data set and split definitions}
@@ -43,54 +43,54 @@ scaling transform.
 \textbf{Experimental-label scaling reference.} For this reference, the Tm
 training split was subsampled to the requested number of labels using the run
 seed, while the validation and test splits were left intact. These runs give a
-target-label baseline for judging whether computational source-label scaling
+target-label baseline for judging whether computational-label scaling
 moves in the expected direction.
 
-\subsection*{Computational source-label data sets}
+\subsection*{Computational-label data sets}
 
-Computational labels were loaded as source tasks, not as additional Tm
+Computational labels were loaded as computational tasks, not as additional Tm
 measurements.
 
-\textbf{Source-label classes.} The source labels were mutation free-energy
+\textbf{Computational-label classes.} The computational labels were mutation free-energy
 changes from alchemical free-energy perturbation (FEP), structure-based
 mutation-effect scores from Rosetta, learned mutation-effect scores from
 ThermoMPNN, Rosetta scores on ESM2-proposed and random variants, and an
-MD-derived Q-value summarizing native-contact persistence. All source labels
+MD-derived Q-value summarizing native-contact persistence. All computational labels
 were preprocessed to [0,1]-scaled regression targets and entered the model only
-through their own source-task heads.
+through their own computational-task heads.
 
-\textbf{Processed source-table sizes.} Mutation-effect sources were organized as
+\textbf{Processed computational-table sizes.} Mutation-effect computational labels were organized as
 two template-specific tables derived from the 1MEL and 4IDL nanobody structures.
 FEP, Rosetta, and ThermoMPNN each contained 435 and 409 processed rows for the
 two templates. ESM2-proposed variants and random variants scored by Rosetta each
-contained 1000 and 1000 processed rows. The MD-derived Q-value source came from
+contained 1000 and 1000 processed rows. The MD-derived Q-value computational label came from
 a separate panel of simulated single-domain antibody structures drawn from
 SAbDab, the Structural Antibody Database \citep{Dunbar2014SAbDab}; its processed
 table contained 1143 analysis-ready rows. Row counts exclude headers.
 
 \textbf{Sequence-overlap check.} We checked exact sequence overlap between the
-source-label tables and the NbBench splits. The mutation-effect tables and the
+computational-label tables and the NbBench splits. The mutation-effect tables and the
 Rosetta-scored variant tables, which carry explicit sequence columns, had no
 exact match to any NbBench training, validation, or test sequence. The
 SAbDab-derived MD table contained a few exact matches, including eight test-set
-sequences. Because the MD Q-value source did not improve final Tm prediction,
+sequences. Because the MD Q-value computational label did not improve final Tm prediction,
 this overlap cannot account for the positive FEP result; we report it for
 transparency.
 
-\textbf{Source-label sampling.} For a mutation-effect experiment with requested
+\textbf{Computational-label sampling.} For a mutation-effect experiment with requested
 count $n$, up to $n$ rows were sampled independently from each of the two
 template tables using the run seed, and the two tables were given separate task
 identifiers. For an MD-derived Q-value experiment with count $n$, $n$ rows were
 sampled from the single Q-value table. Sampled rows were then split 80/20 into
-source-training and source-validation rows with the same seed. The
-source-validation rows were kept for monitoring and control analyses, but in the
+computational-training and computational-validation rows with the same seed. The
+computational-validation rows were kept for monitoring and control analyses, but in the
 reported protocol the validation data passed to the trainer for checkpoint
 selection and early stopping were filtered down to the experimental Tm
 validation rows.
 
 \subsection*{SAbDab-derived MD simulations and Q-value labels}
 
-The MD source labels were built from nanobody structures selected from a
+The MD computational labels were built from nanobody structures selected from a
 SAbDab-derived summary table \citep{Dunbar2014SAbDab}. We took one heavy-chain
 nanobody structure per PDB entry when an IMGT-renumbered coordinate file was
 available and the chosen chain could be verified in that file. The 400 K
@@ -99,7 +99,7 @@ topology, reference structure, a sequence of at least 50 residues, and at least
 one selected native contact left 1143 trajectories in the processed table.
 
 Each system was prepared from the selected nanobody chain alone. We used the
-IMGT-renumbered PDB as the structure source, extracted the heavy chain, dropped
+IMGT-renumbered PDB as the input structure, extracted the heavy chain, dropped
 non-protein components, left the termini uncapped, and assigned protonation at
 pH 7.4. Structure cleaning and missing-atom handling used PDBFixer, followed by
 pdb2pqr/PROPKA for pH-aware protonation and Amber-compatible atom naming when
@@ -117,7 +117,7 @@ restrained NVT. Production ran 100 ns of restraint-free 400 K NVT with
 hydrogen-mass repartitioning (4 amu hydrogen mass), a 4-fs timestep,
 Langevin middle integration at a 1 ps$^{-1}$ collision rate, PME electrostatics
 with a 1.0-nm nonbonded cutoff, and coordinate/energy output every 100 ps. The
-MD source labels use this 400 K production branch.
+MD computational labels use this 400 K production branch.
 
 Q-values were extracted from the 400 K production trajectories with MDTraj
 \citep{McGibbon2015MDTraj}. For each trajectory, the topology was loaded from the
@@ -130,7 +130,7 @@ Supplementary Methods.
 
 \subsection*{FEP mutation free-energy labels}
 
-The FEP source labels were mutation free-energy changes for variants of the 1MEL
+The FEP computational labels were mutation free-energy changes for variants of the 1MEL
 and 4IDL nanobody templates, computed with the same protocol as our related
 nanobody thermostability study. In brief, alchemical mutation simulations were
 run with NAMD 3 using GPU acceleration \citep{Phillips2020NAMD}. Input systems
@@ -166,16 +166,16 @@ side-chain-minimization-only disabled, minimum-score aggregation, and no PDB
 dumping. The same protocol scored the template mutation-effect tables, the
 ESM2-proposed variants, and the random-variant control.
 
-For the ESM2-proposed source, ESM2 650M sampled 100{,}000 two-mutation variants
+For the ESM2-proposed computational label, ESM2 650M sampled 100{,}000 two-mutation variants
 from each wild-type template, ranked them by pseudo-log-likelihood, and kept the
 top 1\% for Rosetta scoring \citep{Lin2023Evolutionary}. The random-variant
 control used roughly 1000 two-mutation variants with positions and substitutions
 chosen at random, scored by the same Rosetta workflow.
 
-ThermoMPNN source labels were computed from the same template-specific variant
+ThermoMPNN computational labels were computed from the same template-specific variant
 sets with ThermoMPNN, a stability-change predictor trained by transfer learning
 from larger protein-stability data \citep{Dieckhaus2024ThermoMPNN}, and converted
-to the same processed CSV format as the other mutation-effect sources.
+to the same processed CSV format as the other mutation-effect computational labels.
 
 \subsection*{Neural-network architecture}
 
@@ -185,17 +185,17 @@ otherwise, the encoder was the 8M-parameter ESM2 model. Sequences were tokenized
 with truncation and padding to 160 residues. The first-token encoder
 representation fed a shared multilayer perceptron with hidden dimensions 256,
 128, and 32, ReLU activations, and dropout. A scalar Tm head predicted the
-scaled target label; in source-transfer models, additional scalar heads
-predicted the source labels from the same shared representation.
+scaled target label; in computational-label transfer models, additional scalar heads
+predicted the computational labels from the same shared representation.
 
 The Tm-only baseline used the encoder, the shared trunk, and the Tm head with
-experimental Tm labels alone. Source-transfer models kept this target path and
-added source heads. The main FEP model used separate source heads for the two
-template-specific mutation-effect tasks, the best design in our source-head
+experimental Tm labels alone. Computational-label transfer models kept this target path and
+added computational heads. The main FEP model used separate computational heads for the two
+template-specific mutation-effect tasks, the best design in our computational-head
 comparison. As controls we also tried a shared mutation-effect head, a shared
 head conditioned on a template embedding, and a shared head with
 template-specific affine calibration, along with residual and latent
-source-fusion variants; the main result used the original shared-trunk
+computational-fusion variants; the main result used the original shared-trunk
 architecture.
 
 \subsection*{Hot-encoder and frozen-encoder training}
@@ -208,17 +208,17 @@ encoder learning rate was $3\times10^{-5}$ and the head learning rate was the
 default $3\times10^{-4}$.
 
 In the frozen-encoder control, all ESM2 parameters were fixed. The encoder was
-run once to precompute sequence embeddings for the target and source examples,
+run once to precompute sequence embeddings for the target and computational examples,
 and training then optimized only the trunk and task heads. This control asks
-whether the source labels still help when the pretrained representation is used
+whether the computational labels still help when the pretrained representation is used
 as a fixed feature extractor. Encoder-size controls repeated selected Tm-only and
 FEP settings with 35M- and 650M-parameter ESM2 encoders.
 
 \subsection*{Loss function and multi-task objective}
 
 Each training example consisted of a sequence $x_i$, scaled label $y_i$, and task
-identifier $t_i$. The target Tm task had one identifier, and each source task had
-its own. A minibatch could mix target and source examples, but
+identifier $t_i$. The target Tm task had one identifier, and each computational task had
+its own. A minibatch could mix target and computational examples, but
 every example contributed loss only through the head for its task.
 
 The per-task regression loss was Huber loss with $\delta=1.0$ on scaled labels.
@@ -229,7 +229,7 @@ log-scale $s_k$, the contribution was
   \frac{L_k}{2\exp(2s_k)} + s_k ,
 \]
 and the total loss summed over the tasks present in the minibatch. Fixed
-source-task weights were also evaluated as controls, particularly for the
+computational-task weights were also evaluated as controls, particularly for the
 MD-derived labels.
 
 \subsection*{Training, early stopping, and hyperparameter selection}
@@ -242,28 +242,28 @@ on CUDA devices, with checkpoints saved and evaluated once per epoch.
 
 Within each run, the best checkpoint was the one with the lowest mean squared
 error on the experimental Tm validation examples, and early stopping used the
-same metric with a patience of 15 epochs. Source-label rows were present in the
+same metric with a patience of 15 epochs. Computational-label rows were present in the
 training set, but they were removed from the validation data passed to the
 trainer for checkpoint selection and early stopping. This is the
 implementation-level step that keeps reported checkpoints selected by target-task
-validation performance rather than by source-task performance.
+validation performance rather than by computational-task performance.
 
 Hyperparameters were likewise selected on the experimental Tm validation split.
 Candidate settings varied the encoder learning rate, head learning rate, dropout,
-loss-weighting mode, source-head design, and selected architecture controls. The
+loss-weighting mode, computational-head design, and selected architecture controls. The
 search covered encoder learning rates of $3\times10^{-5}$, $1\times10^{-4}$, and
 $3\times10^{-4}$; a lower head learning rate of $1\times10^{-4}$ paired with
 encoder learning rate $3\times10^{-5}$; dropout rates of 0.05, 0.15, and 0.30;
-and fixed source-task loss weights where relevant. Each candidate was evaluated
+and fixed computational-task loss weights where relevant. Each candidate was evaluated
 as a three-seed ensemble on the Tm validation split, and the selected setting for
-each source class was then evaluated on the held-out test split as a ten-seed
+each computational class was then evaluated on the held-out test split as a ten-seed
 ensemble.
 
 Independent run seeds controlled model initialization, target-training
-subsampling in the target-label scaling experiment, source-label sampling, and
-source-task train/validation splitting. Final comparisons used seeds 1 to 10. The
-label-count curves used fixed source-specific training recipes while varying the
-number of source labels, rather than retuning a separate model at every
+subsampling in the target-label scaling experiment, computational-label sampling, and
+computational-task train/validation splitting. Final comparisons used seeds 1 to 10. The
+label-count curves used fixed computational-specific training recipes while varying the
+number of computational labels, rather than retuning a separate model at every
 label-count point.
 
 \subsection*{Final evaluation and statistics}
@@ -298,8 +298,8 @@ intervals.
 
 \subsection*{Implementation details}
 
-The pipeline builds the target and source tasks, applies target-label scaling,
-performs seeded source-label sampling, filters validation data for target-task
+The pipeline builds the target and computational tasks, applies target-label scaling,
+performs seeded computational-label sampling, filters validation data for target-task
 checkpoint selection, evaluates seed ensembles, and writes bootstrap statistics.
 Each run emits a machine-readable summary with the command-line arguments,
 resolved model settings, per-point metrics, bootstrap intervals, and paired

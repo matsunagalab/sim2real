@@ -18,7 +18,7 @@ study targets.
 examples fit network parameters, the validation split drives checkpoint
 selection, early stopping, and choice among candidate settings, and the test
 split stays untouched until those choices are fixed. The same rule applies to
-Tm-only models and to models trained with computational source labels.
+Tm-only models and to models trained with computational labels.
 
 \textbf{Target-label scaling.} Before optimization, the training workflow maps
 the experimental Tm values to a scaled regression target. The scaler is fit only
@@ -35,19 +35,19 @@ seed; the validation and test splits are never subsampled. It serves only as a
 positive control for the pipeline. Adding true target labels should lower the Tm
 prediction error.
 
-\subsection*{Processed computational source-label tables}
+\subsection*{Processed computational-label tables}
 
-Computational labels are loaded as source tasks rather than appended to the Tm
+Computational labels are loaded as computational tasks rather than appended to the Tm
 data as extra measurements. Table~\ref{tab:supp_data_sources} lists the processed
-target and source files used in the reported comparisons. Mutation-effect tables
-carry sequence fields and [0,1]-scaled source-label fields. The MD-derived
+target and computational-label files used in the reported comparisons. Mutation-effect tables
+carry sequence fields and [0,1]-scaled computational-label fields. The MD-derived
 Q-value table uses the same processed format so that it can enter the same
-source-task loader; there, the scaled label is a [0,1]-scaled Q-value rather
+computational-task loader; there, the scaled label is a [0,1]-scaled Q-value rather
 than a mutation free energy.
 
 \begin{table}[htbp]
 \centering
-\caption{\textbf{Processed target and source-label data.} Row counts exclude
+\caption{\textbf{Processed target and computational-label data.} Row counts exclude
 header rows.}
 \label{tab:supp_data_sources}
 \small
@@ -58,47 +58,47 @@ Data type & Role & Processed rows & Use in reported comparisons \\
 Experimental Tm & Target train & 57 & Model fitting \\
 Experimental Tm & Target validation & 114 & Checkpoint and setting selection \\
 Experimental Tm & Target test & 396 & Final held-out evaluation \\
-FEP mutation free energy & Source tasks & 435 + 409 & Main source task \\
-Rosetta mutation score & Source tasks & 435 + 409 & Source comparison \\
-ThermoMPNN stability score & Source tasks & 435 + 409 & Source comparison \\
-Random variants scored by Rosetta & Source tasks & 1000 + 1000 & Source comparison \\
-ESM2-proposed variants scored by Rosetta & Source tasks & 1000 + 1000 & Source comparison \\
-MD-derived Q-value & Source task & 1143 & Source comparison and scaling control \\
+FEP mutation free energy & Computational tasks & 435 + 409 & Main computational task \\
+Rosetta mutation score & Computational tasks & 435 + 409 & Computational-label comparison \\
+ThermoMPNN stability score & Computational tasks & 435 + 409 & Computational-label comparison \\
+Random variants scored by Rosetta & Computational tasks & 1000 + 1000 & Computational-label comparison \\
+ESM2-proposed variants scored by Rosetta & Computational tasks & 1000 + 1000 & Computational-label comparison \\
+MD-derived Q-value & Computational task & 1143 & Computational-label comparison and scaling control \\
 \hline
 \end{tabular}
 \end{table}
 
-\textbf{Source-task assignment.} The loader assigns each row to a target or
-source task. Experimental Tm rows use the Tm head. In the main mutation-effect
-model, the two template-specific tables use separate source heads, and the
-MD-derived Q-value table uses a single source head. This assignment fixes which
+\textbf{Computational-task assignment.} The loader assigns each row to a target or
+computational task. Experimental Tm rows use the Tm head. In the main mutation-effect
+model, the two template-specific tables use separate computational heads, and the
+MD-derived Q-value table uses a single computational head. This assignment fixes which
 regression head an example uses and which task-specific loss term it contributes
 to.
 
 \textbf{Sequence-overlap check.} We checked exact sequence overlap between the
-processed source tables and the fixed NbBench splits. The FEP/Rosetta
+processed computational tables and the fixed NbBench splits. The FEP/Rosetta
 mutation-effect tables, the random variants scored by Rosetta, and the
 ESM2-proposed variants scored by Rosetta had no exact match to any NbBench
 training, validation, or test sequence. The ThermoMPNN tables used the same
-template-specific variant design as the mutation-effect sources. The
+template-specific variant design as the mutation-effect computational labels. The
 SAbDab-derived MD Q-value table contained exact matches to 2 NbBench training, 4
 validation, and 8 test sequences. We disclose this because it bears on
 interpretation of the MD control; it cannot explain the positive FEP result, and
-the MD Q-value source did not improve held-out Tm prediction.
+the MD Q-value computational label did not improve held-out Tm prediction.
 
-\textbf{Source-label sampling.} For mutation-effect experiments with requested
+\textbf{Computational-label sampling.} For mutation-effect experiments with requested
 count $n$, the loader samples up to $n$ rows independently from each of the two
 template tables using the run seed; the final FEP setting with $n=320$ therefore
-supplies 320 sampled 1MEL rows and 320 sampled 4IDL rows before the source-task
+supplies 320 sampled 1MEL rows and 320 sampled 4IDL rows before the computational-task
 split. For MD-derived Q-value experiments, the loader samples $n$ rows from the
-single Q-value table. Source rows are split 80/20 into source-training and
-source-validation rows with the same seed. The production training call then
+single Q-value table. Computational-label rows are split 80/20 into computational-training and
+computational-validation rows with the same seed. The production training call then
 filters the validation data passed to the trainer so that checkpoint selection
 and early stopping depend only on the experimental Tm validation examples.
 
 \subsection*{SAbDab-derived nanobody structure panel for MD}
 
-The MD source-label panel was built from SAbDab, the Structural Antibody Database
+The MD computational-label panel was built from SAbDab, the Structural Antibody Database
 \citep{Dunbar2014SAbDab}. The archived SAbDab nanobody summary table holds 2422
 rows with PDB identifier, heavy- and light-chain assignments, model index,
 antigen annotation, experimental method, resolution, species, and other fields.
@@ -118,12 +118,12 @@ in the 300 K campaign and built a 1146-entry 400 K manifest, consisting of 798
 X-ray, 345 electron-microscopy, and 3 NMR structures according to the SAbDab
 method field. None of the selected rows had an annotated light chain, consistent
 with a single-domain antibody panel. After trajectory and Q-value processing,
-1143 unique PDB identifiers yielded usable source-label rows.
+1143 unique PDB identifiers yielded usable computational-label rows.
 
 \subsection*{MD system preparation and simulation protocol}
 
 \textbf{System preparation.} Each structure was prepared as a nanobody-only
-system. The workflow takes the IMGT-renumbered PDB as the structure source,
+system. The workflow takes the IMGT-renumbered PDB as the input structure,
 extracts the selected heavy chain, keeps only protein atoms, and leaves the
 termini uncapped, at pH 7.4. Chains are cleaned with PDBFixer, and pH-aware
 protonation is assigned through pdb2pqr/PROPKA when available
@@ -136,7 +136,7 @@ coordinate files are built with ff19SB and OPC
 \textbf{300 K equilibration branch.} The base 300 K branch uses OpenMM on CUDA
 devices \citep{Eastman2017OpenMM}. It runs 1 ns of NVT followed by 1 ns of NPT at 300 K
 and 1 atm, with a 2-fs timestep and no hydrogen-mass repartitioning. Production
-at 300 K was generated for the broader campaign, but the source label used here
+at 300 K was generated for the broader campaign, but the computational label used here
 comes from the 400 K branch.
 
 \textbf{400 K production branch.} The first 400 K relaxation stage restarts from
@@ -187,7 +187,7 @@ available frames; for shorter trajectories it uses all frames. For a complete
 final 33 ns. In the processed 400 K table, the number of frames used ranges from
 66 to 333 (median 333), the number of native contacts from 28 to 728 (median
 173), and the sequence length from 58 to 461 residues (median 122). Raw Q-values
-range from 0.0437 to 0.9994 and are scaled to [0,1] for source-task
+range from 0.0437 to 0.9994 and are scaled to [0,1] for computational-task
 training.
 
 \subsection*{Sequence tokenization and encoder inputs}
@@ -195,12 +195,12 @@ training.
 Sequences are tokenized with the ESM2 tokenizer for the selected encoder
 \citep{Lin2023Evolutionary}, using truncation and fixed-length padding to 160
 residues. In the production protocol, the trainer receives all target and sampled
-source rows for training, but its evaluation data are filtered to the experimental
+computational-label rows for training, but its evaluation data are filtered to the experimental
 Tm validation rows.
 
 \textbf{Hot-encoder input path.} The hot-encoder setting keeps tokenized
 sequences in the training data and updates the ESM2 weights. The frozen-encoder
-setting runs ESM2 once per target and source sequence to precompute first-token
+setting runs ESM2 once per target and computational-label sequence to precompute first-token
 embeddings, after which the optimizer updates only the regression trunk and task
 heads.
 
@@ -212,20 +212,20 @@ dimensions hidden-size $\rightarrow$ 256 $\rightarrow$ 128 $\rightarrow$ 32, wit
 ReLU activations and dropout after the first two hidden layers. The Tm head maps
 the 32-dimensional representation to one scaled scalar prediction.
 
-\textbf{Target and source heads.} The Tm-only baseline is the encoder, the shared
-trunk, and the Tm head. Source-transfer models keep this target path and add
-source heads. The main mutation-effect model uses separate source heads for the
-two template-specific tasks. The code also implements source-head controls, including a
+\textbf{Target and computational heads.} The Tm-only baseline is the encoder, the shared
+trunk, and the Tm head. Computational-label transfer models keep this target path and add
+computational heads. The main mutation-effect model uses separate computational heads for the
+two template-specific tasks. The code also implements computational-head controls, including a
 single shared mutation-effect head, a template-conditioned head, and a
 template-specific affine calibration on top of a shared head, to test whether the
-two template-specific sources need separate output calibration.
+two template-specific computational labels need separate output calibration.
 
 \textbf{Architecture sensitivity analyses.} Architecture controls include
-residual, latent, and mixture-style source-fusion variants, in which the source
+residual, latent, and mixture-style computational-fusion variants, in which the computational
 path produces a correction to the Tm prediction, a latent interaction between Tm
-and source features, or a gate between a target-only expert and a source-informed
+and computational features, or a gate between a target-only expert and a computational-informed
 expert. The main reported FEP result uses the original shared-trunk architecture
-with separate template-specific source heads; the other variants are kept as
+with separate template-specific computational heads; the other variants are kept as
 sensitivity analyses, not as the main claim.
 
 \subsection*{Training objective, optimizer, and checkpoint selection}
@@ -239,8 +239,8 @@ For task $k$ with loss $L_k$ and learned log-scale $s_k$, the contribution is
   \frac{L_k}{2\exp(2s_k)} + s_k ,
 \]
 and the total loss sums the contributions from the tasks present in the
-minibatch. Fixed source-loss weights are also implemented and were included in
-the candidate searches for source classes where loss balance could shift
+minibatch. Fixed computational-loss weights are also implemented and were included in
+the candidate searches for computational classes where loss balance could shift
 validation performance.
 
 \textbf{Optimizer and schedule.} The optimizer is AdamW. The default head/trunk
@@ -255,9 +255,9 @@ non-trainable and no encoder group is used.
 
 \textbf{Checkpoint selection.} Within each run, the best checkpoint has the
 lowest mean squared error on the experimental Tm validation rows, and early
-stopping monitors the same metric with patience 15 and threshold 0. Source-task
+stopping monitors the same metric with patience 15 and threshold 0. Computational-task
 validation rows are not passed to the trainer in the production protocol. This
-detail is central to the comparison. Source labels shape the learned
+detail is central to the comparison. Computational labels shape the learned
 representation through the training loss, but they do not decide which checkpoint
 is used for target-task prediction.
 
@@ -267,22 +267,22 @@ Candidate settings are selected on the experimental Tm validation split. The
 common grid includes the default setting; encoder learning rates of
 $3\times10^{-5}$, $1\times10^{-4}$, and $3\times10^{-4}$; a lower head learning
 rate of $1\times10^{-4}$ paired with encoder learning rate $3\times10^{-5}$; and
-dropout rates of 0.05, 0.15, and 0.30. Fixed source-loss weights are added for
-source classes where the source-label scale may need explicit balancing. Tm-only
+dropout rates of 0.05, 0.15, and 0.30. Fixed computational-loss weights are added for
+computational classes where the computational-label scale may need explicit balancing. Tm-only
 candidates include shared, residual, and latent architecture variants;
 mutation-effect candidates use the shared-trunk family for the main comparison,
-with a separate source-head design comparison; and MD-derived candidates include
+with a separate computational-head design comparison; and MD-derived candidates include
 fixed-weight settings because Q-value labels differ in scale and interpretation
 from mutation free energies.
 
 \textbf{Seeded candidate evaluation.} Each candidate is first evaluated as a
 three-seed ensemble on the Tm validation split, and the selected setting for each
-source class is then evaluated on the held-out test split as a ten-seed ensemble.
+computational class is then evaluated on the held-out test split as a ten-seed ensemble.
 Final comparisons use seeds 1 to 10. The run seed controls Python, NumPy, PyTorch,
 and CUDA randomness when CUDA is available, as well as target-training subsampling
-in the target-label scaling experiment, source-row sampling, and source
-train/validation splitting. The label-count curves use fixed source-specific
-training recipes while the number of source labels is varied.
+in the target-label scaling experiment, computational-row sampling, and computational-label
+train/validation splitting. The label-count curves use fixed computational-specific
+training recipes while the number of computational labels is varied.
 
 \subsection*{Statistics and stored outputs}
 
@@ -308,32 +308,32 @@ the reference.
 structured summary recording the command-line arguments, relevant environment
 variables, resolved model settings, per-label-count metrics, bootstrap intervals,
 per-example absolute errors, and paired bootstrap summaries. Compact tables
-derived from these summaries feed the main source comparison, the frozen-encoder
-controls, the source-head controls, and the source-combination controls.
+derived from these summaries feed the main computational-label comparison, the frozen-encoder
+controls, the computational-head controls, and the computational-combination controls.
 
 \subsection*{Interpreting the label-count curves}
 
 \textbf{Target-label scaling reference.} The target-label scaling curve is a
 positive control on the pipeline. It tests whether the same model family and
 evaluation code recover the expected gain when more true experimental Tm labels
-are available. The FEP source-label curve tests something different. It asks whether more
+are available. The FEP computational-label curve tests something different. It asks whether more
 labels from a physically related but distinct computed quantity improve the same
 held-out Tm endpoint, while the MD Q-value curve tests whether simply adding more
-simulation-derived labels suffices when the source label measures a more indirect
+simulation-derived labels suffices when the computational label measures a more indirect
 structural response. The decisive comparison is therefore not ``simulation versus
-no simulation,'' but whether the source label carries physical information that
+no simulation,'' but whether the computational label carries physical information that
 transfers to the target property under target-centered model selection.
 
-\subsection*{Supplementary figure source tables}
+\subsection*{Supplementary figure data tables}
 
-The supplementary figures are generated from tabular source files derived from the
-same run summaries as the main figures. The processed source tables, rendered
+The supplementary figures are generated from tabular computational-label files derived from the
+same run summaries as the main figures. The processed computational tables, rendered
 supplementary figures, and figure-generation code will be distributed with the
 public analysis archive.
 
 \subsection*{Fig.-to-data and code mapping}
 
-The manuscript figures are regenerated from compact result summaries and source
+The manuscript figures are regenerated from compact result summaries and computational-label
 tables rather than from scratch run directories. The mapping below is the first
 place to check when auditing or extending a figure.
 
@@ -349,17 +349,17 @@ Display item & Inputs & Script & Primary comparison \\
 \hline
 Fig.~1 & Conceptual protocol & \path{plot/make_outline_figures.py} & Target-centered transfer-learning design \\
 Fig.~2 & Main count-sweep summaries & \path{plot/make_outline_figures.py} & Label-count sweeps for Tm labels, FEP labels, and MD Q-value labels \\
-Fig.~3 & Final hot- and frozen-encoder source-screen summaries & \path{plot/make_outline_figures.py} & All-atom FEP and MD labels versus training only on experimental Tm labels \\
-Fig.~4 & Final source-screen summary & \path{plot/make_outline_figures.py} & Rosetta, ThermoMPNN, and Rosetta-scored proposal sets \\
+Fig.~3 & Final hot- and frozen-encoder computational-label screen summaries & \path{plot/make_outline_figures.py} & All-atom FEP and MD labels versus training only on experimental Tm labels \\
+Fig.~4 & Final computational-label screen summary & \path{plot/make_outline_figures.py} & Rosetta, ThermoMPNN, and Rosetta-scored proposal sets \\
 Supplementary Figs.~1 to 5 & Supplementary manifest and generated TSV tables & \path{plot/make_supplementary_figures.py} & Data-set composition, candidate-setting searches, model controls, count-sweep controls, and MD-feature controls \\
 \hline
 \end{tabular}
 \end{table*}
 
-\textbf{Generated supplementary tables.} The final source-screen settings used in
+\textbf{Generated supplementary tables.} The final computational-label screen settings used in
 Figs.~3 and 4 and the frozen-encoder controls are recorded in generated
 supplementary tables, which list the selected architecture, validation-selected
-setting, source-label count, validation MAE, held-out test MAE, bootstrap
+setting, computational-label count, validation MAE, held-out test MAE, bootstrap
 interval, and run-summary reference for each condition. A panel-level mapping
 table for all supplementary figures is included in the public analysis archive.
 
@@ -371,7 +371,7 @@ table for all supplementary figures is included in the public analysis archive.
 \includegraphics[width=\textwidth]{supp_fig01_data_and_md_label}
 \caption{\textbf{Supplementary Fig. 1. Processed data sets and MD-derived
 Q-value labels.}
-\textbf{(a)} Processed target and source-label row counts used in the reported
+\textbf{(a)} Processed target and computational-label row counts used in the reported
 experiments.
 \textbf{(b)} Distribution of raw MD-derived Q-values before [0,1] scaling.
 \textbf{(c)} Relationship between sequence length and raw MD-derived Q-value.
@@ -385,12 +385,12 @@ the 400 K MD panel.}
 \includegraphics[width=\textwidth]{supp_fig02_candidate_setting_search}
 \caption{\textbf{Supplementary Fig. 2. Candidate-setting searches and
 target-validation selection.}
-\textbf{(a)} Experimental validation MAE values for hot-encoder source
+\textbf{(a)} Experimental validation MAE values for hot-encoder computational-label
 comparisons.
 \textbf{(b)} Experimental validation MAE values for frozen-encoder controls.
-\textbf{(c)} Candidate source-head designs for FEP mutation free-energy labels.
+\textbf{(c)} Candidate computational-head designs for FEP mutation free-energy labels.
 \textbf{(d)} Relationship between selected validation MAE and held-out test MAE
-for the final source comparison. Diamonds mark the best validation setting in
+for the final computational-label comparison. Diamonds mark the best validation setting in
 panels a to c.}
 \label{fig:supp_candidate_settings}
 \end{figure}
@@ -398,13 +398,13 @@ panels a to c.}
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth]{supp_fig03_model_controls}
-\caption{\textbf{Supplementary Fig. 3. Model and source-combination controls.}
+\caption{\textbf{Supplementary Fig. 3. Model and computational-combination controls.}
 \textbf{(a)} Frozen-encoder and hot-encoder comparisons for selected
-source labels.
-\textbf{(b)} Hot-encoder FEP source-head controls.
-\textbf{(c)} Frozen-encoder FEP source-head controls.
-\textbf{(d)} Source-combination controls comparing Tm-only, FEP-only,
-MD Q-value-only, and combined-source settings.}
+computational labels.
+\textbf{(b)} Hot-encoder FEP computational-head controls.
+\textbf{(c)} Frozen-encoder FEP computational-head controls.
+\textbf{(d)} Computational-combination controls comparing Tm-only, FEP-only,
+MD Q-value-only, and combined-computational-label settings.}
 \label{fig:supp_model_controls}
 \end{figure}
 
@@ -426,14 +426,14 @@ separately for each label count on the experimental validation split.
 \centering
 \includegraphics[width=\textwidth]{supp_fig05_md_feature_controls}
 \caption{\textbf{Supplementary Fig. 5. Descriptor controls for MD-derived
-source labels.}
+computational labels.}
 \textbf{(a)} Held-out test MAE values for selected MD-derived and
 nanobody-specific descriptor controls. The dashed line marks the FEP reference.
 \textbf{(b)} Relationship between candidate validation MAE and held-out test
 MAE for descriptor controls that were carried forward to final evaluation.
-\textbf{(c)} Distributions of the model-facing scaled source labels for the
+\textbf{(c)} Distributions of the model-facing scaled computational labels for the
 selected descriptors.
-\textbf{(d)} Spearman correlations among the selected source labels over shared
+\textbf{(d)} Spearman correlations among the selected computational labels over shared
 sequences.}
 \label{fig:supp_md_feature_controls}
 \end{figure}
