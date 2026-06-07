@@ -135,9 +135,13 @@ MAE (paired change, -0.09$^\circ$C; 90\% confidence interval, -0.20 to
 +0.02$^\circ$C), and random variants scored by Rosetta reached 6.51$^\circ$C MAE
 (paired change, -0.10$^\circ$C; 90\% confidence interval, -0.22 to
 +0.03$^\circ$C). All were weaker than FEP, and the two Rosetta controls had
-confidence intervals that crossed zero.
+confidence intervals that crossed zero. Label-count sweeps for these sources
+(Fig.~\ref{fig:variant_sources}b) showed at most a shallow, noisy decrease in
+held-out error as more computational labels were added, none reproducing the
+cleaner FEP scaling trend.
 
-The ESM2-proposed variants scored by Rosetta edged out the random variants, with
+Across the label-count sweep, the ESM2-proposed variants scored by Rosetta
+edged out the random variants, with
 a paired MAE difference of -0.07$^\circ$C in favor of the ESM2-proposed set. The
 confidence interval crossed zero, so we read this as exploratory rather than as
 evidence that the present generator improves variant selection. It does show,
@@ -149,13 +153,14 @@ in the Discussion.
 \centering
 \includegraphics[width=\textwidth]{fig_outline04_mdq_boundary}
 \caption{\textbf{Structure-based labels and language-model-proposed variants.}
-(a) Final test MAE for Tm-only learning, FEP, and structure-based
-computational labels.
-(b) Paired $\Delta$MAE estimates relative to Tm-only learning.
-Negative values indicate improvement.
-(c) Direct paired comparison between ESM2-proposed variants scored by
-Rosetta and random variants scored by Rosetta. Negative values favor the
-ESM2-proposed set.}
+(a) Final held-out test MAE (validation-selected models) for Tm-only learning,
+FEP, and the structure-based and variant computational labels.
+(b) Held-out test MAE versus the number of computational labels per template for
+each mutation-effect and variant source, with Tm-only shown as a dashed
+reference. These are fixed-configuration label-count sweeps (the FEP curve is the
+10-seed sweep of Fig.~\ref{fig:scaling}), so their largest-label points need not
+coincide exactly with the validation-selected models in (a). Points and intervals
+show ensemble MAE and 90\% bootstrap intervals.}
 \label{fig:variant_sources}
 \end{figure*}
 

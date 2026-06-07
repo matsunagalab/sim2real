@@ -136,6 +136,16 @@ FIG3_DESCRIPTORS = [
 
 TEMP_COLOR = {300: COL["design"], 400: COL["mdq"], None: COL["thermo"]}
 
+# Fig. 4b: label-count scaling curves for the mutation-effect / variant sources.
+# FEP reuses the existing sweep; the others are dedicated label-count sweeps.
+FIG4_SCALING = [
+    ("FEP mutation free energy", RESULTS / "fep_hot_tmselect_enc3e-5" / "scaling.json", COL["fep"], "o"),
+    ("ESM2-proposed + Rosetta", RESULTS / "sweep_ddg_rosetta_esm" / "scaling.json", COL["design"], "o"),
+    ("ThermoMPNN stability", RESULTS / "sweep_ddg_thermompnn" / "scaling.json", COL["thermo"], "s"),
+    ("random + Rosetta", RESULTS / "sweep_ddg_rosetta_random" / "scaling.json", COL["rosetta"], "D"),
+    ("Rosetta mutation", RESULTS / "sweep_ddg_rosetta" / "scaling.json", "#B9770E", "v"),
+]
+
 MD_TEMPERATURE_DISTRIBUTION_SPECS = [
     ("MD Q-value", 300, DATA_MD / f"nanobody_qvalue_{INTERNAL_MD_Q_TOKEN}.csv"),
     ("MD Q-value", 400, DATA_MD / f"nanobody_qvalue_{INTERNAL_MD_Q_TOKEN}_400K.csv"),
@@ -814,16 +824,18 @@ def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
 
 
 def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
-    fig, axes = plt.subplot_mosaic(
-        [["a", "b"], ["c", "c"]],
-        figsize=(7.4, 4.7),
+    fig, axes = plt.subplots(
+        1,
+        2,
+        figsize=(7.4, 3.9),
         constrained_layout=True,
-        gridspec_kw={"height_ratios": [1.0, 0.5]},
+        gridspec_kw={"width_ratios": [1.0, 1.15]},
     )
     row_lookup = rows.set_index(rows["source"].astype(str))
     design_sources = ["Tm_only", "FEP", "rosetta_esm", "thermoMPNN", "rosetta_random", "rosetta"]
 
-    ax = axes["a"]
+    # (a) final held-out test MAE for each computational label.
+    ax = axes[0]
     ordered = row_lookup.loc[design_sources].reset_index(drop=True)
     y = np.arange(len(ordered))
     for i, row in ordered.iterrows():
@@ -836,7 +848,7 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
             row["color"],
             marker="s" if row["source"] == "Tm_only" else "o",
         )
-        ax.text(row["ci_hi"] + 0.030, i, f"{row['test_mae']:.2f}", va="center", fontsize=7.3)
+        ax.text(row["ci_hi"] + 0.030, i, f"{row['test_mae']:.2f}", va="center", fontsize=7.0)
     ax.set_yticks(y)
     ax.set_yticklabels(ordered["label_plot"])
     ax.invert_yaxis()
@@ -845,46 +857,25 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
     polish(ax, "x")
     panel_label(ax, "A")
 
-    ax = axes["b"]
-    delta_sources = [s for s in design_sources if s != "Tm_only"]
-    y = np.arange(len(delta_sources))
-    for i, source in enumerate(delta_sources):
-        comp = paired[paired_key(source)]
-        horizontal_interval(ax, i, comp["delta_mae"], comp["delta_ci_lo"], comp["delta_ci_hi"], SOURCE_COLOR[source], zorder=6)
-        ax.text(comp["delta_ci_hi"] + 0.016, i, f"{comp['delta_mae']:+.2f}", va="center", fontsize=7.2)
-    ax.axvline(0, color=COL["black"], linewidth=0.9)
-    ax.set_yticks(y)
-    ax.set_yticklabels([SOURCE_LABEL[s] for s in delta_sources])
-    ax.invert_yaxis()
-    ax.set_xlabel("MAE change vs Tm labels only (deg C)")
-    ax.set_xlim(-0.55, 0.15)
-    polish(ax, "x")
+    # (b) label-count scaling for the mutation-effect / variant sources.
+    ax = axes[1]
+    tm_mae = float(row_lookup.loc["Tm_only", "test_mae"])
+    ax.axhline(tm_mae, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
+    ax.text(330, tm_mae + 0.012, "Tm labels only", fontsize=6.6, color=COL["baseline"], ha="right", va="bottom")
+    x_ticks = [10, 20, 40, 80, 160, 320]
+    for label, path, color, marker in FIG4_SCALING:
+        if not path.exists():
+            continue
+        scaling_errorbar(ax, load_scaling(path), color, label, marker=marker)
+    ax.set_xscale("log")
+    ax.set_xticks(x_ticks)
+    ax.set_xticklabels([str(x) for x in x_ticks])
+    ax.set_xlabel("computational labels per template")
+    ax.set_ylabel("held-out Tm test MAE (deg C)")
+    ax.set_xlim(8, 400)
+    ax.legend(frameon=False, loc="upper right", fontsize=6.5, handlelength=1.5)
+    polish(ax, "both")
     panel_label(ax, "B")
-
-    ax = axes["c"]
-    random_abs = np.asarray(row_lookup.loc["rosetta_random", "abs_errors"], dtype=float)
-    esm_abs = np.asarray(row_lookup.loc["rosetta_esm", "abs_errors"], dtype=float)
-    mean, lo, hi = paired_delta_ci(random_abs, esm_abs)
-    horizontal_interval(ax, 0, mean, lo, hi, COL["design"], zorder=4)
-    ax.axvline(0, color=COL["black"], linewidth=0.9)
-    ax.set_yticks([0])
-    ax.set_yticklabels(["ESM2-proposed\nminus random"])
-    ax.set_xlabel("ESM2-proposed minus random MAE (deg C)")
-    ax.set_xlim(-0.30, 0.20)
-    ax.set_ylim(-0.55, 0.55)
-    ax.text(mean, -0.22, f"{mean:+.2f}", ha="center", va="top", fontsize=7.3, color=COL["design"])
-    ax.text(
-        0.02,
-        0.88,
-        "negative values favor\nESM2-proposed variants",
-        transform=ax.transAxes,
-        ha="left",
-        va="top",
-        fontsize=7.2,
-        color=COL["gray"],
-    )
-    polish(ax, "x")
-    panel_label(ax, "C")
 
     save_figure(fig, "fig_outline04_mdq_boundary")
 
