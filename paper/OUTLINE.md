@@ -675,6 +675,23 @@ Claims (UPDATED for the two-axis story):
 (Panel (a)/(d) reader labels now include "MD native-contact stability (matched scan)"
 alongside "mutation free energy".)
 
+### FIGURE PLAN — 3 main figures (updated 2026-07-12; each figure carries one message)
+
+Per user request, the main text uses THREE figures, each with a single clear message, plus the
+graphical abstract. Encoder-size control, the hot Tm-label sweep, and redundant absolute-MAE panels
+move to Supplementary.
+- **Fig. 1** (`fig_outline01_concept_protocol`): framework — target-centered multi-task ESM2 setup.
+- **Fig. 2 = Data-design axis** (`fig_outline02_data_design`): (a) same MD native-contact observable
+  null as a diverse screen vs positive as the FEP-matched scan (each vs its own Tm-only/FEP ref);
+  (b) the length confound (label value vs sequence length); (c) frozen label-count sweep — FEP and
+  MD ΔQ fall below the Tm-only frozen baseline (dashed), MD ΔQ crossing it by n=320.
+- **Fig. 3 = Physical-observable axis** (`fig_outline03_physical_observable`): (a) tuned frozen source
+  hierarchy (FEP ≈ MD ΔQ lead; Rosetta-family null); (b) paired ΔMAE vs Tm-only, frozen vs hot, for
+  FEP/MD/Rosetta/ThermoMPNN (FEP both regimes, MD frozen only); (c) deep/shallow schematic.
+- **Graphical abstract** (`graphical_abstract`): the two axes in one figure.
+
+Older per-figure plans below are superseded by the 3-figure structure above (kept for panel detail).
+
 ### Fig. 3. Data-design axis: matching the source's sequence design lets MD stability labels transfer
 
 Purpose: the first design axis — show that whether an MD native-contact label transfers is

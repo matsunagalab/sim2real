@@ -879,6 +879,167 @@ def fig04d_schematic(ax) -> None:
             ha="center", fontsize=6.4, color=COL["mdq"], fontweight="bold")
 
 
+def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
+    """Data-design axis: diverse-vs-matched groups, the length confound, and the
+    FROZEN label-count sweep. Panels recomposed verbatim from the old fig03(a,b)
+    and fig02(a)."""
+    fig, axes = plt.subplots(
+        1,
+        3,
+        figsize=(10.6, 3.7),
+        constrained_layout=True,
+        gridspec_kw={"width_ratios": [1.25, 1.0, 1.0]},
+    )
+
+    # (a) The SAME MD native-contact observable, two data designs. Each group is
+    #     anchored to its own Tm-only reference (different absolute MAE scales).
+    ax = axes[0]
+    diverse = fig3a_group(FIG3A_DIVERSE)
+    matched = fig3a_group(FIG3A_MATCHED)
+    groups = [(diverse, [0, 1, 2]), (matched, [4, 5, 6])]
+    for grp, ys in groups:
+        entries = [
+            ("Tm labels only", grp["tm"], COL["baseline"], "s"),
+            ("FEP mutation\nfree energy", grp["fep"], COL["fep"], "o"),
+            (grp["md_label"], grp["md"], COL["mdq"], "D"),
+        ]
+        tm_x = grp["tm"][0]
+        ax.plot([tm_x, tm_x], [ys[0] - 0.45, ys[-1] + 0.45], color=COL["baseline"],
+                linestyle="--", linewidth=0.9, zorder=1)
+        for y, (lab, (mae, lo, hi), color, marker) in zip(ys, entries):
+            horizontal_interval(ax, y, mae, lo, hi, color, marker=marker)
+            ax.text(hi + 0.03, y, f"{mae:.2f}", va="center", fontsize=6.4)
+    yticks = [0, 1, 2, 4, 5, 6]
+    yticklabels = [
+        "Tm labels only", "FEP mutation\nfree energy", diverse["md_label"],
+        "Tm labels only", "FEP mutation\nfree energy", matched["md_label"],
+    ]
+    ax.set_yticks(yticks)
+    ax.set_yticklabels(yticklabels, fontsize=6.2)
+    ax.set_ylim(6.7, -0.7)
+    ax.axhline(3.0, color=COL["grid"], linewidth=0.9)
+    ax.text(5.78, 1.0, diverse["title"], rotation=90, va="center", ha="left",
+            fontsize=6.8, color=COL["mdq"], fontweight="bold")
+    ax.text(5.78, 5.0, matched["title"], rotation=90, va="center", ha="left",
+            fontsize=6.8, color=COL["mdq"], fontweight="bold")
+    ax.set_xlabel("held-out Tm test MAE (deg C)")
+    ax.set_xlim(5.75, 7.55)
+    polish(ax, "x")
+    panel_label(ax, "A")
+
+    # (b) The length confound: MD native-contact label value vs sequence length.
+    ax = axes[1]
+    (dlen, dval, r), matched_pts = fig3b_confound()
+    ax.scatter(dlen, dval, s=9, color=COL["mdq"], alpha=0.35, edgecolor="none",
+               label=f"diverse screen (n={len(dlen)})", zorder=2)
+    mcolors = {"1mel": COL["fep"], "4idl": COL["design"]}
+    for mlen, mval, tag in matched_pts:
+        ax.scatter(mlen, mval, s=9, color=mcolors.get(tag, COL["design"]), alpha=0.5,
+                   edgecolor="none", label=f"matched scan ({tag}, n={len(mlen)})", zorder=3)
+    ax.text(0.04, 0.10, f"diverse: Pearson $r$ = {r:+.2f}\n(length spread 58-461)",
+            transform=ax.transAxes, fontsize=6.4, color=COL["mdq"], va="bottom")
+    ax.text(0.62, 0.42, "matched:\nconstant length", transform=ax.transAxes,
+            fontsize=6.4, color=COL["design"], va="center", ha="center")
+    ax.set_xlabel("sequence length (residues)")
+    ax.set_ylabel("MD Q-value (fraction native contacts)")
+    ax.legend(frameon=False, loc="lower right", fontsize=5.8, handlelength=1.0, markerscale=1.4)
+    polish(ax, "both")
+    panel_label(ax, "B")
+
+    # (c) FROZEN-regime computational-label count sweeps: FEP and the FEP-matched
+    #     MD native-contact label both scale below the Tm-only frozen baseline
+    #     (dashed line), i.e. they beat training on experimental Tm labels alone.
+    ax = axes[2]
+    x_ticks = [20, 80, 160, 320]
+    tm_base = load_scaling(FIG2A_TM_BASELINE)["mae"].iloc[0]
+    ax.axhline(tm_base, color=COL["baseline"], linewidth=1.1, linestyle="--", zorder=1)
+    ax.text(9, tm_base + 0.02, "Tm labels only (baseline)", fontsize=6.2,
+            color=COL["baseline"], va="bottom")
+    for label, path, color, marker in FIG2A_CURVES:
+        scaling_errorbar(ax, load_scaling(path), color, label, marker=marker)
+    ax.set_xscale("log")
+    ax.set_xticks(x_ticks)
+    ax.set_xticklabels([str(x) for x in x_ticks])
+    ax.set_xlabel("computational labels used")
+    ax.set_ylabel("held-out Tm test MAE (deg C)")
+    ax.set_xlim(15, 400)
+    ax.set_ylim(6.85, 7.45)
+    ax.set_yticks([7.0, 7.2, 7.4])
+    ax.legend(frameon=False, loc="upper right", handlelength=1.8, fontsize=6.4)
+    ax.text(0.02, 0.03, "frozen encoder", transform=ax.transAxes, fontsize=6.4, color=COL["gray"])
+    polish(ax, "both")
+    panel_label(ax, "C")
+
+    save_figure(fig, "fig_outline02_data_design")
+
+
+def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
+    """Physical-observable axis / depth: frozen source hierarchy, paired ΔMAE
+    frozen-vs-hot, and the deep/shallow schematic. Panels recomposed verbatim
+    from the old fig02(b), fig04(b) and fig04d_schematic."""
+    fig, axd = plt.subplot_mosaic([["A", "B"], ["C", "C"]],
+                                  figsize=(7.6, 6.2), constrained_layout=True)
+    markers = {"frozen": "s", "hot": "o"}
+    enc_handles = [
+        Line2D([0], [0], marker="s", color=COL["black"], linestyle="none", markersize=5, label="frozen encoder"),
+        Line2D([0], [0], marker="o", color=COL["black"], linestyle="none", markersize=5, label="hot encoder"),
+    ]
+    y_off = {"frozen": -0.20, "hot": 0.20}
+
+    # (a) Tuned source screen at the representative n=320 point (frozen encoder):
+    #     the full hierarchy of computational labels.
+    ax = axd["A"]
+    frozen = read_json(FROZEN_SUMMARY_JSON)
+    frozen_rows = {str(r["source"]): r for r in frozen["rows"]}
+    screen = source_screen_points(frozen_rows)
+    y = np.arange(len(SOURCE_ORDER)) * 1.0
+    for i, src in enumerate(SOURCE_ORDER):
+        mae, lo, hi = screen[src]
+        horizontal_interval(ax, y[i], mae, lo, hi, SOURCE_COLOR[src], marker="s" if src == "Tm_only" else "o")
+        ax.text(hi + 0.012, y[i], f"{mae:.2f}", va="center", fontsize=6.6)
+    tm_frozen = screen["Tm_only"][0]
+    ax.axvline(tm_frozen, color=COL["baseline"], linewidth=0.9, linestyle="--", zorder=1)
+    ax.set_yticks(y)
+    ax.set_yticklabels([SOURCE_LABEL[s] for s in SOURCE_ORDER], fontsize=6.4)
+    ax.set_ylim(y[-1] + 0.6, -0.6)
+    ax.set_xlabel("held-out Tm test MAE (deg C)")
+    ax.set_xlim(6.90, 7.45)
+    ax.text(0.02, 0.03, "frozen encoder", transform=ax.transAxes, fontsize=6.4, color=COL["gray"])
+    polish(ax, "x")
+    panel_label(ax, "A")
+
+    # (b) paired ΔMAE vs Tm-only per source x encoder regime, with 90% CI.
+    ax = axd["B"]
+    delta_sources = ["FEP", MD_CONTACT_Q_SOURCE, "rosetta", "thermoMPNN"]
+    deltas = encoder_delta_rows(delta_sources)
+    ypos = np.arange(len(delta_sources)) * 1.4
+    ax.axvline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
+    for encoder in ["frozen", "hot"]:
+        subset = deltas[deltas["encoder"] == encoder].set_index("source")
+        for i, src in enumerate(delta_sources):
+            row = subset.loc[src]
+            horizontal_interval(ax, ypos[i] + y_off[encoder], row["delta_mae"],
+                                row["delta_ci_lo"], row["delta_ci_hi"], SOURCE_COLOR[src], marker=markers[encoder])
+    ax.set_yticks(ypos)
+    ax.set_yticklabels([SOURCE_LABEL[s] for s in delta_sources], fontsize=6.4)
+    ax.set_ylim(ypos[-1] + 0.7, -0.7)
+    ax.set_xlabel(r"$\Delta$MAE vs Tm-only (deg C)")
+    ax.set_xlim(-0.45, 0.35)
+    ax.text(0.02, 0.02, "left of 0 = improves over Tm-only", transform=ax.transAxes,
+            fontsize=6.0, color=COL["gray"])
+    ax.legend(handles=enc_handles, frameon=False, loc="lower center",
+              bbox_to_anchor=(0.54, 1.01), ncol=2, borderaxespad=0.0)
+    polish(ax, "x")
+    panel_label(ax, "B")
+
+    # (c) interpretation schematic: depth of transfer set by the physical observable.
+    ax = axd["C"]
+    fig04d_schematic(ax)
+    panel_label(ax, "C")
+
+    save_figure(fig, "fig_outline03_physical_observable")
+
+
 def write_summary_tsv(rows: pd.DataFrame, paired: dict) -> None:
     out_rows = []
     tm = rows.loc[rows["source"].astype(str) == "Tm_only"].iloc[0]
@@ -928,9 +1089,8 @@ def main() -> None:
     paired = paired_comparisons()
     write_summary_tsv(rows, paired)
     fig01_concept_protocol(rows)
-    fig02_source_screen(rows, paired)
-    fig03_design_bridge(rows, paired)
-    fig04_boundary_mdq(rows, paired)
+    fig2_data_design(rows, paired)
+    fig3_physical_observable(rows, paired)
 
 
 if __name__ == "__main__":
