@@ -28,22 +28,22 @@ quantity affect whether the benefit remains when ESM2 is fine-tuned?
 \subsection{Local mutation scans gave a stronger MD result}
 
 Figure~\ref{fig:data_design}a compares two choices made before running MD. The
-heterogeneous screen used unrelated single-domain antibody sequences of
-different lengths. The matched scan used local mutations of the fixed 1MEL and
-4IDL structures. Both calculations used 400 K MD and the Best--Hummer native-
-contact fraction $Q$. They also used similar simulation time per sequence. Thus,
-the comparison asks how a similar amount of simulation should be distributed
-over sequence space.
+heterogeneous structure panel spanned single-domain antibodies of different
+lengths. The matched scan used local mutations of the fixed 1MEL and 4IDL
+structures. Both calculations used 400 K MD, similar simulation time per
+sequence, and labels from the Best--Hummer native-contact $Q$ family. Thus, the
+comparison asks how a similar amount of simulation should be distributed over
+sequence space.
 
 The heterogeneous and matched studies were run and tuned as separate series,
 so their absolute MAEs cannot be compared directly. Figure~\ref{fig:data_design}b
 instead shows the paired change from the Tm-only model in each series. In the
 heterogeneous series, the MD label changed MAE by $-0.049^\circ$C with a frozen
-encoder (90\% CI, $-0.085$ to $-0.012^\circ$C) and by $+0.117^\circ$C with a hot
+encoder (90\% CI, $-0.085$ to $-0.012^\circ$C) and by $+0.116^\circ$C with a hot
 encoder (90\% CI, $+0.012$ to $+0.224^\circ$C). The frozen gain was small, and
 the hot model became worse. In the matched series, the frozen change was
-$-0.195^\circ$C (90\% CI, $-0.336$ to $-0.055^\circ$C), about four times the
-change in the heterogeneous series. The hot change was $+0.029^\circ$C, with a
+$-0.195^\circ$C (90\% CI, $-0.336$ to $-0.055^\circ$C), a larger observed gain
+than in the heterogeneous series. The hot change was $+0.029^\circ$C, with a
 confidence interval that included zero.
 
 Several differences between the two sequence sets may contribute to this
@@ -65,38 +65,39 @@ scaling removes this constant, so scaled $Q$ and scaled $\Delta Q$ are identical
 within that table.
 
 The frozen label-count curves give a second view of the matched scan
-(Fig.~\ref{fig:data_design}c). Here $n$ is the number of labels sampled from
-each structure table. FEP MAE changed from 7.13$^\circ$C at $n=20$ to
-7.01$^\circ$C at $n=320$. Matched MD changed from 7.32 to 7.03$^\circ$C and
-fell below the 7.23$^\circ$C Tm-only baseline at the largest setting. The four
-points are not monotonic enough to support a scaling law, but both sources were
-better than Tm-only at $n=320$. Their paired changes were
+(Fig.~\ref{fig:data_design}c). Each point is the paired MAE change from the same
+frozen Tm-only model; zero therefore means equal test MAE. Here $n$ is the
+number of labels sampled from each structure table. At $n=20$, the changes were
+$-0.10^\circ$C for FEP and $+0.09^\circ$C for matched MD. At $n=320$, both
+sources were better than Tm-only: their paired changes were
 $-0.22^\circ$C for FEP and $-0.20^\circ$C for MD. The direct FEP-minus-MD
 difference was only $-0.03^\circ$C (90\% CI, $-0.21$ to $+0.16^\circ$C).
-Thus, with a frozen encoder, the matched MD scan performed as well as FEP at the
-largest tested label count.
+The four tested settings were not monotonic enough to support a scaling law.
+With a frozen encoder, the matched MD scan performed as well as FEP at the
+largest setting.
 
-The main conclusion from Fig.~\ref{fig:data_design} is narrow. Choosing local
-mutations on fixed structures made the frozen MD result much stronger and
-removed the hot penalty seen for the heterogeneous screen. It did not make the
-MD label helpful in the hot model. Sequence choice matters, but it is not the
-only choice that matters.
+The main conclusion from Fig.~\ref{fig:data_design} is narrow. The local
+mutation scans on fixed structures showed a larger frozen MD gain than the
+heterogeneous panel. They did not make the MD label helpful in the fine-tuned
+model. Sequence choice matters, but it is not the only choice that matters.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline02_data_design}
-\caption{Simulation design changes the value of an MD native-contact label.
-(a) A heterogeneous screen of variable-length sequences and local mutation
-scans on the fixed 1MEL and 4IDL structures use similar simulation time per
-sequence and produce labels from the Best--Hummer $Q$ family.
-(b) Paired $\Delta$MAE for each design and encoder setting. Because the two
-series were tuned independently, each value is relative to that series' own
-Tm-only model; their absolute MAEs are not compared. The matched scan gives a
-larger frozen benefit and avoids the hot penalty, but gives no hot benefit.
-(c) Frozen-encoder MAE as the number of FEP or matched-MD labels increases. The
-dashed line is the selected frozen Tm-only model. Here $n$ is the number sampled
-from each structure table. Points and bars show ensemble MAE and 90\% bootstrap
-confidence intervals.}
+\caption{Matched mutation scans show a larger frozen-encoder gain from
+native-contact $Q$.
+(a) A heterogeneous structure panel and local mutation scans on the fixed 1MEL
+and 4IDL structures use similar simulation time per sequence and produce labels
+from the same $Q$ family. The complete pipelines also differ in contact
+selection and averaging windows.
+(b) Paired MAE change for each simulation plan and encoder setting. Zero means
+equal MAE to that series' own Tm-only model, and negative values mean lower Tm
+error. Because the two series were tuned independently, their absolute MAEs are
+not compared. Asterisks mark 90\% paired bootstrap intervals that exclude zero.
+(c) Paired MAE change from the frozen Tm-only model over four tested label
+counts. Here $n$ is the number sampled from each structure table. Points and
+whiskers show the paired change and its 90\% bootstrap interval over the 396 test
+proteins.}
 \label{fig:data_design}
 \end{figure*}
 
@@ -120,16 +121,21 @@ variants plus Rosetta had changes from $+0.029$ to $+0.144^\circ$C, all with
 intervals that included zero. ESM2-proposed variants plus Rosetta were worse by
 $+0.411^\circ$C (90\% CI, $+0.181$ to $+0.651^\circ$C).
 
-The focused comparisons in Fig.~\ref{fig:physical_observable}b separate the two
-all-atom labels. FEP and matched MD were not distinguishable with a frozen
-encoder, as noted above. With a hot encoder, FEP was better than MD by a paired
-$-0.182^\circ$C (90\% CI, $-0.359$ to $-0.009^\circ$C). This difference also
-appears across label counts (Fig.~\ref{fig:physical_observable}c). At $n=20$,
-matched MD was worse than hot Tm-only by $+0.47^\circ$C (90\% CI, $+0.29$ to
-$+0.65^\circ$C). Its error then fell from 7.02 to 6.58$^\circ$C as $n$ increased,
-but at $n=320$ it had only returned to the Tm-only baseline. FEP fell from 6.57
-to 6.40$^\circ$C and was better than baseline at $n=320$. These four-point curves
-show recovery and crossover; they do not establish a power law.
+Figure~\ref{fig:physical_observable}b directly compares the two all-atom labels.
+The plotted quantity is MAE(FEP) minus MAE(matched MD), so zero means equal test
+MAE and negative values favor FEP. The frozen difference was
+$-0.026^\circ$C (90\% CI, $-0.211$ to $+0.159^\circ$C), which did not separate
+the labels. With a fine-tuned encoder, FEP was better by $-0.182^\circ$C
+(90\% CI, $-0.359$ to $-0.009^\circ$C).
+
+The same separation appears across label counts
+(Fig.~\ref{fig:physical_observable}c), where each curve is a paired change from
+the fine-tuned Tm-only model. At $n=20$, matched MD was worse than Tm-only by
+$+0.47^\circ$C (90\% CI, $+0.29$ to $+0.65^\circ$C). Its error decreased as $n$
+increased, but at $n=320$ its paired change was still $+0.03^\circ$C and its
+interval included zero. FEP changed from $+0.02^\circ$C at $n=20$ to
+$-0.15^\circ$C at $n=320$. These four tested settings show recovery and
+crossover; they do not establish a power law.
 
 FEP $\Delta\Delta G$ and Tm are different measurements. $\Delta\Delta G$ gives
 the change in folding free energy caused by a mutation, whereas Tm is the
@@ -168,16 +174,17 @@ strength.
 \centering
 \includegraphics[width=\textwidth]{fig_outline03_physical_observable}
 \caption{FEP is the only computed label that improves both encoder settings.
-(a) Paired $\Delta$MAE from the selected Tm-only model for every tuned label.
-Green denotes lower error and orange higher error. An asterisk marks a 90\%
-paired bootstrap confidence interval that excludes zero.
-(b) Paired comparisons of FEP and matched MD with Tm-only, and direct
-FEP-minus-MD comparisons, in the frozen and hot settings. Values left of zero
-favor the first-named condition.
-(c) Hot-encoder MAE as FEP or matched-MD labels increase. FEP becomes better
-than Tm-only, whereas matched MD recovers from its low-count loss only to the
-baseline. Here $n$ is the number sampled from each structure table. Bars are
-90\% bootstrap confidence intervals over the 396 test proteins.}
+(a) Horizontal bars show the paired MAE change from the corresponding Tm-only
+model for every tuned label. Negative values mean lower Tm error. Solid and
+hatched bars denote frozen and fine-tuned encoders, respectively; whiskers are
+90\% paired bootstrap intervals.
+(b) Direct FEP-minus-MD comparison. Zero means equal held-out Tm MAE, negative
+values mean lower error for FEP, and positive values mean lower error for MD
+native-contact $Q$. The asterisk marks an interval that excludes zero.
+(c) Paired MAE change from the fine-tuned Tm-only model over four tested label
+counts. FEP moves below zero, whereas matched MD approaches zero from higher
+error. Here $n$ is the number sampled from each structure table. Whiskers are
+90\% paired bootstrap intervals over the 396 test proteins.}
 \label{fig:physical_observable}
 \end{figure*}
 

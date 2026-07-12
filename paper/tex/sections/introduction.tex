@@ -3,9 +3,9 @@
 \section{Introduction}
 
 Machine-learning models for molecular design need measured examples, but many
-experiments are slow or expensive. One way to increase the training data is to
-calculate related properties with quantum chemistry, molecular simulation, or
-other physical models. This approach is often called simulation-to-real
+experiments are slow or expensive. Properties calculated with quantum chemistry,
+molecular simulation, or other physical models can be used as additional
+training signals. This approach is often called simulation-to-real
 (Sim2Real) learning. It has been used in materials science to combine large
 computed data sets with smaller experimental data sets
 \citep{Yamada2019Predicting,Aoki2023Multitask,Minami2025Scaling}. In some cases,
@@ -22,7 +22,7 @@ change in folding free energy caused by a sequence change. Rosetta and learned
 stability models provide scores on their own scales, while molecular dynamics
 (MD) can provide structural measurements such as the fraction of native contacts
 that remain during a trajectory. All of these labels concern protein stability,
-but none is a Tm measurement. Adding more of the wrong label may therefore leave
+but none is a Tm measurement. A poorly matched computed label may therefore leave
 Tm prediction unchanged or make it worse.
 
 We study this question in nanobodies, single-domain VHH antibodies used as small

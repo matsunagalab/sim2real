@@ -33,11 +33,10 @@ references. Supplementary Materials are submitted as a separate PDF.
 
 ### Preferred title
 
-**Simulation design and physical observable affect the transfer of molecular simulation to nanobody
-thermal-stability prediction**
+**Transfer learning with simulated variants and calculated quantities for
+nanobody melting-temperature prediction**
 
-The current title in `tex/main.tex` is more generic and should be reconciled with this preferred title
-before submission.
+This title is used in `tex/main.tex` and `tex/supplementary_main.tex`.
 
 ### One-sentence claim
 
@@ -47,9 +46,9 @@ whether the benefit remains when the protein-language-model encoder is fine-tune
 
 ### Plain-language take-home message
 
-Generating more simulation labels is not enough. The simulated variants must probe a relevant
-sequence neighborhood, and the simulated quantity must carry information that transfers to the
-experimental phenotype.
+The number of simulation labels alone does not determine their value. The simulated variants must
+probe a relevant sequence neighborhood, and the simulated quantity must carry information that
+transfers to the experimental phenotype.
 
 ## 3. Main Story
 
@@ -69,8 +68,8 @@ The answer has **two axes**.
 
 The same type of MD native-contact observable has different value under two sequence designs:
 
-- In a diverse screen of unrelated nanobody sequences, the label has only a small frozen-encoder
-  benefit ($\Delta$MAE $-0.049$ °C) and is harmful with a hot encoder ($+0.117$ °C). That panel spans
+- In a heterogeneous panel of nanobody structures, the label has only a small frozen-encoder
+  benefit ($\Delta$MAE $-0.049$ °C) and is harmful with a hot encoder ($+0.116$ °C). That panel spans
   58–461 residues and has a nonzero label–length correlation (Pearson $r=+0.13$), identifying
   heterogeneity and sequence length as potential shortcuts rather than proving one causal mechanism.
 - In mutation scans on the same 1MEL and 4IDL scaffolds used for FEP, sequence length is fixed and the
@@ -160,8 +159,8 @@ results, not as independently measured mechanisms.
 
 ### Reader path
 
-1. Experimental Tm labels are scarce.
-2. Simulations can produce many related labels, but those labels are not Tm.
+1. The present low-data task uses 57 experimental Tm labels for training.
+2. Computed stability values can be used as additional training signals, but those values are not Tm.
 3. Multi-task learning provides a direct way to test transfer while model selection uses only Tm data.
 4. Simulation design controls how strongly an MD label transfers.
 5. Physical observable determines whether transfer survives encoder fine-tuning.
@@ -238,8 +237,8 @@ gain (approximately 0.20 °C), without crowding it with the full comparator tabl
 Paragraph logic:
 
 1. Experimental property data constrain protein engineering.
-2. Sim2Real learning uses abundant computational data to support scarce experimental targets, but a
-   domain gap means more simulation is not automatically useful.
+2. Sim2Real learning uses computed properties as auxiliary signals for experimental targets, but a
+   domain gap means that the calculated data may not improve the measured task.
 3. Protein stability is a particularly sharp case because Tm, mutation $\Delta\Delta G$, structural
    scores, and trajectory summaries have related but non-identical meanings.
 4. Nanobodies provide a useful low-data testbed; ESM2 supplies a shared sequence representation.
@@ -418,14 +417,17 @@ the scalar heads as 32-unit layers. Regenerate it; do not merely relabel the exi
 
 ### Fig. 2 — Simulation-design axis
 
-**Message:** a matched local mutation scan substantially strengthens frozen-encoder native-contact
-transfer relative to a heterogeneous screen, but simulation design alone does not create hot transfer.
+**Message:** the matched local mutation scan shows a larger frozen-encoder native-contact gain than
+the heterogeneous structure panel, but it does not improve the fine-tuned encoder.
 
-- **(a)** Design schematic: variable-length heterogeneous screen versus fixed-scaffold mutation scan,
-  with the same native-contact observable computed in both.
-- **(b)** Paired $\Delta$MAE versus each series' own Tm-only reference for both designs × both encoder
-  regimes. Diverse: $-0.049/+0.117$ °C; matched: $-0.195/+0.029$ °C for frozen/hot, respectively.
-- **(c)** Frozen FEP and matched-MD label-count curves with the tuned Tm-only baseline.
+- **(a)** Full-width acquisition-plan schematic: a heterogeneous structure panel versus fixed-
+  scaffold mutation scans, both followed by 400 K MD and labels from the same native-contact $Q$
+  family. The complete extraction details are not identical.
+- **(b)** Four directly labelled paired effects versus each series' own Tm-only reference. Diverse:
+  $-0.049/+0.116$ °C; matched: $-0.195/+0.029$ °C for frozen/fine-tuned, respectively. Zero means
+  equal MAE to the series-specific Tm-only model.
+- **(c)** Frozen FEP and matched-MD paired $\Delta$MAE over the four tested label counts. Zero is the
+  tuned frozen Tm-only model; show paired 90% bootstrap intervals rather than single-model intervals.
 
 The caption must state that the diverse and matched results come from independently tuned series and
 are expressed relative to their own Tm-only references. The length scatter moves to Supplementary
@@ -436,11 +438,14 @@ Material; length is a plausible design shortcut, not a proven explanation by its
 **Message:** FEP transfers in both encoder regimes; native contacts transfer only with a frozen
 encoder.
 
-- **(a)** Source × encoder-regime map of paired $\Delta$MAE for all tuned computational labels.
-- **(b)** Focused forest plot for FEP and matched MD, including their direct FEP-minus-MD contrast in
-  each regime.
-- **(c)** Hot-regime label-count curves: FEP improves with more labels, whereas matched MD recovers
-  from low-count harm only to the Tm-only baseline.
+- **(a)** Full-width horizontal bars and paired 90% intervals for all tuned computational labels.
+  Solid and hatched bars distinguish frozen and fine-tuned encoders; zero means equal MAE to the
+  corresponding Tm-only model.
+- **(b)** Direct FEP-minus-matched-MD forest plot only. Zero means equal MAE, negative values favor
+  FEP. Frozen: $-0.026$ °C with an interval crossing zero; fine-tuned: $-0.182$ °C with an interval
+  below zero.
+- **(c)** Fine-tuned paired $\Delta$MAE over the four tested label counts. FEP moves below the Tm-only
+  zero line, whereas matched MD approaches it from higher error.
 
 Keep the main figure evidence-first. The old encoder-reshaping schematic moves out of the main figure;
 mechanistic interpretation belongs in the Discussion and graphical abstract with qualified wording.

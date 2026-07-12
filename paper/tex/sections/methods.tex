@@ -38,7 +38,7 @@ step.
 We tested seven sources of computed labels: FEP mutation free energies, matched
 MD native-contact values, Rosetta mutation scores, ThermoMPNN predictions,
 Rosetta scores for random variants, Rosetta scores for ESM2-proposed variants,
-and MD native-contact values for a diverse nanobody panel. These values were
+and MD native-contact values for a heterogeneous structure panel. These values were
 treated as related measurements, not as estimates of Tm.
 
 FEP, Rosetta, and ThermoMPNN used two single-mutation tables based on the 1MEL
@@ -46,8 +46,7 @@ and 4IDL structures. Each contained 435 and 409 rows, respectively. The matched
 MD tables used the same two structures and mutation scans and contained 431
 1MEL rows and 406 4IDL rows that reached the common analysis time. The random
 and ESM2-proposed variant sets each contained 1000 two-mutation sequences per
-structure. The diverse MD table contained 1143 single-domain antibody
-sequences.
+structure. The heterogeneous MD table contained 1143 structure-derived rows.
 
 For all two-table sources, the notation $n$ means a cap of $n$ rows from
 \emph{each} structure table, not $n$ rows in total. Thus, $n=320$ gives at most
