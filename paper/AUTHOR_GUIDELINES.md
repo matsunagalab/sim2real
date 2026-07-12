@@ -11,7 +11,7 @@
   - Journal page: `https://www.biophys.jp/biophysics_and_physicobiology.html`
   - Instructions for Authors: `https://www.biophys.jp/biophysics_and_physicobiology03.html`
   - Quick Guide: `https://www.biophys.jp/biophysics_and_physicobiology_quickguide.html`
-- Last checked: 2026-07-04.
+- Last checked: 2026-07-13.
 - NOTE: Rules below are transcribed from the official Instructions for Authors. Do NOT invent
   rules; if a detail is not covered here, re-check the source before asserting it.
 
@@ -38,22 +38,24 @@ Official required sequence:
 
 ### SECTION_ORDER (file-name tokens → tex/sections/<token>.tex)
 
-SECTION_ORDER: introduction -> methods -> results -> discussion -> conclusion
+SECTION_ORDER: introduction -> methods -> results -> conclusion
 
 Front matter (handled in `tex/main.tex`, not in SECTION_ORDER): title, authors, affiliations,
-**abstract**, **Significance statement (<100 words)**, **keywords (≤5)**, **graphical abstract**.
+**abstract**, **Significance statement (<100 words)**, and **keywords (≤5)**. The graphical
+abstract and its caption are separate submission files.
 
 Back matter after `conclusion` (in `tex/main.tex`, after the SECTION_ORDER block, before References):
 **declarations** = Conflict of interest → Author contributions → Data availability → Acknowledgements.
-`supplementary` is placed after References and is not part of SECTION_ORDER.
+Supplementary Materials are compiled as a separate PDF from `tex/supplementary_main.tex`; they
+are not appended to the main manuscript and are not part of SECTION_ORDER.
 
 ### Mapping
 
 - `introduction` → Introduction.
 - `methods` → Materials and Methods (data, transfer-learning model, simulation labels, model
   selection, statistics; third-party-reproducible detail).
-- `results` → Results (tied to figures).
-- `discussion` → Discussion (interpretation, comparison to prior work, limitations).
+- `results` → Results and discussion (results tied to figures, followed by interpretation,
+  comparison to prior work, and limitations in the same section).
 - `conclusion` → **Conclusion (separate section, required by BPPB).** A compact closing (not a
   summary rehash): the main advance and its take-home significance.
 - `declarations` → Conflict of interest, Author contributions (CRediT-style), Data availability,
@@ -110,27 +112,28 @@ Back matter after `conclusion` (in `tex/main.tex`, after the SECTION_ORDER block
 - **Author contributions** — CRediT-style.
 - **Data availability** — where processed data / code / trajectories are (Zenodo DOI placeholder;
   raw MD/FEP too large → deposited/available as noted).
-- **Acknowledgements** — funding and thanks. **AI-use disclosure** goes here (AI tools cannot be
-  authors; disclose AI assistance in writing/analysis/figures).
+- **Acknowledgements** — funding and thanks.
 
 ## AI Policy
 
-AI-assisted tools cannot be authors. Disclose any AI assistance (writing, analysis, figure prep) in
-the Acknowledgements/declaration. Do not cite AI tools as scholarly sources.
+AI-assisted tools cannot be authors. BPPB does not require a formal declaration when an LLM is used
+only to search prior studies or revise English grammar. A substantial contribution to manuscript
+development requires the tool name, version, and a reproducible description in Acknowledgements.
+AI-generated article figures are prohibited.
 
 ## Open Access / License
 
 BPPB is open access on J-STAGE (Creative Commons). Confirm the license selection at submission.
 
-## Immediate To-Do (BPPB conversion)
+## BPPB conversion status
 
-- [ ] Add a **Conclusion** section (`tex/sections/conclusion.tex`) and wire it into `SECTION_ORDER`.
-- [ ] Add **Significance statement (<100 words)** and **keywords (≤5)** to front matter.
-- [ ] Create the **graphical abstract** (300 dpi) — depicts the two-axis result.
-- [ ] Split declarations into **Conflict of interest / Author contributions / Data availability /
-      Acknowledgements** in BPPB order (`tex/sections/declarations.tex`).
-- [ ] Ensure the bibliography style is **numeric** (`[n]`), citations `[1,3,5-8]` before punctuation.
-- [ ] Swap to the official **BPPB LaTeX template** for final production (currently HenriquesLab class);
-      keep content in `tex/sections/*` so the swap is mechanical.
-- [ ] Update `tex/main.tex` header comments (currently say "CSBJ") and `\leadauthor`.
+- [x] Add a **Conclusion** section (`tex/sections/conclusion.tex`) and wire it into the manuscript.
+- [x] Add **Significance statement (<100 words)** and **keywords (≤5)** to front matter.
+- [x] Create the **graphical abstract** (300 dpi) and a separate caption (<100 words).
+- [x] Add **Conflict of interest / Author contributions / Data availability / Acknowledgements** in
+      BPPB order (`tex/sections/acknowledgments.tex`).
+- [x] Use the official numeric `bppb.bst` bibliography style.
+- [x] Replace the former HenriquesLab class with the official **BPPB LaTeX template** dated
+      8 May 2025 (`bppb.cls`, `bppb.bst`, and `bppb-logo.pdf`).
+- [x] Compile Supplementary Materials as a separate PDF.
 - [ ] Cover letter reframed for BPPB (biophysics framing; no prior/dual submission; author ORCIDs).

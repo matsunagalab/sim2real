@@ -1,0 +1,48 @@
+% BPPB Supplementary Materials
+% Compile and submit this file separately from the main manuscript.
+
+\documentclass[fleqn]{bppb}
+
+\usepackage{amsmath}
+\usepackage[defaultsups]{newtxtext}
+\usepackage[varg]{newtxmath}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage[pdfencoding=auto]{hyperref}
+\hypersetup{
+  setpagesize=false,
+  colorlinks=false,
+  pdfborderstyle={/S/U/W 1},
+  urlcolor=blue,
+  urlbordercolor=blue,
+  citecolor=black,
+  citebordercolor=white,
+  linkcolor=black,
+  linkbordercolor=white,
+}
+\usepackage{cite}
+\let\citep\cite
+
+\graphicspath{{figures/}}
+
+\begin{document}
+\pagestyle{plain}
+
+\begin{center}
+  {\Large\bfseries Supplementary Materials}\par
+  \vspace{1em}
+  {\large Simulation-informed transfer learning improves low-data nanobody
+  thermal stability prediction}\par
+  \vspace{0.5em}
+  Taihei Murakami, Kentaro Sasaki, Soichiro Oda, Kazuma Okada, and
+  Yasuhiro Matsunaga
+\end{center}
+
+\input{sections/supplementary}
+
+\bibliographystyle{bppb}
+\bibliography{refs}
+
+\end{document}

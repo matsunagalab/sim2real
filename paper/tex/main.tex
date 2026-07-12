@@ -1,67 +1,83 @@
-% BPPB submission draft
-% Target journal: Biophysics and Physicobiology (BPPB), Biophysical Society of Japan
-% Article type: Regular Article
-% Local template base: HenriquesLab bioRxiv LaTeX class
-% NOTE: swap to the official BPPB LaTeX template for final production (see AUTHOR_GUIDELINES.md).
+% BPPB Regular Article manuscript
+% Official template source:
+% https://www.biophys.jp/dl/biophysics_and_physicobiology/BPPB_LaTeX_Template_8may2025.zip
 
-\documentclass[times, twoside]{zHenriquesLab-StyleBioRxiv}
+\documentclass[fleqn]{bppb}
 
+\usepackage{amsmath}
+\usepackage[defaultsups]{newtxtext}
+\usepackage[varg]{newtxmath}
+\usepackage{bm}
+\usepackage{graphicx}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,fit,backgrounds,shapes.geometric,calc}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage[pdfencoding=auto]{hyperref}
+\hypersetup{
+  setpagesize=false,
+  colorlinks=false,
+  pdfborderstyle={/S/U/W 1},
+  urlcolor=blue,
+  urlbordercolor=blue,
+  citecolor=black,
+  citebordercolor=white,
+  linkcolor=black,
+  linkbordercolor=white,
+}
+\usepackage{cite}
 
-% ===== BPPB DRAFT SETTINGS =====
+% The manuscript sections use natbib's parenthetical command name. BPPB uses
+% numeric citations through cite.sty, so map that name to the official command.
+\let\citep\cite
+
 \graphicspath{{figures/}}
-
-% Restore first-line paragraph indentation (class sets \parindent=0pt)
-\setlength{\parindent}{1em}
-
-% Lead author for running footer
-\leadauthor{Murakami}
 
 \begin{document}
 
-% ===== TITLE =====
-\title{Simulation-informed transfer learning improves low-data nanobody thermal stability prediction}
-\shorttitle{Simulation-informed Tm prediction}
+\bppbcategory{Regular Articles}
+\title[Simulation-informed Tm prediction]
+      {Simulation-informed transfer learning improves low-data nanobody thermal stability prediction}
 
-% ===== AUTHORS =====
-% Use letters for affiliations, numbers for equal authorship, \Letter for corresponding
-\author[2]{Taihei Murakami\textsuperscript{\textdagger}}
-\author[2]{Kentaro Sasaki\textsuperscript{\textdagger}}
-\author[2]{Soichiro Oda}
-\author[2]{Kazuma Okada}
-\author[1,2]{Yasuhiro Matsunaga\textsuperscript{*}\thanks{ORCID: \href{https://orcid.org/0000-0003-2872-3908}{0000-0003-2872-3908}}}
+% bppb.cls normally numbers affiliations by their first appearance in the
+% author list. Fix the journal-facing order requested by the authors instead.
+\makeatletter
+\@alcnt=3
+\expandafter\def\csname al@RCCS\endcsname{1}
+\expandafter\def\csname al@SU\endcsname{2}
+\expandafter\def\csname al@EME\endcsname{3}
+\makeatother
 
-\affil[1]{RIKEN Center for Computational Science, Kobe, Japan}
-\affil[2]{Saitama University, Saitama, Japan}
+\authorlist{%
+  \authorentry{Taihei Murakami\Note}{SU,EME}
+  \authorentry{Kentaro Sasaki\Note}{SU}
+  \authorentry{Soichiro Oda}{SU}
+  \authorentry{Kazuma Okada}{SU}
+  \Cauthorentry{Yasuhiro Matsunaga}{RCCS,SU}
+    {https://orcid.org/0000-0003-2872-3908}
+    {ymatsunaga@riken.jp}
+}
+\Caffiliate[RCCS]
+  {RIKEN Center for Computational Science, Kobe, Hyogo 650--0047, Japan}
+  {RIKEN Center for Computational Science, Kobe, Hyogo 650--0047, Japan}
+\affiliate[SU]
+  {Saitama University, Saitama 338--8570, Japan}
+\affiliate[EME]
+  {Epsilon Molecular Engineering, Inc., Saitama 338--8570, Japan}
+\bppbnote{These authors contributed equally.}
 
+% Receipt, acceptance, online-release, DOI, and editor fields are assigned by BPPB.
 \maketitle
-\begin{center}
-\footnotesize \textsuperscript{\textdagger}These authors contributed equally to this work.
-\end{center}
 
-% ===== BPPB MAIN TEXT =====
-% SECTION_ORDER: introduction -> methods -> combined results and discussion -> conclusion
-% Front matter (abstract, significance, keywords) precedes; declarations follow before References.
 \input{sections/abstract}
 \input{sections/introduction}
 \input{sections/methods}
 \input{sections/results}
 \input{sections/conclusion}
-% Declarations in BPPB order (Conflict of interest, Author contributions,
-% Data availability, Acknowledgements); AI-use disclosure inside Acknowledgements.
 \input{sections/acknowledgments}
-% ===== END BPPB MAIN TEXT =====
 
-% ===== REFERENCES =====
-\section*{References}
+\bibliographystyle{bppb}
 \bibliography{refs}
-
-% ===== SUPPLEMENTARY MATERIALS =====
-%TC:ignore
-\onecolumn
-\clearpage
-\input{sections/supplementary}
-%TC:endignore
 
 \end{document}

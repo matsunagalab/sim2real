@@ -1,6 +1,5 @@
 % abstract.tex
 
-%TC:break Abstract
 \begin{abstract}
 Experimental measurements of nanobody melting temperature (Tm) are scarce, which
 limits machine-learning models of thermal stability. Simulations can provide more
@@ -21,19 +20,13 @@ scores gave little or no improvement. These results show that simulation data fo
 experimental prediction should be built from carefully chosen variants and from
 quantities that are closely related to the experimental property.
 \end{abstract}
-%TC:break main
 
 \begin{keywords}
-nanobody thermostability | melting-temperature prediction | multi-task transfer learning | protein language model | molecular simulation labels
+nanobody thermostability, melting-temperature prediction, multi-task transfer
+learning, protein language model, molecular simulation labels
 \end{keywords}
 
-\begin{corrauthor}
-Yasuhiro Matsunaga, ymatsunaga\at riken.jp
-\end{corrauthor}
-
-%TC:ignore
-\vspace{0.5em}
-\noindent\textbf{Significance}\\
+\begin{significance}
 Simulations can provide more protein-stability labels than experiments, but those
 labels do not always improve prediction of an experimental property. For nanobody
 Tm prediction, two choices mattered: which variants were simulated and which
@@ -42,16 +35,4 @@ local mutation scans than for a mixed set of sequences. Free-energy labels helpe
 both frozen and fine-tuned sequence models, whereas native-contact labels helped
 only the frozen model. More simulation is therefore not enough; the variants and
 the calculated quantity must be chosen carefully.
-%TC:endignore
-
-%TC:ignore
-\begin{figure*}[b]
-\centering
-\includegraphics[width=0.92\textwidth]{graphical_abstract}
-\caption*{\textbf{Graphical abstract.} Two choices affect whether simulation
-labels improve low-data nanobody Tm prediction: which variants are simulated and
-which quantity is calculated. Matched local mutation scans make MD native-contact
-labels more useful. Free-energy labels help both frozen and fine-tuned encoders,
-whereas native-contact labels help only a frozen encoder.}
-\end{figure*}
-%TC:endignore
+\end{significance}

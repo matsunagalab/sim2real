@@ -1,6 +1,6 @@
 % introduction.tex
 
-\section*{Introduction}
+\section{Introduction}
 
 Machine-learning models for molecular design need measured examples, but many
 experiments are slow or expensive. One way to increase the training data is to
@@ -71,7 +71,7 @@ on the same held-out Tm test proteins using paired errors. In this paper,
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.66\textwidth]{figure_1_concept_protocol_v2}
-\caption{\textbf{Multi-task model used to test computed stability labels.}
+\caption{Multi-task model used to test computed stability labels.
 Experimental sequences and sequences with computed labels pass through the same
 ESM2 model and shared multilayer perceptron. Separate scalar heads predict Tm and
 the computed label. The ESM2 model is either kept frozen or fine-tuned. Models are

@@ -14,18 +14,20 @@ the paper as it is now, not preserve superseded drafts. Numerical claims must be
 - **Target system:** low-data nanobody melting-temperature (Tm) prediction.
 - **Experimental split:** 57 training / 114 validation / 396 held-out test sequences.
 - **Main figures:** three, plus one graphical abstract.
-- **Current manuscript:** approximately 22 pages; BPPB section order is already wired into `tex/main.tex`.
+- **Current manuscript:** 12 pages in the official BPPB template; the BPPB section order is wired
+  into `tex/main.tex`.
 - **Production status:** scientific story and main figures are near-final; supplementary figures,
-  Fig. 1, terminology, cover letter, and final journal-template conversion remain.
+  Fig. 1, terminology, and the cover letter remain.
 
 ### Required section order
 
-`SECTION_ORDER: introduction -> methods -> results -> discussion -> conclusion`
+`SECTION_ORDER: introduction -> methods -> results-and-discussion -> conclusion`
 
-Front matter: title, authors, abstract, keywords, significance statement, graphical abstract.
+Front matter: title, authors, abstract, keywords, and significance statement. The graphical abstract
+and its caption are separate submission files.
 
-Back matter: conflict of interest, author contributions, data availability, acknowledgements,
-references. Supplementary material follows the references.
+Back matter: conflict of interest, author contributions, data availability, acknowledgements, and
+references. Supplementary Materials are submitted as a separate PDF.
 
 ## 2. Title and One-Sentence Claim
 
@@ -540,7 +542,7 @@ behavior and the recovery/crossover pattern.
 
 ### Authors
 
-1. Taihei Murakami — Saitama University; equal contribution.
+1. Taihei Murakami — Saitama University and Epsilon Molecular Engineering, Inc.; equal contribution.
 2. Kentaro Sasaki — Saitama University; equal contribution.
 3. Soichiro Oda — Saitama University.
 4. Kazuma Okada — Saitama University.
@@ -555,7 +557,7 @@ Yasuhiro Matsunaga ORCID: `0000-0003-2872-3908`
 
 - Exact CRediT roles for Soichiro Oda and Kazuma Okada.
 - Final data/archive DOI and raw-trajectory availability language.
-- Official BPPB template and final license choice.
+- Final license choice.
 - Final title.
 - Suggested reviewers and any author ORCIDs required by the submission system.
 
@@ -569,8 +571,8 @@ Yasuhiro Matsunaga ORCID: `0000-0003-2872-3908`
 5. **Perform a claim audit:** every MAE, ΔMAE, CI, label count, and sample size against raw JSON/CSV.
 6. **Revise the cover letter** from the old CSBJ/FEP-only story to BPPB and the two-axis result.
 7. **Refresh repository-facing documentation** that still reports the original split or legacy best run.
-8. **Convert to the official BPPB template** and run final format/citation/figure-resolution checks.
-9. **Confirm declarations and archive identifiers.**
+8. **Run final format/citation/figure-resolution checks** in the official BPPB template.
+9. **Confirm archive identifiers.**
 
 Do not rerun GPU training unless a missing comparison is identified and explicitly approved.
 

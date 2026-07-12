@@ -1,8 +1,8 @@
 % methods.tex
 
-\section*{Materials and Methods}
+\section{Materials and methods}
 
-\subsection*{Study design}
+\subsection{Study design}
 
 We asked whether computed protein-stability labels could improve nanobody
 melting-temperature (Tm) prediction when only a small experimental training set
@@ -15,7 +15,7 @@ All choices were made with the experimental Tm validation set. The test set was
 used only after the model form and training settings had been fixed. Errors on
 the computed labels were not used for checkpoint or hyperparameter selection.
 
-\subsection*{Experimental Tm data}
+\subsection{Experimental Tm data}
 
 We used the thermo-seq task from NbBench, a public nanobody benchmark
 \citep{Zhang2025NbBench}. We reassigned its three published partitions before
@@ -33,7 +33,7 @@ were returned to degrees Celsius before validation and test errors were
 calculated. Validation and test Tm values therefore did not affect the scaling
 step.
 
-\subsection*{Computed-label tables and sampling}
+\subsection{Computed-label tables and sampling}
 
 We tested seven sources of computed labels: FEP mutation free energies, matched
 MD native-contact values, Rosetta mutation scores, ThermoMPNN predictions,
@@ -74,7 +74,7 @@ table contained 2 training, 4 validation, and 8 test sequences also present in
 NbBench. We retained these rows and report the overlap because it limits the
 interpretation of that comparison.
 
-\subsection*{FEP mutation free energies}
+\subsection{FEP mutation free energies}
 
 The FEP labels were mutation free-energy changes, $\Delta\Delta G$, for the
 1MEL and 4IDL mutation scans. Positive raw $\Delta\Delta G$ denotes a
@@ -98,7 +98,7 @@ energy was combined with a residue-specific unfolded-state reference to obtain
 $\Delta\Delta G$ relative to the wild type. The present learning pipeline starts
 from the processed CSV files and does not rerun the FEP calculations.
 
-\subsection*{MD native-contact labels}
+\subsection{MD native-contact labels}
 
 Both MD labels were based on the smooth native-contact fraction $Q$
 \citep{Best2013NativeContacts}. For a native contact with reference distance
@@ -150,7 +150,7 @@ and the same temperature, although their contact selection and averaging window
 were not identical. We therefore treat this as a comparison of complete
 simulation plans, rather than as a one-variable test of sequence choice alone.
 
-\subsection*{Rosetta, ThermoMPNN, and variant-selection comparisons}
+\subsection{Rosetta, ThermoMPNN, and variant-selection comparisons}
 
 Rosetta scores were calculated with the \texttt{ddg\_monomer} application and
 the \texttt{ref2015} score function
@@ -169,7 +169,7 @@ same 435 and 409 single-mutation sequences used by the structure-matched tables
 \citep{Dieckhaus2024ThermoMPNN}. The current loader reads the two processed
 ThermoMPNN tables, rather than the larger raw Colab outputs stored with them.
 
-\subsection*{Sequence model and regression heads}
+\subsection{Sequence model and regression heads}
 
 The main encoder was the 8M-parameter ESM2 model
 \texttt{facebook/esm2\_t6\_8M\_UR50D} \citep{Lin2023Evolutionary}. Sequences
@@ -196,7 +196,7 @@ setting, all ESM2 parameters could change. AdamW used a smaller learning rate
 for ESM2 than for the newly initialized layers. Selected controls used 35M- and
 650M-parameter ESM2 encoders.
 
-\subsection*{Loss and model selection}
+\subsection{Loss and model selection}
 
 Each row had one task identifier and contributed loss only through that task's
 output head. We used Huber loss with $\delta=1$ on the scaled labels. By default,
@@ -230,7 +230,7 @@ was then trained with five seeds for the final test result. Label-count curves
 used the same selected setting at $n=20$, 80, 160, and 320 per structure; they
 were not retuned at each point.
 
-\subsection*{Test evaluation and statistics}
+\subsection{Test evaluation and statistics}
 
 For each condition, the five models predicted all 396 test sequences. Their
 predictions were averaged in scaled space and then returned to degrees Celsius.
@@ -248,7 +248,7 @@ reference MAE for every sample. Negative values therefore favor the candidate.
 Main figures report the mean paired $\Delta$MAE and its 90\% confidence interval.
 We do not use a separate p-value threshold for the main claims.
 
-\subsection*{Software and saved outputs}
+\subsection{Software and saved outputs}
 
 The data loader, training code, model settings, and ensemble evaluation are in
 \texttt{prepare.py}, \texttt{train.py}, and the scripts distributed with the

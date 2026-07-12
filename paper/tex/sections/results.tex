@@ -1,8 +1,8 @@
 % results.tex
 
-\section*{Results and Discussion}
+\section{Results and discussion}
 
-\subsection*{Computed labels were judged only by experimental Tm}
+\subsection{Computed labels were judged only by experimental Tm}
 
 We first set up a common test for all computed labels
 (Fig.~\ref{fig:learning_framework}). Experimental Tm was the prediction target.
@@ -25,7 +25,7 @@ Against these two baselines, we asked two questions. First, does the set of
 sequences chosen for simulation affect transfer? Second, does the computed
 quantity affect whether the benefit remains when ESM2 is fine-tuned?
 
-\subsection*{Local mutation scans gave a stronger MD result}
+\subsection{Local mutation scans gave a stronger MD result}
 
 Figure~\ref{fig:data_design}a compares two choices made before running MD. The
 heterogeneous screen used unrelated single-domain antibody sequences of
@@ -85,7 +85,7 @@ only choice that matters.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline02_data_design}
-\caption{\textbf{Simulation design changes the value of an MD native-contact label.}
+\caption{Simulation design changes the value of an MD native-contact label.
 (a) A heterogeneous screen of variable-length sequences and local mutation
 scans on the fixed 1MEL and 4IDL structures use similar simulation time per
 sequence and produce labels from the Best--Hummer $Q$ family.
@@ -100,7 +100,7 @@ confidence intervals.}
 \label{fig:data_design}
 \end{figure*}
 
-\subsection*{Only FEP helped both frozen and hot models}
+\subsection{Only FEP helped both frozen and hot models}
 
 We next compared all computed labels after separate tuning
 (Fig.~\ref{fig:physical_observable}a). With a frozen encoder, FEP and matched MD
@@ -167,7 +167,7 @@ strength.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline03_physical_observable}
-\caption{\textbf{FEP is the only computed label that improves both encoder settings.}
+\caption{FEP is the only computed label that improves both encoder settings.
 (a) Paired $\Delta$MAE from the selected Tm-only model for every tuned label.
 Green denotes lower error and orange higher error. An asterisk marks a 90\%
 paired bootstrap confidence interval that excludes zero.
@@ -181,7 +181,7 @@ baseline. Here $n$ is the number sampled from each structure table. Bars are
 \label{fig:physical_observable}
 \end{figure*}
 
-\subsection*{Controls, scope, and next tests}
+\subsection{Controls, scope, and next tests}
 
 Several controls limit alternative explanations. Increasing ESM2 from 8M to
 35M or 650M parameters did not reproduce the 8M FEP result (Supplementary
