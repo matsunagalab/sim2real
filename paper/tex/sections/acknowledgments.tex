@@ -3,30 +3,24 @@
 % Conflict of interest -> Author contributions -> Data availability -> Acknowledgements -> References.
 
 \section*{Conflict of interest}
-Taihei Murakami is an employee of Epsilon Molecular Engineering, Inc. Yasuhiro
-Matsunaga is a scientific advisor of Epsilon Molecular Engineering, Inc. The other
-authors declare no competing interests.
+T.M. is an employee of Epsilon Molecular Engineering, Inc. Y.M. is a scientific
+advisor of Epsilon Molecular Engineering, Inc.
 
 \section*{Author contributions}
-Taihei Murakami and Kentaro Sasaki contributed equally to this work. Yasuhiro
-Matsunaga conceived and supervised the study, acquired funding, developed the
-analysis and training code, performed the analyses, interpreted the results,
-prepared the figures, and wrote the manuscript. Kentaro Sasaki performed the
-computational free-energy and structure-based calculations. Soichiro Oda and Kazuma
-Okada performed molecular-dynamics simulations and data curation. Taihei Murakami
-contributed to draft writing. All authors reviewed and approved the final
-manuscript.
-% TODO(confirm with user): exact CRediT roles for Soichiro Oda and Kazuma Okada.
+Y.M. conceived and designed the study. Y.M. and T.M. carried out the overall
+computational study and analyzed the data. S.O. and K.O. performed the FEP
+calculations. Y.M. and T.M. wrote the manuscript. All authors discussed the
+results, reviewed the manuscript, and approved the final version.
 
 \section*{Data availability}
-Processed data required to reproduce the main and supplementary figures are
-available on GitHub (see below) and will be deposited in Zenodo upon acceptance
-(DOI to be assigned). Raw simulation trajectories are large; solvent-stripped,
-frame-thinned trajectories sufficient to reproduce the published labels will be
-deposited in the same Zenodo record, and the full raw data are available upon
-request. Analysis, training, and figure-generation code is available on GitHub at
-\url{https://github.com/ymatsunaga/sim2real-nanobody-tm}; an archival release will
-be deposited in Zenodo upon acceptance.
+The source code for data processing, model training, analysis, and figure
+generation is available at
+\url{https://github.com/ymatsunaga/sim2real-nanobody-tm}. The processed data used
+in this study, together with reduced MD trajectories sufficient to reproduce the
+reported labels, will be available from Zenodo (DOI:
+\texttt{10.5281/zenodo.XXXXXXX}). Full raw simulation files are not included
+because of their size and are available from the corresponding author upon
+reasonable request.
 
 \section*{Acknowledgements}
 This work was supported by JSPS KAKENHI Grant 23H03412 and JST NBDC Grant
@@ -35,6 +29,9 @@ the Supercomputer Fugaku'' (Development and application of large-scale
 simulation-based inferences for biomolecules JPMXP1020230119). Computational
 resources were provided by the supercomputer Fugaku at the RIKEN Center for
 Computational Science under Project IDs hp230209, hp240215, and hp250233.
-AI-assisted tools were used to support language editing, code development, and
-figure preparation; the authors reviewed and take responsibility for all manuscript
-content, analyses, and conclusions.
+OpenAI Codex, based on GPT-5 (accessed July 2026), was used to assist with code
+development and checking, and with drafting and editing the manuscript. The
+authors reviewed all code and text and take full responsibility for the analyses,
+scientific statements, and final manuscript. Generative image models were not
+used. All manuscript figures were generated from numerical data by deterministic,
+author-reviewed scripts.

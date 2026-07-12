@@ -2,98 +2,90 @@
 
 \section*{Introduction}
 
-Machine learning can screen molecular designs before experimental testing, but
-its usefulness is limited by the labels available for training. In materials
-informatics, this bottleneck has motivated simulation-to-real (Sim2Real)
-learning, in which models are trained with large computational databases from
-first-principles calculations, quantum chemistry, or molecular dynamics, then
-adapted to smaller experimental data sets
-\citep{Yamada2019Predicting,Aoki2023Multitask,Minami2025Scaling}. In some
-polymer and inorganic-material settings, transfer error decreases as the
-computational database grows, providing a practical test of whether additional
-simulation is worth generating \citep{Minami2025Scaling}. That test is needed
-because simulation data are not automatically useful. Model assumptions, finite
-sampling, and domain gaps can separate a computed label from the experimental
-property it is meant to support.
+Machine-learning models for molecular design need measured examples, but many
+experiments are slow or expensive. One way to increase the training data is to
+calculate related properties with quantum chemistry, molecular simulation, or
+other physical models. This approach is often called simulation-to-real
+(Sim2Real) learning. It has been used in materials science to combine large
+computed data sets with smaller experimental data sets
+\citep{Yamada2019Predicting,Aoki2023Multitask,Minami2025Scaling}. In some cases,
+prediction improves as more computed data are added \citep{Minami2025Scaling}.
+This outcome is not guaranteed. A calculation may use an imperfect model, sample
+the wrong systems, or measure a property that is only weakly related to the
+experiment.
 
-Protein engineering has the same label bottleneck, but the relation between
-computational and experimental labels is often less direct. Experimental measurements are sparse, whereas
-simulations and structure-based calculations can label many designed or mutated
-sequences. Those computed labels, however, rarely measure the target phenotype
-itself. For thermal stability, the experimental target may be the melting
-temperature (Tm), the assay-dependent temperature at which folded and unfolded
-populations are balanced. The available computed quantity may instead be a
-mutation-level free-energy change ($\Delta\Delta G$), a structure-based stability
-score, or a molecular-dynamics trajectory summary. Such labels are physically
-related to stability, but they are not interchangeable with Tm. The central
-mismatch motivates a direct test of which computed quantities transfer to
-experimental Tm prediction.
+Protein stability makes this problem clear because several common labels have
+different physical meanings. Melting temperature (Tm) is the experimental
+temperature at which folded and unfolded populations are balanced under a given
+assay. A mutation free-energy change ($\Delta\Delta G$) instead describes the
+change in folding free energy caused by a sequence change. Rosetta and learned
+stability models provide scores on their own scales, while molecular dynamics
+(MD) can provide structural measurements such as the fraction of native contacts
+that remain during a trajectory. All of these labels concern protein stability,
+but none is a Tm measurement. Adding more of the wrong label may therefore leave
+Tm prediction unchanged or make it worse.
 
-We study this question for nanobodies, single-domain VHH antibodies that are
-small, modular, and useful as engineered binders
-\citep{Muyldermans2013Nanobodies,Alexander2024Discovery}. Their practical use in
-expression, storage, and formulation depends on thermal stability
-\citep{Kunz2018-qt,Mezzasalma2007-ci,Kumar2000-te}, but measuring or simulating
-that stability directly is costly
+We study this question in nanobodies, single-domain VHH antibodies used as small
+and modular binding proteins \citep{Muyldermans2013Nanobodies,Alexander2024Discovery}.
+Thermal stability affects their expression, storage, and formulation
+\citep{Kunz2018-qt,Mezzasalma2007-ci,Kumar2000-te}. Direct measurements and
+detailed simulations of stability remain costly
 \citep{Bekker2019Thermal,Higashida2021-lt,Mohseni2019-lx,Tomimoto2023-ww}.
-Protein language models (PLMs) such as ESM2 provide a natural starting point
-because they learn sequence representations from large protein corpora
-\citep{Rives2021Biological,Lin2023Evolutionary,Hayes2025-pd}, and several recent
-methods use such representations for Tm prediction
-\citep{Blaabjerg2023Rapid,Li2023DeepTM,Alvarez2024TEMPRO,Savojardo2024-tv,Ramon2025-oy,Mao2026-yf}.
-High-throughput stability assays are also changing the field. Tsuboyama et al.
-measured folding stability for roughly 776{,}000 natural and designed protein
-domains by cDNA-display proteolysis \citep{Tsuboyama2023MegaScale}. Yet those
-data do not remove the need for nanobody-specific target supervision. The
-mega-scale domains are 40 to 72 residues long, whereas VHH domains are longer, and
-models fine-tuned on such data transfer less well to 177 to 501-residue proteins
-than to small domains \citep{Chu2024EsmTherm}. For nanobody Tm prediction,
-target-specific data and target-centered validation remain essential
-\citep{ValdesTresanco2023NbThermo,Zhang2025NbBench,Schmirler2024FineTuning}.
+Protein language models such as ESM2 can learn useful sequence features from
+large protein databases \citep{Rives2021Biological,Lin2023Evolutionary,Hayes2025-pd},
+and several methods use these features to predict Tm
+\citep{Blaabjerg2023Rapid,Li2023DeepTM,Alvarez2024TEMPRO,
+Savojardo2024-tv,Ramon2025-oy,Mao2026-yf}. However, a sequence model does not
+remove the need for measured Tm values from the protein family of interest.
 
-Here, we test whether computed stability labels can supply useful supervision
-when experimental nanobody Tm labels are scarce. We treat Tm prediction as the
-target task and each computed label as a computational task that shares an ESM2-based
-sequence representation \citep{Lin2023Evolutionary}. The computational labels include
-mutation free energies from alchemical free-energy perturbation (FEP), Rosetta
-mutation scores, ThermoMPNN stability scores, Rosetta scores on variants
-proposed by ESM2 or sampled at random, and an MD-derived native-contact stability
-label computed either over the same mutation scans used for FEP or, as a control,
-over a diverse panel of nanobodies. To keep the comparison target-centered and
-fair across very different labels, every source is tuned independently and selected
-on experimental Tm validation data, and every final claim is evaluated on the same
-held-out experimental Tm test set with paired error statistics.
+Large protein-stability data sets are becoming available. For example,
+Tsuboyama et al. measured folding stability for about 776{,}000 natural and
+designed protein domains by cDNA-display proteolysis
+\citep{Tsuboyama2023MegaScale}. Those domains are 40--72 residues long and differ
+from VHH domains in both sequence and measurement type. Models trained on small
+domains also transfer less well to longer proteins \citep{Chu2024EsmTherm}.
+Nanobody-specific data and validation are therefore still needed
+\citep{ValdesTresanco2023NbThermo,Zhang2025NbBench,
+Schmirler2024FineTuning}.
+
+The open question is not simply whether computed labels can be added to a Tm
+model. It is which variants should be simulated and which quantity should be
+calculated. A mixed set of unrelated sequences may contain unwanted differences
+such as sequence length. A mutation scan on one or two fixed structures gives a
+more controlled set of sequence changes. Even with the same variants, a mutation
+free energy, a Rosetta score, and an MD native-contact value may differ in how
+well they relate to Tm. These choices are made before model training, so they
+should be tested as part of the simulation plan.
+
+Here, we compare several computed labels in the same low-data Tm task. The labels
+are mutation free energies from free-energy perturbation (FEP), Rosetta mutation
+scores, ThermoMPNN scores, Rosetta scores for ESM2-proposed or random variants,
+and MD native-contact values. For the MD label, we compare a mixed sequence set
+with local mutation scans on the same 1MEL and 4IDL structures used for FEP. Each
+computed label is trained as a second task that shares an ESM2 sequence model with
+Tm prediction (Fig.~\ref{fig:learning_framework}). We tune every label separately
+using only the experimental Tm validation set. We then compare the selected models
+on the same held-out Tm test proteins using paired errors. In this paper,
+``transfer'' means that adding a computed label lowers the held-out Tm error.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.66\textwidth]{figure_1_concept_protocol_v2}
-\caption{\textbf{Multi-task transfer-learning architecture for using simulation
-data in experimental Tm prediction.}
-Experimental sequence data (left) and computational sequence data (right) are
-encoded by a shared ESM2 protein language model into per-sequence embeddings.
-The embeddings pass through a shared multilayer perceptron and then split into
-two task-specific heads: a Tm head that predicts the experimental melting
-temperature, and a computational head that predicts the computational scores
-(mutation $\Delta\Delta G$ values or an MD-derived Q-value). Only the
-experimental Tm head defines the final objective, while the computational head lets the
-simulation-derived labels reshape the shared representation during training.
-Flame and snowflake icons mark trainable and frozen parameters, respectively;
-the ESM2 encoder is either fine-tuned (hot) or kept frozen depending on the
-configuration.}
+\caption{\textbf{Multi-task model used to test computed stability labels.}
+Experimental sequences and sequences with computed labels pass through the same
+ESM2 model and shared multilayer perceptron. Separate scalar heads predict Tm and
+the computed label. The ESM2 model is either kept frozen or fine-tuned. Models are
+selected using experimental Tm validation data, and the final comparison uses
+held-out Tm test data.}
 \label{fig:learning_framework}
 \end{figure*}
 
-The results are organized by two design axes. First, \emph{data design}: the same
-MD native-contact observable does not improve Tm when computed over a
-diverse-nanobody screen, but does when computed on the FEP-matched mutation scans,
-where it matches FEP with a frozen encoder --- so matching the auxiliary source's
-sequence design to the target, not the choice of dynamical quantity, is what lets
-an MD label transfer.
-Second, the \emph{physical observable}: the alchemical FEP free energy improves Tm
-whether the encoder is frozen or fine-tuned, whereas the native-contact label helps
-only a frozen encoder, so the physical content of the label sets how deeply it
-transfers. The other structure-based scores are weak or null under the same
-tuning. These results extend the Sim2Real argument to a protein-engineering setting
-in which the computational and experimental labels differ in physical meaning, and
-turn "run more simulation" into two concrete design choices --- matched data design
-and a transferable observable --- that decide whether computed data help.
+Two results stand out. First, the choice of simulated variants matters. The MD
+native-contact label gives a much larger improvement with a frozen encoder when
+it is calculated for local mutation scans on fixed structures than for a mixed
+set of sequences. Second, the calculated quantity matters. FEP labels improve Tm
+prediction with both frozen and fine-tuned encoders, whereas native-contact labels
+help only the frozen encoder. Rosetta and ThermoMPNN scores give little or no
+improvement after separate tuning. These results show that useful simulation data
+require two choices before calculation: a controlled set of sequence changes and
+a quantity that is closely related to the experimental property.

@@ -26,6 +26,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.lines import Line2D
 from matplotlib.patches import Circle, FancyArrowPatch, FancyBboxPatch
 
@@ -36,6 +37,8 @@ RESULTS = REPO / "results"
 # final_* staged-HPO runs). HOT = encoder unfrozen; FROZEN = encoder frozen.
 SUMMARY_JSON = RESULTS / "tuned_rep" / "hot_summary.json"
 FROZEN_SUMMARY_JSON = RESULTS / "tuned_rep" / "frozen_summary.json"
+DIVERSE_HOT_SUMMARY_JSON = RESULTS / "source_screen" / "final_source_screen_summary.json"
+DIVERSE_FROZEN_SUMMARY_JSON = RESULTS / "source_screen" / "final_frozen_core_summary.json"
 DATA_MD = REPO / "data" / "md"
 DATA_SRC = REPO / "data" / "source_labels"
 PLOT_DIR = REPO / "plot"
@@ -109,7 +112,7 @@ SIZE650_TM_JSON = RESULTS / "size650_tm_shared_drop005" / "scaling.json"
 SIZE650_FEP_JSON = RESULTS / "size650_ddg_fep_enc3e-5" / "scaling.json"
 
 # ---------------------------------------------------------------------------
-# Fig. 3 (data-design axis).
+# Legacy inputs retained for the simulation-design comparison and supplementary diagnostics.
 # ---------------------------------------------------------------------------
 # (a) Two groups on one held-out-Tm-MAE axis. The SAME MD native-contact
 #     observable is null as a diverse-nanobody screen (old hot series,
@@ -142,6 +145,13 @@ FIG3B_MATCHED_CSVS = [
 #     ΔMAE(n) vs the tuned frozen Tm-only baseline.
 FIG3C_MD_FROZEN = RESULTS / "final_mdq_frozen" / "scaling.json"
 FIG3C_TM_FROZEN = RESULTS / "final_tm_frozen" / "scaling.json"
+
+# Hot-regime label-count curves used in the evidence-first physical-observable figure.
+FIG3_HOT_TM_BASELINE = RESULTS / "final_tm_hot" / "scaling.json"
+FIG3_HOT_CURVES = [
+    ("FEP mutation free energy", RESULTS / "final_fep_hot" / "scaling.json", COL["fep"], "o"),
+    ("MD native-contact (matched scan)", RESULTS / "final_mdq_hot" / "scaling.json", COL["mdq"], "D"),
+]
 
 # ---------------------------------------------------------------------------
 # Fig. 4 (physical-observable axis / depth).
@@ -280,6 +290,55 @@ def encoder_delta_rows(sources: list) -> pd.DataFrame:
     return pd.DataFrame.from_records(records)
 
 
+def design_delta_rows() -> pd.DataFrame:
+    """Native-contact transfer by data design and encoder regime.
+
+    The diverse and matched designs were tuned in independent experimental
+    series, so every effect is expressed relative to that series' own Tm-only
+    reference. This avoids comparing their incompatible absolute MAE scales.
+    """
+    specs = [
+        ("heterogeneous screen", "frozen", DIVERSE_FROZEN_SUMMARY_JSON, "MD_Q_HPHIL_400K"),
+        ("heterogeneous screen", "hot", DIVERSE_HOT_SUMMARY_JSON, "MD_Q_HPHIL_400K"),
+        ("matched mutation scan", "frozen", FROZEN_SUMMARY_JSON, MD_CONTACT_Q_SOURCE),
+        ("matched mutation scan", "hot", SUMMARY_JSON, MD_CONTACT_Q_SOURCE),
+    ]
+    records = []
+    for design, encoder, path, source in specs:
+        comp = read_json(path)["paired_comparisons"][paired_key(source)]
+        records.append(
+            {
+                "design": design,
+                "encoder": encoder,
+                "delta_mae": float(comp["delta_mae"]),
+                "delta_ci_lo": float(comp["delta_ci_lo"]),
+                "delta_ci_hi": float(comp["delta_ci_hi"]),
+            }
+        )
+    return pd.DataFrame.from_records(records)
+
+
+def fep_minus_md_rows() -> pd.DataFrame:
+    """Direct paired FEP-minus-matched-MD contrast in each encoder regime."""
+    records = []
+    for encoder in ("frozen", "hot"):
+        fep = select_scaling_point(RESULTS / f"final_fep_{encoder}" / "scaling.json", "max_n")
+        md = select_scaling_point(RESULTS / f"final_mdq_{encoder}" / "scaling.json", "max_n")
+        delta, lo, hi = paired_delta_ci(
+            np.asarray(md["abs_errors"], dtype=float),
+            np.asarray(fep["abs_errors"], dtype=float),
+        )
+        records.append(
+            {
+                "encoder": encoder,
+                "delta_mae": delta,
+                "delta_ci_lo": lo,
+                "delta_ci_hi": hi,
+            }
+        )
+    return pd.DataFrame.from_records(records)
+
+
 def model_size_rows(rows: pd.DataFrame) -> pd.DataFrame:
     row_lookup = rows.set_index(rows["source"].astype(str))
     specs = [
@@ -377,7 +436,7 @@ def paired_delta_ci(a: np.ndarray, b: np.ndarray, n_boot: int = 10000) -> tuple[
     idx = rng.integers(0, n, size=(n_boot, n))
     delta = np.mean(b[idx], axis=1) - np.mean(a[idx], axis=1)
     lo, hi = np.percentile(delta, [5, 95])
-    return float(np.mean(delta)), float(lo), float(hi)
+    return float(np.mean(b) - np.mean(a)), float(lo), float(hi)
 
 
 def paired_key(source: str, base: str = "Tm_only") -> str:
@@ -880,70 +939,74 @@ def fig04d_schematic(ax) -> None:
 
 
 def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
-    """Data-design axis: diverse-vs-matched groups, the length confound, and the
-    FROZEN label-count sweep. Panels recomposed verbatim from the old fig03(a,b)
-    and fig02(a)."""
+    """Simulation-design axis: variant choice, transfer outcome, label count."""
     fig, axes = plt.subplots(
         1,
         3,
-        figsize=(10.6, 3.7),
+        figsize=(10.8, 3.55),
         constrained_layout=True,
-        gridspec_kw={"width_ratios": [1.25, 1.0, 1.0]},
+        gridspec_kw={"width_ratios": [1.08, 0.95, 1.05]},
     )
 
-    # (a) The SAME MD native-contact observable, two data designs. Each group is
-    #     anchored to its own Tm-only reference (different absolute MAE scales).
+    # (a) The decision happens before simulation: choose a heterogeneous survey
+    #     or a controlled local mutation set, then compute the same Q.
     ax = axes[0]
-    diverse = fig3a_group(FIG3A_DIVERSE)
-    matched = fig3a_group(FIG3A_MATCHED)
-    groups = [(diverse, [0, 1, 2]), (matched, [4, 5, 6])]
-    for grp, ys in groups:
-        entries = [
-            ("Tm labels only", grp["tm"], COL["baseline"], "s"),
-            ("FEP mutation\nfree energy", grp["fep"], COL["fep"], "o"),
-            (grp["md_label"], grp["md"], COL["mdq"], "D"),
-        ]
-        tm_x = grp["tm"][0]
-        ax.plot([tm_x, tm_x], [ys[0] - 0.45, ys[-1] + 0.45], color=COL["baseline"],
-                linestyle="--", linewidth=0.9, zorder=1)
-        for y, (lab, (mae, lo, hi), color, marker) in zip(ys, entries):
-            horizontal_interval(ax, y, mae, lo, hi, color, marker=marker)
-            ax.text(hi + 0.03, y, f"{mae:.2f}", va="center", fontsize=6.4)
-    yticks = [0, 1, 2, 4, 5, 6]
-    yticklabels = [
-        "Tm labels only", "FEP mutation\nfree energy", diverse["md_label"],
-        "Tm labels only", "FEP mutation\nfree energy", matched["md_label"],
-    ]
-    ax.set_yticks(yticks)
-    ax.set_yticklabels(yticklabels, fontsize=6.2)
-    ax.set_ylim(6.7, -0.7)
-    ax.axhline(3.0, color=COL["grid"], linewidth=0.9)
-    ax.text(5.78, 1.0, diverse["title"], rotation=90, va="center", ha="left",
-            fontsize=6.8, color=COL["mdq"], fontweight="bold")
-    ax.text(5.78, 5.0, matched["title"], rotation=90, va="center", ha="left",
-            fontsize=6.8, color=COL["mdq"], fontweight="bold")
-    ax.set_xlabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(5.75, 7.55)
-    polish(ax, "x")
+    hide_axes(ax)
+    box(ax, (0.27, 0.82), (0.46, 0.12), "choose variants before simulation",
+        fc=COL["soft_blue"], ec=COL["design"], weight="bold", fontsize=7.0)
+    arrow(ax, (0.40, 0.82), (0.24, 0.70), color=COL["design"])
+    arrow(ax, (0.60, 0.82), (0.76, 0.70), color=COL["design"])
+
+    box(ax, (0.03, 0.53), (0.39, 0.17), "heterogeneous survey\nmany unrelated sequences",
+        fc=COL["soft_red"], ec=COL["mdq"], weight="bold", fontsize=6.6)
+    box(ax, (0.58, 0.53), (0.39, 0.17), "local mutation scan\n1MEL + 4IDL scaffolds",
+        fc=COL["soft_green"], ec=COL["fep"], weight="bold", fontsize=6.6)
+    ax.text(0.225, 0.43, "variable length\n58–461 residues", ha="center", va="center",
+            fontsize=6.4, color=COL["mdq"])
+    ax.text(0.775, 0.43, "single substitutions\nconstant within scaffold", ha="center", va="center",
+            fontsize=6.4, color=COL["fep"])
+    arrow(ax, (0.225, 0.53), (0.225, 0.34), color=COL["mdq"])
+    arrow(ax, (0.775, 0.53), (0.775, 0.34), color=COL["fep"])
+    box(ax, (0.10, 0.18), (0.25, 0.14), "MD native-contact\nQ labels", fc="white",
+        ec=COL["mdq"], fontsize=6.4)
+    box(ax, (0.65, 0.18), (0.25, 0.14), "MD native-contact\nQ labels", fc="white",
+        ec=COL["mdq"], fontsize=6.4)
+    ax.text(0.50, 0.07, "same physical observable; different acquisition plan",
+            ha="center", va="center", fontsize=6.2, color=COL["gray"])
     panel_label(ax, "A")
 
-    # (b) The length confound: MD native-contact label value vs sequence length.
+    # (b) Transfer relative to each independently tuned series' own Tm-only
+    #     reference. Matching strengthens frozen transfer and removes the hot
+    #     penalty, but is not sufficient to make the hot effect beneficial.
     ax = axes[1]
-    (dlen, dval, r), matched_pts = fig3b_confound()
-    ax.scatter(dlen, dval, s=9, color=COL["mdq"], alpha=0.35, edgecolor="none",
-               label=f"diverse screen (n={len(dlen)})", zorder=2)
-    mcolors = {"1mel": COL["fep"], "4idl": COL["design"]}
-    for mlen, mval, tag in matched_pts:
-        ax.scatter(mlen, mval, s=9, color=mcolors.get(tag, COL["design"]), alpha=0.5,
-                   edgecolor="none", label=f"matched scan ({tag}, n={len(mlen)})", zorder=3)
-    ax.text(0.04, 0.10, f"diverse: Pearson $r$ = {r:+.2f}\n(length spread 58-461)",
-            transform=ax.transAxes, fontsize=6.4, color=COL["mdq"], va="bottom")
-    ax.text(0.62, 0.42, "matched:\nconstant length", transform=ax.transAxes,
-            fontsize=6.4, color=COL["design"], va="center", ha="center")
-    ax.set_xlabel("sequence length (residues)")
-    ax.set_ylabel("MD Q-value (fraction native contacts)")
-    ax.legend(frameon=False, loc="lower right", fontsize=5.8, handlelength=1.0, markerscale=1.4)
-    polish(ax, "both")
+    effects = design_delta_rows()
+    designs = ["heterogeneous screen", "matched mutation scan"]
+    markers = {"frozen": "s", "hot": "o"}
+    offsets = {"frozen": -0.12, "hot": 0.12}
+    colors = {"heterogeneous screen": COL["gray"], "matched mutation scan": COL["mdq"]}
+    ax.axvline(0, color=COL["baseline"], linestyle="--", linewidth=1.0, zorder=1)
+    for i, design in enumerate(designs):
+        subset = effects[effects["design"] == design].set_index("encoder")
+        for encoder in ("frozen", "hot"):
+            row = subset.loc[encoder]
+            y = i + offsets[encoder]
+            horizontal_interval(ax, y, row["delta_mae"], row["delta_ci_lo"], row["delta_ci_hi"],
+                                colors[design], marker=markers[encoder])
+            ax.text(row["delta_ci_hi"] + 0.012, y, f"{row['delta_mae']:+.2f}",
+                    va="center", fontsize=6.0, color=colors[design])
+    ax.set_yticks(range(len(designs)))
+    ax.set_yticklabels(["heterogeneous\nscreen", "matched\nmutation scan"], fontsize=6.6)
+    ax.set_ylim(1.55, -0.55)
+    ax.set_xlim(-0.27, 0.27)
+    ax.set_xlabel(r"paired $\Delta$MAE vs own Tm-only (deg C)")
+    ax.text(0.02, 0.02, "left = improves", transform=ax.transAxes, fontsize=6.0, color=COL["gray"])
+    ax.legend(handles=[
+        Line2D([0], [0], marker="s", color=COL["black"], linestyle="none", markersize=5,
+               label="frozen encoder"),
+        Line2D([0], [0], marker="o", color=COL["black"], linestyle="none", markersize=5,
+               label="hot encoder"),
+    ], frameon=False, loc="lower center", bbox_to_anchor=(0.50, 1.01), ncol=2, fontsize=6.2)
+    polish(ax, "x")
     panel_label(ax, "B")
 
     # (c) FROZEN-regime computational-label count sweeps: FEP and the FEP-matched
@@ -960,7 +1023,7 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_xscale("log")
     ax.set_xticks(x_ticks)
     ax.set_xticklabels([str(x) for x in x_ticks])
-    ax.set_xlabel("computational labels used")
+    ax.set_xlabel("labels sampled per scaffold table, n")
     ax.set_ylabel("held-out Tm test MAE (deg C)")
     ax.set_xlim(15, 400)
     ax.set_ylim(6.85, 7.45)
@@ -974,67 +1037,94 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
 
 
 def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
-    """Physical-observable axis / depth: frozen source hierarchy, paired ΔMAE
-    frozen-vs-hot, and the deep/shallow schematic. Panels recomposed verbatim
-    from the old fig02(b), fig04(b) and fig04d_schematic."""
-    fig, axd = plt.subplot_mosaic([["A", "B"], ["C", "C"]],
-                                  figsize=(7.6, 6.2), constrained_layout=True)
+    """Physical-observable axis: regime map, focused contrast, hot scaling."""
+    fig, axes = plt.subplots(1, 3, figsize=(10.8, 3.65), constrained_layout=True,
+                             gridspec_kw={"width_ratios": [0.92, 1.10, 1.08]})
     markers = {"frozen": "s", "hot": "o"}
     enc_handles = [
         Line2D([0], [0], marker="s", color=COL["black"], linestyle="none", markersize=5, label="frozen encoder"),
         Line2D([0], [0], marker="o", color=COL["black"], linestyle="none", markersize=5, label="hot encoder"),
     ]
-    y_off = {"frozen": -0.20, "hot": 0.20}
+    y_off = {"frozen": -0.15, "hot": 0.15}
 
-    # (a) Tuned source screen at the representative n=320 point (frozen encoder):
-    #     the full hierarchy of computational labels.
-    ax = axd["A"]
-    frozen = read_json(FROZEN_SUMMARY_JSON)
-    frozen_rows = {str(r["source"]): r for r in frozen["rows"]}
-    screen = source_screen_points(frozen_rows)
-    y = np.arange(len(SOURCE_ORDER)) * 1.0
-    for i, src in enumerate(SOURCE_ORDER):
-        mae, lo, hi = screen[src]
-        horizontal_interval(ax, y[i], mae, lo, hi, SOURCE_COLOR[src], marker="s" if src == "Tm_only" else "o")
-        ax.text(hi + 0.012, y[i], f"{mae:.2f}", va="center", fontsize=6.6)
-    tm_frozen = screen["Tm_only"][0]
-    ax.axvline(tm_frozen, color=COL["baseline"], linewidth=0.9, linestyle="--", zorder=1)
-    ax.set_yticks(y)
-    ax.set_yticklabels([SOURCE_LABEL[s] for s in SOURCE_ORDER], fontsize=6.4)
-    ax.set_ylim(y[-1] + 0.6, -0.6)
-    ax.set_xlabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(6.90, 7.45)
-    ax.text(0.02, 0.03, "frozen encoder", transform=ax.transAxes, fontsize=6.4, color=COL["gray"])
-    polish(ax, "x")
+    # (a) All tuned sources as a source x encoder-regime map.
+    ax = axes[0]
+    map_sources = ["FEP", MD_CONTACT_Q_SOURCE, "thermoMPNN", "rosetta", "rosetta_random", "rosetta_esm"]
+    deltas_all = encoder_delta_rows(map_sources)
+    matrix = np.array([
+        [float(deltas_all[(deltas_all["source"] == src) & (deltas_all["encoder"] == enc)]["delta_mae"].iloc[0])
+         for enc in ("frozen", "hot")]
+        for src in map_sources
+    ])
+    transfer_cmap = LinearSegmentedColormap.from_list(
+        "transfer", [COL["fep"], "#FFFFFF", COL["mdq"]]
+    )
+    im = ax.imshow(matrix, cmap=transfer_cmap, vmin=-0.45, vmax=0.45, aspect="auto")
+    for i, src in enumerate(map_sources):
+        for j, enc in enumerate(("frozen", "hot")):
+            row = deltas_all[(deltas_all["source"] == src) & (deltas_all["encoder"] == enc)].iloc[0]
+            star = "*" if row["delta_ci_hi"] < 0 or row["delta_ci_lo"] > 0 else ""
+            ax.text(j, i, f"{row['delta_mae']:+.2f}{star}", ha="center", va="center",
+                    fontsize=6.6, fontweight="bold" if star else "normal")
+    short_labels = ["FEP", "matched MD Q", "ThermoMPNN", "Rosetta",
+                    "random + Rosetta", "ESM2 + Rosetta"]
+    ax.set_xticks([0, 1], ["frozen", "hot"])
+    ax.set_yticks(np.arange(len(map_sources)), short_labels, fontsize=6.2)
+    ax.set_xlabel("encoder regime")
+    cbar = fig.colorbar(im, ax=ax, fraction=0.06, pad=0.04)
+    cbar.set_label(r"$\Delta$MAE vs Tm-only", fontsize=6.2)
+    cbar.ax.tick_params(labelsize=5.8)
+    ax.text(0.0, -0.15, "green = improves; orange = worsens; * 90% CI excludes 0",
+            transform=ax.transAxes, fontsize=5.7, color=COL["gray"])
     panel_label(ax, "A")
 
-    # (b) paired ΔMAE vs Tm-only per source x encoder regime, with 90% CI.
-    ax = axd["B"]
-    delta_sources = ["FEP", MD_CONTACT_Q_SOURCE, "rosetta", "thermoMPNN"]
-    deltas = encoder_delta_rows(delta_sources)
-    ypos = np.arange(len(delta_sources)) * 1.4
+    # (b) Focused FEP/MD forest plus their direct head-to-head contrast.
+    ax = axes[1]
+    deltas = encoder_delta_rows(["FEP", MD_CONTACT_Q_SOURCE])
+    direct = fep_minus_md_rows()
+    ypos = np.arange(3) * 1.15
     ax.axvline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
     for encoder in ["frozen", "hot"]:
         subset = deltas[deltas["encoder"] == encoder].set_index("source")
-        for i, src in enumerate(delta_sources):
+        for i, src in enumerate(["FEP", MD_CONTACT_Q_SOURCE]):
             row = subset.loc[src]
-            horizontal_interval(ax, ypos[i] + y_off[encoder], row["delta_mae"],
-                                row["delta_ci_lo"], row["delta_ci_hi"], SOURCE_COLOR[src], marker=markers[encoder])
+            horizontal_interval(ax, ypos[i] + y_off[encoder], row["delta_mae"], row["delta_ci_lo"],
+                                row["delta_ci_hi"], SOURCE_COLOR[src], marker=markers[encoder])
+        row = direct[direct["encoder"] == encoder].iloc[0]
+        horizontal_interval(ax, ypos[2] + y_off[encoder], row["delta_mae"], row["delta_ci_lo"],
+                            row["delta_ci_hi"], COL["black"], marker=markers[encoder])
     ax.set_yticks(ypos)
-    ax.set_yticklabels([SOURCE_LABEL[s] for s in delta_sources], fontsize=6.4)
+    ax.set_yticklabels(["FEP − Tm-only", "matched MD − Tm-only", "FEP − matched MD"], fontsize=6.2)
     ax.set_ylim(ypos[-1] + 0.7, -0.7)
-    ax.set_xlabel(r"$\Delta$MAE vs Tm-only (deg C)")
-    ax.set_xlim(-0.45, 0.35)
-    ax.text(0.02, 0.02, "left of 0 = improves over Tm-only", transform=ax.transAxes,
+    ax.set_xlabel(r"paired $\Delta$MAE (deg C)")
+    ax.set_xlim(-0.42, 0.22)
+    ax.text(0.02, 0.02, "left favors the first-named condition", transform=ax.transAxes,
             fontsize=6.0, color=COL["gray"])
     ax.legend(handles=enc_handles, frameon=False, loc="lower center",
               bbox_to_anchor=(0.54, 1.01), ncol=2, borderaxespad=0.0)
     polish(ax, "x")
     panel_label(ax, "B")
 
-    # (c) interpretation schematic: depth of transfer set by the physical observable.
-    ax = axd["C"]
-    fig04d_schematic(ax)
+    # (c) Hot-regime label-count behavior: FEP improves, whereas matched MD
+    #     recovers from low-count harm only to the hot Tm-only baseline.
+    ax = axes[2]
+    x_ticks = [20, 80, 160, 320]
+    tm_base = load_scaling(FIG3_HOT_TM_BASELINE)["mae"].iloc[0]
+    ax.axhline(tm_base, color=COL["baseline"], linewidth=1.1, linestyle="--", zorder=1)
+    ax.text(16, tm_base + 0.025, "Tm labels only (baseline)", fontsize=6.1,
+            color=COL["baseline"], va="bottom")
+    for label, path, color, marker in FIG3_HOT_CURVES:
+        scaling_errorbar(ax, load_scaling(path), color, label, marker=marker)
+    ax.set_xscale("log")
+    ax.set_xticks(x_ticks)
+    ax.set_xticklabels([str(x) for x in x_ticks])
+    ax.set_xlabel("labels sampled per scaffold table, n")
+    ax.set_ylabel("held-out Tm test MAE (deg C)")
+    ax.set_xlim(15, 400)
+    ax.set_ylim(6.25, 7.20)
+    ax.legend(frameon=False, loc="upper right", fontsize=6.1, handlelength=1.7)
+    ax.text(0.02, 0.03, "hot encoder", transform=ax.transAxes, fontsize=6.4, color=COL["gray"])
+    polish(ax, "both")
     panel_label(ax, "C")
 
     save_figure(fig, "fig_outline03_physical_observable")

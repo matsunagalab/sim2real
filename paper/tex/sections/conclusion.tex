@@ -2,16 +2,25 @@
 
 \section*{Conclusion}
 
-Simulation-derived labels can improve low-data nanobody Tm prediction, but only
-under two design conditions that this study makes explicit. The auxiliary source
-must share the sequence design of the target, or a length confound cancels its
-signal; and its physical observable must be close enough to stability to reshape
-the sequence representation, or it helps only when that representation is held
-fixed. Under both conditions, alchemical free energies transferred in every encoder
-regime and an FEP-matched molecular-dynamics native-contact label matched them with
-a frozen encoder, while structure-based scores were weak or null. These two axes ---
-matched data design and a transferable physical observable --- turn "run more
-simulation" into concrete, testable choices for building simulation-informed
-predictors of scarce experimental protein properties, and they define the datasets
-worth collecting next: matched-design mutation free energies at scale, paired with a
-modest, well-distributed set of experimental Tm anchors.
+Computed labels improved low-data nanobody Tm prediction only in specific
+settings. The sequences chosen before simulation mattered: MD native-contact
+labels from local mutation scans on 1MEL and 4IDL gave a clearer frozen-encoder
+gain than labels from a heterogeneous sequence screen. The calculated quantity
+also mattered. FEP mutation free energies improved both frozen and fine-tuned
+models, whereas matched MD native-contact values improved only the frozen model;
+Rosetta and ThermoMPNN scores gave no clear gain. Simulation data for experimental
+prediction should therefore be planned around controlled sequence changes and a
+quantity closely related to the measured property, rather than around data volume
+alone. The next test is to extend matched scans to more structures and evaluate the
+resulting models on new Tm measurements.
+
+In the longer term, the same idea could guide an iterative design study. A model
+could choose which variant to calculate next, receive an FEP or MD result, and
+use that result to choose the following variant. Reinforcement learning is one
+way to make these sequential choices, but a computed score alone would not be a
+reliable reward. Our ESM2-proposed variants did not outperform random variants
+when both were scored by Rosetta, showing that a generator and a physics-based
+score do not by themselves make a useful design method. Any future reinforcement-
+learning study should therefore be compared with random sampling and simpler
+active-learning methods, and its success should be judged prospectively by new
+experimental Tm measurements.

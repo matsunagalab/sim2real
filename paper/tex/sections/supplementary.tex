@@ -45,7 +45,7 @@ native-contact tables use the same processed format so that they can enter the s
 computational-task loader; there, the scaled label is a [0,1]-scaled native-contact
 fraction rather than a mutation free energy. The FEP-matched MD table (the primary
 MD label) is built on the same 1MEL/4IDL mutation scans as FEP; the diverse-panel
-MD table is used only as the negative data-design control.
+MD table provides the heterogeneous simulation-acquisition comparison.
 
 \begin{table}[htbp]
 \centering
@@ -66,7 +66,7 @@ Rosetta mutation score & Computational tasks & 435 + 409 & Computational-label c
 ThermoMPNN stability score & Computational tasks & 435 + 409 & Computational-label comparison \\
 Random variants scored by Rosetta & Computational tasks & 1000 + 1000 & Computational-label comparison \\
 ESM2-proposed variants scored by Rosetta & Computational tasks & 1000 + 1000 & Computational-label comparison \\
-MD native-contact (diverse panel) & Computational task & 1143 & Negative data-design control \\
+MD native-contact (diverse panel) & Computational task & 1143 & Heterogeneous simulation-design comparison \\
 \hline
 \end{tabular}
 \end{table}
@@ -85,9 +85,11 @@ random and ESM2-proposed variant tables --- all built on the 1MEL and 4IDL
 scaffolds --- had no exact match to any NbBench training, validation, or test
 sequence. The diverse-panel SAbDab MD table contained exact matches to 2 NbBench
 training, 4 validation, and 8 test sequences. We disclose this because it bears on
-the negative data-design control; because that diverse-panel table is used only as
-the negative control and does not enter any positive result, the overlap cannot
-account for any reported gain.
+the simulation-design comparison. The diverse panel gives a small frozen-encoder
+gain, so the overlap is a limitation of that secondary effect and is one reason not
+to interpret the matched-versus-heterogeneous contrast as a fully isolated causal
+experiment. It cannot explain the matched-scan result, whose sequences have no
+exact NbBench overlap.
 
 \textbf{Computational-label sampling.} For mutation-effect experiments with requested
 count $n$, the loader samples up to $n$ rows independently from each of the two
@@ -102,9 +104,9 @@ and early stopping depend only on the experimental Tm validation examples.
 
 \subsection*{Diverse-panel MD control: SAbDab structure selection}
 
-The following describes the \emph{diverse-panel} MD native-contact control (the
-negative data-design control of Fig.~3). The FEP-matched MD label used for the
-positive results is built on the 1MEL/4IDL mutation scans as described in Methods.
+The following describes the \emph{diverse-panel} MD native-contact comparison used
+for the simulation-design contrast in Fig.~2. The FEP-matched MD label used for the
+main result is built on the 1MEL/4IDL mutation scans as described in Methods.
 The diverse-panel MD control was built from SAbDab, the Structural Antibody Database
 \citep{Dunbar2014SAbDab}. The archived SAbDab nanobody summary table holds 2422
 rows with PDB identifier, heavy- and light-chain assignments, model index,
@@ -120,8 +122,8 @@ manifest holds one entry per PDB identifier, with fields for the manifest row
 number, PDB identifier, selected heavy chain, SAbDab TSV row, IMGT PDB path, and
 MD run directory. This initial one-per-PDB manifest contained 1177 structures.
 
-\textbf{400 K simulation panel.} The 400 K campaign reused the systems prepared
-in the 300 K campaign and built a 1146-entry 400 K manifest, consisting of 798
+\textbf{400 K simulation panel.} The 400 K simulations reused the systems prepared
+for the 300 K runs and built a 1146-entry 400 K manifest, consisting of 798
 X-ray, 345 electron-microscopy, and 3 NMR structures according to the SAbDab
 method field. None of the selected rows had an annotated light chain, consistent
 with a single-domain antibody panel. After trajectory and Q-value processing,
@@ -143,7 +145,7 @@ coordinate files are built with ff19SB and OPC
 \textbf{300 K equilibration branch.} The base 300 K branch uses OpenMM on CUDA
 devices \citep{Eastman2017OpenMM}. It runs 1 ns of NVT followed by 1 ns of NPT at 300 K
 and 1 atm, with a 2-fs timestep and no hydrogen-mass repartitioning. Production
-at 300 K was generated for the broader campaign, but the computational label used here
+at 300 K was generated for the broader study, but the computational label used here
 comes from the 400 K branch.
 
 \textbf{400 K production branch.} The first 400 K relaxation stage restarts from
@@ -285,7 +287,7 @@ for the core sources, and an additional 48 Stage~1 and 168 Stage~2 configuration
 for the structure-based comparators.
 
 \textbf{Seeded candidate evaluation.} Each candidate is evaluated as a three-seed
-ensemble on the Tm validation split at 320 auxiliary labels, and the single best
+ensemble on the Tm validation split at $n=320$ labels per scaffold table, and the single best
 configuration for each source and regime is then evaluated on the held-out test
 split as a five-seed ensemble. The run seed controls Python, NumPy, PyTorch, and
 CUDA randomness when CUDA is available, as well as target-training subsampling in
@@ -329,10 +331,10 @@ evaluation code recover the expected gain when more true experimental Tm labels
 are available. The FEP computational-label curve tests something different. It asks whether more
 labels from a physically related but distinct computed quantity improve the same
 held-out Tm endpoint, while the FEP-matched MD native-contact curve tests whether a
-structural stability observable transfers once its data design matches the target.
+structural stability observable responds to a matched simulation-acquisition design.
 The decisive comparisons are therefore not ``simulation versus no simulation,'' but
-whether the auxiliary label shares the target's sequence design and whether its
-physical observable transfers under target-centered model selection.
+whether the simulations cover relevant sequence changes and whether the
+physical quantity improves models selected with Tm validation data.
 
 \subsection*{Supplementary figure data tables}
 
@@ -357,9 +359,9 @@ processed summaries and scripts used to regenerate each display item.}
 \hline
 Display item & Inputs & Script & Primary comparison \\
 \hline
-Fig.~1 & Conceptual protocol & \path{plot/make_outline_figures.py} & Target-centered transfer-learning design \\
-Fig.~2 & Diverse-panel vs matched-scan MD summaries; frozen label-count sweeps & \path{plot/make_outline_figures.py} & Data-design axis: same MD observable null as a diverse screen, positive as a matched scan \\
-Fig.~3 & Tuned frozen/hot per-source summaries & \path{plot/make_outline_figures.py} & Physical-observable axis: FEP transfers in both regimes, MD native-contact only frozen \\
+Fig.~1 & Conceptual protocol & \path{plot/make_outline_figures.py} & Multi-task training with Tm-based model selection \\
+Fig.~2 & Simulation-plan schematic; design-by-regime MD effects; frozen label-count sweeps & \path{plot/make_outline_figures.py} & Simulation-design axis: matched local scans strengthen frozen native-contact transfer \\
+Fig.~3 & Source-by-regime map; focused FEP/MD contrasts; hot label-count sweeps & \path{plot/make_outline_figures.py} & Physical-observable axis: FEP transfers in both regimes, MD native-contact only frozen \\
 Supplementary Figs.~1 to 5 & Supplementary manifest and generated TSV tables & \path{plot/make_supplementary_figures.py} & Data-set composition, candidate-setting searches, model controls, count-sweep controls, and MD-feature controls \\
 \hline
 \end{tabular}
