@@ -16,7 +16,8 @@ the model, the 114 validation proteins selected the architecture and training
 settings, and the 396 test proteins were used after selection. Every computed
 label was tuned separately in the frozen and hot settings. We then compared
 absolute errors on the same test proteins. This was necessary because a model
-can predict a computed value well without improving Tm.
+can predict a computed value well without improving Tm. The validation searches
+and selected model forms are shown in Supplementary Fig.~2.
 
 The selected Tm-only model had a test MAE of 7.23$^\circ$C with a frozen encoder
 and 6.55$^\circ$C with a hot encoder. The lower error of the hot baseline shows
@@ -49,7 +50,8 @@ confidence interval that included zero.
 Several differences between the two sequence sets may contribute to this
 result. The heterogeneous set ranged from 58 to 461 residues, and its $Q$ value
 had a Pearson correlation of $r=+0.13$ with sequence length. Length could
-therefore provide an unwanted shortcut. The matched scans kept length fixed
+therefore provide an unwanted shortcut (Supplementary Fig.~1). The matched
+scans kept length fixed
 within each structure and supplied local directions: one mutation and its
 change in contact retention. This is a simpler learning problem. However, the
 present data do not show that length alone caused the difference. The two MD
@@ -104,7 +106,8 @@ proteins.}
 \subsection{Only FEP helped both frozen and hot models}
 
 We next compared all computed labels after separate tuning
-(Fig.~\ref{fig:physical_observable}a). With a frozen encoder, FEP and matched MD
+(Fig.~\ref{fig:physical_observable}a and Supplementary Figs.~2 and 3). With a
+frozen encoder, FEP and matched MD
 gave the clearest gains. FEP reached 7.01$^\circ$C MAE, a paired change of
 $-0.221^\circ$C from Tm-only (90\% CI, $-0.366$ to $-0.077^\circ$C). Matched MD
 reached 7.03$^\circ$C, a change of $-0.195^\circ$C. ThermoMPNN was third at
@@ -192,9 +195,10 @@ error. Here $n$ is the number sampled from each structure table. Whiskers are
 
 Several controls limit alternative explanations. Increasing ESM2 from 8M to
 35M or 650M parameters did not reproduce the 8M FEP result (Supplementary
-Fig.~4), so a larger pretrained model was not a substitute for the computed
-label. An analytical correction for periodic-image effects in charge-changing
-FEP mutations had almost no effect on the scaled labels. Tests that clipped the
+Fig.~3), so a larger pretrained model was not a substitute for the computed
+label. Provenance and charge-change checks are shown in Supplementary Fig.~4.
+An analytical correction for periodic-image effects in charge-changing FEP
+mutations had almost no effect on the scaled labels. Tests that clipped the
 largest FEP values or added the available Phe scan did not improve transfer.
 These checks support the use of the original FEP tables, although they do not
 prove that every large $\Delta\Delta G$ value is quantitatively accurate.

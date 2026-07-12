@@ -1,10 +1,11 @@
-data_set	role	processed_rows
-Experimental Tm	target train	57
-Experimental Tm	target validation	114
-Experimental Tm	target test	396
-FEP mutation free energy	source	844
-Rosetta mutation score	source	844
-ThermoMPNN stability score	source	844
-random variants scored by Rosetta	source	2000
-ESM2-proposed variants scored by Rosetta	source	2000
-MD Q-value	source	1143
+data_set	rows	table_rows
+Tm train	57	57
+Tm validation	114	114
+Tm test	396	396
+FEP	844	435+409
+matched MD	837	431+406
+Rosetta	844	435+409
+ThermoMPNN	844	435+409
+random/Rosetta	2000	1000+1000
+ESM2/Rosetta	2000	1000+1000
+heterogeneous MD	1143	1143

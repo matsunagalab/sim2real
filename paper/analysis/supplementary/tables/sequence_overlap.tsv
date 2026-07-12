@@ -1,0 +1,7 @@
+design	split	exact_matches
+heterogeneous panel	train	2
+heterogeneous panel	val	4
+heterogeneous panel	test	8
+matched mutation scan	train	0
+matched mutation scan	val	0
+matched mutation scan	test	0

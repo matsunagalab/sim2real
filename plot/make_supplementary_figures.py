@@ -1,27 +1,19 @@
 #!/usr/bin/env python3
-"""Assemble supplementary figure panels and their numerical source tables.
+"""Build the selected supplementary figures for the current two-axis paper.
 
-The script keeps the analysis handoff simple:
-
-  1. read stable result summaries from results/
-  2. write compact TSV tables to paper/analysis/supplementary/tables/
-  3. render publication figures to paper/analysis/supplementary/figures/
-     and paper/tex/figures/
-
-It does not launch model training or move any result directories.
+The script reads final held-out results, staged-validation runs, and tracked
+processed label tables. It writes compact TSV audit tables and four figures to
+paper/analysis/supplementary/ and paper/tex/figures/. It never launches training.
 """
 
 from __future__ import annotations
 
 import json
 import os
-import re
 from pathlib import Path
 
 os.environ.setdefault("XDG_CACHE_HOME", "/tmp/codex-cache")
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib-cache-codex")
-Path(os.environ["XDG_CACHE_HOME"]).mkdir(parents=True, exist_ok=True)
-Path(os.environ["MPLCONFIGDIR"]).mkdir(parents=True, exist_ok=True)
 
 import matplotlib
 
@@ -30,1516 +22,454 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.lines import Line2D
+from scipy.stats import yeojohnson
 
 
 REPO = Path(__file__).resolve().parents[1]
 RESULTS = REPO / "results"
 DATA = REPO / "data"
-MD_METADATA = DATA / "md" / "metadata"
-MD_QVALUE_TABLE = DATA / "md" / "nanobody_qvalue_400K.csv"
 PAPER = REPO / "paper"
 ANALYSIS = PAPER / "analysis" / "supplementary"
 TABLES = ANALYSIS / "tables"
 ANALYSIS_FIGS = ANALYSIS / "figures"
 TEX_FIGS = PAPER / "tex" / "figures"
 
-INTERNAL_MD_Q_TOKEN = "h" + "p" + "h" + "i" + "l"
-MD_CONTACT_Q_SOURCE = "MD_Q_" + INTERNAL_MD_Q_TOKEN.upper() + "_400K"
-MD_CONTACT_Q_CONDITION = "residual_q_" + INTERNAL_MD_Q_TOKEN + "_400k"
-MD_CONTACT_Q_SHUFFLED_CONDITION = MD_CONTACT_Q_CONDITION + "_shuf"
-MD_CONTACT_Q_RESULT_DIR = "final_" + MD_CONTACT_Q_CONDITION
-MD_CONTACT_Q_SHUFFLED_RESULT_DIR = "final_" + MD_CONTACT_Q_SHUFFLED_CONDITION
-PUBLIC_REPLACEMENTS = [
-    ("MD_Q_" + "H" + "PHIL_400K_SHUF", "MD Q-value shuffled labels"),
-    ("MD_Q_" + "H" + "PHIL_400K", "MD Q-value"),
-    ("nanobody_qvalue_" + INTERNAL_MD_Q_TOKEN + "_400K.csv", "nanobody_qvalue_400K.csv"),
-    ("q-" + INTERNAL_MD_Q_TOKEN + "-400k", "q-value-400k"),
-    ("q_" + INTERNAL_MD_Q_TOKEN + "_400k_shuf", "q_value_400k_shuffled"),
-    ("q_" + INTERNAL_MD_Q_TOKEN + "_400k", "q_value_400k"),
-    ("q_" + INTERNAL_MD_Q_TOKEN, "q_value"),
-    ("q-" + INTERNAL_MD_Q_TOKEN, "q-value"),
-]
-
 COL = {
-    "black": "#222222",
-    "gray": "#707070",
-    "light_gray": "#D7D7D7",
-    "grid": "#E8E8E8",
-    "tm": "#4D4D4D",
-    "fep": "#009E73",
-    "rosetta": "#E69F00",
-    "design": "#0072B2",
-    "thermo": "#CC79A7",
-    "mdq": "#D55E00",
-    "rmsf": "#56B4E9",
-    "other": "#999999",
+    "black": "#222222", "gray": "#6F6F6F", "light": "#D9D9D9",
+    "grid": "#E8E8E8", "tm": "#4D4D4D", "fep": "#009E73",
+    "md": "#D55E00", "rosetta": "#E69F00", "thermo": "#CC79A7",
+    "design": "#0072B2", "soft_blue": "#E7F0F7", "soft_green": "#E6F4EF",
+    "soft_orange": "#FAF0DC", "soft_red": "#F8E7DF", "soft_gray": "#F3F3F3",
 }
 
-SOURCE_ORDER = [
-    "Tm_only",
-    "FEP",
-    "rosetta_esm",
-    "thermoMPNN",
-    "rosetta_random",
-    "rosetta",
-    MD_CONTACT_Q_SOURCE,
-]
-
-SOURCE_LABEL = {
-    "Tm_only": "Tm labels only",
-    "FEP": "FEP mutation\nfree energy",
-    "rosetta": "Rosetta\nmutation score",
-    "thermoMPNN": "ThermoMPNN\nstability score",
-    "rosetta_random": "random variants\nscored by Rosetta",
-    "rosetta_esm": "ESM2-proposed\nvariants + Rosetta",
-    MD_CONTACT_Q_SOURCE: "MD Q-value",
-}
-
-SOURCE_SHORT = {
-    "Tm_only": "Tm only",
-    "FEP": "FEP",
-    "rosetta": "Rosetta",
-    "thermoMPNN": "ThermoMPNN",
-    "rosetta_random": "random/Rosetta",
-    "rosetta_esm": "ESM2-proposed/Rosetta",
-    MD_CONTACT_Q_SOURCE: "MD Q-value",
-}
-
-SOURCE_TICK = {
-    "Tm_only": "Tm only",
-    "FEP": "FEP",
-    "rosetta": "Rosetta",
-    "thermoMPNN": "ThermoMPNN",
-    "rosetta_random": "random/\nRosetta",
-    "rosetta_esm": "ESM2-proposed/\nRosetta",
-    MD_CONTACT_Q_SOURCE: "MD\nQ-value",
-}
-
-SOURCE_COLOR = {
-    "Tm_only": COL["tm"],
-    "FEP": COL["fep"],
-    "rosetta": "#B9770E",
-    "thermoMPNN": COL["thermo"],
-    "rosetta_random": COL["rosetta"],
-    "rosetta_esm": COL["design"],
-    MD_CONTACT_Q_SOURCE: COL["mdq"],
-}
-
-MD_FEATURE_LABEL = {
-    MD_CONTACT_Q_SOURCE: "Q-value, 400 K",
-    f"{MD_CONTACT_Q_SOURCE}_SHUF": "Q-value, shuffled labels",
-    "MD_RMSF": "mean residue fluctuation",
-    "MD_RMSF_MAX": "maximum residue fluctuation",
-    "MD_RG_STD": "radius-of-gyration fluctuation",
-    "MD_SALTBRIDGE": "salt-bridge persistence",
-    "MD_Q_MIN_400K": "minimum Q-value, 400 K",
-    "MD_Q_STD_400K": "Q-value fluctuation, 400 K",
-    "MD_Q_SLOPE_400K": "Q-value slope, 400 K",
-    "MD_RMSF_MAX_400K": "maximum residue fluctuation, 400 K",
-    "MD_RG_STD_400K": "radius-of-gyration fluctuation, 400 K",
-    "MD_Q_CDR3": "CDR3 Q-value",
-    "MD_Q_FRAMEWORK": "framework Q-value",
-    "MD_RMSF_CDR3": "CDR3 residue fluctuation",
-    "MD_RMSF_FRAMEWORK": "framework residue fluctuation",
-    "MD_SS_DIST_MEAN": "disulfide distance",
-    "MD_SS_DIST_STD": "disulfide-distance fluctuation",
-    "MD_CDR3_LEN": "CDR3 length",
-}
-
-DESCRIPTOR_TEST_SPECS = [
-    {
-        "condition": "tm_residual_enc3e-4",
-        "feature": "",
-        "label": "Tm labels only, residual-control architecture",
-        "short_label": "Tm labels only",
-        "group": "target reference",
-        "result_dir": "final_tm_residual_enc3e-4",
-        "color": COL["tm"],
-        "marker": "s",
-    },
-    {
-        "condition": MD_CONTACT_Q_CONDITION,
-        "feature": MD_CONTACT_Q_SOURCE,
-        "label": "MD Q-value, residual-control architecture",
-        "short_label": "Q-value",
-        "group": "MD-derived descriptor",
-        "result_dir": MD_CONTACT_Q_RESULT_DIR,
-        "color": COL["mdq"],
-        "marker": "o",
-    },
-    {
-        "condition": "residual_q_slope_400k",
-        "feature": "MD_Q_SLOPE_400K",
-        "label": "Q-value slope",
-        "short_label": "Q-value slope",
-        "group": "MD-derived descriptor",
-        "result_dir": "final_residual_q_slope_400k",
-        "color": COL["mdq"],
-        "marker": "D",
-    },
-    {
-        "condition": MD_CONTACT_Q_SHUFFLED_CONDITION,
-        "feature": f"{MD_CONTACT_Q_SOURCE}_SHUF",
-        "label": "MD Q-value, shuffled labels",
-        "short_label": "shuffled Q-value",
-        "group": "negative control",
-        "result_dir": MD_CONTACT_Q_SHUFFLED_RESULT_DIR,
-        "color": COL["gray"],
-        "marker": "X",
-    },
-    {
-        "condition": "residual_ss_dist_std",
-        "feature": "MD_SS_DIST_STD",
-        "label": "disulfide-distance fluctuation",
-        "short_label": "disulfide fluct.",
-        "group": "MD-derived descriptor",
-        "result_dir": "final_residual_ss_dist_std",
-        "color": COL["design"],
-        "marker": "o",
-    },
-    {
-        "condition": "residual_rmsf_max",
-        "feature": "MD_RMSF_MAX",
-        "label": "maximum residue fluctuation",
-        "short_label": "max residue fluct.",
-        "group": "MD-derived descriptor",
-        "result_dir": "final_residual_rmsf_max",
-        "color": COL["rmsf"],
-        "marker": "o",
-    },
-    {
-        "condition": "residual_rmsf_cdr3",
-        "feature": "MD_RMSF_CDR3",
-        "label": "CDR3 residue fluctuation",
-        "short_label": "CDR3 residue fluct.",
-        "group": "MD-derived descriptor",
-        "result_dir": "final_residual_rmsf_cdr3",
-        "color": COL["rmsf"],
-        "marker": "^",
-    },
-    {
-        "condition": "residual_cdr3_len",
-        "feature": "MD_CDR3_LEN",
-        "label": "CDR3 length",
-        "short_label": "CDR3 length",
-        "group": "nanobody descriptor",
-        "result_dir": "final_residual_cdr3_len",
-        "color": COL["thermo"],
-        "marker": "o",
-    },
-]
-
-DESCRIPTOR_VALUE_SPECS = [
-    ("Q-value", MD_QVALUE_TABLE, "ddg_scaled01"),
-    ("Q-value slope", DATA / "md" / "feat_q_slope_400K.csv", "ddg_scaled01"),
-    ("disulfide-distance fluctuation", DATA / "md" / "feat_ss_dist_std.csv", "ddg_scaled01"),
-    ("CDR3 length", DATA / "md" / "feat_cdr3_len.csv", "ddg_scaled01"),
-    ("CDR3 residue fluctuation", DATA / "md" / "feat_rmsf_cdr3.csv", "ddg_scaled01"),
-]
+SOURCES = ["Tm_only", "FEP", "MD_FEP400K", "thermoMPNN", "rosetta", "rosetta_random", "rosetta_esm"]
+STEMS = {"Tm_only": "tm", "FEP": "fep", "MD_FEP400K": "mdq", "thermoMPNN": "tmpnn",
+         "rosetta": "ros", "rosetta_random": "rosrnd", "rosetta_esm": "rosesm"}
+LABEL = {"Tm_only": "Tm labels only", "FEP": "FEP mutation\nfree energy",
+         "MD_FEP400K": "MD native contact\n(matched scan)", "thermoMPNN": "ThermoMPNN",
+         "rosetta": "Rosetta mutation\nscore", "rosetta_random": "random variants\n+ Rosetta",
+         "rosetta_esm": "ESM2-proposed\nvariants + Rosetta"}
+SHORT = {"Tm_only": "Tm only", "FEP": "FEP", "MD_FEP400K": "matched MD",
+         "thermoMPNN": "ThermoMPNN", "rosetta": "Rosetta",
+         "rosetta_random": "random/Rosetta", "rosetta_esm": "ESM2/Rosetta"}
+COLOR = {"Tm_only": COL["tm"], "FEP": COL["fep"], "MD_FEP400K": COL["md"],
+         "thermoMPNN": COL["thermo"], "rosetta": "#B9770E",
+         "rosetta_random": COL["rosetta"], "rosetta_esm": COL["design"]}
 
 
 def configure_style() -> None:
-    plt.rcParams.update(
-        {
-            "figure.dpi": 160,
-            "savefig.dpi": 600,
-            "pdf.fonttype": 42,
-            "ps.fonttype": 42,
-            "font.family": "DejaVu Sans",
-            "font.size": 8.2,
-            "axes.titlesize": 8.8,
-            "axes.labelsize": 8.2,
-            "axes.linewidth": 0.8,
-            "xtick.labelsize": 7.2,
-            "ytick.labelsize": 7.2,
-            "legend.fontsize": 7.0,
-            "lines.linewidth": 1.55,
-            "lines.markersize": 4.8,
-            "axes.spines.top": False,
-            "axes.spines.right": False,
-        }
-    )
+    plt.rcParams.update({
+        "figure.dpi": 160, "savefig.dpi": 600, "savefig.facecolor": "white",
+        "pdf.fonttype": 42, "ps.fonttype": 42, "font.family": "DejaVu Sans",
+        "font.size": 9.0, "axes.titlesize": 9.2, "axes.labelsize": 9.0,
+        "xtick.labelsize": 8.3, "ytick.labelsize": 8.3, "legend.fontsize": 8.0,
+        "axes.linewidth": 0.8, "axes.spines.top": True, "axes.spines.right": True,
+    })
 
 
-def ensure_dirs() -> None:
-    for path in (TABLES, ANALYSIS_FIGS, TEX_FIGS):
-        path.mkdir(parents=True, exist_ok=True)
-
-
-def read_json(path: Path) -> dict | list:
+def read_json(path: Path) -> dict:
     return json.loads(path.read_text())
 
 
-def resolve_path(raw: str | Path) -> Path:
-    path = Path(raw)
-    if path.exists():
-        return path
-    text = str(raw)
-    if "/results/" in text:
-        return RESULTS / text.split("/results/", 1)[1]
-    return path
+def final_run(source: str, regime: str) -> dict:
+    return read_json(RESULTS / f"final_{STEMS[source]}_{regime}" / "scaling.json")
 
 
-def scaling_point(path: str | Path, index: int = 0) -> dict:
-    data = read_json(resolve_path(path))
-    return data["scaling"][index]
+def representative(run: dict) -> dict:
+    points = run["scaling"]
+    return points[0] if len(points) == 1 else max(points, key=lambda x: int(x["n"]))
 
 
-def all_scaling_points(path: str | Path) -> list[dict]:
-    return read_json(resolve_path(path))["scaling"]
-
-
-def bootstrap_interval(abs_errors: list[float] | np.ndarray, level: float, seed: int = 20260605) -> tuple[float, float]:
-    errors = np.asarray(abs_errors, dtype=float)
+def paired_delta(reference, candidate, level: float = 0.90, seed: int = 42) -> tuple[float, float, float]:
+    a, b = np.asarray(reference, float), np.asarray(candidate, float)
+    if len(a) != len(b):
+        raise ValueError("paired comparisons require equal-length error vectors")
     rng = np.random.default_rng(seed)
-    idx = rng.integers(0, len(errors), size=(10000, len(errors)))
-    maes = errors[idx].mean(axis=1)
-    alpha = (100.0 - level) / 2.0
-    lo, hi = np.percentile(maes, [alpha, 100.0 - alpha])
-    return float(lo), float(hi)
+    idx = rng.integers(0, len(a), size=(10000, len(a)))
+    boot = (b[idx] - a[idx]).mean(axis=1)
+    q = (1.0 - level) * 50.0
+    lo, hi = np.percentile(boot, [q, 100.0 - q])
+    return float((b - a).mean()), float(lo), float(hi)
 
 
-def interval_from_row(row: pd.Series | dict) -> tuple[float, float]:
-    mae = float(row["mae"] if "mae" in row else row["test_mae"])
-    if "ci_lo" in row and pd.notna(row["ci_lo"]):
-        return float(row["ci_lo"]), float(row["ci_hi"])
-    width = float(row.get("ci_width", 0.0))
-    return mae - width / 2.0, mae + width / 2.0
+def panel_label(ax, letter: str) -> None:
+    ax.text(-0.12, 1.08, f"({letter})", transform=ax.transAxes, fontsize=11,
+            fontweight="bold", ha="left", va="top", clip_on=False)
 
 
-def panel_label(ax, label: str) -> None:
-    ax.text(
-        -0.10,
-        1.05,
-        label,
-        transform=ax.transAxes,
-        fontsize=11,
-        fontweight="bold",
-        ha="left",
-        va="top",
-    )
-
-
-def polish(ax, grid_axis: str = "y") -> None:
-    ax.grid(True, axis=grid_axis, color=COL["grid"], linewidth=0.65)
+def polish(ax, axis: str = "both") -> None:
+    ax.set_axisbelow(True)
+    ax.grid(True, axis=axis, color=COL["grid"], linewidth=0.65)
     ax.tick_params(width=0.8, length=3)
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_linewidth(0.8)
+        spine.set_color(COL["black"])
 
 
-def horizontal_interval(ax, y, mid, lo, hi, color, marker="o", alpha=1.0, zorder=3):
-    ax.plot([lo, hi], [y, y], color=color, linewidth=1.8, solid_capstyle="round", alpha=alpha, zorder=zorder)
-    ax.scatter([mid], [y], s=32, color=color, edgecolor="white", linewidth=0.6, marker=marker, alpha=alpha, zorder=zorder + 1)
+def interval(ax, y, mid, lo, hi, color, marker="o", label=None) -> None:
+    ax.errorbar(mid, y, xerr=[[mid - lo], [hi - mid]], fmt=marker, color=color,
+                ecolor=color, elinewidth=1.35, capsize=3, markersize=6,
+                markeredgecolor="white", markeredgewidth=0.7, label=label, zorder=3)
+
+
+def save_table(df: pd.DataFrame, name: str) -> None:
+    TABLES.mkdir(parents=True, exist_ok=True)
+    df.to_csv(TABLES / name, sep="\t", index=False)
 
 
 def save_figure(fig, stem: str) -> None:
-    for out_dir in (ANALYSIS_FIGS, TEX_FIGS):
-        for ext in ("pdf", "png"):
-            path = out_dir / f"{stem}.{ext}"
-            if ext == "png":
-                fig.savefig(path, bbox_inches="tight", dpi=600)
-            else:
-                fig.savefig(path, bbox_inches="tight")
+    for directory in (ANALYSIS_FIGS, TEX_FIGS):
+        directory.mkdir(parents=True, exist_ok=True)
+        fig.savefig(directory / f"{stem}.pdf", bbox_inches="tight")
+        fig.savefig(directory / f"{stem}.png", dpi=600, bbox_inches="tight")
     plt.close(fig)
-    print(f"wrote {ANALYSIS_FIGS / (stem + '.pdf')}")
+    print(f"wrote {TEX_FIGS / (stem + '.pdf')}")
 
 
-def write_table(df: pd.DataFrame, name: str) -> Path:
-    path = TABLES / name
-    sanitize_public_table(df).to_csv(path, sep="\t", index=False)
-    return path
+def ecdf(values) -> tuple[np.ndarray, np.ndarray]:
+    x = np.sort(np.asarray(values, float))
+    return x, np.arange(1, len(x) + 1) / len(x)
 
 
-def sanitize_public_table(df: pd.DataFrame) -> pd.DataFrame:
-    public = df.copy()
-    for col in public.columns:
-        series = public[col].astype(str)
-        for old, new in PUBLIC_REPLACEMENTS:
-            series = series.str.replace(old, new, regex=False)
-        public[col] = series
-    return public
+def data_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    source_specs = [
+        ("Tm train", [DATA / "nbbench/train.csv"]), ("Tm validation", [DATA / "nbbench/val.csv"]),
+        ("Tm test", [DATA / "nbbench/test.csv"]),
+        ("FEP", [DATA / "source_labels/fep/fep1mel_435_processed.csv", DATA / "source_labels/fep/fep4idl_409_processed.csv"]),
+        ("matched MD", [DATA / "source_labels/md_fep400k/1mel_mdq_processed.csv", DATA / "source_labels/md_fep400k/4idl_mdq_processed.csv"]),
+        ("Rosetta", [DATA / "source_labels/rosetta/measured/1mel_rosettaddg_processed.csv", DATA / "source_labels/rosetta/measured/4idl_rosettaddg_processed.csv"]),
+        ("ThermoMPNN", [DATA / "source_labels/thermompnn/1melMPNN2_processed.csv", DATA / "source_labels/thermompnn/4idlMPNN2_processed.csv"]),
+        ("random/Rosetta", [DATA / "source_labels/rosetta/random1000/random_2mut_1mel_1000_with_ddg_processed.csv", DATA / "source_labels/rosetta/random1000/random_2mut_4idl_1000_with_ddg_processed.csv"]),
+        ("ESM2/Rosetta", [DATA / "source_labels/rosetta/esm1000/esm2_650M_2muts_1mel_100000_top1pct_with_ddg_processed.csv", DATA / "source_labels/rosetta/esm1000/esm2_650M_2muts_4idl_100000_top1pct_with_ddg_processed.csv"]),
+        ("heterogeneous MD", [DATA / "md/nanobody_qvalue_400K.csv"]),
+    ]
+    counts = []
+    for label, paths in source_specs:
+        part = [len(pd.read_csv(p)) for p in paths]
+        counts.append({"data_set": label, "rows": sum(part), "table_rows": "+".join(map(str, part))})
+
+    diverse = pd.read_csv(DATA / "md/nanobody_qvalue_400K.csv")
+    qrows = [pd.DataFrame({"design": "heterogeneous panel", "system": "SAbDab",
+                           "sequence": diverse["seq"], "length": diverse["seq_len"],
+                           "raw_q": diverse["q_value_raw"]})]
+    for system in ("1mel", "4idl"):
+        d = pd.read_csv(DATA / f"md/study_qvalue_fep400k_{system}.csv")
+        qrows.append(pd.DataFrame({"design": "matched mutation scan", "system": system.upper(),
+                                   "sequence": d["seq"], "length": d["seq"].str.len(), "raw_q": d["q_value"]}))
+    qvalues = pd.concat(qrows, ignore_index=True)
+
+    split_sets = {s: set(pd.read_csv(DATA / f"nbbench/{s}.csv")["text"]) for s in ("train", "val", "test")}
+    overlap = []
+    for design, group in qvalues.groupby("design"):
+        seqs = set(group["sequence"])
+        for split, targets in split_sets.items():
+            overlap.append({"design": design, "split": split, "exact_matches": len(seqs & targets)})
+    return pd.DataFrame(counts), qvalues, pd.DataFrame(overlap)
 
 
-def source_screen_final() -> pd.DataFrame:
-    rows = pd.DataFrame(read_json(RESULTS / "source_screen" / "final_source_screen_summary.json")["rows"])
+def fig_s1(counts: pd.DataFrame, qvalues: pd.DataFrame, overlap: pd.DataFrame) -> None:
+    fig, axes = plt.subplots(2, 2, figsize=(7.4, 6.0), constrained_layout=True)
+    ax = axes[0, 0]
+    shown = counts.iloc[::-1]
+    colors = [COL["tm"] if x.startswith("Tm") else COL["md"] if "MD" in x else COL["fep"] for x in shown["data_set"]]
+    ax.barh(shown["data_set"], shown["rows"], color=colors, alpha=0.9)
+    ax.set_xscale("log"); ax.set_xlabel("processed rows (log scale)")
+    for y, (_, r) in enumerate(shown.iterrows()):
+        ax.text(r["rows"] * 1.06, y, r["table_rows"], va="center", fontsize=7.8)
+    ax.set_xlim(35, 3600); polish(ax, "x"); panel_label(ax, "a")
+
+    ax = axes[0, 1]
+    specs = [("heterogeneous panel", None, COL["design"], "-"),
+             ("matched mutation scan", "1MEL", COL["md"], "-"),
+             ("matched mutation scan", "4IDL", COL["fep"], "--")]
+    for design, system, color, ls in specs:
+        d = qvalues[qvalues["design"] == design]
+        if system is not None: d = d[d["system"] == system]
+        x, y = ecdf(d["raw_q"])
+        label = design if system is None else f"matched {system}"
+        ax.plot(x, y, color=color, linestyle=ls, linewidth=1.8, label=label)
+    ax.set_xlabel("raw native-contact Q"); ax.set_ylabel("cumulative fraction")
+    ax.legend(frameon=False, loc="upper left"); polish(ax); panel_label(ax, "b")
+
+    ax = axes[1, 0]
+    div = qvalues[qvalues["design"] == "heterogeneous panel"]
+    ax.scatter(div["length"], div["raw_q"], s=9, alpha=0.28, color=COL["design"], edgecolor="none", label="heterogeneous panel")
+    for system, color, marker in [("1MEL", COL["md"], "o"), ("4IDL", COL["fep"], "D")]:
+        d = qvalues[(qvalues["design"] == "matched mutation scan") & (qvalues["system"] == system)]
+        ax.scatter(d["length"], d["raw_q"], s=12, alpha=0.35, color=color, marker=marker, edgecolor="none", label=f"matched {system}")
+    r = np.corrcoef(div["length"], div["raw_q"])[0, 1]
+    ax.text(0.03, 0.07, f"heterogeneous panel: r = {r:+.2f}", transform=ax.transAxes, ha="left", fontsize=8.2)
+    ax.set_xlabel("sequence length (residues)"); ax.set_ylabel("raw native-contact Q")
+    ax.legend(frameon=False, loc="upper right"); polish(ax); panel_label(ax, "c")
+
+    ax = axes[1, 1]
+    order = ["train", "val", "test"]
+    x = np.arange(3); w = 0.34
+    for j, (design, color, label) in enumerate([("heterogeneous panel", COL["design"], "heterogeneous panel"),
+                                                ("matched mutation scan", COL["md"], "matched scans")]):
+        d = overlap[overlap["design"] == design].set_index("split").loc[order]
+        bars = ax.bar(x + (j - .5) * w, d["exact_matches"], width=w, color=color, label=label)
+        ax.bar_label(bars, fontsize=8, padding=2)
+    ax.set_xticks(x, ["Tm train", "Tm validation", "Tm test"]); ax.set_ylabel("exact sequence matches")
+    ax.set_ylim(0, 9.5); ax.legend(frameon=False, loc="upper left"); polish(ax, "y"); panel_label(ax, "d")
+    save_figure(fig, "supp_fig01_data_and_design")
+
+
+def candidate_table() -> pd.DataFrame:
     records = []
-    for _, row in rows.iterrows():
-        point = scaling_point(row["scaling_json"])
-        ci95_lo, ci95_hi = bootstrap_interval(point["abs_errors"], 95.0)
-        records.append(
-            {
-                "source": row["source"],
-                "label": SOURCE_SHORT.get(row["source"], row["source"]),
-                "architecture": row["arch"],
-                "selected_setting": row["label"],
-                "n_ddg": int(row.get("n_ddg", 0)),
-                "n_md": int(row.get("n_md", 0)),
-                "validation_mae_deg_c": float(row["val_mae"]),
-                "test_mae_deg_c": float(row["test_mae"]),
-                "ci_lo_deg_c": float(point["ci_lo"]),
-                "ci_hi_deg_c": float(point["ci_hi"]),
-                "ci95_lo_deg_c": ci95_lo,
-                "ci95_hi_deg_c": ci95_hi,
-                "scaling_json": str(resolve_path(row["scaling_json"]).relative_to(REPO)),
-            }
-        )
-    out = pd.DataFrame(records)
-    out["source"] = pd.Categorical(out["source"], SOURCE_ORDER, ordered=True)
-    return out.sort_values("source").reset_index(drop=True)
+    for regime in ("frozen", "hot"):
+        for source in SOURCES:
+            stem = STEMS[source]
+            prefix = "tune_s2" if source in ("Tm_only", "FEP", "MD_FEP400K") else "tune_c2"
+            for path in RESULTS.glob(f"{prefix}_{stem}_{regime}_*/scaling.json"):
+                run = read_json(path); args = run.get("args", {})
+                if args.get("final_eval_split") != "val": continue
+                point = run["scaling"][0]; hp = run.get("hparams", {})
+                records.append({"regime": regime, "source": source, "validation_mae": float(point["mae"]),
+                                "architecture": args.get("model_arch"),
+                                "head": "-" if source == "Tm_only" else args.get("ddg_head_mode"),
+                                "learning_rate": hp.get("learning_rate"), "encoder_lr": hp.get("encoder_lr"),
+                                "dropout": hp.get("dropout_rate"), "weight_decay": hp.get("weight_decay"),
+                                "run": str(path.relative_to(REPO))})
+    if not records:
+        saved = TABLES / "candidate_validation.tsv"
+        if saved.exists(): return pd.read_csv(saved, sep="\t")
+        raise FileNotFoundError("staged validation runs and candidate_validation.tsv are both missing")
+    return pd.DataFrame(records).sort_values(["regime", "source", "validation_mae"]).reset_index(drop=True)
 
 
-def source_screen_hunt(path: Path) -> pd.DataFrame:
-    rows = pd.DataFrame(read_json(path))
-    rows = rows[rows.get("rc", 0).eq(0) if "rc" in rows.columns else np.ones(len(rows), dtype=bool)].copy()
-    rows["source_label"] = rows["source"].map(SOURCE_SHORT)
-    rows["source"] = pd.Categorical(rows["source"], SOURCE_ORDER, ordered=True)
-    keep = ["condition", "source", "source_label", "arch", "label", "n_ddg", "n_md", "val_mae", "ci_width", "exp"]
-    return rows[[c for c in keep if c in rows.columns]].sort_values(["source", "arch", "label"]).reset_index(drop=True)
-
-
-def frozen_final() -> pd.DataFrame:
-    rows = pd.DataFrame(read_json(RESULTS / "source_screen" / "final_frozen_core_summary.json")["rows"])
+def selected_table(candidates: pd.DataFrame) -> pd.DataFrame:
     records = []
-    for _, row in rows.iterrows():
-        point = scaling_point(row["scaling_json"])
-        records.append(
-            {
-                "encoder": "frozen encoder",
-                "source": row["source"],
-                "label": SOURCE_SHORT.get(row["source"], row["source"]),
-                "test_mae_deg_c": float(row["test_mae"]),
-                "ci_lo_deg_c": float(point["ci_lo"]),
-                "ci_hi_deg_c": float(point["ci_hi"]),
-                "validation_mae_deg_c": float(row["val_mae"]),
-                "scaling_json": str(resolve_path(row["scaling_json"]).relative_to(REPO)),
-            }
-        )
+    for regime in ("frozen", "hot"):
+        for source in SOURCES:
+            selected = candidates[(candidates["regime"] == regime) & (candidates["source"] == source)].nsmallest(1, "validation_mae").iloc[0]
+            run = final_run(source, regime); args, hp = run["args"], run["hparams"]
+            point = representative(run)
+            expected = (args.get("model_arch"), "-" if source == "Tm_only" else args.get("ddg_head_mode"),
+                        hp.get("learning_rate"), hp.get("encoder_lr"), hp.get("dropout_rate"), hp.get("weight_decay"))
+            observed = (selected["architecture"], selected["head"], selected["learning_rate"], selected["encoder_lr"], selected["dropout"], selected["weight_decay"])
+            if expected != observed:
+                raise ValueError(f"selected validation setting does not match final run: {source} {regime}\n{expected}\n{observed}")
+            records.append({"regime": regime, "source": source, "validation_mae": selected["validation_mae"],
+                            "test_mae": point["mae"], "ci_lo": point["ci_lo"], "ci_hi": point["ci_hi"],
+                            "architecture": expected[0], "head": expected[1], "learning_rate": expected[2],
+                            "encoder_lr": expected[3], "dropout": expected[4], "weight_decay": expected[5],
+                            "validation_run": selected["run"],
+                            "final_run": str((RESULTS / f"final_{STEMS[source]}_{regime}/scaling.json").relative_to(REPO))})
     return pd.DataFrame(records)
 
 
-def encoder_controls(final_sources: pd.DataFrame, frozen: pd.DataFrame) -> pd.DataFrame:
-    fine = final_sources[final_sources["source"].isin(["Tm_only", "FEP", "rosetta", MD_CONTACT_Q_SOURCE])].copy()
-    fine["encoder"] = "hot encoder"
-    fine = fine.rename(
-        columns={
-            "test_mae_deg_c": "test_mae_deg_c",
-            "ci_lo_deg_c": "ci_lo_deg_c",
-            "ci_hi_deg_c": "ci_hi_deg_c",
-        }
-    )
-    fine = fine[["encoder", "source", "label", "test_mae_deg_c", "ci_lo_deg_c", "ci_hi_deg_c", "validation_mae_deg_c", "scaling_json"]]
-    out = pd.concat([fine, frozen], ignore_index=True)
-    out["source"] = pd.Categorical(out["source"], ["Tm_only", "FEP", "rosetta", MD_CONTACT_Q_SOURCE], ordered=True)
-    out["encoder"] = pd.Categorical(out["encoder"], ["frozen encoder", "hot encoder"], ordered=True)
-    return out.sort_values(["source", "encoder"]).reset_index(drop=True)
-
-
-def data_sources_table() -> pd.DataFrame:
-    rows = [
-        ("Experimental Tm", "target train", 57),
-        ("Experimental Tm", "target validation", 114),
-        ("Experimental Tm", "target test", 396),
-        ("FEP mutation free energy", "source", 435 + 409),
-        ("Rosetta mutation score", "source", 435 + 409),
-        ("ThermoMPNN stability score", "source", 435 + 409),
-        ("random variants scored by Rosetta", "source", 1000 + 1000),
-        ("ESM2-proposed variants scored by Rosetta", "source", 1000 + 1000),
-    ]
-    q = pd.read_csv(MD_QVALUE_TABLE)
-    rows.append(("MD Q-value", "source", len(q)))
-    return pd.DataFrame(rows, columns=["data_set", "role", "processed_rows"])
-
-
-def md_q_summary_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    q = pd.read_csv(MD_QVALUE_TABLE)
-    q_keep = q[["pdb_id", "q_value_raw", "n_frames_used", "n_contacts", "seq_len", "ddg_scaled01"]].copy()
-    stats = []
-    for col in ["q_value_raw", "n_frames_used", "n_contacts", "seq_len", "ddg_scaled01"]:
-        s = q_keep[col]
-        stats.append(
-            {
-                "variable": col,
-                "n": int(s.notna().sum()),
-                "min": float(s.min()),
-                "median": float(s.median()),
-                "max": float(s.max()),
-            }
-        )
-
-    method_rows = []
-    manifest_path = MD_METADATA / "nano_manifest_400K.json"
-    sabdab_path = MD_METADATA / "sabdab_nano_summary_all.tsv"
-    if manifest_path.exists() and sabdab_path.exists():
-        manifest = read_json(manifest_path)
-        sabdab = pd.read_csv(sabdab_path, sep="\t")
-        selected = []
-        for entry in manifest:
-            idx = int(entry["tsv_row"]) - 1
-            if 0 <= idx < len(sabdab):
-                selected.append(sabdab.iloc[idx])
-        selected_df = pd.DataFrame(selected)
-        for method, count in selected_df["method"].value_counts(dropna=False).items():
-            method_rows.append({"method": str(method), "structures": int(count)})
-    else:
-        method_rows = [
-            {"method": "X-RAY DIFFRACTION", "structures": 798},
-            {"method": "ELECTRON MICROSCOPY", "structures": 345},
-            {"method": "SOLUTION NMR", "structures": 3},
-        ]
-    methods = pd.DataFrame(method_rows).sort_values("structures", ascending=False).reset_index(drop=True)
-    return q_keep, pd.DataFrame(stats), methods
-
-
-def scaling_table() -> pd.DataFrame:
-    specs = [
-        ("experimental Tm labels", RESULTS / "tm_ref_hot_mtl_tmselect" / "scaling.json", "target labels", COL["tm"]),
-        ("FEP mutation free-energy labels", RESULTS / "fep_hot_tmselect_enc3e-5" / "scaling.json", "source labels", COL["fep"]),
-        ("MD Q-value labels", RESULTS / "hot_q_400k_tmselect" / "scaling.json", "source labels", COL["mdq"]),
-    ]
-    rows = []
-    for label, path, x_kind, color in specs:
-        for point in all_scaling_points(path):
-            rows.append(
-                {
-                    "curve": label,
-                    "label_kind": x_kind,
-                    "n_labels": int(point["n"]),
-                    "mae_deg_c": float(point["mae"]),
-                    "ci_lo_deg_c": float(point["ci_lo"]),
-                    "ci_hi_deg_c": float(point["ci_hi"]),
-                    "color": color,
-                    "source_json": str(path.relative_to(REPO)),
-                }
-            )
-    return pd.DataFrame(rows)
-
-
-def source_count_selected_table() -> pd.DataFrame:
-    rows = []
-    for row in read_json(RESULTS / "hparam_search" / "per_nmd_test_summary.json"):
-        lo, hi = interval_from_row({"test_mae": row["test_mae"], "ci_width": row["ci_width"]})
-        rows.append(
-            {
-                "n_md_labels": int(row["n_md"]),
-                "selected_setting": row["label"],
-                "selected_validation_mae_deg_c": float(row["selected_val_mae"]),
-                "test_mae_deg_c": float(row["test_mae"]),
-                "ci_lo_approx_deg_c": float(lo),
-                "ci_hi_approx_deg_c": float(hi),
-                "ci_width_deg_c": float(row["ci_width"]),
-                "exp": row["exp"],
-            }
-        )
-    return pd.DataFrame(rows).sort_values("n_md_labels").reset_index(drop=True)
-
-
-def model_size_table(final_sources: pd.DataFrame) -> pd.DataFrame:
-    lookup = final_sources.set_index("source")
-    rows = [
-        ("8M", "Tm labels only", lookup.loc["Tm_only", "test_mae_deg_c"], lookup.loc["Tm_only", "ci_lo_deg_c"], lookup.loc["Tm_only", "ci_hi_deg_c"]),
-        ("8M", "FEP mutation free energy", lookup.loc["FEP", "test_mae_deg_c"], lookup.loc["FEP", "ci_lo_deg_c"], lookup.loc["FEP", "ci_hi_deg_c"]),
-    ]
-    for size, condition, path in [
-        ("35M", "Tm labels only", RESULTS / "size35_tm_shared_drop005" / "scaling.json"),
-        ("35M", "FEP mutation free energy", RESULTS / "size35_ddg_fep_enc3e-5" / "scaling.json"),
-        ("650M", "Tm labels only", RESULTS / "size650_tm_shared_drop005" / "scaling.json"),
-        ("650M", "FEP mutation free energy", RESULTS / "size650_ddg_fep_enc3e-5" / "scaling.json"),
-    ]:
-        point = all_scaling_points(path)[0]
-        rows.append((size, condition, point["mae"], point["ci_lo"], point["ci_hi"]))
-    out = pd.DataFrame(rows, columns=["esm2_size", "condition", "test_mae_deg_c", "ci_lo_deg_c", "ci_hi_deg_c"])
-    out["esm2_size"] = pd.Categorical(out["esm2_size"], ["8M", "35M", "650M"], ordered=True)
-    out["condition"] = pd.Categorical(out["condition"], ["Tm labels only", "FEP mutation free energy"], ordered=True)
-    return out.sort_values(["esm2_size", "condition"]).reset_index(drop=True)
-
-
-def head_controls_table(path: Path, encoder: str) -> pd.DataFrame:
-    rows = []
-    for row in read_json(path)["rows"]:
-        point = scaling_point(row["scaling_json"])
-        rows.append(
-            {
-                "encoder": encoder,
-                "source_head": {
-                    "separate": "template-specific",
-                    "shared": "shared",
-                    "context": "conditioned",
-                    "calibrated": "calibrated",
-                }.get(row["ddg_head_mode"], row["ddg_head_mode"]),
-                "test_mae_deg_c": float(row["test_mae"]),
-                "ci_lo_deg_c": float(point["ci_lo"]),
-                "ci_hi_deg_c": float(point["ci_hi"]),
-                "validation_mae_deg_c": float(row["val_mae"]),
-                "selected_setting": row["label"],
-                "exp": row["exp"],
-            }
-        )
-    return pd.DataFrame(rows)
-
-
-def abcd_table() -> pd.DataFrame:
-    label = {
-        "A_Tm": "Tm only",
-        "B_ddG": "FEP only",
-        "C_MD": "MD Q only",
-        "D_ddG_MD_validation_selected": "FEP + selected MD",
-        "D_ddG_MD_extra_q_" + INTERNAL_MD_Q_TOKEN: "FEP + MD Q-value",
-    }
-    rows = []
-    for row in read_json(RESULTS / "abcd_search" / "final_abcd_with_dq_summary.json")["rows"]:
-        lo, hi = interval_from_row({"test_mae": row["test_mae"], "ci_width": row["ci_width"]})
-        rows.append(
-            {
-                "condition": row["condition"],
-                "label": label.get(row["condition"], row["condition"]),
-                "architecture": row.get("arch", ""),
-                "test_mae_deg_c": float(row["test_mae"]),
-                "ci_lo_approx_deg_c": float(lo),
-                "ci_hi_approx_deg_c": float(hi),
-                "ci_width_deg_c": float(row["ci_width"]),
-            }
-        )
-    return pd.DataFrame(rows)
-
-
-def md_feature_table() -> pd.DataFrame:
-    rows = []
-    for row in read_json(RESULTS / "arch_search" / "feature_summary.json"):
-        rows.append(
-            {
-                "feature": row["condition"],
-                "label": MD_FEATURE_LABEL.get(row["condition"], row["condition"]),
-                "validation_mae_deg_c": float(row["val_mae"]),
-                "ci_width_deg_c": float(row["ci_width"]),
-                "architecture": row["arch"],
-                "exp": row["exp"],
-            }
-        )
-    out = pd.DataFrame(rows).sort_values("validation_mae_deg_c").reset_index(drop=True)
-    return out
-
-
-def architecture_controls_table() -> pd.DataFrame:
-    label = {
-        "tm_latent_drop0.30": "Tm only, latent-control architecture",
-        "tm_residual_enc3e-4": "Tm only, residual-control architecture",
-        MD_CONTACT_Q_CONDITION: "MD Q-value, residual-control architecture",
-        "residual_q_slope_400k": "Q-value slope",
-        MD_CONTACT_Q_SHUFFLED_CONDITION: "MD Q-value, shuffled labels",
-        "residual_cdr3_len": "CDR3 length",
-        "residual_rmsf_cdr3": "CDR3 residue fluctuation",
-        "residual_ss_dist_std": "disulfide-distance fluctuation",
-        "residual_rmsf_max": "maximum residue fluctuation",
-    }
-    rows = []
-    for row in read_json(RESULTS / "arch_search" / "final_summary.json"):
-        lo, hi = interval_from_row({"test_mae": row["test_mae"], "ci_width": row["ci_width"]})
-        rows.append(
-            {
-                "condition": row["condition"],
-                "label": label.get(row["condition"], row["condition"]),
-                "architecture": row["arch"],
-                "n_md": int(row["n_md"]),
-                "test_mae_deg_c": float(row["test_mae"]),
-                "ci_lo_approx_deg_c": float(lo),
-                "ci_hi_approx_deg_c": float(hi),
-                "ci_width_deg_c": float(row["ci_width"]),
-                "exp": row["exp"],
-            }
-        )
-    return pd.DataFrame(rows)
-
-
-def descriptor_test_controls_table() -> pd.DataFrame:
-    rows = []
-    for spec in DESCRIPTOR_TEST_SPECS:
-        path = RESULTS / spec["result_dir"] / "scaling.json"
-        if not path.exists():
-            continue
-        point = read_json(path)["scaling"][0]
-        rows.append(
-            {
-                "condition": spec["condition"],
-                "feature": spec["feature"],
-                "label": spec["label"],
-                "short_label": spec["short_label"],
-                "group": spec["group"],
-                "test_mae_deg_c": float(point["mae"]),
-                "ci_lo_deg_c": float(point["ci_lo"]),
-                "ci_hi_deg_c": float(point["ci_hi"]),
-                "ci_width_deg_c": float(point["ci_hi"]) - float(point["ci_lo"]),
-                "scaling_json": str(path.relative_to(REPO)),
-            }
-        )
-    return pd.DataFrame(rows).sort_values("test_mae_deg_c").reset_index(drop=True)
-
-
-def trajectory_length_table() -> pd.DataFrame:
-    rows = []
-    for path in sorted(RESULTS.glob("short_*")):
-        scaling = path / "scaling.json"
-        if not scaling.exists():
-            continue
-        data = read_json(scaling)
-        args = data.get("args", {})
-        source = args.get("md_source", "")
-        match = re.search(r"_T(\d+)$", source)
-        if not match:
-            continue
-        point = data.get("best", data["scaling"][-1])
-        rows.append(
-            {
-                "encoder": "hot encoder" if "short_hot" in path.name else "frozen encoder",
-                "trajectory_ns": int(match.group(1)),
-                "test_mae_deg_c": float(point["mae"]),
-                "ci_width_deg_c": float(point.get("ci_width", np.nan)),
-                "exp": path.name,
-            }
-        )
-    out = pd.DataFrame(rows)
-    out["encoder"] = pd.Categorical(out["encoder"], ["frozen encoder", "hot encoder"], ordered=True)
-    return out.sort_values(["encoder", "trajectory_ns"]).reset_index(drop=True)
-
-
-def md_label_distribution_table() -> pd.DataFrame:
-    rows = []
-    for label, path, preferred in DESCRIPTOR_VALUE_SPECS:
-        df = pd.read_csv(path)
-        col = preferred if preferred in df.columns else "ddg_scaled01"
-        for _, row in df.dropna(subset=[col]).iterrows():
-            rows.append(
-                {
-                    "label": label,
-                    "seq": row.get("seq", ""),
-                    "pdb_id": row.get("pdb_id", ""),
-                    "value": float(row[col]),
-                    "source_file": str(path.relative_to(REPO)),
-                }
-            )
-    return pd.DataFrame(rows)
-
-
-def candidate_label(row: pd.Series) -> str:
-    label = str(row.get("label", "default"))
-    if label == "default":
-        return "default"
-    if label == "fixed":
-        return "fixed source weight"
-    if label.startswith("fixed_w"):
-        return "fixed source weight " + label.split("fixed_w", 1)[1]
-    if label.startswith("drop"):
-        return "dropout " + label.replace("drop", "")
-    if label.startswith("enc"):
-        return "encoder LR " + label.replace("enc", "")
-    if label.startswith("lr"):
-        return "lower trunk LR"
-    return label
-
-
-def fig_s1_data_and_md(q: pd.DataFrame, methods: pd.DataFrame, sources: pd.DataFrame) -> None:
-    fig, axes = plt.subplots(2, 2, figsize=(7.4, 6.0), constrained_layout=True)
-
-    ax = axes[0, 0]
-    source_counts = sources.copy()
-    source_counts["plot_label"] = [
-        "Tm train",
-        "Tm validation",
-        "Tm test",
-        "FEP",
-        "Rosetta",
-        "ThermoMPNN",
-        "random/Rosetta",
-        "ESM2/Rosetta",
-        "MD Q-value",
-    ]
-    source_counts = source_counts.iloc[::-1].reset_index(drop=True)
-    ypos = np.arange(len(source_counts))
-    colors = [
-        COL["tm"] if r == "target train" else COL["light_gray"] if r.startswith("target") else COL["mdq"] if "MD" in d else COL["fep"]
-        for d, r in zip(source_counts["data_set"], source_counts["role"])
-    ]
-    ax.barh(ypos, source_counts["processed_rows"], color=colors, edgecolor="white", linewidth=0.6)
-    ax.set_xscale("log")
-    ax.set_xlabel("processed rows")
-    ax.set_yticks(ypos)
-    ax.set_yticklabels(source_counts["plot_label"])
-    ax.invert_yaxis()
-    polish(ax, "x")
-    panel_label(ax, "A")
-
-    ax = axes[0, 1]
-    ax.hist(q["q_value_raw"], bins=32, color=COL["mdq"], alpha=0.82, edgecolor="white", linewidth=0.4)
-    ax.axvline(q["q_value_raw"].median(), color=COL["black"], linewidth=1.1)
-    ax.set_xlabel("raw MD Q-value")
-    ax.set_ylabel("structures")
-    polish(ax, "y")
-    panel_label(ax, "B")
+def fig_s2(candidates: pd.DataFrame, selected: pd.DataFrame) -> None:
+    fig, axes = plt.subplots(2, 2, figsize=(7.4, 6.3), constrained_layout=True)
+    rng = np.random.default_rng(13)
+    for ax, regime, letter in [(axes[0, 0], "frozen", "a"), (axes[0, 1], "hot", "b")]:
+        for y, source in enumerate(SOURCES):
+            d = candidates[(candidates["regime"] == regime) & (candidates["source"] == source)]
+            jitter = rng.uniform(-0.12, 0.12, len(d))
+            ax.scatter(d["validation_mae"], y + jitter, s=15, color=COLOR[source], alpha=0.38, edgecolor="none")
+            best = d.nsmallest(1, "validation_mae").iloc[0]
+            ax.scatter(best["validation_mae"], y, s=56, marker="D", color=COLOR[source], edgecolor="white", linewidth=0.8, zorder=4)
+        ax.set_yticks(range(len(SOURCES)), [SHORT[x] for x in SOURCES]); ax.invert_yaxis()
+        ax.set_xlabel("Tm validation MAE (deg C)"); ax.set_title("frozen ESM2" if regime == "frozen" else "fine-tuned ESM2")
+        polish(ax, "x"); panel_label(ax, letter)
 
     ax = axes[1, 0]
-    ax.scatter(q["seq_len"], q["q_value_raw"], s=10, color=COL["mdq"], alpha=0.42, edgecolor="none")
-    ax.set_xlabel("sequence length")
-    ax.set_ylabel("raw MD Q-value")
-    ax.set_xlim(45, max(470, q["seq_len"].max() + 10))
-    ax.set_ylim(0.0, 1.02)
-    polish(ax, "both")
-    panel_label(ax, "C")
+    columns = [("frozen", "architecture", "frozen\narch."), ("frozen", "head", "frozen\nhead"),
+               ("hot", "architecture", "fine-tuned\narch."), ("hot", "head", "fine-tuned\nhead")]
+    ax.set_xlim(-.5, 3.5); ax.set_ylim(len(SOURCES)-.5, -.5)
+    ax.set_xticks(range(4), [c[2] for c in columns]); ax.set_yticks(range(len(SOURCES)), [SHORT[x] for x in SOURCES])
+    fill = {"shared": COL["soft_green"], "residual": COL["soft_orange"], "latent": COL["soft_blue"],
+            "separate": COL["soft_green"], "context": COL["soft_blue"], "-": COL["soft_gray"]}
+    for y, source in enumerate(SOURCES):
+        for x, (regime, field, _) in enumerate(columns):
+            value = selected[(selected["regime"] == regime) & (selected["source"] == source)].iloc[0][field]
+            ax.add_patch(plt.Rectangle((x-.48, y-.46), .96, .92, facecolor=fill.get(value, "white"), edgecolor="white"))
+            ax.text(x, y, value, ha="center", va="center", fontsize=7.8)
+    ax.grid(False); panel_label(ax, "c")
 
     ax = axes[1, 1]
-    method_labels = methods["method"].str.replace("X-RAY DIFFRACTION", "X-ray", regex=False)
-    method_labels = method_labels.str.replace("ELECTRON MICROSCOPY", "EM", regex=False)
-    method_labels = method_labels.str.replace("SOLUTION NMR", "NMR", regex=False)
-    ypos = np.arange(len(methods))
-    ax.barh(ypos, methods["structures"], color=[COL["design"], COL["rosetta"], COL["gray"]][: len(methods)], edgecolor="white")
-    ax.set_yticks(ypos)
-    ax.set_yticklabels(method_labels)
-    ax.invert_yaxis()
-    ax.set_xlabel("selected SAbDab structures")
-    polish(ax, "x")
-    panel_label(ax, "D")
-
-    save_figure(fig, "supp_fig01_data_and_md_label")
-
-
-def fig_s2_candidate_settings(hunt: pd.DataFrame, frozen_hunt: pd.DataFrame, head_hunt: pd.DataFrame, final_sources: pd.DataFrame) -> None:
-    fig, axes = plt.subplots(2, 2, figsize=(7.4, 6.2), constrained_layout=True)
-
-    ax = axes[0, 0]
-    plot_order = SOURCE_ORDER
-    for i, source in enumerate(plot_order):
-        vals = hunt.loc[hunt["source"].astype(str) == source, "val_mae"].dropna().to_numpy(float)
-        if len(vals) == 0:
-            continue
-        x = np.full(len(vals), i) + np.linspace(-0.18, 0.18, len(vals))
-        ax.scatter(x, vals, s=18, color=SOURCE_COLOR[source], alpha=0.55, edgecolor="white", linewidth=0.3)
-        best = vals.min()
-        ax.scatter([i], [best], s=44, color=SOURCE_COLOR[source], marker="D", edgecolor="white", linewidth=0.6, zorder=5)
-    ax.set_xticks(np.arange(len(plot_order)))
-    ax.set_xticklabels([SOURCE_TICK[s] for s in plot_order], rotation=28, ha="right", rotation_mode="anchor")
-    ax.set_ylabel("experimental validation MAE (deg C)")
-    ax.set_ylim(5.55, 7.25)
-    polish(ax, "y")
-    panel_label(ax, "A")
-
-    ax = axes[0, 1]
-    frozen_order = ["Tm_only", "FEP", "rosetta", MD_CONTACT_Q_SOURCE]
-    for i, source in enumerate(frozen_order):
-        vals = frozen_hunt.loc[frozen_hunt["source"].astype(str) == source, "val_mae"].dropna().to_numpy(float)
-        x = np.full(len(vals), i) + np.linspace(-0.17, 0.17, max(len(vals), 1))[: len(vals)]
-        ax.scatter(x, vals, s=18, color=SOURCE_COLOR[source], alpha=0.55, edgecolor="white", linewidth=0.3)
-        if len(vals):
-            ax.scatter([i], [vals.min()], s=44, color=SOURCE_COLOR[source], marker="D", edgecolor="white", linewidth=0.6, zorder=5)
-    ax.set_xticks(np.arange(len(frozen_order)))
-    ax.set_xticklabels([SOURCE_TICK[s] for s in frozen_order])
-    ax.set_ylabel("experimental validation MAE (deg C)")
-    ax.set_ylim(6.3, 7.6)
-    polish(ax, "y")
-    panel_label(ax, "B")
-
-    ax = axes[1, 0]
-    head_order = ["separate", "shared", "context", "calibrated"]
-    head_names = {
-        "separate": "template-\nspecific",
-        "shared": "shared",
-        "context": "conditioned",
-        "calibrated": "calibrated",
-    }
-    for i, mode in enumerate(head_order):
-        vals = head_hunt.loc[head_hunt["ddg_head_mode"] == mode, "val_mae"].dropna().to_numpy(float)
-        x = np.full(len(vals), i) + np.linspace(-0.18, 0.18, len(vals))
-        ax.scatter(x, vals, s=18, color=COL["fep"], alpha=0.55, edgecolor="white", linewidth=0.3)
-        if len(vals):
-            ax.scatter([i], [vals.min()], s=44, color=COL["fep"], marker="D", edgecolor="white", linewidth=0.6, zorder=5)
-    ax.set_xticks(np.arange(len(head_order)))
-    ax.set_xticklabels([head_names[h] for h in head_order])
-    ax.set_ylabel("experimental validation MAE (deg C)")
-    ax.set_ylim(5.55, 7.35)
-    polish(ax, "y")
-    panel_label(ax, "C")
-
-    ax = axes[1, 1]
-    for _, row in final_sources.iterrows():
-        source = str(row["source"])
-        ax.scatter(
-            row["validation_mae_deg_c"],
-            row["test_mae_deg_c"],
-            s=46,
-            color=SOURCE_COLOR[source],
-            edgecolor="white",
-            linewidth=0.6,
-            zorder=3,
-        )
-        if source in ["Tm_only", "FEP", MD_CONTACT_Q_SOURCE]:
-            ax.annotate(
-                SOURCE_SHORT[source],
-                xy=(row["validation_mae_deg_c"], row["test_mae_deg_c"]),
-                xytext=(6, 6),
-                textcoords="offset points",
-                fontsize=6.8,
-                arrowprops=dict(arrowstyle="-", lw=0.45, color=COL["gray"]),
-            )
-    ax.set_xlabel("selected validation MAE (deg C)")
-    ax.set_ylabel("held-out test MAE (deg C)")
-    ax.set_xlim(5.68, 6.28)
-    ax.set_ylim(6.15, 6.85)
-    polish(ax, "both")
-    panel_label(ax, "D")
-
-    save_figure(fig, "supp_fig02_candidate_setting_search")
+    for regime, marker, label in [("frozen", "s", "frozen"), ("hot", "o", "fine-tuned")]:
+        d = selected[selected["regime"] == regime]
+        for _, r in d.iterrows():
+            ax.scatter(r["validation_mae"], r["test_mae"], s=45, marker=marker, color=COLOR[r["source"]], edgecolor="white", linewidth=.7)
+            if r["source"] in {"FEP", "MD_FEP400K", "rosetta_esm"}:
+                offset = {"FEP": (3, -10), "MD_FEP400K": (3, 4), "rosetta_esm": (3, 4)}[r["source"]]
+                ha = "left"
+                if r["source"] == "rosetta_esm" and regime == "frozen":
+                    offset, ha = (-3, 4), "right"
+                ax.annotate(SHORT[r["source"]], (r["validation_mae"], r["test_mae"]),
+                            xytext=offset, textcoords="offset points", fontsize=6.9, ha=ha)
+    ax.set_xlabel("selected validation MAE (deg C)"); ax.set_ylabel("held-out test MAE (deg C)")
+    handles = [Line2D([], [], marker="s", color="none", markerfacecolor=COL["gray"], label="frozen"),
+               Line2D([], [], marker="o", color="none", markerfacecolor=COL["gray"], label="fine-tuned")]
+    ax.legend(handles=handles, frameon=False, loc="upper left"); polish(ax); panel_label(ax, "d")
+    save_figure(fig, "supp_fig02_model_selection")
 
 
-def fig_s3_controls(encoders: pd.DataFrame, heads_hot: pd.DataFrame, heads_frozen: pd.DataFrame, abcd: pd.DataFrame) -> None:
+def effect_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    effects = []
+    for regime in ("frozen", "hot"):
+        base = representative(final_run("Tm_only", regime))["abs_errors"]
+        for source in SOURCES:
+            point = representative(final_run(source, regime))
+            if source == "Tm_only": delta, lo, hi = 0.0, 0.0, 0.0
+            else: delta, lo, hi = paired_delta(base, point["abs_errors"])
+            effects.append({"regime": regime, "source": source, "test_mae": point["mae"],
+                            "ci_lo": point["ci_lo"], "ci_hi": point["ci_hi"],
+                            "delta_mae": delta, "delta_ci_lo": lo, "delta_ci_hi": hi})
+    direct = []
+    for regime in ("frozen", "hot"):
+        fep = {int(p["n"]): p for p in final_run("FEP", regime)["scaling"]}
+        md = {int(p["n"]): p for p in final_run("MD_FEP400K", regime)["scaling"]}
+        for n in sorted(fep.keys() & md.keys()):
+            d, lo, hi = paired_delta(md[n]["abs_errors"], fep[n]["abs_errors"])
+            direct.append({"regime": regime, "n": n, "fep_minus_md": d, "ci_lo": lo, "ci_hi": hi})
+    sizes = []
+    specs = [("8M", "Tm labels only", RESULTS / "final_tm_hot/scaling.json"),
+             ("8M", "FEP", RESULTS / "final_fep_hot/scaling.json"),
+             ("35M", "Tm labels only", RESULTS / "size35_tm_shared_drop005/scaling.json"),
+             ("35M", "FEP", RESULTS / "size35_ddg_fep_enc3e-5/scaling.json"),
+             ("650M", "Tm labels only", RESULTS / "size650_tm_shared_drop005/scaling.json"),
+             ("650M", "FEP", RESULTS / "size650_ddg_fep_enc3e-5/scaling.json")]
+    for size, condition, path in specs:
+        p = representative(read_json(path)); sizes.append({"size": size, "condition": condition, "test_mae": p["mae"], "ci_lo": p["ci_lo"], "ci_hi": p["ci_hi"], "source": str(path.relative_to(REPO))})
+    return pd.DataFrame(effects), pd.DataFrame(direct), pd.DataFrame(sizes)
+
+
+def fig_s3(effects: pd.DataFrame, direct: pd.DataFrame, sizes: pd.DataFrame) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(7.4, 6.1), constrained_layout=True)
+    for ax, regime, letter in [(axes[0, 0], "frozen", "a"), (axes[0, 1], "hot", "b")]:
+        d = effects[effects["regime"] == regime].set_index("source").loc[SOURCES]
+        for y, (source, r) in enumerate(d.iterrows()): interval(ax, y, r.test_mae, r.ci_lo, r.ci_hi, COLOR[source])
+        ax.set_yticks(range(len(SOURCES)), [SHORT[x] for x in SOURCES]); ax.invert_yaxis()
+        ax.set_xlabel("held-out Tm test MAE (deg C)"); ax.set_title("frozen ESM2" if regime == "frozen" else "fine-tuned ESM2")
+        polish(ax, "x"); panel_label(ax, letter)
 
-    ax = axes[0, 0]
-    sources = ["Tm_only", "FEP", "rosetta", MD_CONTACT_Q_SOURCE]
-    offsets = {"frozen encoder": -0.13, "hot encoder": 0.13}
-    markers = {"frozen encoder": "s", "hot encoder": "o"}
-    for encoder in ["frozen encoder", "hot encoder"]:
-        subset = encoders[encoders["encoder"] == encoder].set_index("source")
-        for i, source in enumerate(sources):
-            row = subset.loc[source]
-            horizontal_interval(
-                ax,
-                i + offsets[encoder],
-                row["test_mae_deg_c"],
-                row["ci_lo_deg_c"],
-                row["ci_hi_deg_c"],
-                SOURCE_COLOR[source],
-                marker=markers[encoder],
-            )
-    ax.set_yticks(np.arange(len(sources)))
-    ax.set_yticklabels([SOURCE_LABEL[s] for s in sources])
-    ax.invert_yaxis()
-    ax.set_xlabel("held-out test MAE (deg C)")
-    ax.set_xlim(5.95, 7.70)
-    ax.legend(
-        handles=[
-            Line2D([0], [0], marker="s", color=COL["black"], linestyle="none", label="frozen encoder", markersize=5),
-            Line2D([0], [0], marker="o", color=COL["black"], linestyle="none", label="hot encoder", markersize=5),
-        ],
-        frameon=False,
-        loc="lower center",
-        bbox_to_anchor=(0.55, 1.01),
-        ncol=2,
-    )
-    polish(ax, "x")
-    panel_label(ax, "A")
-
-    for ax, df, letter, xlim in [
-        (axes[0, 1], heads_hot, "B", (5.95, 6.78)),
-        (axes[1, 0], heads_frozen, "C", (7.05, 7.34)),
-    ]:
-        ordered = df.sort_values("test_mae_deg_c")
-        y = np.arange(len(ordered))
-        for i, (_, row) in enumerate(ordered.iterrows()):
-            horizontal_interval(ax, i, row["test_mae_deg_c"], row["ci_lo_deg_c"], row["ci_hi_deg_c"], COL["fep"])
-            ax.text(xlim[1] - 0.015, i, f"{row['test_mae_deg_c']:.2f}", va="center", ha="right", fontsize=6.8)
-        ax.set_yticks(y)
-        ax.set_yticklabels(ordered["source_head"])
-        ax.invert_yaxis()
-        ax.set_xlabel("held-out test MAE (deg C)")
-        ax.set_xlim(*xlim)
-        polish(ax, "x")
-        panel_label(ax, letter)
+    ax = axes[1, 0]
+    x = np.arange(4)
+    for regime, offset, color, marker, label in [("frozen", -.08, COL["design"], "s", "frozen"),
+                                                  ("hot", .08, COL["fep"], "o", "fine-tuned")]:
+        d = direct[direct["regime"] == regime].sort_values("n")
+        y = d["fep_minus_md"].to_numpy(); yerr = np.vstack([y-d["ci_lo"], d["ci_hi"]-y])
+        ax.errorbar(x+offset, y, yerr=yerr, color=color, marker=marker, capsize=3, label=label, markeredgecolor="white", markeredgewidth=.7)
+    ax.axhline(0, color=COL["black"], linewidth=.9); ax.set_xticks(x, [20, 80, 160, 320])
+    ax.set_xlabel("computed labels sampled per structure table")
+    ax.set_ylabel("paired ΔMAE: FEP - matched MD (deg C)")
+    ax.text(.03, .05, "negative favors FEP", transform=ax.transAxes, fontsize=8)
+    ax.legend(frameon=False); polish(ax); panel_label(ax, "c")
 
     ax = axes[1, 1]
-    order = [
-        "Tm only",
-        "FEP only",
-        "MD Q only",
-        "FEP + MD Q-value",
-        "FEP + selected MD",
-    ]
-    plot = abcd.set_index("label").loc[order].reset_index()
-    y = np.arange(len(plot))
-    colors = [COL["tm"], COL["fep"], COL["mdq"], COL["mdq"], COL["rmsf"]]
-    for i, (_, row) in enumerate(plot.iterrows()):
-        horizontal_interval(
-            ax,
-            i,
-            row["test_mae_deg_c"],
-            row["ci_lo_approx_deg_c"],
-            row["ci_hi_approx_deg_c"],
-            colors[i],
-            alpha=0.94,
-        )
-        ax.text(6.93, i, f"{row['test_mae_deg_c']:.2f}", va="center", ha="right", fontsize=6.8)
-    ax.set_yticks(y)
-    ax.set_yticklabels(plot["label"])
-    ax.invert_yaxis()
-    ax.set_xlabel("held-out test MAE (deg C)")
-    ax.set_xlim(6.15, 6.95)
-    polish(ax, "x")
-    panel_label(ax, "D")
-
-    save_figure(fig, "supp_fig03_model_controls")
+    order = ["8M", "35M", "650M"]; x = np.arange(3)
+    for condition, color, marker, offset in [("Tm labels only", COL["tm"], "s", -.06), ("FEP", COL["fep"], "o", .06)]:
+        d = sizes[sizes["condition"] == condition].set_index("size").loc[order]
+        y = d["test_mae"].to_numpy(); yerr = np.vstack([y-d["ci_lo"], d["ci_hi"]-y])
+        ax.errorbar(x+offset, y, yerr=yerr, color=color, marker=marker, capsize=3, label=condition, markeredgecolor="white", markeredgewidth=.7)
+    ax.set_xticks(x, order); ax.set_xlabel("ESM2 encoder size"); ax.set_ylabel("held-out Tm test MAE (deg C)")
+    ax.legend(frameon=False); polish(ax); panel_label(ax, "d")
+    save_figure(fig, "supp_fig03_transfer_controls")
 
 
-def fig_s4_scaling(
-    selected_md: pd.DataFrame,
-    model_sizes: pd.DataFrame,
-    traj: pd.DataFrame,
-    final_sources: pd.DataFrame,
-) -> None:
+def fep_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    prov = pd.read_csv(DATA / "source_labels/fep/PROVENANCE.tsv", sep="\t")
+    prov = prov[prov["pos"] > 0].copy()
+    composition = prov.groupby(["system", "mut"], as_index=False).size().rename(columns={"size": "rows"})
+    def scale(values) -> np.ndarray:
+        """Robust -> Yeo-Johnson -> standardize -> min-max, matching convert_yj.ipynb."""
+        x = np.asarray(values, float)
+        iqr = np.percentile(x, 75) - np.percentile(x, 25)
+        x = (x - np.median(x)) / iqr
+        x, _ = yeojohnson(x)
+        x = (x - x.mean()) / x.std()
+        return (x - x.min()) / (x.max() - x.min())
+    sensitivity = []
+    corrected_rows = []
+    for name, amount in [("periodicity eps=97", 0.069), ("periodicity eps=78", 0.086),
+                         ("sensitivity 0.5", 0.5), ("sensitivity 1.5", 1.5)]:
+        all_u, all_c = [], []
+        for system, g in prov.groupby("system"):
+            raw = -g["ddg"].to_numpy()
+            corrected = -(g["ddg"] + amount * g["dq"]**2).to_numpy()
+            u, c = scale(raw), scale(corrected)
+            all_u.extend(u); all_c.extend(c)
+            if name == "periodicity eps=78":
+                corrected_rows.extend({"system": system, "unadjusted": a, "corrected": b} for a, b in zip(u, c))
+        u, c = np.asarray(all_u), np.asarray(all_c)
+        sensitivity.append({"correction": name, "kcal_per_dq2": amount, "label_correlation": np.corrcoef(u, c)[0, 1],
+                            "max_abs_scaled_shift": np.max(np.abs(u-c)), "rows_shifted_gt_0.02": int(np.sum(np.abs(u-c) > .02))})
+    return composition, pd.DataFrame(sensitivity), pd.DataFrame(corrected_rows), prov
+
+
+def fig_s4(composition, sensitivity, corrected, prov) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(7.4, 5.9), constrained_layout=True)
-
     ax = axes[0, 0]
-    interval_sources = ["Tm_only", "FEP", MD_CONTACT_Q_SOURCE]
-    subset = final_sources[final_sources["source"].isin(interval_sources)].copy()
-    subset["source"] = subset["source"].astype(str)
-    subset["source"] = pd.Categorical(subset["source"], interval_sources, ordered=True)
-    subset = subset.sort_values("source")
-    y = np.arange(len(subset))
-    for i, (_, row) in enumerate(subset.iterrows()):
-        source = str(row["source"])
-        color = SOURCE_COLOR[source]
-        ax.plot([row["ci95_lo_deg_c"], row["ci95_hi_deg_c"]], [i + 0.12, i + 0.12], color=color, alpha=0.32, linewidth=3.0)
-        horizontal_interval(
-            ax,
-            i - 0.12,
-            row["test_mae_deg_c"],
-            row["ci_lo_deg_c"],
-            row["ci_hi_deg_c"],
-            color,
-            marker="s" if source == "Tm_only" else "o",
-        )
-        ax.text(row["ci_hi_deg_c"] + 0.025, i - 0.12, f"{row['test_mae_deg_c']:.2f}", va="center", fontsize=6.8)
-    ax.set_yticks(y)
-    ax.set_yticklabels([SOURCE_SHORT[s] for s in interval_sources])
-    ax.invert_yaxis()
-    ax.set_xlabel("held-out test MAE (deg C)")
-    ax.set_xlim(6.0, 7.22)
-    ax.legend(
-        handles=[
-            Line2D([0], [0], color=COL["black"], linewidth=1.8, marker="o", markersize=4, label="90% interval"),
-            Line2D([0], [0], color=COL["black"], linewidth=3.0, alpha=0.32, label="95% interval"),
-        ],
-        frameon=False,
-        loc="lower right",
-        bbox_to_anchor=(1.0, 1.01),
-        ncol=2,
-        handlelength=1.8,
-        columnspacing=1.0,
-    )
-    polish(ax, "x")
-    panel_label(ax, "A")
+    pivot = composition.pivot(index="mut", columns="system", values="rows").fillna(0).loc[["A", "D", "I", "Q"]]
+    x = np.arange(len(pivot)); bottom = np.zeros(len(pivot))
+    for system, color in [("1mel", COL["design"]), ("4idl", COL["md"])]:
+        bars = ax.bar(x, pivot[system], bottom=bottom, color=color, label=system.upper())
+        bottom += pivot[system].to_numpy()
+    ax.set_xticks(x, ["Ala", "Asp", "Ile", "Gln"]); ax.set_ylabel("retained FEP rows")
+    ax.legend(frameon=False); polish(ax, "y"); panel_label(ax, "a")
 
     ax = axes[0, 1]
-    baseline = selected_md.loc[selected_md["n_md_labels"] == 0, "test_mae_deg_c"].iloc[0]
-    ax.axhline(baseline, color=COL["tm"], linestyle="--", linewidth=1.1, label="selected Tm-only reference")
-    ax.plot(selected_md["n_md_labels"].replace(0, 1), selected_md["test_mae_deg_c"], marker="o", color=COL["mdq"])
-    ax.fill_between(
-        selected_md["n_md_labels"].replace(0, 1),
-        selected_md["ci_lo_approx_deg_c"],
-        selected_md["ci_hi_approx_deg_c"],
-        color=COL["mdq"],
-        alpha=0.08,
-        lw=0,
-    )
-    ax.set_xscale("log")
-    ax.set_xticks([1, 10, 40, 80, 160, 320, 640])
-    ax.set_xticklabels(["0", "10", "40", "80", "160", "320", "640"])
-    ax.set_xlabel("MD Q-value labels used")
-    ax.set_ylabel("held-out test MAE (deg C)")
-    ax.set_ylim(6.40, 6.95)
-    polish(ax, "both")
-    panel_label(ax, "B")
+    q = prov["dq"].value_counts().sort_index(); bars = ax.bar([str(int(v)) for v in q.index], q.values, color=COL["fep"])
+    ax.bar_label(bars, fontsize=8, padding=2); ax.set_xlabel("mutation charge change, Δq")
+    ax.set_ylabel("FEP rows"); polish(ax, "y"); panel_label(ax, "b")
 
     ax = axes[1, 0]
-    sizes = ["8M", "35M", "650M"]
-    xpos = np.arange(len(sizes))
-    offsets = {"Tm labels only": -0.10, "FEP mutation free energy": 0.10}
-    colors = {"Tm labels only": COL["tm"], "FEP mutation free energy": COL["fep"]}
-    markers = {"Tm labels only": "s", "FEP mutation free energy": "o"}
-    for condition in ["Tm labels only", "FEP mutation free energy"]:
-        subset = model_sizes[model_sizes["condition"] == condition].set_index("esm2_size")
-        vals = np.array([subset.loc[s, "test_mae_deg_c"] for s in sizes], dtype=float)
-        lo = vals - np.array([subset.loc[s, "ci_lo_deg_c"] for s in sizes], dtype=float)
-        hi = np.array([subset.loc[s, "ci_hi_deg_c"] for s in sizes], dtype=float) - vals
-        ax.errorbar(
-            xpos + offsets[condition],
-            vals,
-            yerr=[lo, hi],
-            color=colors[condition],
-            marker=markers[condition],
-            capsize=2.5,
-            linewidth=1.0,
-            label=condition,
-        )
-    ax.set_xticks(xpos)
-    ax.set_xticklabels(sizes)
-    ax.set_xlabel("ESM2 encoder size")
-    ax.set_ylabel("held-out test MAE (deg C)")
-    ax.set_ylim(6.00, 7.32)
-    ax.legend(frameon=False, loc="upper left")
-    polish(ax, "y")
-    panel_label(ax, "C")
+    ax.scatter(corrected["unadjusted"], corrected["corrected"], s=10, alpha=.30, color=COL["fep"], edgecolor="none")
+    ax.plot([0, 1], [0, 1], color=COL["black"], linewidth=.9, linestyle="--")
+    corr = np.corrcoef(corrected["unadjusted"], corrected["corrected"])[0, 1]
+    shift = np.max(np.abs(corrected["unadjusted"]-corrected["corrected"]))
+    ax.text(.04, .94, f"r = {corr:.5f}\nmax shift = {shift:.3f}", transform=ax.transAxes, va="top", fontsize=8.2)
+    ax.set_xlabel("unadjusted scaled FEP label"); ax.set_ylabel("charge-corrected scaled FEP label")
+    polish(ax); panel_label(ax, "c")
 
     ax = axes[1, 1]
-    for encoder, color, marker in [("frozen encoder", COL["gray"], "s"), ("hot encoder", COL["mdq"], "o")]:
-        subset = traj[traj["encoder"] == encoder]
-        ax.plot(subset["trajectory_ns"], subset["test_mae_deg_c"], marker=marker, color=color, label=encoder)
-    ax.set_xscale("log")
-    ax.set_xticks([5, 10, 17, 30, 50, 100])
-    ax.set_xticklabels(["5", "10", "17", "30", "50", "100"])
-    ax.set_xlabel("terminal MD window used for Q-value (ns)")
-    ax.set_ylabel("held-out test MAE (deg C)")
-    ax.set_ylim(6.55, 7.45)
-    ax.legend(frameon=False, loc="upper right")
-    polish(ax, "both")
-    panel_label(ax, "D")
-
-    save_figure(fig, "supp_fig04_scaling_and_size_controls")
-
-
-def fig_s5_md_features(features: pd.DataFrame, descriptor_tests: pd.DataFrame, md_dist: pd.DataFrame) -> None:
-    fig, axes = plt.subplots(2, 2, figsize=(7.4, 7.0), constrained_layout=True)
-
-    ax = axes[0, 0]
-    test_plot = descriptor_tests.sort_values("test_mae_deg_c").reset_index(drop=True)
-    spec_lookup = {spec["condition"]: spec for spec in DESCRIPTOR_TEST_SPECS}
-    y = np.arange(len(test_plot))
-    for i, row in test_plot.iterrows():
-        spec = spec_lookup.get(row["condition"], {})
-        color = spec.get("color", COL["other"])
-        marker = spec.get("marker", "o")
-        horizontal_interval(
-            ax,
-            i,
-            row["test_mae_deg_c"],
-            row["ci_lo_deg_c"],
-            row["ci_hi_deg_c"],
-            color,
-            marker=marker,
-        )
-        ax.text(row["ci_hi_deg_c"] + 0.018, i, f"{row['test_mae_deg_c']:.2f}", va="center", fontsize=6.8)
-    final_sources = source_screen_final().set_index("source")
-    fep_mae = float(final_sources.loc["FEP", "test_mae_deg_c"])
-    ax.axvline(fep_mae, color=COL["fep"], linestyle="--", linewidth=1.0)
-    ax.text(fep_mae + 0.012, -0.55, "FEP", color=COL["fep"], fontsize=6.8, ha="left", va="center")
-    ax.set_yticks(y)
-    ax.set_yticklabels(test_plot["short_label"])
-    ax.invert_yaxis()
-    ax.set_xlabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(6.0, 7.42)
-    polish(ax, "x")
-    panel_label(ax, "A")
-
-    ax = axes[0, 1]
-    screened = descriptor_tests[descriptor_tests["feature"].astype(bool)].merge(
-        features[["feature", "validation_mae_deg_c"]],
-        on="feature",
-        how="left",
-    )
-    text_offsets = {
-        "Q-value": (0.006, 0.010, "left"),
-        "Q-value slope": (0.006, -0.004, "left"),
-        "shuffled Q-value": (-0.006, 0.012, "right"),
-        "disulfide fluct.": (0.006, -0.016, "left"),
-        "max residue fluct.": (0.006, -0.028, "left"),
-        "CDR3 residue fluct.": (0.006, 0.012, "left"),
-        "CDR3 length": (0.006, 0.008, "left"),
-    }
-    point_labels = {
-        "Q-value": "Q",
-        "Q-value slope": "Q slope",
-        "shuffled Q-value": "shuf Q",
-        "disulfide fluct.": "SS fluct.",
-        "max residue fluct.": "max RMSF",
-        "CDR3 residue fluct.": "CDR3 RMSF",
-        "CDR3 length": "CDR3 len",
-    }
-    for _, row in screened.iterrows():
-        spec = spec_lookup.get(row["condition"], {})
-        ax.scatter(
-            row["validation_mae_deg_c"],
-            row["test_mae_deg_c"],
-            s=34,
-            color=spec.get("color", COL["other"]),
-            marker=spec.get("marker", "o"),
-            edgecolor="white",
-            linewidth=0.5,
-            zorder=3,
-        )
-        dx, dy, ha = text_offsets.get(row["short_label"], (0.004, 0.006, "left"))
-        ax.text(
-            row["validation_mae_deg_c"] + dx,
-            row["test_mae_deg_c"] + dy,
-            point_labels.get(row["short_label"], row["short_label"]),
-            fontsize=5.9,
-            ha=ha,
-            va="bottom",
-        )
-    ax.set_xlabel("candidate validation MAE (deg C)")
-    ax.set_ylabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(5.84, 6.13)
-    ax.set_ylim(6.45, 6.72)
-    polish(ax, "both")
-    panel_label(ax, "B")
-
-    ax = axes[1, 0]
-    keep = [label for label, _, _ in DESCRIPTOR_VALUE_SPECS]
-    compact = {
-        "Q-value": "Q-value",
-        "Q-value slope": "Q-value\nslope",
-        "disulfide-distance fluctuation": "disulfide\nfluct.",
-        "CDR3 length": "CDR3\nlength",
-        "CDR3 residue fluctuation": "CDR3 residue\nfluct.",
-    }
-    data = [md_dist.loc[md_dist["label"] == k, "value"].to_numpy(float) for k in keep]
-    bp = ax.boxplot(data, patch_artist=True, showfliers=False, widths=0.58)
-    for patch, color in zip(bp["boxes"], [COL["mdq"], COL["mdq"], COL["design"], COL["thermo"], COL["rmsf"]]):
-        patch.set_facecolor(color)
-        patch.set_alpha(0.65)
-        patch.set_edgecolor("white")
-    for element in ["whiskers", "caps", "medians"]:
-        for artist in bp[element]:
-            artist.set_color(COL["black"])
-            artist.set_linewidth(0.8)
-    ax.set_xticks(np.arange(1, len(keep) + 1))
-    ax.set_xticklabels([compact[k] for k in keep], rotation=30, ha="right")
-    ax.set_ylabel("model-facing scaled source label")
-    ax.set_ylim(-0.03, 1.03)
-    polish(ax, "y")
-    panel_label(ax, "C")
-
-    ax = axes[1, 1]
-    pivot = md_dist.pivot_table(index="seq", columns="label", values="value", aggfunc="mean")
-    corr = pivot[keep].corr(method="spearman")
-    im = ax.imshow(corr.to_numpy(), vmin=-1, vmax=1, cmap="RdBu_r")
-    ax.set_xticks(np.arange(len(keep)))
-    ax.set_yticks(np.arange(len(keep)))
-    ax.set_xticklabels([compact[k] for k in keep], rotation=35, ha="right")
-    ax.set_yticklabels([compact[k] for k in keep])
-    for i in range(len(keep)):
-        for j in range(len(keep)):
-            value = corr.iloc[i, j]
-            ax.text(j, i, f"{value:.2f}", ha="center", va="center", fontsize=6.1, color="white" if abs(value) > 0.55 else COL["black"])
-    cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.02)
-    cb.set_label("Spearman correlation")
-    for spine in ax.spines.values():
-        spine.set_visible(False)
-    panel_label(ax, "D")
-
-    save_figure(fig, "supp_fig05_md_feature_controls")
-
-
-def build_all_tables() -> dict[str, pd.DataFrame]:
-    final_sources = source_screen_final()
-    frozen = frozen_final()
-    tables = {
-        "data_sources": data_sources_table(),
-        "final_source_screen": final_sources,
-        "source_candidate_settings": source_screen_hunt(RESULTS / "source_screen" / "hpo_summary.json"),
-        "frozen_candidate_settings": source_screen_hunt(RESULTS / "source_screen" / "hpo_frozen_core_summary.json"),
-        "encoder_controls": encoder_controls(final_sources, frozen),
-        "scaling_curves": scaling_table(),
-        "candidate_selected_md_q_scaling": source_count_selected_table(),
-        "model_size_controls": model_size_table(final_sources),
-        "fep_head_controls_hot": head_controls_table(RESULTS / "ddg_head_search" / "final_ddg_head_summary.json", "hot encoder"),
-        "fep_head_controls_frozen": head_controls_table(RESULTS / "ddg_head_search" / "frozen" / "final_ddg_head_summary.json", "frozen encoder"),
-        "fep_head_candidate_settings": pd.DataFrame(read_json(RESULTS / "ddg_head_search" / "hpo_summary.json")),
-        "source_combination_controls": abcd_table(),
-        "md_feature_survey": md_feature_table(),
-        "architecture_controls": architecture_controls_table(),
-        "md_descriptor_test_controls": descriptor_test_controls_table(),
-        "trajectory_length_controls": trajectory_length_table(),
-        "md_label_distributions": md_label_distribution_table(),
-    }
-    q, q_stats, methods = md_q_summary_tables()
-    tables["md_qvalue_rows"] = q
-    tables["md_qvalue_summary"] = q_stats
-    tables["md_structure_methods"] = methods
-    return tables
-
-
-def write_all_tables(tables: dict[str, pd.DataFrame]) -> None:
-    for name, df in tables.items():
-        write_table(df, f"{name}.tsv")
+    x = np.arange(len(sensitivity)); bars = ax.bar(x, sensitivity["max_abs_scaled_shift"], color=[COL["design"], COL["fep"], COL["rosetta"], COL["md"]])
+    ax.axhline(.02, color=COL["black"], linestyle="--", linewidth=.9, label="0.02 scaled-label shift")
+    ax.set_xticks(x, ["eps=97", "eps=78", "0.5", "1.5"]); ax.set_ylabel("maximum absolute scaled-label shift")
+    for i, r in sensitivity.reset_index(drop=True).iterrows():
+        ax.text(i, r.max_abs_scaled_shift + .004, f"r={r.label_correlation:.3f}", rotation=90, ha="center", va="bottom", fontsize=7.2)
+    ax.legend(frameon=False, loc="upper left"); ax.set_ylim(0, max(.11, sensitivity["max_abs_scaled_shift"].max()+.035))
+    polish(ax, "y"); panel_label(ax, "d")
+    save_figure(fig, "supp_fig04_fep_checks")
 
 
 def write_manifest() -> None:
-    """Write a panel-level map from figures to tables and upstream sources."""
-    rows = [
-        {
-            "figure": "Supplementary Fig. 1",
-            "panel": "A",
-            "figure_file": "figures/supp_fig01_data_and_md_label.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig01_data_and_md_label.pdf",
-            "source_tables": "tables/data_sources.tsv",
-            "upstream_sources": "data/nbbench/train.csv; data/nbbench/val.csv; data/nbbench/test.csv; data/md/nanobody_qvalue_400K.csv",
-            "table_builder": "data_sources_table",
-            "panel_builder": "fig_s1_data_and_md",
-            "question": "What target and source-label data sizes are used?",
-            "notes": "Processed row counts used by the reported comparisons.",
-        },
-        {
-            "figure": "Supplementary Fig. 1",
-            "panel": "B",
-            "figure_file": "figures/supp_fig01_data_and_md_label.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig01_data_and_md_label.pdf",
-            "source_tables": "tables/md_qvalue_rows.tsv; tables/md_qvalue_summary.tsv",
-            "upstream_sources": "data/md/nanobody_qvalue_400K.csv",
-            "table_builder": "md_q_summary_tables",
-            "panel_builder": "fig_s1_data_and_md",
-            "question": "What is the raw distribution of the MD Q-value source label?",
-            "notes": "Raw Q-values before min-max scaling.",
-        },
-        {
-            "figure": "Supplementary Fig. 1",
-            "panel": "C",
-            "figure_file": "figures/supp_fig01_data_and_md_label.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig01_data_and_md_label.pdf",
-            "source_tables": "tables/md_qvalue_rows.tsv",
-            "upstream_sources": "data/md/nanobody_qvalue_400K.csv",
-            "table_builder": "md_q_summary_tables",
-            "panel_builder": "fig_s1_data_and_md",
-            "question": "Does MD Q-value mainly reflect sequence length?",
-            "notes": "Scatter of raw Q-value against sequence length.",
-        },
-        {
-            "figure": "Supplementary Fig. 1",
-            "panel": "D",
-            "figure_file": "figures/supp_fig01_data_and_md_label.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig01_data_and_md_label.pdf",
-            "source_tables": "tables/md_structure_methods.tsv",
-            "upstream_sources": "data/md/metadata/nano_manifest_400K.json; data/md/metadata/sabdab_nano_summary_all.tsv",
-            "table_builder": "md_q_summary_tables",
-            "panel_builder": "fig_s1_data_and_md",
-            "question": "What experimental structure methods support the MD panel?",
-            "notes": "Falls back to stored counts if local MD metadata are unavailable.",
-        },
-        {
-            "figure": "Supplementary Fig. 2",
-            "panel": "A",
-            "figure_file": "figures/supp_fig02_candidate_setting_search.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig02_candidate_setting_search.pdf",
-            "source_tables": "tables/source_candidate_settings.tsv",
-            "upstream_sources": "results/source_screen/hpo_summary.json",
-            "table_builder": "source_screen_hunt",
-            "panel_builder": "fig_s2_candidate_settings",
-            "question": "Which candidate settings were screened for hot-encoder source comparisons?",
-            "notes": "Diamonds mark the lowest experimental validation MAE per source.",
-        },
-        {
-            "figure": "Supplementary Fig. 2",
-            "panel": "B",
-            "figure_file": "figures/supp_fig02_candidate_setting_search.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig02_candidate_setting_search.pdf",
-            "source_tables": "tables/frozen_candidate_settings.tsv",
-            "upstream_sources": "results/source_screen/hpo_frozen_core_summary.json",
-            "table_builder": "source_screen_hunt",
-            "panel_builder": "fig_s2_candidate_settings",
-            "question": "Which candidate settings were screened for frozen-encoder controls?",
-            "notes": "Frozen-encoder validation search for core source labels.",
-        },
-        {
-            "figure": "Supplementary Fig. 2",
-            "panel": "C",
-            "figure_file": "figures/supp_fig02_candidate_setting_search.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig02_candidate_setting_search.pdf",
-            "source_tables": "tables/fep_head_candidate_settings.tsv",
-            "upstream_sources": "results/ddg_head_search/hpo_summary.json",
-            "table_builder": "read_json",
-            "panel_builder": "fig_s2_candidate_settings",
-            "question": "Which FEP source-head designs were screened?",
-            "notes": "Candidate source-head design search for FEP labels.",
-        },
-        {
-            "figure": "Supplementary Fig. 2",
-            "panel": "D",
-            "figure_file": "figures/supp_fig02_candidate_setting_search.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig02_candidate_setting_search.pdf",
-            "source_tables": "tables/final_source_screen.tsv",
-            "upstream_sources": "results/source_screen/final_source_screen_summary.json",
-            "table_builder": "source_screen_final",
-            "panel_builder": "fig_s2_candidate_settings",
-            "question": "How do selected validation and final test errors relate?",
-            "notes": "Target-validation selection is compared with held-out test performance.",
-        },
-        {
-            "figure": "Supplementary Fig. 3",
-            "panel": "A",
-            "figure_file": "figures/supp_fig03_model_controls.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig03_model_controls.pdf",
-            "source_tables": "tables/encoder_controls.tsv",
-            "upstream_sources": "results/source_screen/final_source_screen_summary.json; results/source_screen/final_frozen_core_summary.json",
-            "table_builder": "encoder_controls",
-            "panel_builder": "fig_s3_controls",
-            "question": "Does the source-label effect depend on fine-tuning the encoder?",
-            "notes": "Hot-encoder and frozen-encoder final test comparisons.",
-        },
-        {
-            "figure": "Supplementary Fig. 3",
-            "panel": "B",
-            "figure_file": "figures/supp_fig03_model_controls.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig03_model_controls.pdf",
-            "source_tables": "tables/fep_head_controls_hot.tsv",
-            "upstream_sources": "results/ddg_head_search/final_ddg_head_summary.json",
-            "table_builder": "head_controls_table",
-            "panel_builder": "fig_s3_controls",
-            "question": "Which FEP source-head design is best with a hot encoder?",
-            "notes": "Final test evaluation of selected source-head designs.",
-        },
-        {
-            "figure": "Supplementary Fig. 3",
-            "panel": "C",
-            "figure_file": "figures/supp_fig03_model_controls.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig03_model_controls.pdf",
-            "source_tables": "tables/fep_head_controls_frozen.tsv",
-            "upstream_sources": "results/ddg_head_search/frozen/final_ddg_head_summary.json",
-            "table_builder": "head_controls_table",
-            "panel_builder": "fig_s3_controls",
-            "question": "Which FEP source-head design is best with a frozen encoder?",
-            "notes": "Frozen-encoder source-head final test controls.",
-        },
-        {
-            "figure": "Supplementary Fig. 3",
-            "panel": "D",
-            "figure_file": "figures/supp_fig03_model_controls.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig03_model_controls.pdf",
-            "source_tables": "tables/source_combination_controls.tsv",
-            "upstream_sources": "results/abcd_search/final_abcd_with_dq_summary.json",
-            "table_builder": "abcd_table",
-            "panel_builder": "fig_s3_controls",
-            "question": "Do source combinations improve beyond FEP alone?",
-            "notes": "Tm-only, FEP-only, MD-only, and combined-source controls.",
-        },
-        {
-            "figure": "Supplementary Fig. 4",
-            "panel": "A",
-            "figure_file": "figures/supp_fig04_scaling_and_size_controls.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig04_scaling_and_size_controls.pdf",
-            "source_tables": "tables/final_source_screen.tsv",
-            "upstream_sources": "results/source_screen/final_source_screen_summary.json; final scaling.json files listed in the table",
-            "table_builder": "source_screen_final",
-            "panel_builder": "fig_s4_scaling",
-            "question": "Are the main interval conclusions sensitive to showing 90% rather than 95% bootstrap intervals?",
-            "notes": "Final Tm-only, FEP, and MD Q-value conditions shown with both interval levels.",
-        },
-        {
-            "figure": "Supplementary Fig. 4",
-            "panel": "B",
-            "figure_file": "figures/supp_fig04_scaling_and_size_controls.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig04_scaling_and_size_controls.pdf",
-            "source_tables": "tables/candidate_selected_md_q_scaling.tsv",
-            "upstream_sources": "results/hparam_search/per_nmd_test_summary.json",
-            "table_builder": "source_count_selected_table",
-            "panel_builder": "fig_s4_scaling",
-            "question": "Does MD Q-value scaling improve when candidate settings are selected separately for each label count?",
-            "notes": "Validation-selected MD Q-value controls by source-label count.",
-        },
-        {
-            "figure": "Supplementary Fig. 4",
-            "panel": "C",
-            "figure_file": "figures/supp_fig04_scaling_and_size_controls.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig04_scaling_and_size_controls.pdf",
-            "source_tables": "tables/model_size_controls.tsv",
-            "upstream_sources": "results/source_screen/final_source_screen_summary.json; results/size35_tm_shared_drop005/scaling.json; results/size35_ddg_fep_enc3e-5/scaling.json; results/size650_tm_shared_drop005/scaling.json; results/size650_ddg_fep_enc3e-5/scaling.json",
-            "table_builder": "model_size_table",
-            "panel_builder": "fig_s4_scaling",
-            "question": "Is the FEP gain explained by ESM2 encoder size?",
-            "notes": "8M, 35M, and 650M encoder controls.",
-        },
-        {
-            "figure": "Supplementary Fig. 4",
-            "panel": "D",
-            "figure_file": "figures/supp_fig04_scaling_and_size_controls.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig04_scaling_and_size_controls.pdf",
-            "source_tables": "tables/trajectory_length_controls.tsv",
-            "upstream_sources": "results/short_*/*scaling.json",
-            "table_builder": "trajectory_length_table",
-            "panel_builder": "fig_s4_scaling",
-            "question": "Does the MD Q-value result depend on the terminal trajectory window?",
-            "notes": "Hot-encoder and frozen-encoder trajectory-window controls.",
-        },
-        {
-            "figure": "Supplementary Fig. 5",
-            "panel": "A",
-            "figure_file": "figures/supp_fig05_md_feature_controls.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig05_md_feature_controls.pdf",
-            "source_tables": "tables/md_descriptor_test_controls.tsv",
-            "upstream_sources": "results/final_*/*scaling.json",
-            "table_builder": "descriptor_test_controls_table",
-            "panel_builder": "fig_s5_md_features",
-            "question": "Which selected MD-derived and nanobody-specific descriptors improve held-out Tm prediction?",
-            "notes": "Held-out test MAE values for selected descriptor controls.",
-        },
-        {
-            "figure": "Supplementary Fig. 5",
-            "panel": "B",
-            "figure_file": "figures/supp_fig05_md_feature_controls.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig05_md_feature_controls.pdf",
-            "source_tables": "tables/md_feature_survey.tsv; tables/md_descriptor_test_controls.tsv",
-            "upstream_sources": "results/arch_search/feature_summary.json; results/final_*/*scaling.json",
-            "table_builder": "md_feature_table; descriptor_test_controls_table",
-            "panel_builder": "fig_s5_md_features",
-            "question": "How did validation-screened descriptor candidates behave on the held-out test set?",
-            "notes": "Candidate validation MAE is compared with final test MAE for descriptors that were carried forward.",
-        },
-        {
-            "figure": "Supplementary Fig. 5",
-            "panel": "C",
-            "figure_file": "figures/supp_fig05_md_feature_controls.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig05_md_feature_controls.pdf",
-            "source_tables": "tables/md_label_distributions.tsv",
-            "upstream_sources": "data/md/nanobody_qvalue_400K.csv; data/md/feat_q_slope_400K.csv; data/md/feat_ss_dist_std.csv; data/md/feat_cdr3_len.csv; data/md/feat_rmsf_cdr3.csv",
-            "table_builder": "md_label_distribution_table",
-            "panel_builder": "fig_s5_md_features",
-            "question": "What source-label distributions were presented to the multi-task model?",
-            "notes": "Boxplots of min-max scaled source labels used by the model.",
-        },
-        {
-            "figure": "Supplementary Fig. 5",
-            "panel": "D",
-            "figure_file": "figures/supp_fig05_md_feature_controls.pdf",
-            "tex_figure_file": "../../tex/figures/supp_fig05_md_feature_controls.pdf",
-            "source_tables": "tables/md_label_distributions.tsv",
-            "upstream_sources": "data/md/nanobody_qvalue_400K.csv; data/md/feat_q_slope_400K.csv; data/md/feat_ss_dist_std.csv; data/md/feat_cdr3_len.csv; data/md/feat_rmsf_cdr3.csv",
-            "table_builder": "md_label_distribution_table",
-            "panel_builder": "fig_s5_md_features",
-            "question": "Do the selected source labels encode redundant or distinct descriptor information?",
-            "notes": "Spearman correlations are computed across sequences shared by the selected descriptor tables.",
-        },
-    ]
-    path = ANALYSIS / "MANIFEST.tsv"
-    sanitize_public_table(pd.DataFrame(rows)).to_csv(path, sep="\t", index=False)
-    print(f"wrote {path}")
-
-
-def build_figures(tables: dict[str, pd.DataFrame]) -> None:
-    fig_s1_data_and_md(tables["md_qvalue_rows"], tables["md_structure_methods"], tables["data_sources"])
-    fig_s2_candidate_settings(
-        tables["source_candidate_settings"],
-        tables["frozen_candidate_settings"],
-        tables["fep_head_candidate_settings"],
-        tables["final_source_screen"],
-    )
-    fig_s3_controls(
-        tables["encoder_controls"],
-        tables["fep_head_controls_hot"],
-        tables["fep_head_controls_frozen"],
-        tables["source_combination_controls"],
-    )
-    fig_s4_scaling(
-        tables["candidate_selected_md_q_scaling"],
-        tables["model_size_controls"],
-        tables["trajectory_length_controls"],
-        tables["final_source_screen"],
-    )
-    fig_s5_md_features(
-        tables["md_feature_survey"],
-        tables["md_descriptor_test_controls"],
-        tables["md_label_distributions"],
-    )
+    rows = []
+    specs = {
+        "Supplementary Fig. 1": ("supp_fig01_data_and_design.pdf", ["data_sources.tsv", "data_design_qvalues.tsv", "sequence_overlap.tsv"],
+                                  ["processed row counts", "raw Q distributions", "Q versus sequence length", "exact sequence overlap"]),
+        "Supplementary Fig. 2": ("supp_fig02_model_selection.pdf", ["candidate_validation.tsv", "selected_settings.tsv"],
+                                  ["frozen validation search", "fine-tuned validation search", "selected model forms", "validation versus held-out test"]),
+        "Supplementary Fig. 3": ("supp_fig03_transfer_controls.pdf", ["final_source_effects.tsv", "fep_md_direct.tsv", "model_size_controls.tsv"],
+                                  ["frozen absolute MAE", "fine-tuned absolute MAE", "direct FEP-minus-MD count sweep", "ESM2 size control"]),
+        "Supplementary Fig. 4": ("supp_fig04_fep_checks.pdf", ["fep_scan_composition.tsv", "fep_charge_sensitivity.tsv"],
+                                  ["scan composition", "charge-change counts", "periodicity correction", "correction sensitivity"]),
+    }
+    for figure, (file, tables, questions) in specs.items():
+        for i, question in enumerate(questions):
+            rows.append({"figure": figure, "panel": chr(65+i), "figure_file": f"figures/{file}",
+                         "tex_figure_file": f"../../tex/figures/{file}", "source_tables": ";".join(f"tables/{t}" for t in tables),
+                         "generator": "plot/make_supplementary_figures.py", "question": question})
+    pd.DataFrame(rows).to_csv(ANALYSIS / "MANIFEST.tsv", sep="\t", index=False)
 
 
 def main() -> None:
     configure_style()
-    ensure_dirs()
-    tables = build_all_tables()
-    write_all_tables(tables)
-    write_manifest()
-    build_figures(tables)
-    print(f"wrote tables to {TABLES}")
+    counts, qvalues, overlap = data_tables()
+    candidates = candidate_table(); selected = selected_table(candidates)
+    effects, direct, sizes = effect_tables()
+    composition, sensitivity, corrected, provenance = fep_tables()
+    for df, name in [(counts, "data_sources.tsv"), (qvalues, "data_design_qvalues.tsv"), (overlap, "sequence_overlap.tsv"),
+                     (candidates, "candidate_validation.tsv"), (selected, "selected_settings.tsv"),
+                     (effects, "final_source_effects.tsv"), (direct, "fep_md_direct.tsv"), (sizes, "model_size_controls.tsv"),
+                     (composition, "fep_scan_composition.tsv"), (sensitivity, "fep_charge_sensitivity.tsv")]:
+        save_table(df, name)
+    fig_s1(counts, qvalues, overlap); fig_s2(candidates, selected); fig_s3(effects, direct, sizes)
+    fig_s4(composition, sensitivity, corrected, provenance); write_manifest()
+    print("supplementary figure build complete")
 
 
 if __name__ == "__main__":

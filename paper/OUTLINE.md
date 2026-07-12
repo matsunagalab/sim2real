@@ -463,8 +463,8 @@ descriptor-screen narrative.
 - FEP and matched-MD label-count tables.
 - Frozen/hot comparator table.
 - Model-size controls.
-- FEP head/coupling controls where they clarify calibration across scaffolds.
-- Charge-correction and clipping controls if their provenance is fully documented.
+- Direct FEP-minus-matched-MD count comparisons.
+- FEP provenance and the documented charge-correction sensitivity check.
 - Data and code provenance manifest.
 
 ### Redesign or remove
@@ -478,14 +478,19 @@ descriptor-screen narrative.
 - Per-count setting-selection figures that conflict with the final protocol of selecting one
   configuration and varying label count.
 
-### Proposed supplementary sequence
+### Selected supplementary sequence
 
-1. **Supplementary Fig. 1:** datasets, split, source-table sizes, and matched-versus-diverse designs.
-2. **Supplementary Fig. 2:** per-source/per-regime HPO and target-validation selection.
-3. **Supplementary Fig. 3:** full frozen/hot source hierarchy and computational-head controls.
-4. **Supplementary Fig. 4:** FEP/matched-MD label-count and model-size controls.
-5. **Supplementary Fig. 5, only if retained:** diagnostic controls relevant to confounding,
-   preprocessing, charge correction, or clipping—not a competing descriptor-screen story.
+1. **Supplementary Fig. 1:** data sizes, matched-versus-heterogeneous Q distributions, sequence
+   length, and exact overlap with the Tm splits.
+2. **Supplementary Fig. 2:** stage-2 validation candidates and the selected architecture/head for
+   every source and encoder setting.
+3. **Supplementary Fig. 3:** absolute source errors, direct FEP-minus-matched-MD count curves, and
+   ESM2-size controls.
+4. **Supplementary Fig. 4:** retained FEP scan composition, mutation charge changes, and analytical
+   charge-correction sensitivity.
+
+The old descriptor survey, source-combination panel, per-count retuning panel, and diverse-MD
+trajectory-window panel are not used because they do not support the current two-axis claim.
 
 `plot/make_supplementary_figures.py`, `paper/analysis/supplementary/MANIFEST.tsv`, captions in
 `tex/sections/supplementary.tex`, and `reproduce/manuscript_results.yaml` must be updated together.
@@ -568,16 +573,14 @@ Yasuhiro Matsunaga ORCID: `0000-0003-2872-3908`
 
 ## 12. Remaining Work in Priority Order
 
-1. **Rebuild Supplementary Figs. 1–5 around the current two-axis story.** Update generator, tables,
-   manifest, captions, and reproduction workflow together.
-2. **Regenerate Fig. 1** with correct architecture and “computational head” terminology.
-3. **Unify terminology** across Results, Discussion, Supplementary Material, and figures.
-4. **Resolve statistical conventions:** p-value sidedness and label-count notation.
-5. **Perform a claim audit:** every MAE, ΔMAE, CI, label count, and sample size against raw JSON/CSV.
-6. **Revise the cover letter** from the old CSBJ/FEP-only story to BPPB and the two-axis result.
-7. **Refresh repository-facing documentation** that still reports the original split or legacy best run.
-8. **Run final format/citation/figure-resolution checks** in the official BPPB template.
-9. **Confirm archive identifiers.**
+1. **Regenerate Fig. 1** with correct architecture and “computational head” terminology.
+2. **Unify terminology** across Results, Discussion, Supplementary Material, and figures.
+3. **Resolve statistical conventions:** p-value sidedness and label-count notation.
+4. **Perform a claim audit:** every MAE, ΔMAE, CI, label count, and sample size against raw JSON/CSV.
+5. **Revise the cover letter** from the old CSBJ/FEP-only story to BPPB and the two-axis result.
+6. **Refresh repository-facing documentation** that still reports the original split or legacy best run.
+7. **Run final format/citation/figure-resolution checks** in the official BPPB template.
+8. **Confirm archive identifiers.**
 
 Do not rerun GPU training unless a missing comparison is identified and explicitly approved.
 
@@ -596,6 +599,9 @@ Do not rerun GPU training unless a missing comparison is identified and explicit
   matter, declarations, conclusion, graphical abstract, and numeric citations added.
 - **2026-07-12:** This outline was rewritten to remove superseded CSBJ, FEP-only, descriptor-screen,
   and four-figure planning from the active manuscript specification.
+- **2026-07-13:** Supplementary figures reduced from five to four and rebuilt around data checks,
+  validation selection, transfer controls, and FEP provenance/charge checks. The legacy descriptor
+  survey was removed from the active supplement.
 
 ## 14. Final Drafting Checklist
 
@@ -604,7 +610,7 @@ Do not rerun GPU training unless a missing comparison is identified and explicit
 - [x] No reinforcement-learning or design-loop claim.
 - [x] Three-main-figure structure.
 - [x] BPPB section order, significance statement, keywords, graphical abstract, and declarations.
-- [ ] Supplementary figures and captions rebuilt from tuned results.
+- [x] Supplementary figures and captions rebuilt from tuned results.
 - [ ] Fig. 1 architecture and terminology corrected.
 - [ ] Computational/auxiliary terminology unified.
 - [ ] P-value convention and label-count definition unified.

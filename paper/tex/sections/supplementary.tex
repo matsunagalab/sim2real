@@ -70,11 +70,10 @@ MD native-contact (diverse panel) & Computational task & 1143 & Heterogeneous si
 \end{table}
 
 \textbf{Computational-task assignment.} The loader assigns each row to a target or
-computational task. Experimental Tm rows use the Tm head. In the main mutation-effect
-model, the two template-specific tables use separate computational heads, and the
-MD-derived Q-value table uses a single computational head. This assignment fixes which
-regression head an example uses and which task-specific loss term it contributes
-to.
+computed-label task. Experimental Tm rows use the Tm head. The 1MEL and 4IDL
+tables use either separate computational heads or one head conditioned on a
+learned structure indicator, according to the setting selected for that label
+source. This assignment fixes which regression head and loss term each row uses.
 
 \textbf{Sequence-overlap check.} We checked exact sequence overlap between the
 processed computational tables and the fixed NbBench splits. The FEP, Rosetta, and
@@ -99,6 +98,25 @@ single table. Computational-label rows are split 80/20 into computational-traini
 computational-validation rows with the same seed. The production training call then
 filters the validation data passed to the trainer so that checkpoint selection
 and early stopping depend only on the experimental Tm validation examples.
+
+\subsection{FEP-table provenance and charge-change check}
+
+The retained FEP tables contain Ala, Asp, Ile, and Gln mutation scans. The 1MEL
+table contains 116, 80, 119, and 120 rows from these scans, respectively; the
+4IDL table contains 105, 84, 113, and 107 rows. Row-level provenance was checked
+against the archived scan outputs. The available Phe scans were not included in
+the retained tables.
+
+We also estimated the analytical periodic net-charge correction for
+charge-changing mutations. Of the 844 retained rows, 284 change the formal
+charge. For a cubic 70-\AA{} box, the correction magnitude used in this check was
+$0.086(\Delta q)^2$ kcal mol$^{-1}$ at a solvent dielectric of 78. We applied the
+correction before repeating the same sign reversal, robust scaling,
+Yeo--Johnson transform, and min--max scaling used for the model-facing labels.
+The corrected and uncorrected labels had a correlation of 0.99989; the largest
+scaled-label shift was 0.008, and no row shifted by more than 0.02. Larger
+per-charge sensitivity values are shown only as bounds in Supplementary Fig.~4;
+they are not estimates of the omitted correction terms.
 
 \subsection{Diverse-panel MD control: SAbDab structure selection}
 
@@ -219,21 +237,17 @@ dimensions hidden-size $\rightarrow$ 256 $\rightarrow$ 128 $\rightarrow$ 32, wit
 ReLU activations and dropout after the first two hidden layers. The Tm head maps
 the 32-dimensional representation to one scaled scalar prediction.
 
-\textbf{Target and computational heads.} The Tm-only baseline is the encoder, the shared
-trunk, and the Tm head. Computational-label transfer models keep this target path and add
-computational heads. The main mutation-effect model uses separate computational heads for the
-two template-specific tasks. The code also implements computational-head controls, including a
-single shared mutation-effect head, a template-conditioned head, and a
-template-specific affine calibration on top of a shared head, to test whether the
-two template-specific computational labels need separate output calibration.
+\textbf{Target and computational heads.} The candidate models use a Tm path and,
+for transfer models, one or more computed-label heads. For two-table sources, the
+search compares separate structure-specific heads with a head conditioned on a
+learned structure indicator. Every output head returns one scaled scalar.
 
-\textbf{Architecture sensitivity analyses.} Architecture controls include
-residual, latent, and mixture-style computational-fusion variants, in which the computational
-path produces a correction to the Tm prediction, a latent interaction between Tm
-and computational features, or a gate between a target-only expert and a computational-informed
-expert. The main reported FEP result uses the original shared-trunk architecture
-with separate template-specific computational heads; the other variants are kept as
-sensitivity analyses, not as the main claim.
+\textbf{Architecture search.} The selected model form can be shared, residual, or
+latent. The shared form sends all rows through one 256--128--32 trunk. The
+residual and latent forms use separate 256--128--32 paths and combine them in the
+Tm prediction. The final FEP models use the shared form with separate heads. Other
+sources select different forms in some encoder settings; these selected forms are
+listed in Supplementary Fig.~2.
 
 \subsection{Training objective, optimizer, and checkpoint selection}
 
@@ -264,9 +278,9 @@ non-trainable and no encoder group is used.
 lowest mean squared error on the experimental Tm validation rows, and early
 stopping monitors the same metric with patience 15 and threshold 0. Computational-task
 validation rows are not passed to the trainer in the production protocol. This
-detail is central to the comparison. Computational labels shape the learned
-representation through the training loss, but they do not decide which checkpoint
-is used for target-task prediction.
+detail is central to the comparison. Computed labels affect the shared or coupled
+regression parameters through the training loss, but they do not decide which
+checkpoint is used for Tm prediction.
 
 \subsection{Candidate-setting selection and final evaluation}
 
@@ -360,85 +374,76 @@ Display item & Inputs & Script & Primary comparison \\
 Fig.~1 & Conceptual protocol & \path{plot/make_outline_figures.py} & Multi-task training with Tm-based model selection \\
 Fig.~2 & Simulation-plan schematic; design-by-regime paired MD effects; frozen paired label-count curves & \path{plot/make_outline_figures.py} & Simulation-design axis: matched local scans show a larger frozen native-contact gain \\
 Fig.~3 & Source-by-regime paired-effect bars; direct FEP-minus-MD contrast; fine-tuned paired label-count curves & \path{plot/make_outline_figures.py} & Physical-observable axis: FEP transfers in both regimes, MD native-contact only frozen \\
-Supplementary Figs.~1 to 5 & Supplementary manifest and generated TSV tables & \path{plot/make_supplementary_figures.py} & Data-set composition, candidate-setting searches, model controls, count-sweep controls, and MD-feature controls \\
+Supplementary Figs.~1 to 4 & Supplementary manifest and generated TSV tables & \path{plot/make_supplementary_figures.py} & Data and overlap checks, validation selection, transfer controls, and FEP charge-change checks \\
 \hline
 \end{tabular}
 \end{table*}
 
-\textbf{Generated supplementary tables.} The final computational-label screen settings used in
-Figs.~3 and 4 and the frozen-encoder controls are recorded in generated
-supplementary tables, which list the selected architecture, validation-selected
-setting, computational-label count, validation MAE, held-out test MAE, bootstrap
-interval, and run-summary reference for each condition. A panel-level mapping
-table for all supplementary figures is included in the public analysis archive.
+\textbf{Generated supplementary tables.} Compact tables record the validation
+candidates, selected architecture and head, held-out errors, paired comparisons,
+data-set diagnostics, and FEP charge-change checks. A panel-level mapping table
+for all supplementary figures is included in the public analysis archive.
 
 \clearpage
 \section{Supplementary figures}
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{supp_fig01_data_and_md_label}
-\caption{Processed data sets and MD-derived Q-value labels.
-\textbf{(a)} Processed target and computational-label row counts used in the reported
-experiments.
-\textbf{(b)} Distribution of raw MD-derived Q-values before [0,1] scaling.
-\textbf{(c)} Relationship between sequence length and raw MD-derived Q-value.
-\textbf{(d)} Experimental methods for the selected SAbDab structures used in
-the 400 K MD panel.}
-\label{fig:supp_data_md}
+\includegraphics[width=\textwidth]{supp_fig01_data_and_design}
+\caption{Data sets and diagnostics for the two MD acquisition plans.
+\textbf{(a)} Processed row counts. Labels of the form $a+b$ give the 1MEL and
+4IDL table sizes.
+\textbf{(b)} Empirical cumulative distributions of the raw native-contact $Q$
+values for the heterogeneous structure panel and the two matched mutation scans.
+The extraction details are not identical, so the distributions are descriptive.
+\textbf{(c)} Raw $Q$ versus sequence length. The matched scans have one fixed
+length per structure, whereas the heterogeneous panel spans 58--461 residues and
+has Pearson $r=+0.13$.
+\textbf{(d)} Exact sequence matches to the three NbBench splits. The matched
+scans have no matches; the heterogeneous panel has 2, 4, and 8.}
+\label{fig:supp_data_design}
 \end{figure}
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{supp_fig02_candidate_setting_search}
-\caption{Candidate-setting searches and target-validation selection.
-\textbf{(a)} Experimental validation MAE values for hot-encoder computational-label
-comparisons.
-\textbf{(b)} Experimental validation MAE values for frozen-encoder controls.
-\textbf{(c)} Candidate computational-head designs for FEP mutation free-energy labels.
-\textbf{(d)} Relationship between selected validation MAE and held-out test MAE
-for the final computational-label comparison. Diamonds mark the best validation setting in
-panels a to c.}
-\label{fig:supp_candidate_settings}
+\includegraphics[width=\textwidth]{supp_fig02_model_selection}
+\caption{Per-source model selection using experimental Tm validation data.
+\textbf{(a,b)} Stage-2 candidate validation MAEs for frozen and fine-tuned ESM2.
+Each small point is one candidate; diamonds mark the selected setting. No test
+errors enter this selection.
+\textbf{(c)} Architecture and computational-head form selected for every source
+and encoder setting. A dash denotes a Tm-only model without a computational head.
+\textbf{(d)} Selected validation MAE and the later held-out test MAE. Colors
+match panels a and b; squares and circles denote frozen and fine-tuned ESM2.}
+\label{fig:supp_model_selection}
 \end{figure}
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{supp_fig03_model_controls}
-\caption{Model and computational-combination controls.
-\textbf{(a)} Frozen-encoder and hot-encoder comparisons for selected
-computational labels.
-\textbf{(b)} Hot-encoder FEP computational-head controls.
-\textbf{(c)} Frozen-encoder FEP computational-head controls.
-\textbf{(d)} Computational-combination controls comparing Tm-only, FEP-only,
-MD Q-value-only, and combined-computational-label settings.}
-\label{fig:supp_model_controls}
+\includegraphics[width=\textwidth]{supp_fig03_transfer_controls}
+\caption{Absolute test errors and transfer controls.
+\textbf{(a,b)} Held-out Tm test MAE for every selected source with frozen and
+fine-tuned ESM2. Whiskers are 90\% bootstrap intervals over the 396 test proteins.
+\textbf{(c)} Direct paired difference between FEP and matched-MD absolute errors
+at each label count. Negative values favor FEP; whiskers are 90\% paired
+bootstrap intervals.
+\textbf{(d)} Available fine-tuned ESM2-size controls for Tm-only and FEP models.
+Increasing encoder size did not reproduce the 8M FEP result.}
+\label{fig:supp_transfer_controls}
 \end{figure}
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{supp_fig04_scaling_and_size_controls}
-\caption{Interval, scaling, encoder-size, and MD-window controls.
-\textbf{(a)} Final Tm-only, FEP, and MD Q-value conditions shown with 90\% and
-95\% bootstrap intervals.
-\textbf{(b)} MD Q-value label-count curve after selecting the candidate setting
-separately for each label count on the experimental validation split.
-\textbf{(c)} ESM2 encoder-size controls for Tm-only and FEP settings.
-\textbf{(d)} MD trajectory-window controls for Q-value labels.}
-\label{fig:supp_scaling_controls}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[width=\textwidth]{supp_fig05_md_feature_controls}
-\caption{Descriptor controls for MD-derived computational labels.
-\textbf{(a)} Held-out test MAE values for selected MD-derived and
-nanobody-specific descriptor controls. The dashed line marks the FEP reference.
-\textbf{(b)} Relationship between candidate validation MAE and held-out test
-MAE for descriptor controls that were carried forward to final evaluation.
-\textbf{(c)} Distributions of the model-facing scaled computational labels for the
-selected descriptors.
-\textbf{(d)} Spearman correlations among the selected computational labels over shared
-sequences.}
-\label{fig:supp_md_feature_controls}
+\includegraphics[width=\textwidth]{supp_fig04_fep_checks}
+\caption{Provenance and charge-change checks for the retained FEP labels.
+\textbf{(a)} Rows from the retained Ala, Asp, Ile, and Gln scans, separated by
+structure.
+\textbf{(b)} Distribution of formal mutation charge changes.
+\textbf{(c)} Model-facing FEP labels before and after the analytical periodic
+net-charge correction at dielectric 78. The dashed line is equality.
+\textbf{(d)} Maximum scaled-label shift under two periodicity estimates and two
+larger sensitivity values in kcal mol$^{-1}$ per $(\Delta q)^2$. Numbers above
+the bars give the corrected-versus-uncorrected correlation. The larger values
+are sensitivity bounds, not estimates of omitted correction terms.}
+\label{fig:supp_fep_checks}
 \end{figure}

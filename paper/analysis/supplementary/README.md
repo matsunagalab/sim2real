@@ -5,7 +5,7 @@ extend.
 
 ## Files
 
-- `tables/*.tsv`: numerical source data for Supplementary Figs. 1-5.
+- `tables/*.tsv`: numerical source data for Supplementary Figs. 1-4.
 - `figures/*.pdf` and `figures/*.png`: rendered supplementary figures.
 - `MANIFEST.tsv`: panel-level index of figures, source tables, upstream result
   summaries, generator functions, and the question each panel answers.
@@ -26,18 +26,11 @@ supplementary analysis. Each row corresponds to one figure panel and records:
 
 ## Source-of-truth result summaries
 
-The supplementary figure generator reads these result summaries:
-
-- `results/source_screen/final_source_screen_summary.json`
-- `results/source_screen/final_frozen_core_summary.json`
-- `results/source_screen/hpo_summary.json`
-- `results/source_screen/hpo_frozen_core_summary.json`
-- `results/ddg_head_search/final_ddg_head_summary.json`
-- `results/ddg_head_search/frozen/final_ddg_head_summary.json`
-- `results/abcd_search/final_abcd_with_dq_summary.json`
-- `results/arch_search/final_summary.json`
-- `results/arch_search/feature_summary.json`
-- `results/hparam_search/per_nmd_test_summary.json`
+The supplementary figure generator reads the final per-source runs under
+`results/final_*`, the staged Tm-validation searches under `results/tune_*`, the
+available ESM2-size controls, and tracked processed label tables. The compact
+`candidate_validation.tsv` table is also retained so the figures can be rebuilt
+when the full staged-search directories are not present.
 
 These JSON files should be treated as immutable summaries for the current
 manuscript figures. New analyses should write new result
@@ -61,11 +54,11 @@ directories and new summary JSON files rather than overwriting these summaries.
 - Single-condition intervals are nonparametric bootstrap intervals over test
   examples.
 - Paired comparisons use paired bootstrap resampling of the same test examples.
-- Figure labels should use manuscript-facing names such as `hot encoder`,
-  `frozen encoder`, `FEP mutation free energy`, and `MD Q-value`.
+- Figure labels should use manuscript-facing names such as `fine-tuned ESM2`,
+  `frozen ESM2`, `FEP mutation free energy`, and `MD native contact`.
 
 ## External MD source files
 
-The raw MD trajectories are not stored in the paper tree. The generated TSV
-tables in this directory capture the SAbDab method counts and processed Q-value
-summaries needed by the current manuscript.
+The raw MD trajectories are not stored in the paper tree. The tracked processed
+Q-value tables and generated TSV files contain the values needed by the current
+supplementary figures.

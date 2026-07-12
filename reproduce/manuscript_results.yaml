@@ -513,11 +513,10 @@ stages:
       command: [uv, run, python, plot/make_supplementary_figures.py]
       outputs:
         - paper/analysis/supplementary/MANIFEST.tsv
-        - paper/tex/figures/supp_fig01_data_and_md_label.pdf
-        - paper/tex/figures/supp_fig02_candidate_setting_search.pdf
-        - paper/tex/figures/supp_fig03_model_controls.pdf
-        - paper/tex/figures/supp_fig04_scaling_and_size_controls.pdf
-        - paper/tex/figures/supp_fig05_md_feature_controls.pdf
+        - paper/tex/figures/supp_fig01_data_and_design.pdf
+        - paper/tex/figures/supp_fig02_model_selection.pdf
+        - paper/tex/figures/supp_fig03_transfer_controls.pdf
+        - paper/tex/figures/supp_fig04_fep_checks.pdf
 
     - name: LaTeX typesetting
       type: command

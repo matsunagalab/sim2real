@@ -55,7 +55,8 @@ tables with the run seed. The diverse MD source had one table, so $n$ is the
 total number sampled from that table. After sampling, each computed-label table
 was divided at random into 80\% training and 20\% monitoring rows. These
 monitoring rows were not passed to the trainer for checkpoint selection; only
-the experimental Tm validation rows were used for that purpose.
+the experimental Tm validation rows were used for that purpose. Data-set sizes,
+sequence lengths, and exact-overlap checks are summarized in Supplementary Fig.~1.
 
 The 1MEL and 4IDL tables were kept as two tasks because their score ranges can
 differ. Models used either two separate output heads or one output head with a
