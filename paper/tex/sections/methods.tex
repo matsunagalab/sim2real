@@ -86,8 +86,10 @@ any reported gain. We report it for transparency.
 \textbf{Computational-label sampling.} For a mutation-effect experiment with requested
 count $n$, up to $n$ rows were sampled independently from each of the two
 template tables using the run seed, and the two tables were given separate task
-identifiers. For an MD-derived Q-value experiment with count $n$, $n$ rows were
-sampled from the single Q-value table. Sampled rows were then split 80/20 into
+identifiers. The FEP-matched MD native-contact label, built on the same two
+1MEL/4IDL scaffolds, was sampled the same way (two template tables, separate task
+identifiers); the diverse-panel MD control sampled $n$ rows from its single table.
+Sampled rows were then split 80/20 into
 computational-training and computational-validation rows with the same seed. The
 computational-validation rows were kept for monitoring and control analyses, but in the
 reported protocol the validation data passed to the trainer for checkpoint

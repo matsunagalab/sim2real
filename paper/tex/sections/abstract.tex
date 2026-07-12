@@ -13,10 +13,10 @@ validation, 396 held-out test sequences). To compare very different labels fairl
 each was tuned independently and selected only on experimental Tm validation
 performance, then judged by paired errors on the held-out Tm test set. Two design
 axes governed transfer. First, data design: a molecular-dynamics native-contact
-stability label transferred and matched alchemical free-energy perturbation (FEP)
-when computed on the FEP-matched mutation scans (frozen encoder, paired gain
-0.20$^\circ$C), whereas the same observable over a diverse-nanobody screen did not,
-because sequence length confounds that screen. Second, the physical observable:
+stability label matched the accuracy of alchemical free-energy perturbation (FEP)
+when it was computed on the same mutation scans used for FEP (frozen encoder,
+paired gain 0.20$^\circ$C), whereas the same observable computed over a
+diverse-nanobody screen did not help, because sequence length confounds that screen. Second, the physical observable:
 the FEP free energy improved Tm with both a frozen and a fine-tuned encoder
 (best 6.40$^\circ$C mean absolute error, from a 6.55$^\circ$C baseline), while the
 native-contact label helped only a frozen encoder. Rosetta and ThermoMPNN scores
@@ -46,4 +46,17 @@ observable --- an alchemical free energy --- that is close enough to stability t
 reshape a protein language model. This turns "run more simulation" into concrete,
 testable design rules for building simulation-informed predictors of experimental
 protein properties.
+%TC:endignore
+
+%TC:ignore
+\begin{figure*}[b]
+\centering
+\includegraphics[width=0.92\textwidth]{graphical_abstract}
+\caption*{\textbf{Graphical abstract.} Two design choices decide whether a
+simulation-derived label improves low-data nanobody Tm prediction: (1) data design
+--- a molecular-dynamics native-contact label transfers only when its variants are
+matched to the target's sequence neighborhood; and (2) the physical observable ---
+an alchemical free energy transfers with both a frozen and a fine-tuned encoder,
+whereas a native-contact label helps only a frozen encoder.}
+\end{figure*}
 %TC:endignore
