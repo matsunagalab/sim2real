@@ -2,15 +2,23 @@
 
 ## Submission Target
 
-- Journal: Computational and Structural Biotechnology Journal (CSBJ)
-- Section: General
-- Article type: Research Article
-- Strategy: compact Research Article, not Short Communication
-- Target length: about 5,000 to 8,000 main-text words, excluding references, figure legends, and supplementary material
-- Main display items: 4 multi-panel figures, 0 to 2 main tables only if needed
-- Section order source of truth: `paper/AUTHOR_GUIDELINES.md`
+- Journal: **Biophysics and Physicobiology (BPPB)** — open-access journal of the Biophysical Society of Japan (https://www.biophys.jp/biophysics_and_physicobiology.html)
+- Article type: **Regular Article** (biophysics-oriented framing). Official templates exist (download the Regular Article template before final formatting).
+- Strategy: concise biophysics Research Article; foreground the physical interpretation (how the physical observable maps to stability transfer).
 
-SECTION_ORDER: abstract -> introduction -> methods -> results -> discussion -> acknowledgments
+**Confirmed BPPB format (from Instruction for Authors, biophysics_and_physicobiology03.html, Jan 2025):**
+- Section order: **Introduction → Materials and Methods → Results → Discussion (or Results and discussion) → Conclusion → Conflict of interest → Author contributions → Data availability → Acknowledgements → References.** (Methods after Intro, NOT last.)
+- Page 1: title, authors, affiliations, addresses, **abstract (≤250 words, no references)**, **≤5 keywords**, **Significance statement (<100 words)**.
+- **Graphical abstract required** (1 figure, color or mono, 300 dpi, TIFF/PNG/JPEG, caption <100 words).
+- **References: NUMBERED, brackets `[1,3,5-8]`**, Index Medicus/MEDLINE abbreviated journal titles, DOI as URL. (Change from CSBJ author–year: `\citep`→numbered `\cite`, swap bibliography style.)
+- Figures: 300 dpi, TIFF/PNG/JPEG (gray/color).
+- Declarations required: Conflict of interest; Author contributions; Data availability (J-STAGE Data encouraged). Funding NOT explicitly required. AI-use: describe in Acknowledgements only if substantial.
+- Word/page/figure-count limits: not stated by the journal.
+
+Format TODOs (LaTeX): switch bib to numbered style; add Significance statement + Graphical abstract; add Conclusion section; split declarations into their own sections; regenerate `paper/AUTHOR_GUIDELINES.md` from BPPB instructions; consider the official BPPB template.
+
+SECTION_ORDER: abstract -> introduction -> methods -> results -> discussion -> conclusion -> acknowledgments
+(supplementary after references; declarations = conflict_of_interest, author_contributions, data_availability as their own blocks per BPPB.)
 
 ## Author And Submission Metadata
 
@@ -18,17 +26,21 @@ Author order:
 
 1. Taihei Murakami
 2. Kentaro Sasaki
-3. Yasuhiro Matsunaga
+3. Soichiro Oda
+4. Kazuma Okada
+5. Yasuhiro Matsunaga
 
 Affiliations:
 
-- `1`: Saitama University, Saitama, Japan
-- `2`: RIKEN Center for Computational Science, Kobe, Japan
+- `1`: RIKEN Center for Computational Science, Kobe, Japan
+- `2`: Saitama University, Saitama, Japan
 
 Author-affiliation mapping:
 
-- Taihei Murakami: `1`
-- Kentaro Sasaki: `1`
+- Taihei Murakami: `2`
+- Kentaro Sasaki: `2`
+- Soichiro Oda: `2`
+- Kazuma Okada: `2`
 - Yasuhiro Matsunaga: `1,2`
 
 Equal contribution:
@@ -50,17 +62,22 @@ Student ORCID IDs are not treated as required placeholders unless the authors al
 
 Preferred:
 
-**Mutation free-energy labels improve low-data nanobody thermal stability prediction**
+**Data design and physical observable govern the transfer of molecular simulation to nanobody thermal-stability prediction**
 
 Alternatives:
 
-- **Learning from simulation data for experimental protein-property prediction**
-- **Multi-task transfer learning from computational stability labels for nanobody melting-temperature prediction**
-- **Free-energy-guided transfer of simulation labels to nanobody thermal stability prediction**
-- **Simulation-informed transfer learning improves low-data nanobody thermal stability prediction**
+- **When does molecular simulation transfer to experimental protein stability? Two design axes for low-data nanobody Tm prediction**
+- **Matched mutation scans let molecular-dynamics stability labels transfer to nanobody melting-temperature prediction**
+- **From free energies to native contacts: how the physical observable sets the depth of simulation-to-experiment transfer**
 
-The preferred title foregrounds the tested contribution rather than implying
-that generic simulation data always improves experimental prediction.
+Rationale (updated story): the earlier reading was "simulation transfers only for FEP; a
+molecular-dynamics native-contact label does not." The controlled experiments here overturn the
+naive part: an MD native-contact stability label **does** transfer once its data design is matched to
+the target (a mutation scan on the same scaffold, removing the sequence-length confound of a diverse
+screen). What still differs is the **depth** of transfer, set by the physical observable — alchemical
+free energy (FEP) reshapes the sequence representation and transfers even with a fine-tuned encoder,
+whereas the native-contact label only helps a fixed representation. The title should foreground these
+two design axes (data design + physical observable), not a single method.
 
 ## Central Message
 
@@ -78,9 +95,37 @@ The answer developed in this case study is:
 - Evaluate all claims on a held-out experimental Tm test set.
 - Compare source labels by paired errors on the same test examples.
 
-The main result is that FEP-derived mutation free-energy labels provide the clearest improvement over Tm-only training. Rosetta scores assigned to variants proposed by ESM2 provide a weaker but positive signal. A simple MD-derived Q-value label does not improve the held-out Tm prediction. Descriptor controls then sharpen the interpretation: Q-value slope is slightly better than the raw Q-value, while disulfide-distance fluctuation and CDR3 length perform better among tested descriptor controls but still do not reach the FEP reference. Therefore, the message is not that adding simulation data is generically beneficial; rather, the computational label must encode information that transfers to the target phenotype, and the conversion from simulation trajectory or nanobody descriptor to source label is part of the scientific design problem.
+The main result is organized along **two design axes** that together govern whether and how a
+simulation-derived label transfers to the experimental phenotype:
 
-The relation between Tm and mutation free energy is the final interpretation, not the opening premise. Sparse experimental Tm labels anchor the absolute stability scale, while mutation free-energy labels provide local stability-change information over sequence perturbations.
+1. **Data design (does it transfer at all).** The same physical observable — a molecular-dynamics
+   native-contact stability label — fails to help when computed over a *diverse* screen of different
+   nanobodies (its signal is confounded with sequence length), but **does** improve held-out Tm once
+   it is computed over a *mutation scan on the same scaffolds used for FEP* (single-residue
+   perturbations, constant length, no length confound). So matching the source's sequence
+   neighborhood to the target — the same mutation-scan design as the free-energy labels — is what
+   turns a null result into a real one. This is a controlled, confound-isolated finding: it is the
+   data design, not the label arithmetic (a per-mutant Q vs a WT-referenced ΔQ are equivalent after
+   min-max scaling).
+
+2. **Physical observable (how deep the transfer goes).** With a matched design, both label families
+   transfer, but to different depths. Alchemical mutation free energy (FEP) reshapes the shared
+   sequence representation and improves Tm even when the encoder is fine-tuned (the deeper regime).
+   The native-contact stability label helps only when the representation is held fixed (frozen
+   encoder); it does not have the leverage to reshape the encoder toward the Tm phenotype. So the
+   physical content of the label — how directly it encodes the mutation's effect on stability — sets
+   the *depth* of transfer.
+
+Supporting comparisons show the other structure-based scores (plain Rosetta, ThermoMPNN, and Rosetta
+on ESM2-proposed or random variant sets) are weak-to-null under matched tuning, and controls rule out
+alternatives (encoder size does not substitute for a matched physical label; charge-change finite-size
+corrections are negligible for the ML labels).
+
+The practical message is therefore a **design rule for simulation datasets**: match the source's
+sequence design to the target, and choose the physical observable for its alignment with the
+phenotype (free energies reshape the representation; coarse structural summaries only refine a fixed
+one). Sparse experimental Tm labels anchor the absolute stability scale, while mutation-scan
+simulation labels supply local stability-change directions over sequence perturbations.
 
 ## Reader Entry And Terminology
 
@@ -259,7 +304,7 @@ Avoid in the main Introduction unless needed:
 3. A controlled comparison of multiple computational label types under the same experimental split and model-selection rule.
 4. Evidence that mutation free-energy labels improve experimental Tm prediction even though they are not Tm measurements.
 5. A boundary condition: structural-dynamics labels do not automatically transfer to Tm prediction.
-6. A design-loop bridge: variants proposed by a sequence model and scored by physics-based calculations can still provide useful supervised signal, although this paper does not perform active learning or reinforcement learning.
+6. A selectivity result: under matched per-source tuning, only mutation free-energy (FEP, both regimes) and the matched-scan MD native-contact label (frozen) robustly transfer; Rosetta-family scores — plain Rosetta, ThermoMPNN, and Rosetta scores on ESM2-proposed or random variant sets — are weak-to-null. No reinforcement-learning / closed-loop design claim is made.
 
 ## Manuscript Architecture
 
@@ -275,7 +320,7 @@ Required moves:
 4. Introduce the multi-task transfer-learning framework.
 5. State the controlled evaluation design: shared experimental split, validation-set model selection, held-out Tm test set, paired comparison.
 6. Report the main number: FEP labels improve held-out Tm prediction from MAE 6.61 to 6.26 deg C, a paired improvement of 0.35 deg C.
-7. State source dependence: Rosetta scores assigned to ESM2-proposed variants are positive but weaker; the MD-derived Q-value does not improve performance.
+7. State source dependence: under matched tuning only FEP (both regimes) and the FEP-matched MD native-contact label (frozen) robustly help; Rosetta-family scores are weak-to-null.
 8. End with the interpretation: mutation free-energy labels provide local stability-change information complementary to sparse absolute Tm measurements.
 
 ### Introduction
@@ -375,6 +420,25 @@ Subsection plan:
 
 The Results should follow the figures and keep interpretation controlled.
 
+**UPDATED RESULTS ARC (two-axis story; replaces the earlier "MD Q-value is a negative control" arc).**
+The old arc was: (1) framework; (2) source comparison with FEP positive and MD Q-value negative;
+(3) MD descriptor choice; (4) structure-based + LM-proposed variants. The new arc is:
+- **R1 — Framework** (Fig. 1): unchanged.
+- **R2 — Which computational labels transfer** (Fig. 2): FEP best; **the FEP-matched MD
+  native-contact label also transfers (≈ FEP frozen)**; Rosetta/ThermoMPNN intermediate; count sweeps.
+- **R3 — Data-design axis** (Fig. 3): the *same* MD observable is null as a diverse screen
+  (length-confounded) but transfers as an FEP-matched mutation scan → matched sequence design, not
+  the ΔQ-vs-Q arithmetic (equivalent after min-max), is what makes MD transfer.
+- **R4 — Physical-observable axis / depth** (Fig. 4): with matched design, FEP transfers in both
+  encoder regimes but the MD native-contact label only with a frozen encoder → the physical
+  observable sets the depth of transfer (whether it can reshape the encoder). Under tuning the
+  Rosetta-family scores (plain Rosetta, ThermoMPNN, and the two variant-set sources) are weak-to-null;
+  they appear only as menu comparators (Fig 2b) with NO reinforcement-learning / design-loop claim.
+- **R5 — Controls**: encoder size does not substitute; charge-change corrections negligible;
+  min-max/clip and extreme-value handling (do NOT clip; the unmeasurable extreme buried-charge ΔΔG
+  carry disproportionate transfer signal).
+The detailed subsection prose below is being rewritten to this arc.
+
 #### Result 1: A framework for using simulation labels in experimental protein-property prediction
 
 Display: Fig. 1, introduced before the Results section and used as the
@@ -461,35 +525,36 @@ Key points:
   figure.
 - FEP should also be included in Fig. 4 as a comparator, so readers can see the
   weaker structure-based source signals relative to the main positive source.
-- ESM2-proposed variants scored by Rosetta improve over Tm-only learning, but
-  their direct advantage over random variants scored by Rosetta is exploratory.
-- These source labels are useful as context and future direction, but they are
-  not the main quantitative claim.
+- Two additional Rosetta-scored variant sets (ESM2-proposed and random variants)
+  are shown only as ordinary comparators in the source menu (Fig 2).
+- These source labels are context; they are not a quantitative claim.
 
 Main claim:
 
-Non-FEP structure-based labels provide weaker source signals; the proposal-set
-result motivates future generator, physics, and predictor workflows without
-claiming closed-loop optimization.
+Non-FEP structure-based labels provide weak-to-null source signals under matched
+per-source tuning.
 
-#### Result 5: Physics-labeled sequence proposals provide a design-loop bridge
+#### Result 5: The Rosetta-family scores (incl. the two variant-set sources) are weak-to-null
 
-Display: Fig. 4c,d and Discussion.
+Display: Fig. 2b and Fig. 4a,b.
 
-Key numbers:
+Key numbers (tuned, ΔMAE vs Tm-only @n=320; frozen / hot):
 
-| comparison | ΔMAE | 90% paired CI |
+| source | frozen ΔMAE | hot ΔMAE |
 |---|---:|---:|
-| ESM2-proposed variants scored by Rosetta vs Tm-only | -0.1652 | [-0.3058, -0.0250] |
-| ESM2-proposed variants scored by Rosetta vs random variants scored by Rosetta | -0.0654 | [-0.1949, +0.0639] |
+| Rosetta mutation score | +0.002 | +0.078 |
+| ThermoMPNN stability score | −0.141 (ns) | +0.073 |
+| random variants + Rosetta | −0.013 | +0.144 |
+| ESM2-proposed variants + Rosetta | +0.083 | +0.411* (worse) |
 
 Main claim:
 
-Rosetta scores assigned to ESM2-proposed variants improve over Tm-only
-training, but their superiority over random variants scored by Rosetta is not
-conclusive. This should be framed as a route toward future
-generator, physics, and predictor design loops, not as evidence that the sequence
-proposals are already optimized.
+Under rigorous per-source tuning in the low-data regime, the Rosetta-family scores
+do not robustly improve Tm prediction; ThermoMPNN gives only a weak (non-significant)
+frozen gain. **We make NO reinforcement-learning / closed-loop design claim** — under
+tuning the ESM2-proposed variant set does not beat random, so the earlier
+"design-loop bridge" framing is dropped (user decision 2026-07-04). The two
+variant-set sources appear purely as menu comparators.
 
 #### Result 6: Mutation free-energy labels complement sparse absolute Tm anchors
 
@@ -515,18 +580,16 @@ Paragraph plan:
 3. Interpret why this matters: relative mutation free energies complement sparse absolute Tm labels.
 4. Discuss source dependence: not every simulation-derived or physics-based label transfers.
 5. Discuss encoder adaptation and model size: limited adaptation helps; larger language models were not sufficient in this low-data regime.
-6. Discuss ESM2-proposed variants scored by Rosetta: positive supervised signal, but no claim of completed design optimization.
+6. Discuss the Rosetta-family scores (plain Rosetta, ThermoMPNN, and the two variant-set sources) as weak-to-null under tuning; make no reinforcement-learning / closed-loop design claim (the ESM2-proposed variant set does not beat random).
 7. Limitations:
    - small experimental Tm train set;
    - nanobody-specific dataset;
    - small number of exact NbBench sequence overlaps in the MD source table;
    - no new experimental validation of high-Tm candidates;
-   - ESM2-proposed-vs-random comparison remains exploratory;
    - raw simulation data may be large and difficult to deposit fully.
 8. Outlook:
-   - candidate generation, physics scoring, Tm prediction, and iterative selection;
-   - future active-learning or reinforcement-learning design loops;
-   - the present paper stops at supervised evidence supporting this direction.
+   - matched-design simulation labels (both alchemical and, for a fixed representation, structural) as auxiliary supervision for other low-data protein properties;
+   - the present paper stops at supervised evidence; no design-loop / reinforcement-learning claim is made.
 9. Concluding paragraph:
    - The key practical lesson is to choose computational labels by their transferable physical content, not by availability alone.
 
@@ -596,61 +659,82 @@ Panels:
 - (d) Paired MAE changes for FEP and MD Q-value labels relative to the
   encoder-matched Tm-only reference, comparing frozen and hot encoders.
 
-Claims:
+Claims (UPDATED for the two-axis story):
 
 - Experimental Tm labels show the expected low-data count response.
-- FEP reaches the best held-out Tm MAE at the full label set, but the curve is noisy.
-- The MD-derived Q-value does not reproduce the FEP benefit.
-- Larger ESM2 encoders do not explain the FEP gain.
-- Encoder updating improves the FEP gain, but FEP retains a smaller benefit with
-  a frozen encoder.
-- Avoid claiming a strict monotonic law.
+- FEP reaches the best held-out Tm MAE and improves in both encoder regimes.
+- **The FEP-matched MD native-contact label also improves held-out Tm — comparable
+  to FEP with a frozen encoder** — so, with matched design, an MD stability label
+  transfers (this replaces the earlier "MD Q-value does not help" claim).
+- Other structure-based scores (plain Rosetta, ThermoMPNN, and Rosetta on ESM2-proposed
+  or random variant sets) are weak-to-null under matched tuning (ThermoMPNN gives only a
+  weak, non-significant frozen gain).
+- Larger ESM2 encoders do not explain or substitute for the physical-label gain.
+- Avoid claiming a strict monotonic law; report paired ΔMAE with bootstrap CIs.
 
-### Fig. 3. MD descriptor choice controls transfer to Tm prediction
+(Panel (a)/(d) reader labels now include "MD native-contact stability (matched scan)"
+alongside "mutation free energy".)
 
-Purpose: central all-atom simulation comparison, moving beyond the raw Q-value
-failure to ask which simulated quantities produce useful source labels.
+### Fig. 3. Data-design axis: matching the source's sequence design lets MD stability labels transfer
 
-Panels:
-
-- (a) Held-out test MAE for Tm labels only, FEP mutation free-energy labels,
-  selected 300 K and 400 K MD-derived descriptors, and the sequence-only
-  CDR3-length control.
-- (b) Distributions of normalized source-label values for matched descriptors
-  computed from 300 K and 400 K trajectories.
-
-Claims:
-
-- FEP is the clearest all-atom source label.
-- The tested terminal Q-value is not enough, but the descriptor screen shows
-  that the MD result depends on which dynamical quantity becomes the source
-  label.
-- Temperature and descriptor choice change the source-label distributions seen
-  by the model.
-
-### Fig. 4. Structure-based labels and language-model-proposed variants
-
-Purpose: show non-FEP/non-MD source-label comparisons and the design-loop
-perspective.
+Purpose: the first design axis — show that whether an MD native-contact label transfers is
+controlled by its **data design**, not by the observable arithmetic. The identical physical
+observable fails as a diverse-nanobody screen (length-confounded) but transfers as an FEP-matched
+mutation scan.
 
 Panels:
 
-- (a) Final test MAE for Tm-only learning, FEP mutation free-energy labels,
-  Rosetta mutation scores, ThermoMPNN stability scores, random variants scored
-  by Rosetta, and ESM2-proposed variants scored by Rosetta.
-- (b) Paired ΔMAE versus Tm-only learning.
-- (c) Direct paired comparison between ESM2-proposed variants scored by Rosetta
-  and random variants scored by Rosetta.
-- (d) Perspective panel for future generator, physics, and predictor loops.
+- (a) Held-out Tm MAE for the MD native-contact label computed two ways: over a **diverse
+  nanobody screen** (the earlier setup; no improvement) vs over the **FEP-matched mutation scan**
+  on the same 1mel/4idl scaffolds (improves, ≈ FEP frozen). Tm-only and FEP shown as references.
+- (b) The confound made explicit: source-label value vs sequence length — the diverse screen has
+  a length spread and a nonzero label–length correlation, whereas the matched scan is constant
+  length (correlation undefined / removed). (Provenance/data: `data/md/nanobody_qvalue_400K.csv`
+  vs `data/source_labels/md_fep400k/`.)
+- (c) Label-count scaling of the matched-scan MD label with paired ΔMAE(n) and bootstrap CI,
+  showing the improvement grows with matched labels (frozen).
 
 Claims:
 
-- Rosetta and ThermoMPNN source labels are weaker than FEP when plotted on the
-  same axis.
-- ESM2-proposed variants scored by Rosetta provide a useful supervised source
-  signal, but superiority over random variants remains unresolved.
-- The result motivates future closed-loop design, while the present paper tests
-  only supervised learning from scored proposal sets.
+- The same native-contact observable is a null result as a diverse screen and a real transfer
+  signal as a matched mutation scan → **data design (matched sequence neighborhood), not the
+  ΔQ-vs-Q arithmetic (equivalent after min-max), drives it.**
+- The earlier diverse-screen label is confounded with sequence length; the matched scan removes it.
+- Under matched design the MD label scales with label count (frozen).
+
+Note: numbers to be finalized from the tuned re-run (`MD_FEP400K`, source_screen HPO, hot+frozen).
+
+### Fig. 4. Physical-observable axis: the label's physical content sets the depth of transfer
+
+Purpose: the second design axis — with data design matched, show that the **physical observable**
+sets how *deep* the transfer goes. Alchemical free energy (FEP) reshapes the shared representation
+and transfers even when the encoder is fine-tuned; the native-contact stability label only helps a
+fixed (frozen) representation. Place the other ΔΔG-native labels (Rosetta, ThermoMPNN) on the same
+axis.
+
+Panels (finalized 2026-07-04; the old design-loop panel (c) was removed — see Decision Log):
+
+- (a) Held-out Tm MAE for Tm-only, FEP, MD native-contact (matched scan), Rosetta mutation score,
+  and ThermoMPNN stability score, under **frozen vs hot encoder** (grouped). Key contrast: FEP
+  improves in the hot regime; the MD native-contact label improves only frozen and not hot.
+- (b) Paired ΔMAE vs Tm-only for each source × encoder regime, with bootstrap CIs — quantifying the
+  "hot only for free-energy-type labels" split. (FEP crosses 0 in both regimes; MD only frozen;
+  Rosetta/ThermoMPNN essentially null.)
+- (c) Interpretation panel: shared-representation schematic showing the auxiliary label reshaping the
+  encoder (deep, free energies) vs only the fixed trunk (shallow, native-contact Q).
+
+Claims:
+
+- Under matched design, **FEP transfers in both regimes; the MD native-contact label transfers only
+  with a frozen encoder** → the physical observable determines whether the source can reshape the
+  representation (depth of transfer).
+- Under rigorous per-source tuning, only FEP (both regimes) and MD ΔQ (frozen) robustly help; the
+  Rosetta-family scores (plain Rosetta, ThermoMPNN, and the two variant-set sources) sit at/near
+  baseline. So the free-energy-type advantage is real but selective, not a blanket "ΔΔG helps."
+- The two additional Rosetta-scored variant sets (ESM2-proposed, random) are shown in Fig 2's source
+  menu as ordinary comparators; **we make NO reinforcement-learning / closed-loop design claim** —
+  under tuning ESM2-proposed does not beat random, so any design-loop framing is dropped (user
+  decision 2026-07-04).
 
 ## Supplementary Material Plan
 
@@ -675,8 +759,8 @@ Keep the main paper compact and put reproducibility details here.
 - Use: "the utility of computational labels is source-dependent."
 - Avoid: "ΔΔG predicts Tm."
 - Use: "mutation free-energy labels provide source-label information that improves Tm prediction."
-- Avoid: "sequence-model proposals are better than random variants."
-- Use: "Rosetta scores assigned to ESM2-proposed variants improve over Tm-only, while superiority over random variants scored by Rosetta remains unresolved."
+- Avoid: "sequence-model proposals are better than random variants" and any design-loop / reinforcement-learning framing.
+- Use: "the two Rosetta-scored variant sets (ESM2-proposed and random) are weak-to-null comparators; ESM2-proposed does not beat random under tuning."
 - Avoid: opening the paper with the Tm/ΔΔG relationship.
 - Use: the Tm/ΔΔG relationship as the final interpretation of why FEP works.
 - Avoid local lab shorthand in the manuscript and figures.
@@ -684,25 +768,84 @@ Keep the main paper compact and put reproducibility details here.
 
 ## Current Key Numbers
 
-| condition | test MAE | ΔMAE vs Tm-only | 90% paired CI |
+**DEFINITIVE tuned two-axis numbers (2026-07-04).** Per-source × per-regime staged HPO
+(Stage 1 arch×head skeleton → Stage 2 lr/dropout/wd fine-tune, selected on Tm **validation**),
+then final **test** eval (5 runs, full scaling n_ddg = 20/80/160/320), paired bootstrap ΔMAE vs
+the tuned Tm-only baseline over shared test-sample indices (eval set n=396, swapped low-data split).
+Winning configs recorded in `zenodo/_logs/tune_final_results.tsv` + `results/final_*/scaling.json`.
+
+Tuned Tm-only baselines: **frozen 7.229 / hot 6.548**.
+
+FROZEN (encoder frozen — aux shapes the shared trunk only):
+
+| n_ddg | FEP MAE (ΔMAE, p) | MD ΔQ MAE (ΔMAE, p) |
+|---:|---|---|
+| 20  | 7.133 (−0.097, **0.001**) | 7.318 (+0.089, ns) |
+| 80  | 7.182 (−0.047, ns)        | 7.157 (−0.072, ns) |
+| 160 | 7.139 (−0.090, **0.044**) | 7.176 (−0.053, ns) |
+| 320 | 7.008 (−0.221, **0.006**) | 7.034 (−0.195, **0.011**) |
+
+HOT (encoder unfrozen):
+
+| n_ddg | FEP MAE (ΔMAE, p) | MD ΔQ MAE (ΔMAE, p) |
+|---:|---|---|
+| 20  | 6.569 (+0.021, ns)        | 7.018 (+0.470, **worse**) |
+| 80  | 6.474 (−0.074, ns)        | 6.785 (+0.237, **worse**) |
+| 160 | 6.418 (−0.130, **0.026**) | 6.691 (+0.143, **worse**) |
+| 320 | 6.395 (−0.153, **0.040**) | 6.577 (+0.029, ns) |
+
+Head-to-head at n=320 (paired): **frozen** FEP 7.008 vs MD 7.034, ΔMAE −0.026 [−0.210,+0.156] p=0.41
+(**statistical tie — MD ΔQ competitive with FEP when frozen**); **hot** FEP 6.395 vs MD 6.577,
+ΔMAE −0.182 [−0.356,−0.007] p=0.044 (**FEP significantly better in hot**).
+
+**FULL comparator table (all sources re-tuned in the identical staged protocol, 2026-07-04).**
+ΔMAE at n=320 vs tuned Tm-only, paired bootstrap (`*` = 90% CI excludes 0). Slope = power-law b
+(4-point fit; unstable for the noisy hot Rosetta-family curves — rely on ΔMAE@320 there).
+
+FROZEN (baseline 7.229):
+
+| source | MAE@320 | ΔMAE@320 (p) | slope |
 |---|---:|---:|---:|
-| Tm-only | 6.6145 | - | - |
-| FEP | 6.2611 | -0.3530 | [-0.4621, -0.2426] |
-| ESM2-proposed variants scored by Rosetta | 6.4484 | -0.1652 | [-0.3058, -0.0250] |
-| ThermoMPNN | 6.4607 | -0.1525 | [-0.2958, -0.0067] |
-| Random variants scored by Rosetta | 6.5130 | -0.0998 | [-0.2248, +0.0259] |
-| Rosetta | 6.5255 | -0.0880 | [-0.2008, +0.0247] |
-| MD-derived Q-value | 6.7304 | +0.1172 | [+0.0120, +0.2235] |
+| FEP            | 7.008 | **−0.221*** | −0.032 |
+| MD ΔQ          | 7.034 | **−0.195*** | −0.080 |
+| ThermoMPNN     | 7.089 | −0.141 (ns) | −0.116 |
+| Rosetta-random | 7.216 | −0.013 (ns) | −0.041 |
+| Rosetta        | 7.231 | +0.002 (ns) | −0.013 |
+| Rosetta-ESM    | 7.312 | +0.083 (ns) | −0.001 |
 
-Additional paired comparison:
+HOT (baseline 6.548):
 
-- ESM2-proposed variants scored by Rosetta minus random variants scored by Rosetta:
-  - ΔMAE -0.0654
-  - 90% CI [-0.1949, +0.0639]
-  - Interpretation: suggestive but not conclusive.
+| source | MAE@320 | ΔMAE@320 (p) | slope |
+|---|---:|---:|---:|
+| FEP            | 6.395 | **−0.153*** | −0.202 |
+| MD ΔQ          | 6.577 | +0.029 (ns; degrades at low n, +0.470* @ n=20) | −0.129 |
+| ThermoMPNN     | 6.621 | +0.073 (ns) | −0.248 |
+| Rosetta        | 6.625 | +0.078 (ns) | −0.065 |
+| Rosetta-random | 6.692 | +0.144 (ns) | (noisy) |
+| Rosetta-ESM    | 6.959 | **+0.411*** (worse) | (noisy) |
+
+**Tuned hierarchy (overturns the pre-tuning single-config ranking):** FEP is the ONLY source that
+significantly helps in HOT and is best in FROZEN. In FROZEN, FEP ≈ MD ΔQ (statistical tie) lead, with
+ThermoMPNN a weak third and the **Rosetta family essentially null/harmful**. The old single-config
+numbers (where Rosetta variants and ThermoMPNN all looked helpful) were an artefact of un-tuned
+comparison; under matched per-source tuning + the low-data split the transfer is much more selective.
+
+**Two-axis reading (survives rigorous tuning + test eval):**
+1. **Data design** — matched mutation-scan MD (native-contact ΔQ, same 1mel/4idl scaffolds as FEP)
+   transfers in FROZEN and reaches −0.195 at n=320 (p=0.011), a statistical tie with FEP (−0.221).
+   The old diverse-screen MD (Q–length confound) gave zero/negative transfer. → design, not observable.
+2. **Physical observable** — alchemical ΔΔG (FEP) helps in BOTH regimes (reshapes the encoder →
+   transfers hot). Native-contact ΔQ helps ONLY frozen; in hot it actively degrades (+0.47 at n=20),
+   recovering only to baseline by n=320. → the free-energy observable is the more robust/deep signal.
+
+Superseded reference (old single-config, pre-tuning): Tm-only 6.6145; FEP 6.2611 (−0.353);
+ESM2-proposed/Rosetta 6.4484 (−0.165); ThermoMPNN 6.4607 (−0.153); random/Rosetta 6.5130 (−0.100);
+Rosetta 6.5255 (−0.088); old diverse-MD Q-value 6.7304 (+0.117).
 
 ## Decision Log
 
+- 2026-07-04: **Figures Fig 2/3/4 rebuilt with tuned numbers; RL/design-loop story dropped.** `plot/build_tuned_summaries.py` (new) writes `results/tuned_rep/{hot,frozen}_summary.json` + per-source representative single-point scaling.json from the 14 `final_*` runs; `plot/make_outline_figures.py` repointed to them, added source `MD_FEP400K` ("MD native-contact (matched scan)"). All 14 plotted numbers cross-checked PASS vs the tuned Key Numbers. **User decision:** the two Rosetta-scored variant sets (ESM2-proposed, random) are shown only as ordinary menu comparators in Fig 2b — **NO reinforcement-learning / closed-loop design claim** (under tuning ESM2-proposed 7.31/6.96 does NOT beat random 7.22/6.69). Consequently **Fig 4's old design-loop panel (c) was removed**; Fig 4 = (a) grouped frozen/hot MAE, (b) paired ΔMAE, (c) deep/shallow schematic. Old Result 5 "design-loop bridge" reframed to "Rosetta-family scores are weak-to-null"; design-loop/RL wording removed from contributions, abstract, results arc, discussion, writing-rules, TODO. Figures: `paper/tex/figures/fig_outline0{2,3,4}.{pdf,png,svg}`.
+- 2026-07-04: **ALL comparators re-tuned (full staged HPO) — tuned hierarchy finalized.** Per user request, Rosetta / Rosetta-ESM / Rosetta-random / ThermoMPNN were put through the identical Stage1(arch×head, 48 cfg)→Stage2(lr/dropout/wd, 168 cfg)→final test(5 runs, full scaling) protocol as FEP/MD. Result (see Current Key Numbers full comparator table): FEP is the ONLY source significant in HOT (−0.153*) and best in FROZEN (−0.221*); MD ΔQ ties FEP in FROZEN (−0.195*); ThermoMPNN weak-third FROZEN (−0.141 ns); Rosetta family null/harmful (Rosetta +0.002, Rosetta-random −0.013, Rosetta-ESM +0.083 in frozen; all ≥baseline in hot, Rosetta-ESM +0.411* worse). This overturns the pre-tuning single-config ranking (where Rosetta/ThermoMPNN looked helpful). Winning configs in `zenodo/_logs/comp_final_results.tsv` + `results/final_{ros,rosesm,rosrnd,tmpnn}_{hot,frozen}/scaling.json`. Next: figures Fig 2/3/4 from the tuned numbers.
 - 2026-05-30: Initial MD-centered story was weakened after controlled comparison.
 - 2026-05-31: FEP mutation-effect labels identified as the main positive result.
 - 2026-05-31: ESM2-proposed-variant result positioned as a bridge toward future design loops while avoiding a claim of optimized sequence design.
@@ -716,11 +859,13 @@ Additional paired comparison:
 
 - 2026-06-07: Terminology — removed the transfer-learning "source" wording throughout the manuscript and figure captions/labels; "source label/task/head" → "computational label / computational task / computational head" (≈190 replacements). "structure source" reworded to "input structure" (a different meaning). Plot axis labels updated too.
 - 2026-06-07: Discussion restructured to CSBJ style — removed the content subsection headers ("Main finding and positioning", "Why mutation free energies can transfer", "What the controls rule out", "Physics-scored sequence proposals as a future direction", "Implications for large-scale data collection", "Outlook") and kept the prose as continuous text; only "Limitations" and "Conclusions" remain. Results titles de-jargoned.
+- 2026-07-03: **MAJOR PIVOT — thesis + MD data swap + journal change.** (a) Replaced the MD source: the old diverse-nanobody 400 K native-contact Q-value (`data/md/nanobody_qvalue_400K.csv`, a `--md-source` auxiliary) → the new **FEP-matched mutation-scan MD ΔQ** (`MD_FEP400K`, 1mel 431 + 4idl 406, a `--ddg-source` treated like FEP). (b) **Thesis reframed from "MD does not transfer (negative control)" to a two-axis story:** *data design* (matched mutation scan removes the length confound and makes the same MD observable transfer; ΔQ ≡ Q after min-max, so it is the design not the arithmetic) and *physical observable* (FEP reshapes the encoder → transfers hot; MD native-contact Q only helps a frozen encoder → sets the *depth* of transfer). Controlled 2×2 + clip-threshold sweep established that clipping hurts monotonically and the extreme (experimentally unmeasurable, poor-yield) buried-charge ΔΔG carry disproportionate transfer signal → do NOT clip. (c) **Journal changed CSBJ → Biophysics and Physicobiology (BPPB)**, Biophysical Society of Japan; reframe toward biophysics; AUTHOR_GUIDELINES to be regenerated from BPPB instructions (format not yet confirmed). (d) Figures rescoped: Fig 2 adds MD ΔQ as a positive; Fig 3 becomes the data-design axis; Fig 4 becomes the physical-observable/depth axis. Tuned numbers being re-run (`source_screen` HPO for `MD_FEP400K`, hot+frozen). See memories `md-deltaq-transfer-experiment` and `fep-provenance-charge-correction`.
 - 2026-06-07: Fig. 1 reduced to width=0.66\textwidth.
 - 2026-06-07: Figure data made reproducible on any checkout — make_outline_figures.py now rebases the absolute scaling_json paths stored in the source-screen summary onto the local results tree (rebase_results()).
 - 2026-06-07: Fig. 2 — panel (b) now reports the final validation-selected model MAE from the controlled source-screen summary (canonical) instead of test-argmin sweep points; panel (d) changed from paired ΔMAE to absolute held-out test MAE for Tm-only, FEP, and MD Q-value under frozen vs hot encoders (per request to drop the difference and include Tm-only). Fig. 2 is now internally consistent and matches Fig. 4 and the body (MD Q-value = 6.73, Tm-only = 6.61, FEP = 6.26).
 - 2026-06-07: Fig. 3 — panel (b) replaced (the 4-descriptor normalized-value box plot was uninformative) with the raw MD Q-value (fraction native contacts) distribution at 300 K vs 400 K, showing 300 K saturates near one while 400 K spreads to lower values.
 - 2026-06-07: Fig. 4 — removed panel (d) (the closed-loop "future direction" schematic; Discussion-flavoured, and Fig. 4 is the last Results figure). Fig. 4 is now (a) absolute MAE, (b) ΔMAE, (c) ESM2-proposed-minus-random.
+- 2026-07-04: **RIGOROUS TUNING COMPLETE — two-axis story confirmed on test.** In response to the critique that all conditions were under-tuned, ran a staged per-source×per-regime HPO: Stage 1 (arch{shared/residual/latent}×head{separate/context}, 30 configs) → Stage 2 (encoder_lr/lr × dropout × weight_decay around each winning skeleton, 126 configs), all selected on Tm **validation**; then final **test** eval (5 runs, full scaling) + paired bootstrap vs tuned Tm-only. Result (see Current Key Numbers): FROZEN — both FEP (−0.221, p=0.006) and MD ΔQ (−0.195, p=0.011) scale and are a statistical TIE at n=320 (data-design axis holds). HOT — FEP helps (−0.153, p=0.040); MD ΔQ HURTS (+0.47 at n=20, back to baseline by n=320); FEP>MD in hot (p=0.044) (physical-observable axis holds). Winning configs: FEP hot=shared/separate,enc3e-5,d0.15,w0.1; FEP frozen=shared/separate,lr1e-3,d0.05,w0.02; MD hot=latent/context,enc1e-5,d0.15,w0.02; MD frozen=shared/separate,lr1e-3,d0.05,w0.02; Tm hot=residual,enc5e-5,d0.3,w0.02; Tm frozen=latent,lr1e-3,d0.05,w0.1. The shallow-HPO val blip (MD hot latent 5.8 beating FEP) did NOT survive to test = val overfitting. Story is now data-defensible; proceeding to figures. NOTE: Rosetta/ThermoMPNN/ESM2-proposed comparators still need re-tuning in the same protocol for secondary panels.
 - 2026-06-07: CONSISTENCY ROOT CAUSE (Fig. 2/3/4 MD Q-value mismatch the user flagged): the same conditions were pulled from different experiment series with different MAE — sweep `*_tmselect` (MD Q-value 6.61), residual-descriptor `final_residual_*` (6.67), and source-screen `sourcefinal_*` (6.73). Decided canonical = source-screen summary; Fig. 2 was harmonized. Fig. 3a still uses the residual series (kept intentionally so the MD-descriptor comparison within 3a stays same-config/fair), so its Tm-only/FEP/MD Q-value still read 6.62/6.26/6.67 and differ slightly from the canonical 6.61/6.26/6.73. PENDING (needs new training, GPU): retrain all Fig. 3a descriptors at BOTH 300 K and 400 K in one canonical config so Fig. 3a becomes "all features × both temperatures" (#4) AND its shared conditions match Fig. 2/4. Until then Fig. 3a keeps its current single-temperature-per-descriptor layout.
 - 2026-06-07: Fig. 3a DONE (#4) — trained the 3 missing-temperature residual runs on Apple MPS in the canonical config (hot encoder, MODEL_ARCH=residual, encoder-lr 3e-5, selection-scope tm, n_md 640, 3 seeds): MD Q-value 300 K (6.72), Q-value slope 300 K (6.57), RMSF max 400 K (6.69). Fig. 3a now shows every MD descriptor at both 300 K and 400 K where trajectory data exist (disulfide-distance and CDR3-residue fluctuation are 300 K only — no 400 K trajectories; CDR3 length is sequence-derived), colour-coded by temperature. Temperature effects are descriptor-specific (Q-value better at 400 K, structural fluctuations defined at 300 K) and small vs the bootstrap intervals. #5 resolved by explaining in the Fig. 3 caption that 3a is a separate residual training series from the source-screen models (Fig. 2/4), so its absolute MAE (e.g. MD Q-value 6.67) is not meant for cross-figure numerical comparison with the canonical source-screen value (6.73). Also fixed a dependency regression: transformers pinned <5.5 (5.10.2 broke training on torch 2.6 via torch.float8_e8m0fnu).
 
@@ -733,7 +878,7 @@ Additional paired comparison:
 - [ ] Present source-label training before discussing the Tm/ΔΔG relationship.
 - [ ] Keep FEP as the main quantitative result.
 - [ ] Use the MD-derived Q-value result to show source dependence.
-- [ ] Treat ESM2-proposed-vs-random results as a design-loop bridge, not as evidence of optimized sequence design.
+- [ ] Treat the two Rosetta-scored variant sets (ESM2-proposed, random) as ordinary menu comparators only; make NO design-loop / reinforcement-learning claim (ESM2-proposed does not beat random under tuning).
 - [ ] Place the Tm/ΔΔG conceptual interpretation near the end of Results or in Discussion.
 - [ ] Add CSBJ-required statements: funding, author contributions, competing interests, data availability, code availability, and AI-use disclosure.
 - [ ] Convert figure panel labels to `(a)`, `(b)`, `(c)` style.

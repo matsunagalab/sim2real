@@ -1,0 +1,106 @@
+{
+  "rows": [
+    {
+      "source": "Tm_only",
+      "test_mae": 6.547931901269491,
+      "ci_width": 0.8708356589677448,
+      "val_mae": null,
+      "scaling_json": "/home/yasu/tmp/sim2real/results/tuned_rep/Tm_only_hot/scaling.json",
+      "arch": "residual",
+      "label": "Tm labels only"
+    },
+    {
+      "source": "FEP",
+      "test_mae": 6.394508715394586,
+      "ci_width": 0.8406925579461957,
+      "val_mae": null,
+      "scaling_json": "/home/yasu/tmp/sim2real/results/tuned_rep/FEP_hot/scaling.json",
+      "arch": "shared",
+      "label": "FEP mutation\nfree energy"
+    },
+    {
+      "source": "MD_FEP400K",
+      "test_mae": 6.576658727648285,
+      "ci_width": 0.8817193433357859,
+      "val_mae": null,
+      "scaling_json": "/home/yasu/tmp/sim2real/results/tuned_rep/MD_FEP400K_hot/scaling.json",
+      "arch": "latent",
+      "label": "MD native-contact\n(matched scan)"
+    },
+    {
+      "source": "thermoMPNN",
+      "test_mae": 6.620592243350584,
+      "ci_width": 0.8873259429567497,
+      "val_mae": null,
+      "scaling_json": "/home/yasu/tmp/sim2real/results/tuned_rep/thermoMPNN_hot/scaling.json",
+      "arch": "latent",
+      "label": "ThermoMPNN\nstability score"
+    },
+    {
+      "source": "rosetta_random",
+      "test_mae": 6.691650032759581,
+      "ci_width": 0.8863935353065688,
+      "val_mae": null,
+      "scaling_json": "/home/yasu/tmp/sim2real/results/tuned_rep/rosetta_random_hot/scaling.json",
+      "arch": "residual",
+      "label": "random variants\n+ Rosetta"
+    },
+    {
+      "source": "rosetta",
+      "test_mae": 6.625475345220457,
+      "ci_width": 0.8855942226270557,
+      "val_mae": null,
+      "scaling_json": "/home/yasu/tmp/sim2real/results/tuned_rep/rosetta_hot/scaling.json",
+      "arch": "latent",
+      "label": "Rosetta mutation\nscore"
+    },
+    {
+      "source": "rosetta_esm",
+      "test_mae": 6.9586277046843446,
+      "ci_width": 0.9164609822609124,
+      "val_mae": null,
+      "scaling_json": "/home/yasu/tmp/sim2real/results/tuned_rep/rosetta_esm_hot/scaling.json",
+      "arch": "shared",
+      "label": "ESM2-proposed\nvariants + Rosetta"
+    }
+  ],
+  "best": "FEP",
+  "paired_comparisons": {
+    "FEP_minus_Tm_only": {
+      "delta_mae": -0.1534231858749049,
+      "delta_ci_lo": -0.29450805003970393,
+      "delta_ci_hi": -0.009140611801602107,
+      "p_value": 0.0798
+    },
+    "MD_FEP400K_minus_Tm_only": {
+      "delta_mae": 0.028726826378793646,
+      "delta_ci_lo": -0.11350255180936143,
+      "delta_ci_hi": 0.17261302150200616,
+      "p_value": 0.7512000000000001
+    },
+    "thermoMPNN_minus_Tm_only": {
+      "delta_mae": 0.07266034208109318,
+      "delta_ci_lo": -0.08600836906003302,
+      "delta_ci_hi": 0.2334210394191041,
+      "p_value": 0.4476
+    },
+    "rosetta_random_minus_Tm_only": {
+      "delta_mae": 0.14371813149008972,
+      "delta_ci_lo": -0.02737603281462144,
+      "delta_ci_hi": 0.31306049585279505,
+      "p_value": 0.1614
+    },
+    "rosetta_minus_Tm_only": {
+      "delta_mae": 0.07754344395096613,
+      "delta_ci_lo": -0.07589133704283628,
+      "delta_ci_hi": 0.23215935807644567,
+      "p_value": 0.41700000000000004
+    },
+    "rosetta_esm_minus_Tm_only": {
+      "delta_mae": 0.41069580341485334,
+      "delta_ci_lo": 0.1805927296300697,
+      "delta_ci_hi": 0.6506224755328193,
+      "p_value": 0.0023999999999999577
+    }
+  }
+}

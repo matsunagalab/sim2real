@@ -2,208 +2,113 @@
 
 \section*{Discussion}
 
-This study asked how computed stability labels should be used when the
-experimental target is scarce and the computed quantity is related to, but not
-the same as, that target. In low-data nanobody Tm prediction, FEP mutation
-free-energy labels gave a modest but consistent paired improvement in
-held-out Tm error. The same default target-centered protocol did not benefit
-from a raw MD-derived Q-value, and larger ESM2 encoders did not reproduce the
-FEP gain. This pattern points to selective transfer. Computational labels must carry
-stability information that transfers to the experimental endpoint under
-validation rules defined by that endpoint.
-The absolute gain was small in degrees Celsius, so it should be read as a
-statistically consistent improvement in a low-data predictor, not as evidence
-that individual nanobody designs would show an assay-level stability gain of the
-same magnitude.
+This study asked how simulation-derived stability labels should be used when the
+experimental target is scarce and the simulated quantity is related to, but not
+identical to, that target. In low-data nanobody Tm prediction the answer separated
+into two design axes. Matching the auxiliary source's sequence design to the target
+decided whether a molecular-dynamics label transferred at all, and the physical
+observable decided how deeply it transferred. Under matched per-source tuning, only
+the FEP mutation free energy (with a frozen or a fine-tuned encoder) and the
+FEP-matched MD native-contact label (with a frozen encoder) robustly improved
+held-out Tm, while the Rosetta-family scores were weak or null. The absolute gains
+were small in degrees Celsius, so they should be read as statistically consistent
+improvements in a low-data predictor rather than as assay-level stability changes of
+the same magnitude.
 
-These results connect nanobody Tm prediction with Sim2Real learning.
-Existing nanobody Tm predictors rely mainly on PLM fine-tuning or
-structure-based features \citep{Zhang2025NbBench}. Materials-informatics
-Sim2Real studies show that large computed databases can improve small
-experimental target sets when the computational and experimental domains are related
-\citep{Minami2025Scaling}. Our setting adds a stricter test. The computational label
-and the target label differ in physical meaning. FEP provides relative
-mutation free energies, whereas the target is an absolute melting temperature.
-The study shows that such a computational label can augment scarce Tm supervision,
-whereas other available computed labels transfer weakly or not at all.
+\textbf{Data design decides whether an MD label transfers.} The clearest new result
+is that the same MD native-contact observable can be null or useful depending only
+on how its variants are chosen. Computed over a diverse panel of nanobodies the
+label did not improve Tm; computed over the FEP-matched 1MEL and 4IDL mutation
+scans it improved Tm and matched FEP with a frozen encoder. The diverse panel
+spans a wide range of sequence lengths and carries a nonzero label--length
+correlation, a confound the auxiliary head can fit instead of the stability signal;
+the matched scans hold length constant and present a clean mutation-to-stability
+gradient. Because a constant wild-type offset is absorbed by the min--max scaling,
+referencing each mutant to its wild type ($\Delta Q$) is numerically equivalent to
+using the raw contact fraction, so the gain is attributable to the matched sequence
+design and not to the label arithmetic. This reframes an earlier apparent negative
+result --- that an MD-derived stability label does not help --- as a statement about
+data design rather than about molecular dynamics.
 
-The helpful label measured a different quantity from Tm. FEP estimates how a
-mutation changes free energy, producing a relative
-$\Delta\Delta G$ value for that mutation. Tm is instead the absolute temperature
-at which the folded and unfolded states balance under a given assay. The two are not
-interchangeable. They do, however, read out related aspects of the same
-stability landscape. Sparse Tm measurements anchor the absolute scale, while
-mutation free energies provide local directions in sequence space. In this
-study, that shared physical content was sufficient for $\Delta\Delta G$
-supervision, selected only by Tm validation performance, to improve held-out Tm
-prediction even though the computational labels came from template variants different
-from the Tm test sequences.
+\textbf{The physical observable sets the depth of transfer.} With data design
+matched, FEP and the native-contact label still behaved differently across encoder
+regimes. FEP improved Tm whether the encoder was frozen or fine-tuned, whereas the
+native-contact label helped only when the encoder was frozen and gave no net gain,
+or a small degradation at low label counts, once the encoder was fine-tuned. A
+frozen encoder lets an auxiliary label recombine fixed features through the shared
+trunk; fine-tuning additionally lets it reshape the sequence representation itself.
+The alchemical free energy carries enough mutation-specific stability information to
+make that reshaping beneficial, while a native-contact persistence statistic can
+usefully condition a fixed representation but does not have the leverage to steer
+encoder fine-tuning toward the Tm phenotype. The physical content of the label thus
+sets not just whether it helps but how deeply it can act.
 
-This interpretation also separates computational-label content from generic auxiliary-task
-regularization. A raw MD-derived Q-value supplied an additional simulation task
-but did not improve the target endpoint under the default protocol. The gain
-tracks the specific stability-change information in $\Delta\Delta G$.
+\textbf{Why the free-energy label works.} FEP estimates how a mutation changes
+folding free energy, a relative $\Delta\Delta G$, whereas Tm is the absolute
+temperature at which folded and unfolded populations balance. The two are not
+interchangeable, but they read out related aspects of the same stability landscape:
+sparse Tm measurements anchor the absolute scale, and mutation free energies supply
+local directions in sequence space. That shared physical content was enough for
+$\Delta\Delta G$ supervision, selected only by Tm validation, to improve held-out
+Tm even though the auxiliary variants differ from the Tm test sequences. This
+interpretation also separates label content from generic auxiliary-task
+regularization, because a native-contact task supplied the same kind of extra
+signal yet only helped in the shallower (frozen) regime.
 
-Three controls sharpen this reading. First, the FEP label-count sweep was best
-at the largest tested setting, but it was not smooth enough to claim a
-biomolecular scaling law; the firmer conclusion is label dependence. This both
-echoes and complicates the materials-informatics case, where transferred error
-can scale with the size of a related computational database
-\citep{Minami2025Scaling}. In our protein setting, the useful labels were
-mutation free energies, not extra Tm measurements. Second, model size was not
-the lever. The 35M and 650M ESM2 encoders did not beat the 8M encoder in either
-the Tm-only or FEP settings, and the best model paired the 8M encoder with FEP
-labels, consistent with the broader observation that fine-tuning rather than
-raw capacity can drive PLM-based protein-property prediction
-\citep{Schmirler2024FineTuning}. Third, the frozen-encoder control locates the
-signal. FEP labels helped even with a fixed representation, but the best FEP
-model required encoder adaptation. The labels work best when they are allowed
-to reshape the representation toward stability-relevant directions while still
-being selected on experimental Tm.
+\textbf{Controls locate the signal.} Three controls sharpen the reading. First,
+model size was not the lever: 35M and 650M ESM2 encoders did not beat the 8M
+encoder in either the Tm-only or FEP settings, consistent with the observation that
+fine-tuning rather than raw capacity drives PLM-based property prediction
+\citep{Schmirler2024FineTuning}. Second, the frozen-versus-hot contrast is exactly
+the physical-observable axis above and shows the effect is about representational
+depth, not optimizer settings, because each source was retuned within each regime.
+Third, a net-charge finite-size correction for the buried-charge FEP mutations was
+negligible for the scaled labels, so it does not affect the comparison. We also
+kept the extreme FEP values rather than clipping them, since the extreme
+buried-charge mutations --- experimentally hard to measure --- carry a
+disproportionate share of the transferable signal.
 
-The MD result calls for the same specificity. Other MD-derived descriptors may
-behave differently, but a raw high-temperature native-contact Q-value did not
-transfer under the default target-centered protocol. By compressing each
-trajectory to a single terminal contact-persistence
-statistic, it may miss mutation-specific energetics that govern how sequence
-changes shift stability. The descriptor controls support this point. Q-value
-slope was slightly better than the raw Q-value, and disulfide-distance
-fluctuation was better still, although neither reached the FEP reference. A
-simulation campaign aimed at target transfer should choose trajectory
-observables for their expected physical relevance to the endpoint, rather than
-for label count alone.
+\textbf{Selectivity and what we do not claim.} The improvements were selective, not
+additive. The Rosetta-family scores --- the plain Rosetta mutation score, ThermoMPNN,
+and Rosetta scores on ESM2-proposed or random variant sets --- did not robustly
+improve Tm under matched tuning, with ThermoMPNN giving only a weak, non-significant
+frozen gain. In particular, the Rosetta scores on ESM2-proposed variants did not
+outperform the random-variant control once each was tuned, so we make no claim that
+language-model proposals scored by physics constitute a useful design loop; those
+two sources appear only as ordinary comparators. Establishing a generator--physics--predictor
+design loop, and any active- or reinforcement-learning extension, is outside the
+scope of this supervised study.
 
-The Rosetta-scored proposal-set result is best read as a feasibility test for
-design workflows. Rosetta scores on ESM2-proposed variants improved Tm prediction
-over Tm-only learning, but the direct comparison with random variants stayed
-within noise, so we do not claim that the present generator has already optimized
-nanobody thermostability. The supported conclusion is that language-model
-proposals can be annotated by a physics-based score and used as supervised computational labels
-for a Tm predictor.
-
-That supervised-scoring step is the only part of a design loop we tested. A full
-loop would let a generator propose variants, physics-based calculations annotate
-them, the Tm predictor update its estimate of experimental stability, and that
-estimate drive the next round of proposals, connecting this transfer-learning
-result to active or reinforcement learning. Those closed-loop steps, and
-experimental validation of newly proposed high-Tm nanobodies, are beyond the
-present scope.
-
-The practical implication is not the size of the improvement, which was modest,
-but the criterion it suggests for data collection. Under target-centered
-evaluation, a computational label helped only when its physical quantity was close to
-the target ($\Delta\Delta G$), not when it was simulation-derived
-(the MD Q-value) or backed by a larger model alone. A data campaign aimed at a
-scarce phenotype such as Tm should be chosen for physical relatedness
-to that phenotype, and then validated by held-out target performance, before
-committing to scale.
-
-For nanobody Tm specifically, three priorities follow. First, relative stability
-at scale for VHH-length scaffolds. The strongest computational label here, $\Delta\Delta G$, is
-the quantity that high-throughput proteolysis can already measure for on the order
-of $10^5$ domains \citep{Tsuboyama2023MegaScale}, but those domains are short
-(40 to 72 residues) whereas VHH domains are longer; extending such assays, or
-computational $\Delta\Delta G$, to VHH-length scaffolds would supply the large,
-physically matched computational-label pool that our two-template FEP set only begins to
-sample. Second, template and mutation diversity. Our FEP labels came from two
-templates, enough to show transfer but not to scale it; $\Delta\Delta G$ spanning
-many templates and mutations, broad enough to cover the sequence neighborhood of
-the Tm target, is the natural next dataset. Third, modest but well-distributed Tm
-anchors. The target side here was 57 sequences, and a few hundred Tm measurements
-spread across the relevant stability range would fix the absolute scale that
-$\Delta\Delta G$, being relative, cannot set on its own.
-
-These choices also trade off against cost, although this study did not measure
-cost systematically. Learned predictors and structure-based scores can label
-large variant sets much faster than all-atom alchemical calculations, and they
-gave modest transfer signals in our experiments. Such labels may be useful for
-broad, inexpensive computational-label pools, but the main risk is saturation. A proxy can
-carry the model only as far as its own accuracy and physical relevance allow, so
-adding more cheap labels may stop helping once that ceiling is reached. All-atom
-FEP sits at the other end of this tradeoff. It is more expensive per mutation,
-but it gave the strongest per-label transfer observed here. This points to a
-tiered strategy in which learned or structure-based labels provide breadth, while
-all-atom calculations can be reserved for regions where a more directly
-stability-related label is worth the extra cost.
-
-The negative results also guide follow-up work. Collecting more coarse
-trajectory summaries, such as a single native-contact Q-value, is unlikely to
-repay the simulation cost. If molecular dynamics is used as a computational label, the
-observable should be designed to report mutation-specific energetics rather than
-a global stability proxy. Enlarging the language model is likewise not a
-substitute for physically matched labels.
-
-A supplementary control is consistent with this selectivity. Combining FEP and MD
-Q-value labels in the same model did not improve over FEP alone
-(Supplementary Fig.~3d), reinforcing that computational-task selection should
-prioritize quality over quantity. Conversely, when the MD Q-value model
-was tuned separately at each label count on the experimental validation
-split, its performance improved and crossed the Tm-only baseline at the
-largest setting (Supplementary Fig.~4b). This suggests that the failure
-of MD labels under our default protocol is partly methodological. A
-fixed hyperparameter recipe disadvantaged the MD computational label rather
-than proving that the computational label is purely uninformative. The FEP result was retained
-under the same fixed recipe and the validation-tuned FEP model matched
-it.
-
-These costs should ultimately be weighed against experimental value. Minami et
-al. formalized this idea as an equivalent sample size, defined as the number of
-simulation labels that substitute for one experimental label along an equal-error
-contour \citep{Minami2025Scaling}. Our data permit only a coarse version of that
-calculation. Near the operating point of this study, 57 Tm labels and 320 FEP
-labels per template, the empirical target-label curve gives an approximate local
-slope of 0.009$^\circ$C per Tm label. Matching that slope with FEP labels would
-require on the order of 30 labels per template, or roughly 60 labels in total.
-The MD-derived Q-value curve does not decrease with added labels under the
-default protocol, so the same calculation gives little experimental-label
-equivalence for that computational label. Because the FEP curve is nonmonotonic and the
-computational costs were not measured systematically, these values should be
-treated as planning-scale estimates rather than a cost-benefit analysis.
-
-A large and diverse $\Delta\Delta G$ dataset would also let the central
-quantitative question be tested directly. Whether held-out Tm error falls
-predictably as the computational-label pool grows, the scaling behavior that makes simulation
-databases worth building in materials informatics
-\citep{Minami2025Scaling}, could not be settled here because our pool was small
-and the label-count curve was not monotonic. Establishing that relationship would
-turn the qualitative observation that more physically relevant data helps into a
-quantitative guide for how much such data to collect.
+\textbf{Connection to Sim2Real learning and cost.} These results extend
+simulation-to-real learning \citep{Minami2025Scaling} to a protein-engineering
+setting where the computational and experimental labels differ in physical meaning.
+Materials-informatics studies show that transferred error can fall as a related
+computational database grows; here the analogous quantity is a matched-design
+$\Delta\Delta G$ pool, which our two-template FEP set only begins to sample. Because
+that pool was small and the label-count curves were not strictly monotonic, we do
+not claim a clean scaling exponent, and an equivalent-sample-size estimate (the
+number of simulation labels that substitute for one experimental label) is only
+planning-scale here. Cost trades off against transfer strength: learned or
+structure-based scores label variants far faster than all-atom alchemical
+calculations but gave weak-to-null transfer, whereas FEP was the most expensive per
+mutation yet the strongest per label. A tiered strategy --- cheap scores for breadth,
+all-atom calculations where a directly stability-related label is worth the cost ---
+follows naturally, though we did not measure cost systematically.
 
 \subsection*{Limitations}
 
 Several limitations bound the interpretation. The experimental Tm training set is
-small, so the conclusions should be retested on other nanobody collections and
-protein families. The computational-label comparison covers only the labels available
-here; other free-energy protocols, stability predictors, or trajectory
-descriptors may transfer differently. The FEP curve supports a beneficial trend
-at the largest setting but does not establish a clean scaling exponent. The MD
-computational table contained a small number of exact NbBench sequence overlaps, and the
-negative MD result should be rechecked after removing those rows in a larger
-follow-up analysis. No new experimental measurements were made to validate
-high-stability candidates. Because raw trajectories may be too large to deposit
-in full, reproducibility will rely on processed data, scripts, and a clearly
-reported simulation protocol.
-
-For low-data experimental protein-property prediction, simulation labels are best
-treated as design choices rather than generic data augmentation. Their value
-depends on whether they encode information that improves the target task under
-target-centered validation. Here, mutation free energies did that for nanobody
-Tm. The resulting strategy is to use
-experimental data to define the target phenotype, use simulation to annotate
-physically meaningful perturbations around it, and judge the combined model only
-on held-out experimental data. This strategy can support future
-simulation-assisted and closed-loop protein-engineering workflows.
-
-\subsection*{Conclusions}
-
-We have shown that simulation-to-real transfer learning improves low-data
-nanobody Tm prediction when the computational label is physically matched to the
-target, and that the benefit is selective rather than generic. FEP mutation
-free energies gave a consistent 0.35$^\circ$C improvement in held-out Tm MAE,
-while an MD-derived Q-value did not transfer under the same protocol, and
-enlarging the ESM2 encoder did not reproduce the FEP gain. These results
-support a conservative criterion for allocating simulation effort in protein
-engineering. The most defensible computational labels are those whose physical content
-is related to the experimental endpoint, whose value is validated under
-target-centered model selection, and whose performance improves when informative
-labels are scaled.
+small (57 sequences), so the conclusions should be retested on other nanobody
+collections and protein families. The auxiliary-label comparison covers only the
+labels available here; other free-energy protocols, stability predictors, or
+trajectory observables may transfer differently. The FEP and matched-MD label-count
+curves support beneficial trends at the largest tested setting but do not establish
+a clean scaling exponent, and the bootstrap intervals are wide, so the source
+rankings are best read as robust patterns rather than precise gaps. The
+FEP-matched labels are built on only two templates; broader template and mutation
+coverage is the natural next dataset. The diverse-panel MD control contained a few
+exact NbBench sequence overlaps, but it is used only as the negative data-design
+control and does not enter the positive results. No new experimental measurements
+were made to validate high-stability candidates, and because raw trajectories may
+be too large to deposit in full, reproducibility relies on processed data, scripts,
+and a clearly reported protocol.

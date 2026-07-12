@@ -3,33 +3,47 @@
 %TC:break Abstract
 \begin{abstract}
 Nanobody engineering depends on thermal stability, but experimental
-melting-temperature (Tm) measurements remain scarce. Computed stability labels
-can be generated more readily, yet they usually describe quantities other than
-Tm, such as mutation-level free-energy changes or structural scores. We asked
-whether such labels can improve low-data Tm prediction when they are used as
-computational tasks but models are selected only by experimental Tm performance. Using
-a public nanobody benchmark with 57 training, 114 validation, and 396 held-out
-test sequences, we trained multi-task models that shared an ESM2 sequence
-representation between a Tm target head and one computational task at a
-time. The computational labels included alchemical free-energy perturbation (FEP)
-mutation free energies, Rosetta and ThermoMPNN mutation scores, Rosetta scores
-for language-model-proposed variants, and molecular-dynamics (MD) trajectory
-summaries. FEP labels gave the strongest transfer, lowering held-out Tm mean
-absolute error from 6.61 to 6.26$^\circ$C, a paired gain of 0.35$^\circ$C
-(90\% confidence interval, 0.24 to 0.46$^\circ$C). This improvement was not
-reproduced by an MD-derived Q-value or by larger ESM2 encoders. Rosetta-scored
-proposal sets gave weaker gains that remained close to random-variant controls.
-These results
-show that simulation-derived labels can support scarce experimental Tm
-prediction, but only when the computational label carries physical information that
-transfers to the target phenotype.
+melting-temperature (Tm) measurements remain scarce. Molecular simulations can
+generate stability-related labels far more readily, yet these labels measure
+quantities other than Tm, and it is unclear which of them actually help an
+experimental Tm predictor. We trained multi-task models that share an ESM2
+sequence representation between a Tm target head and one simulation-derived
+auxiliary label at a time, in a deliberately low-data setting (57 training, 114
+validation, 396 held-out test sequences). To compare very different labels fairly,
+each was tuned independently and selected only on experimental Tm validation
+performance, then judged by paired errors on the held-out Tm test set. Two design
+axes governed transfer. First, data design: a molecular-dynamics native-contact
+stability label transferred and matched alchemical free-energy perturbation (FEP)
+when computed on the FEP-matched mutation scans (frozen encoder, paired gain
+0.20$^\circ$C), whereas the same observable over a diverse-nanobody screen did not,
+because sequence length confounds that screen. Second, the physical observable:
+the FEP free energy improved Tm with both a frozen and a fine-tuned encoder
+(best 6.40$^\circ$C mean absolute error, from a 6.55$^\circ$C baseline), while the
+native-contact label helped only a frozen encoder. Rosetta and ThermoMPNN scores
+were weak or null. Simulation-derived labels can support scarce experimental Tm
+prediction, but only when a matched data design and a physically transferable
+observable are combined.
 \end{abstract}
 %TC:break main
 
 \begin{keywords}
-nanobody thermostability | melting temperature | simulation-to-real transfer learning | protein language model | free energy perturbation
+nanobody thermostability | melting-temperature prediction | multi-task transfer learning | protein language model | molecular simulation labels
 \end{keywords}
 
 \begin{corrauthor}
 Yasuhiro Matsunaga, ymatsunaga\at riken.jp
 \end{corrauthor}
+
+%TC:ignore
+\vspace{0.5em}
+\noindent\textbf{Significance}\\
+Simulations can label protein variants far faster than experiments, but a
+simulated label only helps a data-scarce experimental predictor if it actually
+transfers to the measured phenotype. Using nanobody thermal stability as a
+testbed, we show that two design choices decide this: matching the simulated
+variants to the same sequence neighborhood as the target, and choosing a physical
+observable --- an alchemical free energy --- that is close enough to stability to
+reshape a protein language model. This turns "run more simulation" into concrete,
+testable design rules for building simulation-informed predictors of experimental
+protein properties.
+%TC:endignore

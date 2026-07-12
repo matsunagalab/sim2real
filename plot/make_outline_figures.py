@@ -32,9 +32,12 @@ from matplotlib.patches import Circle, FancyArrowPatch, FancyBboxPatch
 
 REPO = Path(__file__).resolve().parents[1]
 RESULTS = REPO / "results"
-SUMMARY_JSON = RESULTS / "source_screen" / "final_source_screen_summary.json"
-FROZEN_SUMMARY_JSON = RESULTS / "source_screen" / "final_frozen_core_summary.json"
+# Tuned two-axis summaries (built by plot/build_tuned_summaries.py from the
+# final_* staged-HPO runs). HOT = encoder unfrozen; FROZEN = encoder frozen.
+SUMMARY_JSON = RESULTS / "tuned_rep" / "hot_summary.json"
+FROZEN_SUMMARY_JSON = RESULTS / "tuned_rep" / "frozen_summary.json"
 DATA_MD = REPO / "data" / "md"
+DATA_SRC = REPO / "data" / "source_labels"
 PLOT_DIR = REPO / "plot"
 PAPER_FIG_DIR = REPO / "paper" / "tex" / "figures"
 
@@ -56,117 +59,97 @@ COL = {
     "soft_gray": "#F3F3F3",
 }
 
-INTERNAL_MD_Q_TOKEN = "h" + "p" + "h" + "i" + "l"
-MD_CONTACT_Q_SOURCE = "MD_Q_" + INTERNAL_MD_Q_TOKEN.upper() + "_400K"
-MD_CONTACT_Q_RESULT_DIR = "final_residual_q_" + INTERNAL_MD_Q_TOKEN + "_400k"
+# Tuned MD source: FEP-matched native-contact mutation scan (source key MD_FEP400K).
+INTERNAL_MD_Q_TOKEN = "h" + "p" + "h" + "i" + "l"  # kept for the diverse-screen CSVs (Fig 3)
+MD_CONTACT_Q_SOURCE = "MD_FEP400K"
 
 SOURCE_ORDER = [
     "Tm_only",
     "FEP",
-    "rosetta_esm",
+    MD_CONTACT_Q_SOURCE,
     "thermoMPNN",
     "rosetta_random",
     "rosetta",
-    MD_CONTACT_Q_SOURCE,
+    "rosetta_esm",
 ]
 
 SOURCE_LABEL = {
     "Tm_only": "Tm labels only",
     "FEP": "FEP mutation\nfree energy",
+    MD_CONTACT_Q_SOURCE: "MD native-contact\n(matched scan)",
     "rosetta": "Rosetta mutation\nscore",
     "thermoMPNN": "ThermoMPNN\nstability score",
     "rosetta_random": "random variants\n+ Rosetta",
     "rosetta_esm": "ESM2-proposed\nvariants + Rosetta",
-    MD_CONTACT_Q_SOURCE: "MD Q-value",
 }
 
 SOURCE_COLOR = {
     "Tm_only": COL["baseline"],
     "FEP": COL["fep"],
-    "rosetta_esm": COL["design"],
+    MD_CONTACT_Q_SOURCE: COL["mdq"],
     "thermoMPNN": COL["thermo"],
     "rosetta_random": COL["rosetta"],
     "rosetta": "#B9770E",
-    MD_CONTACT_Q_SOURCE: COL["mdq"],
+    "rosetta_esm": COL["design"],
 }
 
-SCALING_CURVES = {
-    "Tm-only labels": {
-        "path": RESULTS / "tm_ref_hot_mtl_tmselect" / "scaling.json",
-        "color": COL["baseline"],
-        "x_label": "experimental Tm labels",
-        "sample_factor": 1.0,
-    },
-    "FEP mutation-effect labels": {
-        "path": RESULTS / "fep_hot_tmselect_enc3e-5" / "scaling.json",
-        "color": COL["fep"],
-        "x_label": "FEP labels",
-        "sample_factor": 1.0,
-    },
-    "MD Q-value labels": {
-        "path": RESULTS / "hot_q_400k_tmselect" / "scaling.json",
-        "color": COL["mdq"],
-        "x_label": "MD Q-value labels",
-        "sample_factor": 1.0,
-    },
-}
+# Fig. 2a: tuned FROZEN computational-label count sweeps (internally consistent —
+#   all frozen). Tm-only shown as its tuned frozen baseline (dashed line). In the
+#   frozen regime both FEP and the FEP-matched MD label scale below the Tm-only
+#   baseline, i.e. they beat training on experimental Tm labels alone.
+FIG2A_TM_BASELINE = RESULTS / "tuned_rep" / "Tm_only_frozen" / "scaling.json"
+FIG2A_CURVES = [
+    ("FEP mutation free energy", RESULTS / "final_fep_frozen" / "scaling.json", COL["fep"], "o"),
+    ("MD native-contact (matched scan)", RESULTS / "final_mdq_frozen" / "scaling.json", COL["mdq"], "D"),
+]
 
 SIZE35_TM_JSON = RESULTS / "size35_tm_shared_drop005" / "scaling.json"
 SIZE35_FEP_JSON = RESULTS / "size35_ddg_fep_enc3e-5" / "scaling.json"
 SIZE650_TM_JSON = RESULTS / "size650_tm_shared_drop005" / "scaling.json"
 SIZE650_FEP_JSON = RESULTS / "size650_ddg_fep_enc3e-5" / "scaling.json"
 
-# Fig. 3a references (Tm-only and FEP) shown as comparison baselines.
-FIG3_REFERENCES = [
-    ("Tm labels only", RESULTS / "tm_ref_hot_mtl_tmselect" / "scaling.json", COL["baseline"], "s", "max_n"),
-    ("FEP mutation\nfree energy", RESULTS / "fep_hot_tmselect_enc3e-5" / "scaling.json", COL["fep"], "o", "best_mae"),
+# ---------------------------------------------------------------------------
+# Fig. 3 (data-design axis).
+# ---------------------------------------------------------------------------
+# (a) Two groups on one held-out-Tm-MAE axis. The SAME MD native-contact
+#     observable is null as a diverse-nanobody screen (old hot series,
+#     length-confounded) but transfers as an FEP-matched mutation scan (tuned
+#     frozen). Each group carries its own matched Tm-only and FEP reference,
+#     because the two experimental series sit on different absolute MAE scales.
+FIG3A_DIVERSE = {
+    "title": "diverse nanobody screen",
+    "tm": (RESULTS / "tm_ref_hot_mtl_tmselect" / "scaling.json", "max_n"),
+    "fep": (RESULTS / "fep_hot_tmselect_enc3e-5" / "scaling.json", "best_mae"),
+    "md": (RESULTS / "final_residual_q_hphil_400k" / "scaling.json", "single"),
+    "md_label": "MD native-contact\n(diverse screen)",
+}
+FIG3A_MATCHED = {
+    "title": "FEP-matched mutation scan",
+    "tm": (RESULTS / "tuned_rep" / "Tm_only_frozen" / "scaling.json", "single"),
+    "fep": (RESULTS / "tuned_rep" / "FEP_frozen" / "scaling.json", "single"),
+    "md": (RESULTS / "tuned_rep" / "MD_FEP400K_frozen" / "scaling.json", "single"),
+    "md_label": "MD native-contact\n(matched scan)",
+}
+
+# (b) The length confound: MD native-contact label value vs sequence length.
+FIG3B_DIVERSE_CSV = DATA_MD / f"nanobody_qvalue_{INTERNAL_MD_Q_TOKEN}_400K.csv"
+FIG3B_MATCHED_CSVS = [
+    DATA_MD / "study_qvalue_fep400k_1mel.csv",
+    DATA_MD / "study_qvalue_fep400k_4idl.csv",
 ]
 
-# Fig. 3a MD descriptors: each trained as the sole MD auxiliary in the same
-# residual setup, at 300 K and/or 400 K. (disulfide-distance and CDR3-residue
-# fluctuation have no 400 K trajectory data; CDR3 length is temperature-free.)
-FIG3_DESCRIPTORS = [
-    ("MD Q-value",                      {300: "final_residual_q_hphil_300k", 400: "final_residual_q_hphil_400k"}),
-    ("Q-value slope",                   {300: "final_residual_q_slope_300k", 400: "final_residual_q_slope_400k"}),
-    ("RMSF max",                        {300: "final_residual_rmsf_max",     400: "final_residual_rmsf_max_400k"}),
-    ("disulfide-distance\nfluctuation", {300: "final_residual_ss_dist_std"}),
-    ("CDR3 residue\nfluctuation",       {300: "final_residual_rmsf_cdr3"}),
-    ("sequence CDR3 length",            {None: "final_residual_cdr3_len"}),
-]
+# (c) Label-count scaling of the matched-scan MD label (FROZEN) as paired
+#     ΔMAE(n) vs the tuned frozen Tm-only baseline.
+FIG3C_MD_FROZEN = RESULTS / "final_mdq_frozen" / "scaling.json"
+FIG3C_TM_FROZEN = RESULTS / "final_tm_frozen" / "scaling.json"
 
-TEMP_COLOR = {300: COL["design"], 400: COL["mdq"], None: COL["thermo"]}
-
-# Fig. 3b: MD Q-value label-count scaling at 300 K vs 400 K (same hot/shared setup).
-FIG3B_QSCALING = [
-    (RESULTS / "hot_q_300k_tmselect" / "scaling.json", COL["design"], "o", "300 K"),
-    (RESULTS / "hot_q_400k_tmselect" / "scaling.json", COL["mdq"], "o", "400 K"),
-]
-
-# Fig. 4b: label-count scaling curves for the mutation-effect / variant sources.
-# FEP reuses the existing sweep; the others are dedicated label-count sweeps.
-FIG4_SCALING = [
-    ("FEP mutation free energy", RESULTS / "fep_hot_tmselect_enc3e-5" / "scaling.json", COL["fep"], "o"),
-    ("ESM2-proposed + Rosetta", RESULTS / "sweep_ddg_rosetta_esm" / "scaling.json", COL["design"], "o"),
-    ("ThermoMPNN stability", RESULTS / "sweep_ddg_thermompnn" / "scaling.json", COL["thermo"], "s"),
-    ("random + Rosetta", RESULTS / "sweep_ddg_rosetta_random" / "scaling.json", COL["rosetta"], "D"),
-    ("Rosetta mutation", RESULTS / "sweep_ddg_rosetta" / "scaling.json", "#B9770E", "v"),
-]
-
-MD_TEMPERATURE_DISTRIBUTION_SPECS = [
-    ("MD Q-value", 300, DATA_MD / f"nanobody_qvalue_{INTERNAL_MD_Q_TOKEN}.csv"),
-    ("MD Q-value", 400, DATA_MD / f"nanobody_qvalue_{INTERNAL_MD_Q_TOKEN}_400K.csv"),
-    ("Q-value slope", 300, DATA_MD / "feat_q_slope.csv"),
-    ("Q-value slope", 400, DATA_MD / "feat_q_slope_400K.csv"),
-    ("RMSF max", 300, DATA_MD / "feat_rmsf_max.csv"),
-    ("RMSF max", 400, DATA_MD / "feat_rmsf_max_400K.csv"),
-    ("Rg fluctuation", 300, DATA_MD / "feat_rg_std.csv"),
-    ("Rg fluctuation", 400, DATA_MD / "feat_rg_std_400K.csv"),
-]
-
-QVALUE_TEMPERATURE_SPECS = [
-    (300, DATA_MD / f"nanobody_qvalue_{INTERNAL_MD_Q_TOKEN}.csv"),
-    (400, DATA_MD / f"nanobody_qvalue_{INTERNAL_MD_Q_TOKEN}_400K.csv"),
-]
+# ---------------------------------------------------------------------------
+# Fig. 4 (physical-observable axis / depth).
+# ---------------------------------------------------------------------------
+# Sources shown grouped by frozen vs hot encoder (representative n=320 points).
+FIG4_SOURCES = ["Tm_only", "FEP", MD_CONTACT_Q_SOURCE, "rosetta", "thermoMPNN"]
+# (c) design-loop feasibility: ESM2-proposed vs random variants, both scored by Rosetta.
+FIG4C_SOURCES = ["rosetta_esm", "rosetta_random"]
 
 
 def configure_style() -> None:
@@ -246,13 +229,23 @@ def paired_comparisons() -> dict:
     return read_json(SUMMARY_JSON)["paired_comparisons"]
 
 
-def encoder_core_rows() -> pd.DataFrame:
+def source_screen_points(summary_rows: dict) -> dict:
+    """{source: (test_mae, ci_lo, ci_hi)} from a summary's rows (any regime)."""
+    out = {}
+    for src, row in summary_rows.items():
+        scaling = read_json(rebase_results(row["scaling_json"]))["scaling"][0]
+        out[src] = (float(row["test_mae"]), float(scaling["ci_lo"]), float(scaling["ci_hi"]))
+    return out
+
+
+def encoder_core_rows(sources: list) -> pd.DataFrame:
+    """Representative held-out test MAE + CI per source, for frozen and hot."""
     records = []
     for encoder, path in [("frozen", FROZEN_SUMMARY_JSON), ("hot", SUMMARY_JSON)]:
         summary = read_json(path)
         for row in summary["rows"]:
             source = str(row["source"])
-            if source not in ["Tm_only", "FEP", "rosetta", MD_CONTACT_Q_SOURCE]:
+            if source not in sources:
                 continue
             scaling = read_json(rebase_results(row["scaling_json"]))["scaling"][0]
             records.append(
@@ -267,11 +260,12 @@ def encoder_core_rows() -> pd.DataFrame:
     return pd.DataFrame.from_records(records)
 
 
-def encoder_delta_rows() -> pd.DataFrame:
+def encoder_delta_rows(sources: list) -> pd.DataFrame:
+    """Paired ΔMAE vs Tm-only per source, for frozen and hot."""
     records = []
     for encoder, path in [("frozen", FROZEN_SUMMARY_JSON), ("hot", SUMMARY_JSON)]:
         comparisons = read_json(path)["paired_comparisons"]
-        for source in ["FEP", MD_CONTACT_Q_SOURCE]:
+        for source in sources:
             comp = comparisons[paired_key(source)]
             records.append(
                 {
@@ -280,6 +274,7 @@ def encoder_delta_rows() -> pd.DataFrame:
                     "delta_mae": float(comp["delta_mae"]),
                     "delta_ci_lo": float(comp["delta_ci_lo"]),
                     "delta_ci_hi": float(comp["delta_ci_hi"]),
+                    "p_value": float(comp.get("p_value", np.nan)),
                 }
             )
     return pd.DataFrame.from_records(records)
@@ -339,65 +334,40 @@ def select_scaling_point(path: Path, mode: str) -> dict:
     return point
 
 
-def fig3_reference_rows() -> pd.DataFrame:
-    records = []
-    for label, path, color, marker, mode in FIG3_REFERENCES:
-        if not path.exists():
-            continue
+def fig3a_group(spec: dict) -> dict:
+    """Held-out Tm MAE for the Tm-only, FEP and MD points of a Fig-3a group."""
+    out = {"title": spec["title"], "md_label": spec["md_label"]}
+    for key in ("tm", "fep", "md"):
+        path, mode = spec[key]
         point = select_scaling_point(path, mode)
-        records.append(
-            {
-                "label": label,
-                "mae": float(point["mae"]),
-                "ci_lo": float(point["ci_lo"]),
-                "ci_hi": float(point["ci_hi"]),
-                "color": color,
-                "marker": marker,
-            }
-        )
-    return pd.DataFrame.from_records(records)
-
-
-def fig3_descriptor_rows() -> list:
-    """For each MD descriptor, the held-out test MAE at each available temperature."""
-    out = []
-    for label, temp_dirs in FIG3_DESCRIPTORS:
-        points = {}
-        for temp, stem in temp_dirs.items():
-            path = RESULTS / stem / "scaling.json"
-            if not path.exists():
-                continue
-            point = select_scaling_point(path, "single")
-            points[temp] = (float(point["mae"]), float(point["ci_lo"]), float(point["ci_hi"]))
-        out.append((label, points))
+        out[key] = (float(point["mae"]), float(point["ci_lo"]), float(point["ci_hi"]))
     return out
 
 
-def md_temperature_distribution_rows() -> pd.DataFrame:
-    records = []
-    for descriptor, temperature, path in MD_TEMPERATURE_DISTRIBUTION_SPECS:
+def fig3b_confound() -> tuple:
+    """MD native-contact label value vs sequence length: diverse screen vs matched scan."""
+    div = pd.read_csv(FIG3B_DIVERSE_CSV)
+    dlen = div["seq_len"].to_numpy(float)
+    dval = div["q_value_raw"].to_numpy(float)
+    r = float(np.corrcoef(dlen, dval)[0, 1])
+    matched = []
+    for path in FIG3B_MATCHED_CSVS:
         df = pd.read_csv(path)
-        if "ddg_scaled01" not in df.columns:
-            raise ValueError(f"{path} does not contain the normalized computational-label column")
-        for value in df["ddg_scaled01"].dropna().to_numpy(float):
-            records.append(
-                {
-                    "descriptor": descriptor,
-                    "temperature": temperature,
-                    "value": float(value),
-                }
-            )
-    return pd.DataFrame.from_records(records)
+        mlen = df["seq"].str.len().to_numpy(float)
+        mval = df["q_value"].to_numpy(float)
+        matched.append((mlen, mval, path.stem.split("_")[-1]))
+    return (dlen, dval, r), matched
 
 
-def qvalue_temperature_rows() -> pd.DataFrame:
-    """Raw MD Q-value (fraction of native contacts) per nanobody at 300 K and 400 K."""
+def fig3c_delta_by_n(n_boot: int = 10000) -> pd.DataFrame:
+    """Paired ΔMAE(n) of the matched MD label (frozen) vs the frozen Tm-only baseline."""
+    tm = np.asarray(select_scaling_point(FIG3C_TM_FROZEN, "single")["abs_errors"], dtype=float)
+    md = read_json(FIG3C_MD_FROZEN)
     records = []
-    for temperature, path in QVALUE_TEMPERATURE_SPECS:
-        df = pd.read_csv(path)
-        col = "q_value_raw" if "q_value_raw" in df.columns else "ddg_scaled01"
-        for value in df[col].dropna().to_numpy(float):
-            records.append({"temperature": temperature, "value": float(value)})
+    for point in md["scaling"]:
+        a = np.asarray(point["abs_errors"], dtype=float)
+        delta, lo, hi = paired_delta_ci(tm, a, n_boot=n_boot)
+        records.append({"n": float(point["n"]), "delta_mae": delta, "delta_ci_lo": lo, "delta_ci_hi": hi})
     return pd.DataFrame.from_records(records)
 
 
@@ -612,53 +582,51 @@ def fig01_concept_protocol(rows: pd.DataFrame) -> None:
 
 def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(7.4, 6.2), constrained_layout=True)
-    scaling_ylim = (5.75, 7.90)
-    scaling_yticks = [6.0, 6.5, 7.0, 7.5]
-    x_ticks = [10, 20, 40, 80, 160, 320, 640]
+    x_ticks = [20, 80, 160, 320]
+    core = rows.set_index(rows["source"].astype(str))
 
-    tm_scale = load_scaling(SCALING_CURVES["Tm-only labels"]["path"])
-    baseline = rows.loc[rows["source"].astype(str) == "Tm_only"].iloc[0]["test_mae"]
-    fep_scale = load_scaling(SCALING_CURVES["FEP mutation-effect labels"]["path"])
-    md_scale = load_scaling(SCALING_CURVES["MD Q-value labels"]["path"])
-    curves = [
-        ("Tm labels only", tm_scale, COL["baseline"], "s"),
-        ("FEP mutation free energy", fep_scale, COL["fep"], "o"),
-        ("MD Q-value", md_scale, COL["mdq"], "o"),
-    ]
-
+    # (a) FROZEN-regime computational-label count sweeps: FEP and the FEP-matched
+    #     MD native-contact label both scale below the Tm-only frozen baseline
+    #     (dashed line), i.e. they beat training on experimental Tm labels alone.
     ax = axes[0, 0]
-    for label, curve, color, marker in curves:
-        scaling_errorbar(ax, curve, color, label, marker=marker)
+    tm_base = load_scaling(FIG2A_TM_BASELINE)["mae"].iloc[0]
+    ax.axhline(tm_base, color=COL["baseline"], linewidth=1.1, linestyle="--", zorder=1)
+    ax.text(9, tm_base + 0.02, "Tm labels only (baseline)", fontsize=6.2,
+            color=COL["baseline"], va="bottom")
+    for label, path, color, marker in FIG2A_CURVES:
+        scaling_errorbar(ax, load_scaling(path), color, label, marker=marker)
     ax.set_xscale("log")
     ax.set_xticks(x_ticks)
     ax.set_xticklabels([str(x) for x in x_ticks])
-    ax.set_xlabel("labels used")
+    ax.set_xlabel("computational labels used")
     ax.set_ylabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(8, 760)
-    ax.set_ylim(*scaling_ylim)
-    ax.set_yticks(scaling_yticks)
-    ax.legend(frameon=False, loc="upper right", handlelength=1.8)
+    ax.set_xlim(15, 400)
+    ax.set_ylim(6.85, 7.45)
+    ax.set_yticks([7.0, 7.2, 7.4])
+    ax.legend(frameon=False, loc="upper right", handlelength=1.8, fontsize=6.4)
+    ax.text(0.02, 0.03, "frozen encoder", transform=ax.transAxes, fontsize=6.4, color=COL["gray"])
     polish(ax, "both")
     panel_label(ax, "A")
 
+    # (b) Tuned source screen at the representative n=320 point (frozen encoder):
+    #     the full hierarchy of computational labels.
     ax = axes[0, 1]
-    # Final validation-selected models (canonical source-screen summary), so the
-    # numbers match panel (d), Fig. 3a, Fig. 4, and the body text.
-    core = rows.set_index(rows["source"].astype(str))
-    best_points = [
-        ("Tm labels\nonly", core.loc["Tm_only"], COL["baseline"], "s"),
-        ("FEP mutation\nfree energy", core.loc["FEP"], COL["fep"], "o"),
-        ("MD\nQ-value", core.loc[MD_CONTACT_Q_SOURCE], COL["mdq"], "o"),
-    ]
-    y = np.arange(len(best_points)) * 1.35
-    for i, (label, point, col, marker) in enumerate(best_points):
-        horizontal_interval(ax, y[i], point["test_mae"], point["ci_lo"], point["ci_hi"], col, marker=marker)
-        ax.text(point["ci_hi"] + 0.025, y[i], f"{point['test_mae']:.2f}", va="center", fontsize=7.3)
+    frozen = read_json(FROZEN_SUMMARY_JSON)
+    frozen_rows = {str(r["source"]): r for r in frozen["rows"]}
+    screen = source_screen_points(frozen_rows)
+    y = np.arange(len(SOURCE_ORDER)) * 1.0
+    for i, src in enumerate(SOURCE_ORDER):
+        mae, lo, hi = screen[src]
+        horizontal_interval(ax, y[i], mae, lo, hi, SOURCE_COLOR[src], marker="s" if src == "Tm_only" else "o")
+        ax.text(hi + 0.012, y[i], f"{mae:.2f}", va="center", fontsize=6.6)
+    tm_frozen = screen["Tm_only"][0]
+    ax.axvline(tm_frozen, color=COL["baseline"], linewidth=0.9, linestyle="--", zorder=1)
     ax.set_yticks(y)
-    ax.set_yticklabels([b[0] for b in best_points])
-    ax.set_ylim(y[-1] + 0.55, -0.55)
+    ax.set_yticklabels([SOURCE_LABEL[s] for s in SOURCE_ORDER], fontsize=6.4)
+    ax.set_ylim(y[-1] + 0.6, -0.6)
     ax.set_xlabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(5.75, 7.30)
+    ax.set_xlim(6.90, 7.45)
+    ax.text(0.02, 0.03, "frozen encoder", transform=ax.transAxes, fontsize=6.4, color=COL["gray"])
     polish(ax, "x")
     panel_label(ax, "B")
 
@@ -695,8 +663,8 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
     panel_label(ax, "C")
 
     ax = axes[1, 1]
-    core_rows = encoder_core_rows()
     abs_sources = ["Tm_only", "FEP", MD_CONTACT_Q_SOURCE]
+    core_rows = encoder_core_rows(abs_sources)
     ypos = np.arange(len(abs_sources)) * 1.45
     y_offsets = {"frozen": -0.18, "hot": 0.18}
     markers = {"frozen": "s", "hot": "o"}
@@ -715,7 +683,7 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
                 marker=markers[encoder],
             )
     ax.set_yticks(ypos)
-    ax.set_yticklabels(["Tm labels\nonly", "FEP mutation\nfree energy", "MD Q-value"])
+    ax.set_yticklabels(["Tm labels\nonly", "FEP mutation\nfree energy", "MD native-contact\n(matched scan)"], fontsize=6.6)
     ax.set_ylim(ypos[-1] + 0.60, -0.60)
     ax.set_xlabel("held-out Tm test MAE (deg C)")
     ax.set_xlim(5.7, 8.0)
@@ -739,130 +707,176 @@ def fig02_source_screen(rows: pd.DataFrame, paired: dict) -> None:
 def fig03_design_bridge(rows: pd.DataFrame, paired: dict) -> None:
     fig, axes = plt.subplots(
         1,
-        2,
-        figsize=(7.4, 4.7),
+        3,
+        figsize=(10.6, 3.7),
         constrained_layout=True,
-        gridspec_kw={"width_ratios": [1.32, 1.0]},
+        gridspec_kw={"width_ratios": [1.25, 1.0, 1.0]},
     )
 
+    # (a) The SAME MD native-contact observable, two data designs. Each group is
+    #     anchored to its own Tm-only reference (different absolute MAE scales).
     ax = axes[0]
-    refs = fig3_reference_rows()
-    descriptors = fig3_descriptor_rows()
-    yticks, yticklabels = [], []
-    idx = 0
-    for _, row in refs.iterrows():
-        horizontal_interval(ax, idx, row["mae"], row["ci_lo"], row["ci_hi"], row["color"], marker=row["marker"])
-        ax.text(row["ci_hi"] + 0.03, idx, f"{row['mae']:.2f}", va="center", fontsize=6.4)
-        yticks.append(idx)
-        yticklabels.append(row["label"])
-        idx += 1
-    sep = idx - 0.5
-    temp_offset = {300: -0.18, 400: 0.18, None: 0.0}
-    for label, points in descriptors:
-        for temp in sorted(points, key=lambda t: (t is None, t)):
-            mae, lo, hi = points[temp]
-            marker = "s" if temp is None else "o"
-            horizontal_interval(ax, idx + temp_offset[temp], mae, lo, hi, TEMP_COLOR[temp], marker=marker)
-            ax.text(hi + 0.03, idx + temp_offset[temp], f"{mae:.2f}", va="center", fontsize=5.9)
-        yticks.append(idx)
-        yticklabels.append(label)
-        idx += 1
-    ax.axhline(sep, color=COL["grid"], linewidth=0.8)
+    diverse = fig3a_group(FIG3A_DIVERSE)
+    matched = fig3a_group(FIG3A_MATCHED)
+    groups = [(diverse, [0, 1, 2]), (matched, [4, 5, 6])]
+    for grp, ys in groups:
+        entries = [
+            ("Tm labels only", grp["tm"], COL["baseline"], "s"),
+            ("FEP mutation\nfree energy", grp["fep"], COL["fep"], "o"),
+            (grp["md_label"], grp["md"], COL["mdq"], "D"),
+        ]
+        tm_x = grp["tm"][0]
+        ax.plot([tm_x, tm_x], [ys[0] - 0.45, ys[-1] + 0.45], color=COL["baseline"],
+                linestyle="--", linewidth=0.9, zorder=1)
+        for y, (lab, (mae, lo, hi), color, marker) in zip(ys, entries):
+            horizontal_interval(ax, y, mae, lo, hi, color, marker=marker)
+            ax.text(hi + 0.03, y, f"{mae:.2f}", va="center", fontsize=6.4)
+    yticks = [0, 1, 2, 4, 5, 6]
+    yticklabels = [
+        "Tm labels only", "FEP mutation\nfree energy", diverse["md_label"],
+        "Tm labels only", "FEP mutation\nfree energy", matched["md_label"],
+    ]
     ax.set_yticks(yticks)
-    ax.set_yticklabels(yticklabels)
-    ax.set_ylim(idx - 0.4, -0.7)
+    ax.set_yticklabels(yticklabels, fontsize=6.2)
+    ax.set_ylim(6.7, -0.7)
+    ax.axhline(3.0, color=COL["grid"], linewidth=0.9)
+    ax.text(5.78, 1.0, diverse["title"], rotation=90, va="center", ha="left",
+            fontsize=6.8, color=COL["mdq"], fontweight="bold")
+    ax.text(5.78, 5.0, matched["title"], rotation=90, va="center", ha="left",
+            fontsize=6.8, color=COL["mdq"], fontweight="bold")
     ax.set_xlabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(5.75, 7.75)
-    ax.legend(
-        handles=[
-            Line2D([0], [0], marker="o", color=TEMP_COLOR[300], linestyle="none", markersize=5, label="300 K"),
-            Line2D([0], [0], marker="o", color=TEMP_COLOR[400], linestyle="none", markersize=5, label="400 K"),
-        ],
-        frameon=False,
-        loc="lower right",
-        fontsize=7,
-        handlelength=1.2,
-    )
+    ax.set_xlim(5.75, 7.55)
     polish(ax, "x")
     panel_label(ax, "A")
 
+    # (b) The length confound: MD native-contact label value vs sequence length.
     ax = axes[1]
-    tm_ref = float(rows.set_index(rows["source"].astype(str)).loc["Tm_only", "test_mae"])
-    ax.axhline(tm_ref, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
-    ax.text(640, tm_ref + 0.012, "Tm labels only", fontsize=6.6, color=COL["baseline"], ha="right", va="bottom")
-    x_ticks = [10, 20, 40, 80, 160, 320, 640]
-    for path, color, marker, label in FIG3B_QSCALING:
-        if not path.exists():
-            continue
-        scaling_errorbar(ax, load_scaling(path), color, label, marker=marker)
-    ax.set_xscale("log")
-    ax.set_xticks(x_ticks)
-    ax.set_xticklabels([str(x) for x in x_ticks])
-    ax.set_xlabel("MD Q-value labels")
-    ax.set_ylabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(8, 760)
-    ax.legend(frameon=False, loc="upper right", fontsize=7, handlelength=1.5, title="trajectory $T$")
+    (dlen, dval, r), matched_pts = fig3b_confound()
+    ax.scatter(dlen, dval, s=9, color=COL["mdq"], alpha=0.35, edgecolor="none",
+               label=f"diverse screen (n={len(dlen)})", zorder=2)
+    mcolors = {"1mel": COL["fep"], "4idl": COL["design"]}
+    for mlen, mval, tag in matched_pts:
+        ax.scatter(mlen, mval, s=9, color=mcolors.get(tag, COL["design"]), alpha=0.5,
+                   edgecolor="none", label=f"matched scan ({tag}, n={len(mlen)})", zorder=3)
+    ax.text(0.04, 0.10, f"diverse: Pearson $r$ = {r:+.2f}\n(length spread 58-461)",
+            transform=ax.transAxes, fontsize=6.4, color=COL["mdq"], va="bottom")
+    ax.text(0.62, 0.42, "matched:\nconstant length", transform=ax.transAxes,
+            fontsize=6.4, color=COL["design"], va="center", ha="center")
+    ax.set_xlabel("sequence length (residues)")
+    ax.set_ylabel("MD Q-value (fraction native contacts)")
+    ax.legend(frameon=False, loc="lower right", fontsize=5.8, handlelength=1.0, markerscale=1.4)
     polish(ax, "both")
     panel_label(ax, "B")
+
+    # (c) Label-count scaling of the matched MD label (frozen): paired ΔMAE(n).
+    ax = axes[2]
+    delta = fig3c_delta_by_n()
+    x = delta["n"].to_numpy(float)
+    y = delta["delta_mae"].to_numpy(float)
+    yerr = np.vstack([y - delta["delta_ci_lo"].to_numpy(float), delta["delta_ci_hi"].to_numpy(float) - y])
+    ax.axhline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
+    ax.errorbar(x, y, yerr=yerr, fmt="D-", color=COL["mdq"], ecolor=COL["mdq"],
+                elinewidth=1.0, capsize=2.5, markerfacecolor=COL["mdq"],
+                markeredgecolor="white", markeredgewidth=0.6, zorder=3)
+    ax.text(x[-1], y[-1] - 0.03, f"{y[-1]:.2f}*", ha="center", va="top", fontsize=6.8, color=COL["mdq"])
+    ax.set_xscale("log")
+    ax.set_xticks([20, 80, 160, 320])
+    ax.set_xticklabels(["20", "80", "160", "320"])
+    ax.set_xlabel("matched MD labels")
+    ax.set_ylabel(r"$\Delta$MAE vs Tm-only (deg C)")
+    ax.set_xlim(15, 430)
+    ax.set_ylim(-0.42, 0.28)
+    ax.text(0.03, 0.92, "frozen encoder", transform=ax.transAxes, fontsize=6.4, color=COL["gray"])
+    polish(ax, "both")
+    panel_label(ax, "C")
 
     save_figure(fig, "fig_outline03_design_bridge")
 
 
 def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
-    fig, axes = plt.subplots(
-        1,
-        2,
-        figsize=(7.4, 3.9),
-        constrained_layout=True,
-        gridspec_kw={"width_ratios": [1.0, 1.15]},
-    )
-    row_lookup = rows.set_index(rows["source"].astype(str))
-    design_sources = ["Tm_only", "FEP", "rosetta_esm", "thermoMPNN", "rosetta_random", "rosetta"]
+    fig, axd = plt.subplot_mosaic([["A", "B"], ["C", "C"]],
+                                  figsize=(7.6, 6.2), constrained_layout=True)
+    markers = {"frozen": "s", "hot": "o"}
+    enc_handles = [
+        Line2D([0], [0], marker="s", color=COL["black"], linestyle="none", markersize=5, label="frozen encoder"),
+        Line2D([0], [0], marker="o", color=COL["black"], linestyle="none", markersize=5, label="hot encoder"),
+    ]
 
-    # (a) final held-out test MAE for each computational label.
-    ax = axes[0]
-    ordered = row_lookup.loc[design_sources].reset_index(drop=True)
-    y = np.arange(len(ordered))
-    for i, row in ordered.iterrows():
-        horizontal_interval(
-            ax,
-            i,
-            row["test_mae"],
-            row["ci_lo"],
-            row["ci_hi"],
-            row["color"],
-            marker="s" if row["source"] == "Tm_only" else "o",
-        )
-        ax.text(row["ci_hi"] + 0.030, i, f"{row['test_mae']:.2f}", va="center", fontsize=7.0)
-    ax.set_yticks(y)
-    ax.set_yticklabels(ordered["label_plot"])
-    ax.invert_yaxis()
+    # (a) representative held-out Tm MAE, grouped by frozen vs hot encoder.
+    ax = axd["A"]
+    core = encoder_core_rows(FIG4_SOURCES)
+    ypos = np.arange(len(FIG4_SOURCES)) * 1.4
+    y_off = {"frozen": -0.20, "hot": 0.20}
+    for encoder in ["frozen", "hot"]:
+        subset = core[core["encoder"] == encoder].set_index("source")
+        for i, src in enumerate(FIG4_SOURCES):
+            row = subset.loc[src]
+            horizontal_interval(ax, ypos[i] + y_off[encoder], row["test_mae"],
+                                row["ci_lo"], row["ci_hi"], SOURCE_COLOR[src], marker=markers[encoder])
+    ax.set_yticks(ypos)
+    ax.set_yticklabels([SOURCE_LABEL[s] for s in FIG4_SOURCES], fontsize=6.4)
+    ax.set_ylim(ypos[-1] + 0.7, -0.7)
     ax.set_xlabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(5.72, 7.05)
+    ax.set_xlim(6.20, 7.55)
+    ax.legend(handles=enc_handles, frameon=False, loc="lower center",
+              bbox_to_anchor=(0.54, 1.01), ncol=2, borderaxespad=0.0)
     polish(ax, "x")
     panel_label(ax, "A")
 
-    # (b) label-count scaling for the mutation-effect / variant sources.
-    ax = axes[1]
-    tm_mae = float(row_lookup.loc["Tm_only", "test_mae"])
-    ax.axhline(tm_mae, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
-    ax.text(330, tm_mae + 0.012, "Tm labels only", fontsize=6.6, color=COL["baseline"], ha="right", va="bottom")
-    x_ticks = [10, 20, 40, 80, 160, 320]
-    for label, path, color, marker in FIG4_SCALING:
-        if not path.exists():
-            continue
-        scaling_errorbar(ax, load_scaling(path), color, label, marker=marker)
-    ax.set_xscale("log")
-    ax.set_xticks(x_ticks)
-    ax.set_xticklabels([str(x) for x in x_ticks])
-    ax.set_xlabel("computational labels per template")
-    ax.set_ylabel("held-out Tm test MAE (deg C)")
-    ax.set_xlim(8, 400)
-    ax.legend(frameon=False, loc="upper right", fontsize=6.5, handlelength=1.5)
-    polish(ax, "both")
+    # (b) paired ΔMAE vs Tm-only per source x encoder regime, with 90% CI.
+    ax = axd["B"]
+    delta_sources = ["FEP", MD_CONTACT_Q_SOURCE, "rosetta", "thermoMPNN"]
+    deltas = encoder_delta_rows(delta_sources)
+    ypos = np.arange(len(delta_sources)) * 1.4
+    ax.axvline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
+    for encoder in ["frozen", "hot"]:
+        subset = deltas[deltas["encoder"] == encoder].set_index("source")
+        for i, src in enumerate(delta_sources):
+            row = subset.loc[src]
+            horizontal_interval(ax, ypos[i] + y_off[encoder], row["delta_mae"],
+                                row["delta_ci_lo"], row["delta_ci_hi"], SOURCE_COLOR[src], marker=markers[encoder])
+    ax.set_yticks(ypos)
+    ax.set_yticklabels([SOURCE_LABEL[s] for s in delta_sources], fontsize=6.4)
+    ax.set_ylim(ypos[-1] + 0.7, -0.7)
+    ax.set_xlabel(r"$\Delta$MAE vs Tm-only (deg C)")
+    ax.set_xlim(-0.45, 0.35)
+    ax.text(0.02, 0.02, "left of 0 = improves over Tm-only", transform=ax.transAxes,
+            fontsize=6.0, color=COL["gray"])
+    ax.legend(handles=enc_handles, frameon=False, loc="lower center",
+              bbox_to_anchor=(0.54, 1.01), ncol=2, borderaxespad=0.0)
+    polish(ax, "x")
     panel_label(ax, "B")
 
+    # (c) interpretation schematic: depth of transfer set by the physical observable.
+    ax = axd["C"]
+    fig04d_schematic(ax)
+    panel_label(ax, "C")
+
     save_figure(fig, "fig_outline04_mdq_boundary")
+
+
+def fig04d_schematic(ax) -> None:
+    """Deep (free energy reshapes encoder) vs shallow (native-contact Q shapes only
+    the fixed trunk) shared-representation schematic."""
+    hide_axes(ax)
+    # top row: FEP / free-energy -> reshapes encoder (deep, hot-transferable)
+    box(ax, (0.04, 0.68), (0.24, 0.20), "mutation\nfree energy\n(FEP)", fc=COL["soft_green"], ec=COL["fep"], weight="bold", fontsize=6.6)
+    box(ax, (0.40, 0.70), (0.20, 0.16), "encoder", fc=COL["soft_blue"], ec=COL["design"], weight="bold", fontsize=7.0)
+    box(ax, (0.70, 0.70), (0.20, 0.16), "Tm head", fc="white", ec=COL["baseline"], fontsize=7.0)
+    arrow(ax, (0.28, 0.78), (0.40, 0.78), color=COL["fep"])
+    arrow(ax, (0.60, 0.78), (0.70, 0.78), color=COL["design"])
+    ax.text(0.50, 0.925, "deep: reshapes the encoder (transfers frozen + hot)",
+            ha="center", fontsize=6.4, color=COL["fep"], fontweight="bold")
+
+    # bottom row: MD native-contact Q -> only the fixed trunk (shallow, frozen-only)
+    box(ax, (0.04, 0.22), (0.24, 0.20), "native-contact\nstability Q\n(MD)", fc=COL["soft_red"], ec=COL["mdq"], weight="bold", fontsize=6.6)
+    box(ax, (0.40, 0.24), (0.20, 0.16), "frozen\nencoder", fc=COL["soft_gray"], ec=COL["gray"], fontsize=6.6)
+    box(ax, (0.70, 0.24), (0.20, 0.16), "Tm head", fc="white", ec=COL["baseline"], fontsize=7.0)
+    arrow(ax, (0.28, 0.32), (0.40, 0.32), color=COL["mdq"])
+    arrow(ax, (0.60, 0.32), (0.70, 0.32), color=COL["baseline"])
+    ax.text(0.505, 0.335, "x", ha="center", va="center", fontsize=9, color=COL["mdq"], fontweight="bold")
+    ax.text(0.50, 0.05, "shallow: only refines the fixed trunk (helps frozen, not hot)",
+            ha="center", fontsize=6.4, color=COL["mdq"], fontweight="bold")
 
 
 def write_summary_tsv(rows: pd.DataFrame, paired: dict) -> None:
@@ -888,7 +902,11 @@ def write_summary_tsv(rows: pd.DataFrame, paired: dict) -> None:
                     "delta_ci_hi": comp["delta_ci_hi"],
                 }
             )
-        out["val_delta_vs_tm"] = row["val_mae"] - tm["val_mae"]
+        # val_mae is not tracked in the tuned representative files.
+        if row["val_mae"] is None or tm["val_mae"] is None:
+            out["val_delta_vs_tm"] = np.nan
+        else:
+            out["val_delta_vs_tm"] = row["val_mae"] - tm["val_mae"]
         out_rows.append(out)
     df = pd.DataFrame(out_rows)
     for out_dir in (PLOT_DIR, PAPER_FIG_DIR):

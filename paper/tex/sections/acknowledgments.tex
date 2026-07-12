@@ -1,21 +1,40 @@
 % acknowledgments.tex
+% BPPB back matter (declarations), in the required order:
+% Conflict of interest -> Author contributions -> Data availability -> Acknowledgements -> References.
 
-\begin{acknowledgements}
-This work was supported by JSPS KAKENHI Grant 23H03412 and JST NBDC Grant JPMJND2603, and partly supported by MEXT as ``Program for Promoting Researches on the Supercomputer Fugaku'' (Development and application of large-scale simulation-based inferences for biomolecules JPMXP1020230119). Computational resources were provided by the supercomputer Fugaku at the RIKEN Center for Computational Science under Project IDs hp230209, hp240215, and hp250233.
-\end{acknowledgements}
+\section*{Conflict of interest}
+Taihei Murakami is an employee of Epsilon Molecular Engineering, Inc. Yasuhiro
+Matsunaga is a scientific advisor of Epsilon Molecular Engineering, Inc. The other
+authors declare no competing interests.
 
-\begin{contributions}
-Taihei Murakami and Kentaro Sasaki contributed equally to this work. Yasuhiro Matsunaga conceived and supervised the study, acquired funding, developed the analysis and training code, performed the analyses, interpreted the results, prepared the figures, and wrote the manuscript. Kentaro Sasaki performed computational calculations. Taihei Murakami contributed to draft writing. All authors reviewed and approved the final manuscript.
-\end{contributions}
-
-\section*{Declaration of competing interest}
-Taihei Murakami is an employee of Epsilon Molecular Engineering, Inc. Yasuhiro Matsunaga is a scientific advisor of Epsilon Molecular Engineering, Inc.
+\section*{Author contributions}
+Taihei Murakami and Kentaro Sasaki contributed equally to this work. Yasuhiro
+Matsunaga conceived and supervised the study, acquired funding, developed the
+analysis and training code, performed the analyses, interpreted the results,
+prepared the figures, and wrote the manuscript. Kentaro Sasaki performed the
+computational free-energy and structure-based calculations. Soichiro Oda and Kazuma
+Okada performed molecular-dynamics simulations and data curation. Taihei Murakami
+contributed to draft writing. All authors reviewed and approved the final
+manuscript.
+% TODO(confirm with user): exact CRediT roles for Soichiro Oda and Kazuma Okada.
 
 \section*{Data availability}
-Processed data required to reproduce the main and supplementary figures are available on GitHub (see Code availability) and will be deposited in Zenodo upon acceptance. Raw simulation trajectories are large and will be made available upon request.
+Processed data required to reproduce the main and supplementary figures are
+available on GitHub (see below) and will be deposited in Zenodo upon acceptance
+(DOI to be assigned). Raw simulation trajectories are large; solvent-stripped,
+frame-thinned trajectories sufficient to reproduce the published labels will be
+deposited in the same Zenodo record, and the full raw data are available upon
+request. Analysis, training, and figure-generation code is available on GitHub at
+\url{https://github.com/ymatsunaga/sim2real-nanobody-tm}; an archival release will
+be deposited in Zenodo upon acceptance.
 
-\section*{Code availability}
-Analysis, training, and figure-generation code is available on GitHub at \url{https://github.com/ymatsunaga/sim2real-nanobody-tm} (archival release will be deposited in Zenodo upon acceptance).
-
-\section*{AI-use disclosure}
-AI-assisted tools were used to support language editing, code development, and figure preparation. The authors reviewed and take responsibility for all manuscript content, analyses, and conclusions.
+\section*{Acknowledgements}
+This work was supported by JSPS KAKENHI Grant 23H03412 and JST NBDC Grant
+JPMJND2603, and partly supported by MEXT as ``Program for Promoting Researches on
+the Supercomputer Fugaku'' (Development and application of large-scale
+simulation-based inferences for biomolecules JPMXP1020230119). Computational
+resources were provided by the supercomputer Fugaku at the RIKEN Center for
+Computational Science under Project IDs hp230209, hp240215, and hp250233.
+AI-assisted tools were used to support language editing, code development, and
+figure preparation; the authors reviewed and take responsibility for all manuscript
+content, analyses, and conclusions.

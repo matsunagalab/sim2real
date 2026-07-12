@@ -41,7 +41,7 @@ MAX_LENGTH = 160
 SOURCE_LABEL_MANIFEST = os.path.join(REPO_ROOT, "data", "source_labels", "MANIFEST.tsv")
 
 
-def load_ddg_paths_from_manifest(manifest_path: str = SOURCE_LABEL_MANIFEST) -> dict[str, tuple[str, str]]:
+def load_ddg_paths_from_manifest(manifest_path: str = SOURCE_LABEL_MANIFEST) -> dict[str, list[tuple[int, str]]]:
     """Resolve active mutation-label source tables from the data manifest."""
     if not os.path.exists(manifest_path):
         raise FileNotFoundError(f"Missing source-label manifest: {manifest_path}")
@@ -64,19 +64,28 @@ def load_ddg_paths_from_manifest(manifest_path: str = SOURCE_LABEL_MANIFEST) -> 
         & manifest["prepare_argument"].astype(str).str.startswith("--ddg-source ")
     ].copy()
 
-    paths: dict[str, tuple[str, str]] = {}
+    # task_id per structure (1MEL->task 1, 4IDL->task 2), kept fixed so multi-task
+    # head assignment is stable. A source may provide one or both structures; a
+    # single-structure source (e.g. a partial run where only one system finished)
+    # is allowed and trains only its own task head.
+    struct_task = {"1MEL": 1, "4IDL": 2}
+    paths: dict[str, list[tuple[int, str]]] = {}
     for prepare_arg, group in current.groupby("prepare_argument", sort=False):
         source_key = prepare_arg.split(maxsplit=1)[1]
         by_structure = {
             str(row["structure"]).upper(): str(row["processed_csv"])
             for _, row in group.iterrows()
         }
-        if not {"1MEL", "4IDL"}.issubset(by_structure):
-            continue
-        for rel_path in (by_structure["1MEL"], by_structure["4IDL"]):
+        entries: list[tuple[int, str]] = []
+        for struct in ("1MEL", "4IDL"):
+            if struct not in by_structure:
+                continue
+            rel_path = by_structure[struct]
             if not os.path.exists(os.path.join(REPO_ROOT, rel_path)):
                 raise FileNotFoundError(f"Manifest points to a missing source-label table: {rel_path}")
-        paths[source_key] = (by_structure["1MEL"], by_structure["4IDL"])
+            entries.append((struct_task[struct], rel_path))
+        if entries:
+            paths[source_key] = entries
 
     if not paths:
         raise ValueError(f"No active DDG source paths found in {manifest_path}")
@@ -187,8 +196,7 @@ def load_and_prepare_datasets(seed: int, n_ddg: int | None = None, ddg_source: s
 
     # ---- ddG auxiliary tasks (task_id=1,2) ----
     if ddg_source and ddg_source != "none":
-        ddg_1mel_path, ddg_4idl_path = DDG_PATHS[ddg_source]
-        for task_id, rel_path in [(1, ddg_1mel_path), (2, ddg_4idl_path)]:
+        for task_id, rel_path in DDG_PATHS[ddg_source]:
             df = pd.read_csv(os.path.join(REPO_ROOT, rel_path))
             if n_ddg is not None:
                 df = df.sample(n=min(n_ddg, len(df)), random_state=seed).reset_index(drop=True)

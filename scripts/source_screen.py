@@ -378,7 +378,7 @@ def main() -> int:
     if args.mode == "hpo":
         jobs = build_hpo_jobs(
             ddg_sources=parse_csv(args.ddg_sources),
-            md_sources=parse_csv(args.md_sources),
+            md_sources=parse_csv(args.md_sources) if args.md_sources.strip() else [],
             tm_archs=parse_csv(args.tm_archs),
             ddg_n=args.ddg_n,
             md_n=args.md_n,

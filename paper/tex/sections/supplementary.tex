@@ -40,10 +40,12 @@ prediction error.
 Computational labels are loaded as computational tasks rather than appended to the Tm
 data as extra measurements. Table~\ref{tab:supp_data_sources} lists the processed
 target and computational-label files used in the reported comparisons. Mutation-effect tables
-carry sequence fields and [0,1]-scaled computational-label fields. The MD-derived
-Q-value table uses the same processed format so that it can enter the same
-computational-task loader; there, the scaled label is a [0,1]-scaled Q-value rather
-than a mutation free energy.
+carry sequence fields and [0,1]-scaled computational-label fields. The MD
+native-contact tables use the same processed format so that they can enter the same
+computational-task loader; there, the scaled label is a [0,1]-scaled native-contact
+fraction rather than a mutation free energy. The FEP-matched MD table (the primary
+MD label) is built on the same 1MEL/4IDL mutation scans as FEP; the diverse-panel
+MD table is used only as the negative data-design control.
 
 \begin{table}[htbp]
 \centering
@@ -59,11 +61,12 @@ Experimental Tm & Target train & 57 & Model fitting \\
 Experimental Tm & Target validation & 114 & Checkpoint and setting selection \\
 Experimental Tm & Target test & 396 & Final held-out evaluation \\
 FEP mutation free energy & Computational tasks & 435 + 409 & Main computational task \\
+MD native-contact (FEP-matched scan) & Computational tasks & 431 + 406 & Matched-design MD label (primary) \\
 Rosetta mutation score & Computational tasks & 435 + 409 & Computational-label comparison \\
 ThermoMPNN stability score & Computational tasks & 435 + 409 & Computational-label comparison \\
 Random variants scored by Rosetta & Computational tasks & 1000 + 1000 & Computational-label comparison \\
 ESM2-proposed variants scored by Rosetta & Computational tasks & 1000 + 1000 & Computational-label comparison \\
-MD-derived Q-value & Computational task & 1143 & Computational-label comparison and scaling control \\
+MD native-contact (diverse panel) & Computational task & 1143 & Negative data-design control \\
 \hline
 \end{tabular}
 \end{table}
@@ -76,29 +79,33 @@ regression head an example uses and which task-specific loss term it contributes
 to.
 
 \textbf{Sequence-overlap check.} We checked exact sequence overlap between the
-processed computational tables and the fixed NbBench splits. The FEP/Rosetta
-mutation-effect tables, the random variants scored by Rosetta, and the
-ESM2-proposed variants scored by Rosetta had no exact match to any NbBench
-training, validation, or test sequence. The ThermoMPNN tables used the same
-template-specific variant design as the mutation-effect computational labels. The
-SAbDab-derived MD Q-value table contained exact matches to 2 NbBench training, 4
-validation, and 8 test sequences. We disclose this because it bears on
-interpretation of the MD control; it cannot explain the positive FEP result, and
-the MD Q-value computational label did not improve held-out Tm prediction.
+processed computational tables and the fixed NbBench splits. The FEP, Rosetta, and
+ThermoMPNN mutation-effect tables, the FEP-matched MD native-contact table, and the
+random and ESM2-proposed variant tables --- all built on the 1MEL and 4IDL
+scaffolds --- had no exact match to any NbBench training, validation, or test
+sequence. The diverse-panel SAbDab MD table contained exact matches to 2 NbBench
+training, 4 validation, and 8 test sequences. We disclose this because it bears on
+the negative data-design control; because that diverse-panel table is used only as
+the negative control and does not enter any positive result, the overlap cannot
+account for any reported gain.
 
 \textbf{Computational-label sampling.} For mutation-effect experiments with requested
 count $n$, the loader samples up to $n$ rows independently from each of the two
 template tables using the run seed; the final FEP setting with $n=320$ therefore
 supplies 320 sampled 1MEL rows and 320 sampled 4IDL rows before the computational-task
-split. For MD-derived Q-value experiments, the loader samples $n$ rows from the
-single Q-value table. Computational-label rows are split 80/20 into computational-training and
+split. The FEP-matched MD native-contact label samples from the same two
+template-specific tables. The diverse-panel MD control samples $n$ rows from its
+single table. Computational-label rows are split 80/20 into computational-training and
 computational-validation rows with the same seed. The production training call then
 filters the validation data passed to the trainer so that checkpoint selection
 and early stopping depend only on the experimental Tm validation examples.
 
-\subsection*{SAbDab-derived nanobody structure panel for MD}
+\subsection*{Diverse-panel MD control: SAbDab structure selection}
 
-The MD computational-label panel was built from SAbDab, the Structural Antibody Database
+The following describes the \emph{diverse-panel} MD native-contact control (the
+negative data-design control of Fig.~3). The FEP-matched MD label used for the
+positive results is built on the 1MEL/4IDL mutation scans as described in Methods.
+The diverse-panel MD control was built from SAbDab, the Structural Antibody Database
 \citep{Dunbar2014SAbDab}. The archived SAbDab nanobody summary table holds 2422
 rows with PDB identifier, heavy- and light-chain assignments, model index,
 antigen annotation, experimental method, resolution, species, and other fields.
@@ -263,31 +270,34 @@ is used for target-task prediction.
 
 \subsection*{Candidate-setting selection and final evaluation}
 
-Candidate settings are selected on the experimental Tm validation split. The
-common grid includes the default setting; encoder learning rates of
-$3\times10^{-5}$, $1\times10^{-4}$, and $3\times10^{-4}$; a lower head learning
-rate of $1\times10^{-4}$ paired with encoder learning rate $3\times10^{-5}$; and
-dropout rates of 0.05, 0.15, and 0.30. Fixed computational-loss weights are added for
-computational classes where the computational-label scale may need explicit balancing. Tm-only
-candidates include shared, residual, and latent architecture variants;
-mutation-effect candidates use the shared-trunk family for the main comparison,
-with a separate computational-head design comparison; and MD-derived candidates include
-fixed-weight settings because Q-value labels differ in scale and interpretation
-from mutation free energies.
+Candidate settings are selected on the experimental Tm validation split, tuning
+every source independently and separately for the frozen and hot encoder regimes
+with a two-stage search. Stage~1 fixes learning rate, dropout, and weight decay at
+defaults and searches the model architecture (shared trunk, residual fusion, or
+latent fusion) crossed with the auxiliary-head coupling (separate template-specific
+heads or a template-conditioned shared head). Stage~2 holds the best Stage~1
+skeleton and searches, for the hot regime, the encoder learning rate
+($1\times10^{-4}$, $5\times10^{-5}$, $3\times10^{-5}$, $1\times10^{-5}$) and, for
+the frozen regime, the head learning rate ($1\times10^{-3}$, $5\times10^{-4}$,
+$2\times10^{-4}$), each crossed with dropout (0.05, 0.15, 0.30) and weight decay
+(0.02, 0.10). This staged search covered 30 Stage~1 and 126 Stage~2 configurations
+for the core sources, and an additional 48 Stage~1 and 168 Stage~2 configurations
+for the structure-based comparators.
 
-\textbf{Seeded candidate evaluation.} Each candidate is first evaluated as a
-three-seed ensemble on the Tm validation split, and the selected setting for each
-computational class is then evaluated on the held-out test split as a ten-seed ensemble.
-Final comparisons use seeds 1 to 10. The run seed controls Python, NumPy, PyTorch,
-and CUDA randomness when CUDA is available, as well as target-training subsampling
-in the target-label scaling experiment, computational-row sampling, and computational-label
-train/validation splitting. The label-count curves use fixed computational-specific
-training recipes while the number of computational labels is varied.
+\textbf{Seeded candidate evaluation.} Each candidate is evaluated as a three-seed
+ensemble on the Tm validation split at 320 auxiliary labels, and the single best
+configuration for each source and regime is then evaluated on the held-out test
+split as a five-seed ensemble. The run seed controls Python, NumPy, PyTorch, and
+CUDA randomness when CUDA is available, as well as target-training subsampling in
+the target-label scaling experiment, computational-row sampling, and computational-label
+train/validation splitting. The label-count curves use the selected per-source
+configuration while the number of computational labels is varied over 20, 80, 160,
+and 320.
 
 \subsection*{Statistics and stored outputs}
 
 The primary metric is MAE in degrees Celsius on the 396 held-out test examples.
-For each condition, the ten seeded models produce scaled Tm predictions for every
+For each condition, the five seeded models produce scaled Tm predictions for every
 test sequence; these are averaged in scaled-label space and inverse-transformed
 to degrees Celsius. Root mean squared error, coefficient of determination, and
 Spearman and Pearson correlations are also computed, but the figures emphasize MAE
@@ -295,7 +305,7 @@ because it reads directly as an average temperature error.
 
 \textbf{Bootstrap intervals.} Single-condition confidence intervals come from
 nonparametric bootstrap resampling over test examples. The absolute-error vector
-from the ten-seed ensemble is resampled with replacement 10,000 times using a
+from the five-seed ensemble is resampled with replacement 10,000 times using a
 fixed bootstrap seed, and the reported 90\% interval is the 5th to 95th percentile
 range of the bootstrapped MAE values. The 90\% interval is used for consistency
 with the directional paired comparisons in the main text; the stored bootstrap
@@ -318,11 +328,11 @@ positive control on the pipeline. It tests whether the same model family and
 evaluation code recover the expected gain when more true experimental Tm labels
 are available. The FEP computational-label curve tests something different. It asks whether more
 labels from a physically related but distinct computed quantity improve the same
-held-out Tm endpoint, while the MD Q-value curve tests whether simply adding more
-simulation-derived labels suffices when the computational label measures a more indirect
-structural response. The decisive comparison is therefore not ``simulation versus
-no simulation,'' but whether the computational label carries physical information that
-transfers to the target property under target-centered model selection.
+held-out Tm endpoint, while the FEP-matched MD native-contact curve tests whether a
+structural stability observable transfers once its data design matches the target.
+The decisive comparisons are therefore not ``simulation versus no simulation,'' but
+whether the auxiliary label shares the target's sequence design and whether its
+physical observable transfers under target-centered model selection.
 
 \subsection*{Supplementary figure data tables}
 
@@ -348,9 +358,9 @@ processed summaries and scripts used to regenerate each display item.}
 Display item & Inputs & Script & Primary comparison \\
 \hline
 Fig.~1 & Conceptual protocol & \path{plot/make_outline_figures.py} & Target-centered transfer-learning design \\
-Fig.~2 & Main count-sweep summaries & \path{plot/make_outline_figures.py} & Label-count sweeps for Tm labels, FEP labels, and MD Q-value labels \\
-Fig.~3 & Final hot- and frozen-encoder computational-label screen summaries & \path{plot/make_outline_figures.py} & All-atom FEP and MD labels versus training only on experimental Tm labels \\
-Fig.~4 & Final computational-label screen summary & \path{plot/make_outline_figures.py} & Rosetta, ThermoMPNN, and Rosetta-scored proposal sets \\
+Fig.~2 & Tuned per-source summaries (hot/frozen) & \path{plot/make_outline_figures.py} & Which computational labels transfer: FEP, FEP-matched MD, and comparators \\
+Fig.~3 & Diverse-panel vs matched-scan MD summaries & \path{plot/make_outline_figures.py} & Data-design axis: same MD observable null as a diverse screen, positive as a matched scan \\
+Fig.~4 & Tuned frozen/hot per-source summaries & \path{plot/make_outline_figures.py} & Physical-observable axis: FEP transfers in both regimes, MD native-contact only frozen \\
 Supplementary Figs.~1 to 5 & Supplementary manifest and generated TSV tables & \path{plot/make_supplementary_figures.py} & Data-set composition, candidate-setting searches, model controls, count-sweep controls, and MD-feature controls \\
 \hline
 \end{tabular}

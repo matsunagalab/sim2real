@@ -57,11 +57,12 @@ target task and each computed label as a computational task that shares an ESM2-
 sequence representation \citep{Lin2023Evolutionary}. The computational labels include
 mutation free energies from alchemical free-energy perturbation (FEP), Rosetta
 mutation scores, ThermoMPNN stability scores, Rosetta scores on variants
-proposed by ESM2 or sampled at random, and an MD-derived Q-value that summarizes
-native-contact persistence. To keep the comparison target-centered, every
-candidate setting is selected on experimental Tm validation data, and every
-final claim is evaluated on the same held-out experimental Tm test set with
-paired error statistics.
+proposed by ESM2 or sampled at random, and an MD-derived native-contact stability
+label computed either over the same mutation scans used for FEP or, as a control,
+over a diverse panel of nanobodies. To keep the comparison target-centered and
+fair across very different labels, every source is tuned independently and selected
+on experimental Tm validation data, and every final claim is evaluated on the same
+held-out experimental Tm test set with paired error statistics.
 
 \begin{figure*}[t]
 \centering
@@ -82,11 +83,16 @@ configuration.}
 \label{fig:learning_framework}
 \end{figure*}
 
-The results are label-dependent. FEP mutation free energies, although relative
-and mutation-level, give the clearest improvement in absolute Tm prediction,
-whereas an MD-derived Q-value does not improve under the same protocol.
-Rosetta-scored ESM2 proposals provide only a weaker exploratory signal. These
-results extend the Sim2Real argument to a protein-engineering setting in which
-the computational and experimental labels differ in physical meaning. In this setting,
-computed data are useful only when they encode information that transfers to the
-experimental property of interest.
+The results are organized by two design axes. First, \emph{data design}: the same
+MD native-contact observable does not improve Tm as a diverse-nanobody screen but
+does when it is computed on the FEP-matched mutation scans, where it matches FEP
+with a frozen encoder --- so matching the auxiliary source's sequence design to the
+target, not the choice of dynamical quantity, is what lets an MD label transfer.
+Second, the \emph{physical observable}: the alchemical FEP free energy improves Tm
+whether the encoder is frozen or fine-tuned, whereas the native-contact label helps
+only a frozen encoder, so the physical content of the label sets how deeply it
+transfers. The other structure-based scores are weak or null under the same
+tuning. These results extend the Sim2Real argument to a protein-engineering setting
+in which the computational and experimental labels differ in physical meaning, and
+turn "run more simulation" into two concrete design choices --- matched data design
+and a transferable observable --- that decide whether computed data help.
