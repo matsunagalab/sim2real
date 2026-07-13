@@ -27,16 +27,15 @@ quantity affect whether the benefit remains when ESM2 is fine-tuned?
 
 \subsection{Local mutation scans gave a stronger MD result}
 
-Figure~\ref{fig:data_design}a compares two choices made before running MD. The
-heterogeneous structure panel spanned single-domain antibodies of different
-lengths. The matched scan used local mutations of the fixed 1MEL and 4IDL
-structures. Both calculations used 400 K MD, similar simulation time per
-sequence, and labels from the Best--Hummer native-contact $Q$ family. Thus, the
-comparison asks how a similar amount of simulation should be distributed over
-sequence space.
+We compared two choices made before running MD. The heterogeneous structure
+panel spanned single-domain antibodies of different lengths. The matched scan
+used local mutations of the fixed 1MEL and 4IDL structures. Both calculations
+used 400 K MD, similar simulation time per sequence, and labels from the
+Best--Hummer native-contact $Q$ family. Thus, the comparison asks how a similar
+amount of simulation should be distributed over sequence space.
 
 The heterogeneous and matched studies were run and tuned as separate series,
-so their absolute MAEs cannot be compared directly. Figure~\ref{fig:data_design}b
+so their absolute MAEs cannot be compared directly. Figure~\ref{fig:data_design}a
 instead shows the paired change from the Tm-only model in each series. In the
 heterogeneous series, the MD label changed MAE by $-0.049^\circ$C with a frozen
 encoder (90\% CI, $-0.085$ to $-0.012^\circ$C) and by $+0.116^\circ$C with a hot
@@ -66,7 +65,7 @@ scaling removes this constant, so scaled $Q$ and scaled $\Delta Q$ are identical
 within that table.
 
 The frozen label-count curves give a second view of the matched scan
-(Fig.~\ref{fig:data_design}c). Each point is the paired MAE change from the same
+(Fig.~\ref{fig:data_design}b). Each point is the paired MAE change from the same
 frozen Tm-only model; zero therefore means equal test MAE. Here $n$ is the
 number of labels sampled from each structure table. At $n=20$, the changes were
 $-0.10^\circ$C for FEP and $+0.09^\circ$C for matched MD. At $n=320$, both
@@ -87,19 +86,18 @@ model. Sequence choice matters, but it is not the only choice that matters.
 \includegraphics[width=\textwidth]{fig_outline02_data_design}
 \caption{Matched mutation scans show a larger frozen-encoder gain from
 native-contact $Q$.
-(a) Data-derived views of the two acquisition plans: the sequence-length
-distribution of the heterogeneous structure panel and the actual mutation-position
-coverage of the fixed 1MEL and 4IDL scans. Both use 400 K MD, similar simulation
-time per sequence, and labels from the same $Q$ family; contact selection and
-averaging windows differ.
-(b) Paired MAE change for each simulation plan and encoder setting. Zero means
+The heterogeneous plan distributed simulations across variable-length
+structures, whereas the matched plan used local mutations of 1MEL and 4IDL.
+Both used 400 K MD, similar simulation time per sequence, and labels from the
+same $Q$ family; contact selection and averaging windows differed.
+(a) Paired MAE change for each simulation plan and encoder setting. Zero means
 equal MAE to that series' own Tm-only model, and negative values mean lower Tm
 error. Because the two series were tuned independently, their absolute MAEs are
 not compared. The heterogeneous and matched series use fixed 10-seed and
 five-seed ensembles, respectively. Bold values have nominal 90\% paired
 bootstrap intervals that exclude zero; intervals are not adjusted for multiple
 comparisons.
-(c) Paired MAE change from the frozen Tm-only model over four tested label
+(b) Paired MAE change from the frozen Tm-only model over four tested label
 counts, shown on a log$_2$ count axis. Here $n$ is the number sampled from each
 structure table. Points and whiskers show the paired change and its nominal 90\%
 bootstrap interval over the 396 test proteins.}

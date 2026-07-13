@@ -319,8 +319,8 @@ The Results section should contain three movements aligned to the three main fig
 
 #### Result 2 — A matched mutation scan strengthens native-contact transfer
 
-- Begin with a schematic contrasting heterogeneous variable-length sequences with fixed-scaffold
-  local mutation scans.
+- Define the heterogeneous variable-length panel and the fixed-scaffold local mutation scans
+  briefly in the text; do not spend a main-figure panel on this setup.
 - Compare diverse-panel and matched-scan native-contact labels as paired $\Delta$MAE against their
   own training-series Tm-only references, in both frozen and hot regimes. Do not compare absolute
   MAEs across the two series.
@@ -420,14 +420,10 @@ the scalar heads as 32-unit layers. Regenerate it; do not merely relabel the exi
 **Message:** the matched local mutation scan shows a larger frozen-encoder native-contact gain than
 the heterogeneous structure panel, but it does not improve the fine-tuned encoder.
 
-- **(a)** Full-width, data-derived acquisition-plan comparison: the measured sequence-length
-  distribution of the heterogeneous structure panel beside the actual mutation-position coverage
-  of the fixed-scaffold scans. Each lane states 400 K MD and a native-contact $Q$-family label;
-  do not merge them into one pipeline because contact selection and averaging windows differ.
-- **(b)** Four directly labelled paired effects versus each series' own Tm-only reference. Diverse:
+- **(a)** Four directly labelled paired effects versus each series' own Tm-only reference. Diverse:
   $-0.049/+0.116$ °C; matched: $-0.195/+0.029$ °C for frozen/fine-tuned, respectively. Zero means
   equal MAE to the series-specific Tm-only model.
-- **(c)** Frozen FEP and matched-MD paired $\Delta$MAE over the four tested label counts on a log$_2$
+- **(b)** Frozen FEP and matched-MD paired $\Delta$MAE over the four tested label counts on a log$_2$
   count axis. Zero is the tuned frozen Tm-only model; show paired 90% bootstrap intervals rather
   than single-model intervals and label the final values directly.
 
@@ -605,6 +601,9 @@ Do not rerun GPU training unless a missing comparison is identified and explicit
   length--$Q$ limitation and the encoder-size and charge-correction controls;
   repeated HPO, source-error, count-curve, and provenance displays were moved to
   tracked tables.
+- **2026-07-13:** Fig. 2 was reduced from three panels to two. The acquisition-plan
+  setup is stated in prose, while the main figure keeps only the transfer effect
+  and frozen label-count evidence.
 - **2026-07-13:** Supplementary figures reduced from five to four and rebuilt around data checks,
   validation selection, transfer controls, and FEP provenance/charge checks. The legacy descriptor
   survey was removed from the active supplement.

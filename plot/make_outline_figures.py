@@ -1024,67 +1024,18 @@ def fig04d_schematic(ax) -> None:
 
 
 def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
-    """Simulation-plan axis at the journal's final printed width."""
-    fig = plt.figure(figsize=(7.2, 5.65), layout="constrained")
-    grid = fig.add_gridspec(2, 2, height_ratios=[1.03, 1.12], width_ratios=[1.05, 1.0])
+    """Simulation-plan evidence at the journal's final printed width."""
+    fig, axes = plt.subplots(
+        1,
+        2,
+        figsize=(7.2, 3.65),
+        gridspec_kw={"width_ratios": [1.12, 1.0]},
+        layout="constrained",
+    )
 
-    # (a) Data-derived views of what was simulated. This avoids a decorative
-    # cartoon and does not imply that the two Q-extraction pipelines were identical.
-    top = grid[0, :].subgridspec(2, 2, height_ratios=[1.0, 0.22], hspace=0.03, wspace=0.18)
-    ax = fig.add_subplot(top[0, 0])
-    diverse = pd.read_csv(DATA_MD / "nanobody_qvalue_400K.csv")
-    bins = np.arange(40, 501, 25)
-    ax.hist(diverse["seq_len"], bins=bins, color=COL["design"], alpha=0.88,
-            edgecolor="white", linewidth=0.55)
-    ax.axvline(diverse["seq_len"].median(), color=COL["black"], linestyle="--", linewidth=1.1)
-    ax.set_xlim(40, 500)
-    ax.set_xlabel("Sequence length (residues)")
-    ax.set_ylabel("Structures")
-    ax.set_title("Heterogeneous panel\n400 K MD → native-contact Q",
-                 loc="left", fontweight="bold")
-    ax.text(0.97, 0.91,
-            f"{len(diverse):,} structures\n{int(diverse['seq_len'].min())}–{int(diverse['seq_len'].max())} residues",
-            transform=ax.transAxes, ha="right", va="top", fontsize=8.9,
-            bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.86, "pad": 1.5})
-    polish(ax, "y", boxed=True)
-    ax.text(-0.16, 1.30, "(a)", transform=ax.transAxes, fontsize=11.5,
-            fontweight="bold", ha="left", va="top", clip_on=False)
-
-    ax = fig.add_subplot(top[0, 1])
-    scan_specs = [
-        ("1MEL", DATA_MD / "study_qvalue_fep400k_1mel.csv", 1.0),
-        ("4IDL", DATA_MD / "study_qvalue_fep400k_4idl.csv", 0.0),
-    ]
-    for name, path, y in scan_specs:
-        scan = pd.read_csv(path)
-        positions = scan["mutation"].str.extract(r"(\d+)", expand=False).astype(int)
-        counts = positions.value_counts().sort_index()
-        seq_len = int(scan["seq"].str.len().iloc[0])
-        ax.hlines(y, 1, seq_len, color=COL["gray"], linewidth=2.2, zorder=1)
-        ax.scatter(counts.index, np.full(len(counts), y),
-                   s=14 + 4.0 * counts.to_numpy(), color=COL["mdq"], alpha=0.78,
-                   edgecolor="white", linewidth=0.6, zorder=3)
-        ax.text(seq_len + 4, y,
-                f"{len(scan)} variants\n{len(counts)} positions; {seq_len} aa",
-                ha="left", va="center", fontsize=8.3, color=COL["gray"])
-    ax.set_xlim(0, 165)
-    ax.set_ylim(-0.55, 1.55)
-    ax.set_yticks([1, 0], ["1MEL", "4IDL"])
-    ax.set_xlabel("Mutation position in scaffold")
-    ax.set_title("Matched mutation scans\n400 K MD → native-contact Q",
-                 loc="left", fontweight="bold")
-    polish(ax, "x", boxed=True)
-
-    note = fig.add_subplot(top[1, :])
-    hide_axes(note)
-    note.text(0.5, 0.58,
-              "Same temperature and similar simulation time per sequence; "
-              "contact definition and averaging window differed.",
-              ha="center", va="center", fontsize=8.8, color=COL["gray"])
-
-    # (b) Four directly labelled effects; every zero is the corresponding
+    # (a) Four directly labelled effects; every zero is the corresponding
     # independently tuned series' own Tm-only model.
-    ax = fig.add_subplot(grid[1, 0])
+    ax = axes[0]
     effects = design_delta_rows()
     rows_b = [
         ("Heterogeneous · frozen", "heterogeneous screen", "frozen", COL["gray"], "s"),
@@ -1122,22 +1073,22 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
         )
     ax.axhline(1.5, color="white", linewidth=2.0, zorder=1)
     ax.set_yticks(ypos)
-    ax.set_yticklabels([r[0] for r in rows_b], fontsize=8.7)
+    ax.set_yticklabels([r[0] for r in rows_b], fontsize=9.2)
     ax.set_ylim(len(rows_b) - 0.45, -0.55)
     ax.set_xlim(-0.38, 0.28)
     ax.set_xlabel(r"$\Delta$MAE vs own Tm-only model (°C)")
-    ax.set_title("Native-contact transfer", loc="left", fontweight="bold")
+    ax.set_title("MD native-contact transfer", loc="left", fontweight="bold")
     ax.text(0.03, 0.97, "lower Tm error", transform=ax.transAxes, ha="left", va="top",
             fontsize=8.4, color=COL["design"])
     ax.text(0.97, 0.97, "higher Tm error", transform=ax.transAxes, ha="right", va="top",
             fontsize=8.4, color=COL["rosetta"])
     polish(ax, "x", boxed=True)
-    panel_label(ax, "B")
+    panel_label(ax, "A")
 
-    # (c) Paired changes from the frozen Tm-only model. Paired intervals make
+    # (b) Paired changes from the frozen Tm-only model. Paired intervals make
     # the baseline and the direction of transfer explicit and avoid clipped
     # single-model confidence intervals.
-    ax = fig.add_subplot(grid[1, 1])
+    ax = axes[1]
     ax.axhspan(-0.45, 0.0, color=COL["soft_blue"], alpha=0.45, zorder=0)
     ax.axhspan(0.0, 0.28, color=COL["soft_orange"], alpha=0.45, zorder=0)
     ax.axhline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
@@ -1163,13 +1114,13 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
             color=COL["baseline"])
     endpoint_labels = {"FEP $\\Delta\\Delta G$": "FEP ΔΔG",
                        "MD native-contact $Q$": "MD Q"}
-    for (label, value, color), dy in zip(frozen_endpoints, (-8, 10)):
-        ax.annotate(f"{endpoint_labels[label]}  {value:+.2f}", xy=(320, value), xytext=(8, dy),
-                    textcoords="offset points", ha="left", va="center", fontsize=8.3,
-                    fontweight="bold", color=color,
-                    bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.78, "pad": 0.4})
+    for (label, value, color), dy in zip(frozen_endpoints, (-0.025, 0.035)):
+        ax.text(0.97, value + dy, f"{endpoint_labels[label]}  {value:+.2f}",
+                transform=ax.get_yaxis_transform(), ha="right", va="center", fontsize=8.3,
+                fontweight="bold", color=color,
+                bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.78, "pad": 0.4})
     polish(ax, "both", boxed=True)
-    panel_label(ax, "C")
+    panel_label(ax, "B")
 
     save_figure(fig, "fig_outline02_data_design")
 
