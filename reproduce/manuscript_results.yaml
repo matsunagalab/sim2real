@@ -504,9 +504,8 @@ stages:
       command: [uv, run, python, plot/make_outline_figures.py]
       outputs:
         - paper/tex/figures/fig_outline01_concept_protocol.pdf
-        - paper/tex/figures/fig_outline02_source_screen.pdf
-        - paper/tex/figures/fig_outline03_design_bridge.pdf
-        - paper/tex/figures/fig_outline04_mdq_boundary.pdf
+        - paper/tex/figures/fig_outline02_data_design.pdf
+        - paper/tex/figures/fig_outline03_physical_observable.pdf
 
     - name: supplementary figure and table regeneration
       type: command

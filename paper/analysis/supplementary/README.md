@@ -5,7 +5,7 @@ extend.
 
 ## Files
 
-- `tables/*.tsv`: numerical source data for Supplementary Figs. 1-4.
+- `tables/*.tsv`: numerical source data for Supplementary Figs. S1--S4.
 - `figures/*.pdf` and `figures/*.png`: rendered supplementary figures.
 - `MANIFEST.tsv`: panel-level index of figures, source tables, upstream result
   summaries, generator functions, and the question each panel answers.

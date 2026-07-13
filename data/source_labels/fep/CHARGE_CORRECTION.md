@@ -4,7 +4,10 @@ Reproducible record for two questions about the FEP ΔΔG source labels:
 1. Which raw FEP runs do the repo labels come from? (provenance)
 2. Do periodic-PME net-charge finite-size artifacts affect the ML labels? (charge correction)
 
-**Script:** `scripts/fep_charge_correction.py` (regenerates everything below + `PROVENANCE.tsv`).
+**Provenance script:** `scripts/fep_charge_correction.py` (regenerates `PROVENANCE.tsv`
+and the raw-energy correction audit). The current model-facing scaled-label audit is
+recomputed by `plot/make_supplementary_figures.py` using the complete preprocessing
+pipeline described below.
 **Raw data:** `/data/{odas,kazu,yasu}/vhh_fep/<system>_<scan>/`. **Post-processing:** `/data/share/ddG.jl`.
 
 ---
@@ -71,18 +74,24 @@ This is only one of the four Rocklin (2013) terms; the undersolvation / discrete
 residual terms need a Poisson-Boltzmann solve (APBS; e.g. `github.com/xiki-tempula/rocklinc`).
 We bracket those with a **generous per-q² sensitivity sweep** instead of running APBS.
 
-### Effect on the ML labels (per-system whole-file min-max, matching the pipeline)
+### Effect on the ML labels
+
+The current model-facing calculation applies the production preprocessing separately
+within each structure table: robust centering/scaling, Yeo--Johnson transformation,
+standardization, and min--max scaling. This differs from the older min--max-only
+diagnostic retained in `scripts/fep_charge_correction.py`.
+
 | correction (per q²) | scaled-label corr | max &#124;Δscaled&#124; | labels shifted >0.02 |
 |---|---|---|---|
-| **periodicity, εs=78 (0.086)** | **0.99994** | 0.005 | **0 / 844** |
-| periodicity, εs=97 (0.069) | 0.99996 | 0.004 | 0 / 844 |
-| generous undersolv (0.5) | 0.998 | 0.031 | 8 / 844 |
-| very generous (1.5) | 0.983 | 0.094 | 568 / 844 |
+| **periodicity, εs=78 (0.086)** | **0.99989** | 0.0077 | **0 / 844** |
+| periodicity, εs=97 (0.069) | 0.99993 | 0.0062 | 0 / 844 |
+| generous sensitivity value (0.5) | 0.9968 | 0.0403 | 12 / 844 |
+| very generous sensitivity value (1.5) | 0.9734 | 0.1089 | 426 / 844 |
 
 **Conclusion:** the correction is a function of Δq² only; with uniform box it is a per-Δq-class
-offset that is largely absorbed by min-max scaling. With the defensible (no-APBS) periodicity term
-**no label shifts by >0.02 (correlation 0.99994)**; even an aggressive undersolvation upper bound
-keeps correlation ≥0.98. **→ The charge correction does not change the FEP transfer/scaling result;
+offset that is largely absorbed by the model-facing preprocessing. With the defensible (no-APBS)
+periodicity term **no label shifts by >0.02 (correlation 0.99989)**; even the larger sensitivity
+values retain correlations above 0.97. **→ The charge correction does not change the FEP transfer/scaling result;
 running rocklinc/APBS is unnecessary for the ML source labels.** It would matter only for
 *quantitative* ΔΔG of the few Δq=−2 (Arg/Lys→Asp) mutations.
 

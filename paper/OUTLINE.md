@@ -420,14 +420,16 @@ the scalar heads as 32-unit layers. Regenerate it; do not merely relabel the exi
 **Message:** the matched local mutation scan shows a larger frozen-encoder native-contact gain than
 the heterogeneous structure panel, but it does not improve the fine-tuned encoder.
 
-- **(a)** Full-width acquisition-plan schematic: a heterogeneous structure panel versus fixed-
-  scaffold mutation scans, both followed by 400 K MD and labels from the same native-contact $Q$
-  family. The complete extraction details are not identical.
+- **(a)** Full-width, data-derived acquisition-plan comparison: the measured sequence-length
+  distribution of the heterogeneous structure panel beside the actual mutation-position coverage
+  of the fixed-scaffold scans. Each lane states 400 K MD and a native-contact $Q$-family label;
+  do not merge them into one pipeline because contact selection and averaging windows differ.
 - **(b)** Four directly labelled paired effects versus each series' own Tm-only reference. Diverse:
   $-0.049/+0.116$ °C; matched: $-0.195/+0.029$ °C for frozen/fine-tuned, respectively. Zero means
   equal MAE to the series-specific Tm-only model.
-- **(c)** Frozen FEP and matched-MD paired $\Delta$MAE over the four tested label counts. Zero is the
-  tuned frozen Tm-only model; show paired 90% bootstrap intervals rather than single-model intervals.
+- **(c)** Frozen FEP and matched-MD paired $\Delta$MAE over the four tested label counts on a log$_2$
+  count axis. Zero is the tuned frozen Tm-only model; show paired 90% bootstrap intervals rather
+  than single-model intervals and label the final values directly.
 
 The caption must state that the diverse and matched results come from independently tuned series and
 are expressed relative to their own Tm-only references. The length scatter moves to Supplementary
@@ -438,14 +440,15 @@ Material; length is a plausible design shortcut, not a proven explanation by its
 **Message:** FEP transfers in both encoder regimes; native contacts transfer only with a frozen
 encoder.
 
-- **(a)** Full-width horizontal bars and paired 90% intervals for all tuned computational labels.
-  Solid and hatched bars distinguish frozen and fine-tuned encoders; zero means equal MAE to the
-  corresponding Tm-only model.
+- **(a)** Full-width paired-effect forest plot for all tuned computational labels. Filled squares
+  and open circles distinguish frozen and fine-tuned encoders; source colors identify FEP, matched
+  MD, and neutral comparators. Zero means equal MAE to the corresponding Tm-only model.
 - **(b)** Direct FEP-minus-matched-MD forest plot only. Zero means equal MAE, negative values favor
   FEP. Frozen: $-0.026$ °C with an interval crossing zero; fine-tuned: $-0.182$ °C with an interval
   below zero.
-- **(c)** Fine-tuned paired $\Delta$MAE over the four tested label counts. FEP moves below the Tm-only
-  zero line, whereas matched MD approaches it from higher error.
+- **(c)** Fine-tuned paired $\Delta$MAE over the four tested label counts on a log$_2$ count axis.
+  FEP moves below the Tm-only zero line, whereas matched MD approaches it from higher error; label
+  the final values directly.
 
 Keep the main figure evidence-first. The old encoder-reshaping schematic moves out of the main figure;
 mechanistic interpretation belongs in the Discussion and graphical abstract with qualified wording.
@@ -480,14 +483,15 @@ descriptor-screen narrative.
 
 ### Selected supplementary sequence
 
-1. **Supplementary Fig. 1:** data sizes, matched-versus-heterogeneous Q distributions, sequence
-   length, and exact overlap with the Tm splits.
-2. **Supplementary Fig. 2:** stage-2 validation candidates and the selected architecture/head for
-   every source and encoder setting.
-3. **Supplementary Fig. 3:** absolute source errors, direct FEP-minus-matched-MD count curves, and
-   ESM2-size controls.
-4. **Supplementary Fig. 4:** retained FEP scan composition, mutation charge changes, and analytical
-   charge-correction sensitivity.
+1. **Supplementary Fig. S1:** data sizes and unique-sequence counts, matched-versus-heterogeneous
+   native-contact-loss distributions, sequence length, and unique exact overlap with the Tm splits.
+2. **Supplementary Fig. S2:** completed stage-2 validation candidates relative to the selected
+   candidate, the selected architecture/head, and the later held-out generalization gap.
+3. **Supplementary Fig. S3:** absolute source errors, direct FEP-minus-matched-MD count curves, and
+   paired FEP effects in exploratory ESM2-size controls. Larger Tm-only models do not replace FEP,
+   but the within-size FEP benefit remains at 35M and 650M.
+4. **Supplementary Fig. S4:** retained FEP scan composition, mutation charge changes, per-label
+   correction shifts, and analytical charge-correction sensitivity.
 
 The old descriptor survey, source-combination panel, per-count retuning panel, and diverse-MD
 trajectory-window panel are not used because they do not support the current two-axis claim.
@@ -515,17 +519,17 @@ should be recomputed from these vectors rather than copied from prose.
 
 ### Largest label-count setting
 
-An asterisk means the current 90% paired bootstrap CI versus the tuned Tm-only baseline excludes zero.
-P values are intentionally omitted until the one-sided/two-sided convention is unified.
+Bold means the nominal 90% paired bootstrap CI versus the tuned Tm-only baseline excludes zero.
+These intervals are not adjusted for multiple comparisons; P values are omitted.
 
 | Computational label | Frozen MAE | Frozen ΔMAE | Hot MAE | Hot ΔMAE |
 |---|---:|---:|---:|---:|
-| FEP mutation free energy | 7.008 | **−0.221*** | 6.395 | **−0.153*** |
-| MD native contact, matched scan | 7.034 | **−0.195*** | 6.577 | +0.029 |
+| FEP mutation free energy | 7.008 | **−0.221** | 6.395 | **−0.153** |
+| MD native contact, matched scan | 7.034 | **−0.195** | 6.577 | +0.029 |
 | ThermoMPNN | 7.089 | −0.141 | 6.621 | +0.073 |
 | Rosetta mutation score | 7.231 | +0.002 | 6.625 | +0.078 |
 | Random variants + Rosetta | 7.216 | −0.013 | 6.692 | +0.144 |
-| ESM2-proposed variants + Rosetta | 7.312 | +0.083 | 6.959 | **+0.411*** |
+| ESM2-proposed variants + Rosetta | 7.312 | +0.083 | 6.959 | **+0.411** |
 
 Rounded paired 90% CIs used in the current manuscript:
 

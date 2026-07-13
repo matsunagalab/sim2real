@@ -1,11 +1,11 @@
-data_set	rows	table_rows
-Tm train	57	57
-Tm validation	114	114
-Tm test	396	396
-FEP	844	435+409
-matched MD	837	431+406
-Rosetta	844	435+409
-ThermoMPNN	844	435+409
-random/Rosetta	2000	1000+1000
-ESM2/Rosetta	2000	1000+1000
-heterogeneous MD	1143	1143
+data_set	rows	unique_sequences	table_rows
+Tm train	57	57	57
+Tm validation	114	114	114
+Tm test	396	396	396
+FEP	844	844	435+409
+matched MD	837	837	431+406
+Rosetta	844	844	435+409
+ThermoMPNN	844	844	435+409
+random/Rosetta	2000	2000	1000+1000
+ESM2/Rosetta	2000	2000	1000+1000
+heterogeneous MD	1143	833	1143

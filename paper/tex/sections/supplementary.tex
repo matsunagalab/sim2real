@@ -115,7 +115,7 @@ correction before repeating the same sign reversal, robust scaling,
 Yeo--Johnson transform, and min--max scaling used for the model-facing labels.
 The corrected and uncorrected labels had a correlation of 0.99989; the largest
 scaled-label shift was 0.008, and no row shifted by more than 0.02. Larger
-per-charge sensitivity values are shown only as bounds in Supplementary Fig.~4;
+per-charge sensitivity values are shown only as bounds in Supplementary Fig.~\ref{fig:supp_fep_checks};
 they are not estimates of the omitted correction terms.
 
 \subsection{Diverse-panel MD control: SAbDab structure selection}
@@ -247,7 +247,7 @@ latent. The shared form sends all rows through one 256--128--32 trunk. The
 residual and latent forms use separate 256--128--32 paths and combine them in the
 Tm prediction. The final FEP models use the shared form with separate heads. Other
 sources select different forms in some encoder settings; these selected forms are
-listed in Supplementary Fig.~2.
+listed in Supplementary Fig.~\ref{fig:supp_model_selection}.
 
 \subsection{Training objective, optimizer, and checkpoint selection}
 
@@ -294,9 +294,10 @@ skeleton and searches, for the hot regime, the encoder learning rate
 ($1\times10^{-4}$, $5\times10^{-5}$, $3\times10^{-5}$, $1\times10^{-5}$) and, for
 the frozen regime, the head learning rate ($1\times10^{-3}$, $5\times10^{-4}$,
 $2\times10^{-4}$), each crossed with dropout (0.05, 0.15, 0.30) and weight decay
-(0.02, 0.10). This staged search covered 30 Stage~1 and 126 Stage~2 configurations
-for the core sources, and an additional 48 Stage~1 and 168 Stage~2 configurations
-for the structure-based comparators.
+(0.02, 0.10). The completed search records comprise 71 Stage~1 runs and 273
+Stage~2 candidates: 115 frozen-encoder and 158 fine-tuned-encoder candidates.
+Figure~\ref{fig:supp_model_selection} shows the completed Stage~2 candidates used
+for selection rather than the size of the intended Cartesian grid.
 
 \textbf{Seeded candidate evaluation.} Each candidate is evaluated as a three-seed
 ensemble on the Tm validation split at $n=320$ labels per scaffold table, and the single best
@@ -374,7 +375,7 @@ Display item & Inputs & Script & Primary comparison \\
 Fig.~1 & Conceptual protocol & \path{plot/make_outline_figures.py} & Multi-task training with Tm-based model selection \\
 Fig.~2 & Simulation-plan schematic; design-by-regime paired MD effects; frozen paired label-count curves & \path{plot/make_outline_figures.py} & Simulation-design axis: matched local scans show a larger frozen native-contact gain \\
 Fig.~3 & Source-by-regime paired-effect bars; direct FEP-minus-MD contrast; fine-tuned paired label-count curves & \path{plot/make_outline_figures.py} & Physical-observable axis: FEP transfers in both regimes, MD native-contact only frozen \\
-Supplementary Figs.~1 to 4 & Supplementary manifest and generated TSV tables & \path{plot/make_supplementary_figures.py} & Data and overlap checks, validation selection, transfer controls, and FEP charge-change checks \\
+Supplementary Figs.~S1 to S4 & Supplementary manifest and generated TSV tables & \path{plot/make_supplementary_figures.py} & Data and overlap checks, validation selection, transfer controls, and FEP charge-change checks \\
 \hline
 \end{tabular}
 \end{table*}
@@ -386,21 +387,24 @@ for all supplementary figures is included in the public analysis archive.
 
 \clearpage
 \section{Supplementary figures}
+\renewcommand{\thefigure}{S\arabic{figure}}
 
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth]{supp_fig01_data_and_design}
 \caption{Data sets and diagnostics for the two MD acquisition plans.
-\textbf{(a)} Processed row counts. Labels of the form $a+b$ give the 1MEL and
-4IDL table sizes.
-\textbf{(b)} Empirical cumulative distributions of the raw native-contact $Q$
-values for the heterogeneous structure panel and the two matched mutation scans.
-The extraction details are not identical, so the distributions are descriptive.
-\textbf{(c)} Raw $Q$ versus sequence length. The matched scans have one fixed
-length per structure, whereas the heterogeneous panel spans 58--461 residues and
-has Pearson $r=+0.13$.
-\textbf{(d)} Exact sequence matches to the three NbBench splits. The matched
-scans have no matches; the heterogeneous panel has 2, 4, and 8.}
+\textbf{(a)} Processed row counts. The heterogeneous MD panel contains 1,143
+structure rows but 833 unique sequences; the two scaffold-table counts are
+recorded in the archived figure data table.
+\textbf{(b)} Empirical cumulative distributions of native-contact loss,
+$1-Q$, on a log axis. The extraction details are not identical, so the
+distributions are descriptive.
+\textbf{(c)} Raw $Q$ versus sequence length. Hexagons show density in the
+heterogeneous panel; violins show the two fixed-length matched scans. The
+heterogeneous panel spans 58--461 residues and has Pearson $r=+0.13$.
+\textbf{(d)} Unique exact sequences shared with the three NbBench splits. The
+matched scans have no matches; the heterogeneous panel has 2, 4, and 8 unique
+matches.}
 \label{fig:supp_data_design}
 \end{figure}
 
@@ -408,13 +412,15 @@ scans have no matches; the heterogeneous panel has 2, 4, and 8.}
 \centering
 \includegraphics[width=\textwidth]{supp_fig02_model_selection}
 \caption{Per-source model selection using experimental Tm validation data.
-\textbf{(a,b)} Stage-2 candidate validation MAEs for frozen and fine-tuned ESM2.
-Each small point is one candidate; diamonds mark the selected setting. No test
-errors enter this selection.
+\textbf{(a,b)} Completed Stage-2 candidates for frozen and fine-tuned ESM2,
+shown as validation MAE above the selected candidate for that source. Each small
+point is one candidate, diamonds at zero mark the selected setting, and row-end
+labels give candidate counts. The two panels contain 115 and 158 candidates,
+respectively; no test errors enter selection.
 \textbf{(c)} Architecture and computational-head form selected for every source
 and encoder setting. A dash denotes a Tm-only model without a computational head.
-\textbf{(d)} Selected validation MAE and the later held-out test MAE. Colors
-match panels a and b; squares and circles denote frozen and fine-tuned ESM2.}
+\textbf{(d)} Held-out generalization gap, test MAE minus selected validation
+MAE. Squares and circles denote frozen and fine-tuned ESM2.}
 \label{fig:supp_model_selection}
 \end{figure}
 
@@ -425,10 +431,13 @@ match panels a and b; squares and circles denote frozen and fine-tuned ESM2.}
 \textbf{(a,b)} Held-out Tm test MAE for every selected source with frozen and
 fine-tuned ESM2. Whiskers are 90\% bootstrap intervals over the 396 test proteins.
 \textbf{(c)} Direct paired difference between FEP and matched-MD absolute errors
-at each label count. Negative values favor FEP; whiskers are 90\% paired
-bootstrap intervals.
-\textbf{(d)} Available fine-tuned ESM2-size controls for Tm-only and FEP models.
-Increasing encoder size did not reproduce the 8M FEP result.}
+at each label count on a log$_2$ count axis. Negative values favor FEP; whiskers
+are nominal 90\% paired bootstrap intervals.
+\textbf{(d)} Paired FEP-minus-Tm-only MAE for fine-tuned ESM2 sizes. FEP reduces
+MAE within all three size controls. The 8M point is the staged-selected five-seed
+model; 35M and 650M are exploratory fixed-configuration ten-seed controls and
+were not subjected to the same search. Neither larger Tm-only control reaches
+the absolute MAE of 8M+FEP.}
 \label{fig:supp_transfer_controls}
 \end{figure}
 
@@ -436,14 +445,17 @@ Increasing encoder size did not reproduce the 8M FEP result.}
 \centering
 \includegraphics[width=\textwidth]{supp_fig04_fep_checks}
 \caption{Provenance and charge-change checks for the retained FEP labels.
-\textbf{(a)} Rows from the retained Ala, Asp, Ile, and Gln scans, separated by
+\textbf{(a)} Rows from the retained Ala, Asp, Ile, and Gln scans, grouped by
 structure.
-\textbf{(b)} Distribution of formal mutation charge changes.
-\textbf{(c)} Model-facing FEP labels before and after the analytical periodic
-net-charge correction at dielectric 78. The dashed line is equality.
+\textbf{(b)} Distribution of formal mutation charge changes; 284 of 844 rows
+change charge.
+\textbf{(c)} Per-label shift after the analytical periodic net-charge correction
+at dielectric 78, plotted against the unadjusted scaled label. The dashed line
+marks zero shift.
 \textbf{(d)} Maximum scaled-label shift under two periodicity estimates and two
 larger sensitivity values in kcal mol$^{-1}$ per $(\Delta q)^2$. Numbers above
-the bars give the corrected-versus-uncorrected correlation. The larger values
-are sensitivity bounds, not estimates of omitted correction terms.}
+the bars give the maximum shift and corrected-versus-uncorrected correlation.
+The larger values are sensitivity bounds, not estimates of omitted correction
+terms.}
 \label{fig:supp_fep_checks}
 \end{figure}

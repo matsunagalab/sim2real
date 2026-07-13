@@ -17,7 +17,7 @@ settings, and the 396 test proteins were used after selection. Every computed
 label was tuned separately in the frozen and hot settings. We then compared
 absolute errors on the same test proteins. This was necessary because a model
 can predict a computed value well without improving Tm. The validation searches
-and selected model forms are shown in Supplementary Fig.~2.
+and selected model forms are shown in Supplementary Fig.~S2.
 
 The selected Tm-only model had a test MAE of 7.23$^\circ$C with a frozen encoder
 and 6.55$^\circ$C with a hot encoder. The lower error of the hot baseline shows
@@ -50,7 +50,7 @@ confidence interval that included zero.
 Several differences between the two sequence sets may contribute to this
 result. The heterogeneous set ranged from 58 to 461 residues, and its $Q$ value
 had a Pearson correlation of $r=+0.13$ with sequence length. Length could
-therefore provide an unwanted shortcut (Supplementary Fig.~1). The matched
+therefore provide an unwanted shortcut (Supplementary Fig.~S1). The matched
 scans kept length fixed
 within each structure and supplied local directions: one mutation and its
 change in contact retention. This is a simpler learning problem. However, the
@@ -88,25 +88,29 @@ model. Sequence choice matters, but it is not the only choice that matters.
 \includegraphics[width=\textwidth]{fig_outline02_data_design}
 \caption{Matched mutation scans show a larger frozen-encoder gain from
 native-contact $Q$.
-(a) A heterogeneous structure panel and local mutation scans on the fixed 1MEL
-and 4IDL structures use similar simulation time per sequence and produce labels
-from the same $Q$ family. The complete pipelines also differ in contact
-selection and averaging windows.
+(a) Data-derived views of the two acquisition plans: the sequence-length
+distribution of the heterogeneous structure panel and the actual mutation-position
+coverage of the fixed 1MEL and 4IDL scans. Both use 400 K MD, similar simulation
+time per sequence, and labels from the same $Q$ family; contact selection and
+averaging windows differ.
 (b) Paired MAE change for each simulation plan and encoder setting. Zero means
 equal MAE to that series' own Tm-only model, and negative values mean lower Tm
 error. Because the two series were tuned independently, their absolute MAEs are
-not compared. Asterisks mark 90\% paired bootstrap intervals that exclude zero.
+not compared. The heterogeneous and matched series use fixed 10-seed and
+five-seed ensembles, respectively. Bold values have nominal 90\% paired
+bootstrap intervals that exclude zero; intervals are not adjusted for multiple
+comparisons.
 (c) Paired MAE change from the frozen Tm-only model over four tested label
-counts. Here $n$ is the number sampled from each structure table. Points and
-whiskers show the paired change and its 90\% bootstrap interval over the 396 test
-proteins.}
+counts, shown on a log$_2$ count axis. Here $n$ is the number sampled from each
+structure table. Points and whiskers show the paired change and its nominal 90\%
+bootstrap interval over the 396 test proteins.}
 \label{fig:data_design}
 \end{figure*}
 
 \subsection{Only FEP helped both frozen and hot models}
 
 We next compared all computed labels after separate tuning
-(Fig.~\ref{fig:physical_observable}a and Supplementary Figs.~2 and 3). With a
+(Fig.~\ref{fig:physical_observable}a and Supplementary Figs.~S2 and S3). With a
 frozen encoder, FEP and matched MD
 gave the clearest gains. FEP reached 7.01$^\circ$C MAE, a paired change of
 $-0.221^\circ$C from Tm-only (90\% CI, $-0.366$ to $-0.077^\circ$C). Matched MD
@@ -177,26 +181,31 @@ strength.
 \centering
 \includegraphics[width=\textwidth]{fig_outline03_physical_observable}
 \caption{FEP is the only computed label that improves both encoder settings.
-(a) Horizontal bars show the paired MAE change from the corresponding Tm-only
-model for every tuned label. Negative values mean lower Tm error. Solid and
-hatched bars denote frozen and fine-tuned encoders, respectively; whiskers are
-90\% paired bootstrap intervals.
+(a) Points show the paired MAE change from the corresponding Tm-only model for
+every tuned label. Negative values mean lower Tm error. Filled squares and open
+circles denote frozen and fine-tuned encoders, respectively; whiskers are nominal
+90\% paired bootstrap intervals. Bold values have intervals that exclude zero;
+intervals are not adjusted for multiple comparisons.
 (b) Direct FEP-minus-MD comparison. Zero means equal held-out Tm MAE, negative
 values mean lower error for FEP, and positive values mean lower error for MD
-native-contact $Q$. The asterisk marks an interval that excludes zero.
+native-contact $Q$. The bold value has a nominal 90\% paired interval that
+excludes zero.
 (c) Paired MAE change from the fine-tuned Tm-only model over four tested label
-counts. FEP moves below zero, whereas matched MD approaches zero from higher
-error. Here $n$ is the number sampled from each structure table. Whiskers are
-90\% paired bootstrap intervals over the 396 test proteins.}
+counts on a log$_2$ count axis. FEP moves below zero, whereas matched MD
+approaches zero from higher error. Here $n$ is the number sampled from each
+structure table. Whiskers are nominal 90\% paired bootstrap intervals over the
+396 test proteins.}
 \label{fig:physical_observable}
 \end{figure*}
 
 \subsection{Controls, scope, and next tests}
 
-Several controls limit alternative explanations. Increasing ESM2 from 8M to
-35M or 650M parameters did not reproduce the 8M FEP result (Supplementary
-Fig.~3), so a larger pretrained model was not a substitute for the computed
-label. Provenance and charge-change checks are shown in Supplementary Fig.~4.
+Several controls limit alternative explanations. Neither the 35M nor the 650M
+Tm-only model reached the absolute MAE of the 8M model trained with FEP labels,
+so encoder size alone did not substitute for the computed label. Within each
+larger-size exploratory control, however, adding FEP labels also reduced MAE
+relative to its corresponding Tm-only model (Supplementary Fig.~S3). Provenance
+and charge-change checks are shown in Supplementary Fig.~S4.
 An analytical correction for periodic-image effects in charge-changing FEP
 mutations had almost no effect on the scaled labels. Tests that clipped the
 largest FEP values or added the available Phe scan did not improve transfer.

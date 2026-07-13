@@ -1,7 +1,4 @@
-size	condition	test_mae	ci_lo	ci_hi	source
-8M	Tm labels only	6.547931901269491	6.111492707123335	6.98232836609108	results/final_tm_hot/scaling.json
-8M	FEP	6.394508715394586	5.973910436711892	6.814602994658087	results/final_fep_hot/scaling.json
-35M	Tm labels only	6.696432718620675	6.260228625437091	7.134553120377336	results/size35_tm_shared_drop005/scaling.json
-35M	FEP	6.502512412323837	6.076865794358123	6.929858255531435	results/size35_ddg_fep_enc3e-5/scaling.json
-650M	Tm labels only	6.814191831974156	6.370883873220283	7.259939460859338	results/size650_tm_shared_drop005/scaling.json
-650M	FEP	6.683189253444401	6.250144722291747	7.114780865955026	results/size650_ddg_fep_enc3e-5/scaling.json
+size	design	tm_test_mae	fep_test_mae	fep_minus_tm	ci_lo	ci_hi	n_seeds	tm_source	fep_source
+8M	staged-selected	6.547931901269491	6.394508715394586	-0.15342318587490344	-0.2945080500397055	-0.009140611801601788	5	results/final_tm_hot/scaling.json	results/final_fep_hot/scaling.json
+35M	exploratory fixed configuration	6.696432718620675	6.502512412323837	-0.193920306296838	-0.3204536623086736	-0.06777044506847178	10	results/size35_tm_shared_drop005/scaling.json	results/size35_ddg_fep_enc3e-5/scaling.json
+650M	exploratory fixed configuration	6.814191831974156	6.683189253444401	-0.1310025785297538	-0.22623631984257195	-0.03464281454208852	10	results/size650_tm_shared_drop005/scaling.json	results/size650_ddg_fep_enc3e-5/scaling.json
