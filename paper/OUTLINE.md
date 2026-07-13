@@ -460,15 +460,12 @@ descriptor-screen narrative.
 
 ### Keep and update
 
-- Detailed source-table construction and row counts.
-- Full HPO space and selected settings for every source/regime.
-- Run-level or ensemble-level final metrics and confidence intervals.
-- FEP and matched-MD label-count tables.
-- Frozen/hot comparator table.
-- Model-size controls.
-- Direct FEP-minus-matched-MD count comparisons.
-- FEP provenance and the documented charge-correction sensitivity check.
-- Data and code provenance manifest.
+- Additional diverse-panel simulation and label-extraction details that are not
+  already in Materials and Methods.
+- FEP provenance and the charge-correction check.
+- The model-size control.
+- Machine-readable HPO, final-metric, label-count, and provenance tables in the
+  analysis archive; these do not need to be repeated as display items.
 
 ### Redesign or remove
 
@@ -483,18 +480,19 @@ descriptor-screen narrative.
 
 ### Selected supplementary sequence
 
-1. **Supplementary Fig. S1:** data sizes and unique-sequence counts, matched-versus-heterogeneous
-   native-contact-loss distributions, sequence length, and unique exact overlap with the Tm splits.
-2. **Supplementary Fig. S2:** completed stage-2 validation candidates relative to the selected
-   candidate, the selected architecture/head, and the later held-out generalization gap.
-3. **Supplementary Fig. S3:** absolute source errors, direct FEP-minus-matched-MD count curves, and
-   paired FEP effects in exploratory ESM2-size controls. Larger Tm-only models do not replace FEP,
-   but the within-size FEP benefit remains at 35M and 650M.
-4. **Supplementary Fig. S4:** retained FEP scan composition, mutation charge changes, per-label
-   correction shifts, and analytical charge-correction sensitivity.
+1. **Supplementary Fig. S1:** sequence length versus native-contact $Q$ in the
+   heterogeneous MD panel, with the fixed lengths of the matched scans marked.
+   This is retained only because it supports the possible length-shortcut
+   limitation discussed in Results.
+2. **Supplementary Fig. S2:** paired FEP effects in the 8M, 35M, and 650M
+   encoder controls, together with the row-level effect of the analytical
+   net-charge correction on the scaled FEP labels.
 
-The old descriptor survey, source-combination panel, per-count retuning panel, and diverse-MD
-trajectory-window panel are not used because they do not support the current two-axis claim.
+The old descriptor survey, source-combination panel, per-count retuning panel,
+diverse-MD trajectory-window panel, data-count display, HPO display, repeated
+absolute-error displays, direct count-curve contrast, scan-composition display,
+and arbitrary charge-sensitivity bounds are not used because they repeat the
+main text or do not support the current two-axis claim.
 
 `plot/make_supplementary_figures.py`, `paper/analysis/supplementary/MANIFEST.tsv`, captions in
 `tex/sections/supplementary.tex`, and `reproduce/manuscript_results.yaml` must be updated together.
@@ -603,6 +601,10 @@ Do not rerun GPU training unless a missing comparison is identified and explicit
   matter, declarations, conclusion, graphical abstract, and numeric citations added.
 - **2026-07-12:** This outline was rewritten to remove superseded CSBJ, FEP-only, descriptor-screen,
   and four-figure planning from the active manuscript specification.
+- **2026-07-13:** Supplementary figures reduced from four to two, retaining only the
+  length--$Q$ limitation and the encoder-size and charge-correction controls;
+  repeated HPO, source-error, count-curve, and provenance displays were moved to
+  tracked tables.
 - **2026-07-13:** Supplementary figures reduced from five to four and rebuilt around data checks,
   validation selection, transfer controls, and FEP provenance/charge checks. The legacy descriptor
   survey was removed from the active supplement.

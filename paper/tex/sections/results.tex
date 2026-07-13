@@ -16,8 +16,7 @@ the model, the 114 validation proteins selected the architecture and training
 settings, and the 396 test proteins were used after selection. Every computed
 label was tuned separately in the frozen and hot settings. We then compared
 absolute errors on the same test proteins. This was necessary because a model
-can predict a computed value well without improving Tm. The validation searches
-and selected model forms are shown in Supplementary Fig.~S2.
+can predict a computed value well without improving Tm.
 
 The selected Tm-only model had a test MAE of 7.23$^\circ$C with a frozen encoder
 and 6.55$^\circ$C with a hot encoder. The lower error of the hot baseline shows
@@ -110,7 +109,7 @@ bootstrap interval over the 396 test proteins.}
 \subsection{Only FEP helped both frozen and hot models}
 
 We next compared all computed labels after separate tuning
-(Fig.~\ref{fig:physical_observable}a and Supplementary Figs.~S2 and S3). With a
+(Fig.~\ref{fig:physical_observable}a). With a
 frozen encoder, FEP and matched MD
 gave the clearest gains. FEP reached 7.01$^\circ$C MAE, a paired change of
 $-0.221^\circ$C from Tm-only (90\% CI, $-0.366$ to $-0.077^\circ$C). Matched MD
@@ -204,10 +203,10 @@ Several controls limit alternative explanations. Neither the 35M nor the 650M
 Tm-only model reached the absolute MAE of the 8M model trained with FEP labels,
 so encoder size alone did not substitute for the computed label. Within each
 larger-size exploratory control, however, adding FEP labels also reduced MAE
-relative to its corresponding Tm-only model (Supplementary Fig.~S3). Provenance
-and charge-change checks are shown in Supplementary Fig.~S4.
-An analytical correction for periodic-image effects in charge-changing FEP
-mutations had almost no effect on the scaled labels. Tests that clipped the
+relative to its corresponding Tm-only model (Supplementary Fig.~S2a). An
+analytical correction for periodic-image effects in charge-changing FEP
+mutations had almost no effect on the scaled labels (Supplementary Fig.~S2b).
+Tests that clipped the
 largest FEP values or added the available Phe scan did not improve transfer.
 These checks support the use of the original FEP tables, although they do not
 prove that every large $\Delta\Delta G$ value is quantitatively accurate.

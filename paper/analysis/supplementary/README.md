@@ -5,7 +5,8 @@ extend.
 
 ## Files
 
-- `tables/*.tsv`: numerical source data for Supplementary Figs. S1--S4.
+- `tables/*.tsv`: numerical source data and retained audit tables. The selected
+  display items are Supplementary Figs. S1--S2.
 - `figures/*.pdf` and `figures/*.png`: rendered supplementary figures.
 - `MANIFEST.tsv`: panel-level index of figures, source tables, upstream result
   summaries, generator functions, and the question each panel answers.
@@ -19,9 +20,7 @@ supplementary analysis. Each row corresponds to one figure panel and records:
 
 - the rendered figure file and LaTeX-ready copy;
 - the compact TSV table used for the panel;
-- the upstream source data or result summary;
-- the function in `plot/make_supplementary_figures.py` that builds the table;
-- the plotting function that renders the panel;
+- the generator script;
 - the question addressed by the panel.
 
 ## Source-of-truth result summaries

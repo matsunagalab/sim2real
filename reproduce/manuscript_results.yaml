@@ -513,9 +513,7 @@ stages:
       outputs:
         - paper/analysis/supplementary/MANIFEST.tsv
         - paper/tex/figures/supp_fig01_data_and_design.pdf
-        - paper/tex/figures/supp_fig02_model_selection.pdf
-        - paper/tex/figures/supp_fig03_transfer_controls.pdf
-        - paper/tex/figures/supp_fig04_fep_checks.pdf
+        - paper/tex/figures/supp_fig02_transfer_controls.pdf
 
     - name: LaTeX typesetting
       type: command

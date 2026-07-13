@@ -2,460 +2,90 @@
 
 \section{Supplementary methods}
 
-\subsection{Experimental target data and target-label scaling}
+\subsection{Additional details for the diverse MD panel}
 
-All target-task comparisons use the same NbBench thermo-seq endpoint
-\citep{Zhang2025NbBench}. The processed tables hold an amino-acid sequence field
-and a melting-temperature label in degrees Celsius. The split sizes are 57
-training, 114 validation, and 396 held-out test sequences. As described in
-Methods, we deliberately assigned the smallest NbBench partition to training and
-the largest to the test set so that the model sits in the low-data regime the
-study targets.
+The diverse panel was assembled from an archived SAbDab summary containing
+2422 rows and the corresponding IMGT-renumbered structures
+\citep{Dunbar2014SAbDab}. For each PDB identifier, the workflow took the first
+heavy-chain entry whose chain identifier was present in the structure file. This
+deterministic rule gave 1177 initial structures. Of these, 1146 entered the
+400-K manifest and 1143 yielded a usable sequence, topology, trajectory, and
+native-contact label.
 
-\textbf{Split definitions.} The splits are fixed throughout. The 57 training
-examples fit network parameters, the validation split drives checkpoint
-selection, early stopping, and choice among candidate settings, and the test
-split stays untouched until those choices are fixed. The same rule applies to
-Tm-only models and to models trained with computational labels.
+The selected heavy chain was kept as an uncapped protein at pH 7.4, solvated in
+OPC water with 15~\AA{} padding and 0.15~M NaCl, and described with ff19SB
+\citep{Tian2020ff19SB,Izadi2014OPC}. The 300-K branch comprised 1~ns NVT and
+1~ns NPT with a 2-fs timestep. Two 1-ns restrained NVT stages at 400~K preceded
+100~ns of unrestrained 400-K NVT production. Production used hydrogen-mass
+repartitioning to 4~amu, a 4-fs timestep, and output every 100~ps. OpenMM used
+PME electrostatics with a 1.0-nm cutoff, constraints on bonds to hydrogen, and a
+Langevin middle integrator with 1~ps$^{-1}$ friction
+\citep{Eastman2017OpenMM}.
 
-\textbf{Target-label scaling.} Before optimization, the training workflow maps
-the experimental Tm values to a scaled regression target. The scaler is fit only
-on the 57 training labels, using robust scaling followed by linear rescaling to
-[0,1]. Validation labels are transformed with this training-fitted
-scaler during model selection. Test predictions are averaged across seeds in
-scaled-label space and inverse-transformed to degrees Celsius before errors are
-computed, so the validation and test label distributions never influence the
-fitted transform.
+The diverse-panel contact calculation used backbone heavy-atom pairs separated
+by more than three residues, within 0.45~nm in the reference structure, and with
+at least one atom in Asp, Glu, Gln, Asn, Arg, Lys, or His. For trajectories with
+more than 300 frames, the label was averaged over the larger of the final 300
+frames and the final one third of the trajectory; all frames were used for
+shorter trajectories. The processed table used 66--333 frames (median 333) and
+28--728 contacts (median 173) per system. Sequence lengths were 58--461 residues
+(median 122). Supplementary Fig.~S1 shows the relation between sequence length
+and the resulting raw $Q$ value.
 
-\textbf{Experimental-label scaling reference.} This reference uses the same
-training split but subsamples it to the requested number of labels with the run
-seed; the validation and test splits are never subsampled. It serves only as a
-positive control for the pipeline. Adding true target labels should lower the Tm
-prediction error.
+\subsection{FEP provenance and charge-change check}
 
-\subsection{Processed computational-label tables}
+The retained FEP tables contain Ala, Asp, Ile, and Gln scans. Their row counts
+were 116, 80, 119, and 120 for 1MEL and 105, 84, 113, and 107 for 4IDL,
+respectively. Row-level provenance was checked against the archived scan
+outputs; the available Phe scans were not included.
 
-Computational labels are loaded as computational tasks rather than appended to the Tm
-data as extra measurements. Table~\ref{tab:supp_data_sources} lists the processed
-target and computational-label files used in the reported comparisons. Mutation-effect tables
-carry sequence fields and [0,1]-scaled computational-label fields. The MD
-native-contact tables use the same processed format so that they can enter the same
-computational-task loader; there, the scaled label is a [0,1]-scaled native-contact
-fraction rather than a mutation free energy. The FEP-matched MD table (the primary
-MD label) is built on the same 1MEL/4IDL mutation scans as FEP; the diverse-panel
-MD table provides the heterogeneous simulation-acquisition comparison.
+Of the 844 retained mutations, 284 change formal charge. For a cubic 70-\AA{}
+box and solvent dielectric 78, we tested an analytical periodic net-charge
+correction of $0.086(\Delta q)^2$ kcal mol$^{-1}$. We applied the correction
+before repeating the sign reversal, robust scaling, Yeo--Johnson transform, and
+min--max scaling used for the model-facing labels. Corrected and uncorrected
+labels had Pearson $r=0.99989$; the largest scaled-label shift was 0.008, and no
+row shifted by more than 0.02 (Supplementary Fig.~S2b).
 
-\begin{table}[htbp]
-\centering
-\caption{Processed target and computational-label data. Row counts exclude
-header rows.}
-\label{tab:supp_data_sources}
-\small
-\begin{tabular}{p{0.27\textwidth}p{0.20\textwidth}p{0.13\textwidth}p{0.28\textwidth}}
-\hline
-Data type & Role & Processed rows & Use in reported comparisons \\
-\hline
-Experimental Tm & Target train & 57 & Model fitting \\
-Experimental Tm & Target validation & 114 & Checkpoint and setting selection \\
-Experimental Tm & Target test & 396 & Final held-out evaluation \\
-FEP mutation free energy & Computational tasks & 435 + 409 & Main computational task \\
-MD native-contact (FEP-matched scan) & Computational tasks & 431 + 406 & Matched-design MD label (primary) \\
-Rosetta mutation score & Computational tasks & 435 + 409 & Computational-label comparison \\
-ThermoMPNN stability score & Computational tasks & 435 + 409 & Computational-label comparison \\
-Random variants scored by Rosetta & Computational tasks & 1000 + 1000 & Computational-label comparison \\
-ESM2-proposed variants scored by Rosetta & Computational tasks & 1000 + 1000 & Computational-label comparison \\
-MD native-contact (diverse panel) & Computational task & 1143 & Heterogeneous simulation-design comparison \\
-\hline
-\end{tabular}
-\end{table}
+\subsection{Model-selection audit}
 
-\textbf{Computational-task assignment.} The loader assigns each row to a target or
-computed-label task. Experimental Tm rows use the Tm head. The 1MEL and 4IDL
-tables use either separate computational heads or one head conditioned on a
-learned structure indicator, according to the setting selected for that label
-source. This assignment fixes which regression head and loss term each row uses.
-
-\textbf{Sequence-overlap check.} We checked exact sequence overlap between the
-processed computational tables and the fixed NbBench splits. The FEP, Rosetta, and
-ThermoMPNN mutation-effect tables, the FEP-matched MD native-contact table, and the
-random and ESM2-proposed variant tables --- all built on the 1MEL and 4IDL
-scaffolds --- had no exact match to any NbBench training, validation, or test
-sequence. The diverse-panel SAbDab MD table contained exact matches to 2 NbBench
-training, 4 validation, and 8 test sequences. We disclose this because it bears on
-the simulation-design comparison. The diverse panel gives a small frozen-encoder
-gain, so the overlap is a limitation of that secondary effect and is one reason not
-to interpret the matched-versus-heterogeneous contrast as a fully isolated causal
-experiment. It cannot explain the matched-scan result, whose sequences have no
-exact NbBench overlap.
-
-\textbf{Computational-label sampling.} For mutation-effect experiments with requested
-count $n$, the loader samples up to $n$ rows independently from each of the two
-template tables using the run seed; the final FEP setting with $n=320$ therefore
-supplies 320 sampled 1MEL rows and 320 sampled 4IDL rows before the computational-task
-split. The FEP-matched MD native-contact label samples from the same two
-template-specific tables. The diverse-panel MD control samples $n$ rows from its
-single table. Computational-label rows are split 80/20 into computational-training and
-computational-validation rows with the same seed. The production training call then
-filters the validation data passed to the trainer so that checkpoint selection
-and early stopping depend only on the experimental Tm validation examples.
-
-\subsection{FEP-table provenance and charge-change check}
-
-The retained FEP tables contain Ala, Asp, Ile, and Gln mutation scans. The 1MEL
-table contains 116, 80, 119, and 120 rows from these scans, respectively; the
-4IDL table contains 105, 84, 113, and 107 rows. Row-level provenance was checked
-against the archived scan outputs. The available Phe scans were not included in
-the retained tables.
-
-We also estimated the analytical periodic net-charge correction for
-charge-changing mutations. Of the 844 retained rows, 284 change the formal
-charge. For a cubic 70-\AA{} box, the correction magnitude used in this check was
-$0.086(\Delta q)^2$ kcal mol$^{-1}$ at a solvent dielectric of 78. We applied the
-correction before repeating the same sign reversal, robust scaling,
-Yeo--Johnson transform, and min--max scaling used for the model-facing labels.
-The corrected and uncorrected labels had a correlation of 0.99989; the largest
-scaled-label shift was 0.008, and no row shifted by more than 0.02. Larger
-per-charge sensitivity values are shown only as bounds in Supplementary Fig.~\ref{fig:supp_fep_checks};
-they are not estimates of the omitted correction terms.
-
-\subsection{Diverse-panel MD control: SAbDab structure selection}
-
-The following describes the \emph{diverse-panel} MD native-contact comparison used
-for the simulation-design contrast in Fig.~2. The FEP-matched MD label used for the
-main result is built on the 1MEL/4IDL mutation scans as described in Methods.
-The diverse-panel MD control was built from SAbDab, the Structural Antibody Database
-\citep{Dunbar2014SAbDab}. The archived SAbDab nanobody summary table holds 2422
-rows with PDB identifier, heavy- and light-chain assignments, model index,
-antigen annotation, experimental method, resolution, species, and other fields.
-The manifest workflow matches this summary against the archived IMGT-renumbered
-PDB files.
-
-\textbf{Structure-selection rule.} The rule is deterministic. For each PDB
-identifier with both a SAbDab summary row and an IMGT-renumbered PDB file, the
-workflow takes the first heavy-chain row in the SAbDab table and accepts the
-chain only if that chain identifier is present in the IMGT PDB file. The output
-manifest holds one entry per PDB identifier, with fields for the manifest row
-number, PDB identifier, selected heavy chain, SAbDab TSV row, IMGT PDB path, and
-MD run directory. This initial one-per-PDB manifest contained 1177 structures.
-
-\textbf{400 K simulation panel.} The 400 K simulations reused the systems prepared
-for the 300 K runs and built a 1146-entry 400 K manifest, consisting of 798
-X-ray, 345 electron-microscopy, and 3 NMR structures according to the SAbDab
-method field. None of the selected rows had an annotated light chain, consistent
-with a single-domain antibody panel. After trajectory and Q-value processing,
-1143 unique PDB identifiers yielded usable computational-label rows.
-
-\subsection{MD system preparation and simulation protocol}
-
-\textbf{System preparation.} Each structure was prepared as a nanobody-only
-system. The workflow takes the IMGT-renumbered PDB as the input structure,
-extracts the selected heavy chain, keeps only protein atoms, and leaves the
-termini uncapped, at pH 7.4. Chains are cleaned with PDBFixer, and pH-aware
-protonation is assigned through pdb2pqr/PROPKA when available
-\citep{Dolinsky2004PDB2PQR,Olsson2011PROPKA3}, with a fallback to AmberTools-based
-hydrogen assignment and Amber naming. The prepared chain is solvated in explicit
-OPC water with 15 \AA{} padding and 0.15 M NaCl, and Amber topology and
-coordinate files are built with ff19SB and OPC
-\citep{Case2023AmberTools,Tian2020ff19SB,Izadi2014OPC}.
-
-\textbf{300 K equilibration branch.} The base 300 K branch uses OpenMM on CUDA
-devices \citep{Eastman2017OpenMM}. It runs 1 ns of NVT followed by 1 ns of NPT at 300 K
-and 1 atm, with a 2-fs timestep and no hydrogen-mass repartitioning. Production
-at 300 K was generated for the broader study, but the computational label used here
-comes from the 400 K branch.
-
-\textbf{400 K production branch.} The first 400 K relaxation stage restarts from
-the 300 K equilibrated state and runs 1 ns of NVT at 400 K with C$\alpha$
-restraints; the second repeats 1 ns of restrained 400 K NVT. Both relaxation
-stages use a 2-fs timestep and no hydrogen-mass repartitioning. Production runs
-100 ns of restraint-free 400 K NVT, with hydrogen-mass repartitioning, 4 amu
-hydrogen mass, a 4-fs timestep, and coordinate/energy output every 100 ps.
-
-\textbf{Integrator and reporting settings.} In OpenMM, explicit-solvent periodic
-systems use PME electrostatics with a 1.0-nm nonbonded cutoff and constraints on
-bonds to hydrogen. NPT stages use a Monte Carlo barostat; NVT stages omit it. The
-integrator is the Langevin middle integrator with 1 ps$^{-1}$ friction. The
-100-ps reporting interval gives 1000 expected frames for a complete 100 ns
-production trajectory.
-
-\subsection{MD-derived Q-value extraction}
-
-\textbf{Trajectory input requirements.} The processed MD table was generated from
-the archived 400 K production trajectories. A system was eligible only if it had
-a production trajectory, a prepared reference structure, and an Amber parameter
-file. The amino-acid sequence was read from the prepared structure using the
-first C$\alpha$ atom of each residue, and sequences shorter than 50 residues were
-excluded.
-
-\textbf{Native-contact definition.} Q-values are computed with MDTraj
-\citep{McGibbon2015MDTraj}. The topology is loaded from the Amber parameter file,
-and the native reference is frame 0 of production. The calculation uses protein
-backbone heavy atoms. A candidate native contact must span more than three
-residues, have a reference-frame distance below 0.45 nm, and include at least one
-atom from a hydrophilic residue (Asp, Glu, Gln, Asn, Arg, Lys, or His, including
-Amber protonation variants). For a native-contact pair $(i,j)$ with reference
-distance $r^0_{ij}$ and instantaneous distance $r_{ij}$, the per-frame
-contribution is
-\[
-  q_{ij} =
-  \frac{1}{1+\exp\{\beta(r_{ij}-\lambda r^0_{ij})\}},
-\]
-with $\beta=50$ nm$^{-1}$ and $\lambda=1.8$, following the smooth native-contact
-form of Best-Hummer-style Q-value analyses \citep{Best2013NativeContacts}. The
-frame-level Q-value is the mean of $q_{ij}$ over all selected native contacts.
-
-\textbf{Trajectory-level Q-value label.} The trajectory-level label is the mean
-Q-value over the terminal portion of production. For trajectories with more than
-300 frames, the implementation uses the larger of 300 frames and one third of the
-available frames; for shorter trajectories it uses all frames. For a complete
-100 ns trajectory with 100-ps output, this is 333 terminal frames, roughly the
-final 33 ns. In the processed 400 K table, the number of frames used ranges from
-66 to 333 (median 333), the number of native contacts from 28 to 728 (median
-173), and the sequence length from 58 to 461 residues (median 122). Raw Q-values
-range from 0.0437 to 0.9994 and are scaled to [0,1] for computational-task
-training.
-
-\subsection{Sequence tokenization and encoder inputs}
-
-Sequences are tokenized with the ESM2 tokenizer for the selected encoder
-\citep{Lin2023Evolutionary}, using truncation and fixed-length padding to 160
-residues. In the production protocol, the trainer receives all target and sampled
-computational-label rows for training, but its evaluation data are filtered to the experimental
-Tm validation rows.
-
-\textbf{Hot-encoder input path.} The hot-encoder setting keeps tokenized
-sequences in the training data and updates the ESM2 weights. The frozen-encoder
-setting runs ESM2 once per target and computational-label sequence to precompute first-token
-embeddings, after which the optimizer updates only the regression trunk and task
-heads.
-
-\subsection{Neural-network architecture}
-
-The default encoder is the 8M-parameter ESM2 model, and the model uses its
-first-token representation as the sequence-level embedding. The shared trunk has
-dimensions hidden-size $\rightarrow$ 256 $\rightarrow$ 128 $\rightarrow$ 32, with
-ReLU activations and dropout after the first two hidden layers. The Tm head maps
-the 32-dimensional representation to one scaled scalar prediction.
-
-\textbf{Target and computational heads.} The candidate models use a Tm path and,
-for transfer models, one or more computed-label heads. For two-table sources, the
-search compares separate structure-specific heads with a head conditioned on a
-learned structure indicator. Every output head returns one scaled scalar.
-
-\textbf{Architecture search.} The selected model form can be shared, residual, or
-latent. The shared form sends all rows through one 256--128--32 trunk. The
-residual and latent forms use separate 256--128--32 paths and combine them in the
-Tm prediction. The final FEP models use the shared form with separate heads. Other
-sources select different forms in some encoder settings; these selected forms are
-listed in Supplementary Fig.~\ref{fig:supp_model_selection}.
-
-\subsection{Training objective, optimizer, and checkpoint selection}
-
-Each training example is a sequence, a scaled label, and a task identifier, and
-contributes loss only through the regression head for its task. The per-task loss
-is Huber loss with $\delta=1.0$ on the scaled label. The default multi-task
-objective uses learned task-uncertainty weights \citep{Kendall2018Uncertainty}.
-For task $k$ with loss $L_k$ and learned log-scale $s_k$, the contribution is
-\[
-  \frac{L_k}{2\exp(2s_k)} + s_k ,
-\]
-and the total loss sums the contributions from the tasks present in the
-minibatch. Fixed computational-loss weights are also implemented and were included in
-the candidate searches for computational classes where loss balance could shift
-validation performance.
-
-\textbf{Optimizer and schedule.} The optimizer is AdamW. The default head/trunk
-learning rate is $3\times10^{-4}$, the default hot-encoder learning rate is
-$1\times10^{-4}$, weight decay is 0.04, dropout is 0.15, batch size is 16, warmup
-is 100 steps, and the schedule is cosine decay over at most 400 epochs.
-Checkpoints are evaluated and saved once per epoch, and mixed precision is used
-when CUDA is available. In the hot-encoder setting, the trainer creates separate
-optimizer parameter groups for ESM2 parameters and for the freshly initialized
-trunk/head parameters; in the frozen-encoder setting, ESM2 parameters are
-non-trainable and no encoder group is used.
-
-\textbf{Checkpoint selection.} Within each run, the best checkpoint has the
-lowest mean squared error on the experimental Tm validation rows, and early
-stopping monitors the same metric with patience 15 and threshold 0. Computational-task
-validation rows are not passed to the trainer in the production protocol. This
-detail is central to the comparison. Computed labels affect the shared or coupled
-regression parameters through the training loss, but they do not decide which
-checkpoint is used for Tm prediction.
-
-\subsection{Candidate-setting selection and final evaluation}
-
-Candidate settings are selected on the experimental Tm validation split, tuning
-every source independently and separately for the frozen and hot encoder regimes
-with a two-stage search. Stage~1 fixes learning rate, dropout, and weight decay at
-defaults and searches the model architecture (shared trunk, residual fusion, or
-latent fusion) crossed with the auxiliary-head coupling (separate template-specific
-heads or a template-conditioned shared head). Stage~2 holds the best Stage~1
-skeleton and searches, for the hot regime, the encoder learning rate
-($1\times10^{-4}$, $5\times10^{-5}$, $3\times10^{-5}$, $1\times10^{-5}$) and, for
-the frozen regime, the head learning rate ($1\times10^{-3}$, $5\times10^{-4}$,
-$2\times10^{-4}$), each crossed with dropout (0.05, 0.15, 0.30) and weight decay
-(0.02, 0.10). The completed search records comprise 71 Stage~1 runs and 273
-Stage~2 candidates: 115 frozen-encoder and 158 fine-tuned-encoder candidates.
-Figure~\ref{fig:supp_model_selection} shows the completed Stage~2 candidates used
-for selection rather than the size of the intended Cartesian grid.
-
-\textbf{Seeded candidate evaluation.} Each candidate is evaluated as a three-seed
-ensemble on the Tm validation split at $n=320$ labels per scaffold table, and the single best
-configuration for each source and regime is then evaluated on the held-out test
-split as a five-seed ensemble. The run seed controls Python, NumPy, PyTorch, and
-CUDA randomness when CUDA is available, as well as target-training subsampling in
-the target-label scaling experiment, computational-row sampling, and computational-label
-train/validation splitting. The label-count curves use the selected per-source
-configuration while the number of computational labels is varied over 20, 80, 160,
-and 320.
-
-\subsection{Statistics and stored outputs}
-
-The primary metric is MAE in degrees Celsius on the 396 held-out test examples.
-For each condition, the five seeded models produce scaled Tm predictions for every
-test sequence; these are averaged in scaled-label space and inverse-transformed
-to degrees Celsius. Root mean squared error, coefficient of determination, and
-Spearman and Pearson correlations are also computed, but the figures emphasize MAE
-because it reads directly as an average temperature error.
-
-\textbf{Bootstrap intervals.} Single-condition confidence intervals come from
-nonparametric bootstrap resampling over test examples. The absolute-error vector
-from the five-seed ensemble is resampled with replacement 10,000 times using a
-fixed bootstrap seed, and the reported 90\% interval is the 5th to 95th percentile
-range of the bootstrapped MAE values. The 90\% interval is used for consistency
-with the directional paired comparisons in the main text; the stored bootstrap
-summaries allow other interval levels to be recomputed. Paired comparisons use the same bootstrap
-indices for the candidate and reference absolute-error vectors. The reported
-$\Delta$MAE is candidate minus reference, so negative values mean lower error than
-the reference.
-
-\textbf{Stored run summaries.} Each training and evaluation call writes a
-structured summary recording the command-line arguments, relevant environment
-variables, resolved model settings, per-label-count metrics, bootstrap intervals,
-per-example absolute errors, and paired bootstrap summaries. Compact tables
-derived from these summaries feed the main computational-label comparison, the frozen-encoder
-controls, the computational-head controls, and the computational-combination controls.
-
-\subsection{Interpreting the label-count curves}
-
-\textbf{Target-label scaling reference.} The target-label scaling curve is a
-positive control on the pipeline. It tests whether the same model family and
-evaluation code recover the expected gain when more true experimental Tm labels
-are available. The FEP computational-label curve tests something different. It asks whether more
-labels from a physically related but distinct computed quantity improve the same
-held-out Tm endpoint, while the FEP-matched MD native-contact curve tests whether a
-structural stability observable responds to a matched simulation-acquisition design.
-The decisive comparisons are therefore not ``simulation versus no simulation,'' but
-whether the simulations cover relevant sequence changes and whether the
-physical quantity improves models selected with Tm validation data.
-
-\subsection{Supplementary figure data tables}
-
-The supplementary figures are generated from tabular computational-label files derived from the
-same run summaries as the main figures. The processed computational tables, rendered
-supplementary figures, and figure-generation code will be distributed with the
-public analysis archive.
-
-\subsection{Fig.-to-data and code mapping}
-
-The manuscript figures are regenerated from compact result summaries and computational-label
-tables rather than from scratch run directories. The mapping below is the first
-place to check when auditing or extending a figure.
-
-\begin{table*}[h]
-\centering
-\caption{Manuscript Fig.-to-data mapping. The table identifies the
-processed summaries and scripts used to regenerate each display item.}
-\label{tab:supp_figure_mapping}
-\scriptsize
-\begin{tabular}{p{0.12\textwidth}p{0.30\textwidth}p{0.24\textwidth}p{0.22\textwidth}}
-\hline
-Display item & Inputs & Script & Primary comparison \\
-\hline
-Fig.~1 & Conceptual protocol & \path{plot/make_outline_figures.py} & Multi-task training with Tm-based model selection \\
-Fig.~2 & Simulation-plan schematic; design-by-regime paired MD effects; frozen paired label-count curves & \path{plot/make_outline_figures.py} & Simulation-design axis: matched local scans show a larger frozen native-contact gain \\
-Fig.~3 & Source-by-regime paired-effect bars; direct FEP-minus-MD contrast; fine-tuned paired label-count curves & \path{plot/make_outline_figures.py} & Physical-observable axis: FEP transfers in both regimes, MD native-contact only frozen \\
-Supplementary Figs.~S1 to S4 & Supplementary manifest and generated TSV tables & \path{plot/make_supplementary_figures.py} & Data and overlap checks, validation selection, transfer controls, and FEP charge-change checks \\
-\hline
-\end{tabular}
-\end{table*}
-
-\textbf{Generated supplementary tables.} Compact tables record the validation
-candidates, selected architecture and head, held-out errors, paired comparisons,
-data-set diagnostics, and FEP charge-change checks. A panel-level mapping table
-for all supplementary figures is included in the public analysis archive.
+The completed search records contain 71 Stage-1 runs and 273 Stage-2
+candidates: 115 with frozen ESM2 and 158 with fine-tuned ESM2. Each candidate
+was evaluated as a three-seed ensemble on the experimental Tm validation split;
+the selected setting was evaluated on the held-out test split with five seeds.
+The run seed controlled Python, NumPy, PyTorch, and CUDA randomness, as well as
+computed-row sampling and the computed-label train--monitoring split. Candidate
+scores, selected settings, final errors, label-count results, and figure-level
+provenance are retained as machine-readable tables in the analysis archive.
 
 \clearpage
-\section{Supplementary figures}
 \renewcommand{\thefigure}{S\arabic{figure}}
 
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth]{supp_fig01_data_and_design}
-\caption{Data sets and diagnostics for the two MD acquisition plans.
-\textbf{(a)} Processed row counts. The heterogeneous MD panel contains 1,143
-structure rows but 833 unique sequences; the two scaffold-table counts are
-recorded in the archived figure data table.
-\textbf{(b)} Empirical cumulative distributions of native-contact loss,
-$1-Q$, on a log axis. The extraction details are not identical, so the
-distributions are descriptive.
-\textbf{(c)} Raw $Q$ versus sequence length. Hexagons show density in the
-heterogeneous panel; violins show the two fixed-length matched scans. The
-heterogeneous panel spans 58--461 residues and has Pearson $r=+0.13$.
-\textbf{(d)} Unique exact sequences shared with the three NbBench splits. The
-matched scans have no matches; the heterogeneous panel has 2, 4, and 8 unique
-matches.}
+\caption{Sequence length and native-contact $Q$ in the heterogeneous MD panel.
+Hexagons show the density of the 1143 processed rows. Dashed lines mark the
+fixed sequence lengths of the 1MEL and 4IDL matched mutation scans. In the
+heterogeneous panel, sequence length ranged from 58 to 461 residues and had a
+Pearson correlation of $r=+0.13$ with raw $Q$. This association identifies a
+possible shortcut but does not establish that length caused the transfer
+difference.}
 \label{fig:supp_data_design}
 \end{figure}
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{supp_fig02_model_selection}
-\caption{Per-source model selection using experimental Tm validation data.
-\textbf{(a,b)} Completed Stage-2 candidates for frozen and fine-tuned ESM2,
-shown as validation MAE above the selected candidate for that source. Each small
-point is one candidate, diamonds at zero mark the selected setting, and row-end
-labels give candidate counts. The two panels contain 115 and 158 candidates,
-respectively; no test errors enter selection.
-\textbf{(c)} Architecture and computational-head form selected for every source
-and encoder setting. A dash denotes a Tm-only model without a computational head.
-\textbf{(d)} Held-out generalization gap, test MAE minus selected validation
-MAE. Squares and circles denote frozen and fine-tuned ESM2.}
-\label{fig:supp_model_selection}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[width=\textwidth]{supp_fig03_transfer_controls}
-\caption{Absolute test errors and transfer controls.
-\textbf{(a,b)} Held-out Tm test MAE for every selected source with frozen and
-fine-tuned ESM2. Whiskers are 90\% bootstrap intervals over the 396 test proteins.
-\textbf{(c)} Direct paired difference between FEP and matched-MD absolute errors
-at each label count on a log$_2$ count axis. Negative values favor FEP; whiskers
-are nominal 90\% paired bootstrap intervals.
-\textbf{(d)} Paired FEP-minus-Tm-only MAE for fine-tuned ESM2 sizes. FEP reduces
-MAE within all three size controls. The 8M point is the staged-selected five-seed
-model; 35M and 650M are exploratory fixed-configuration ten-seed controls and
-were not subjected to the same search. Neither larger Tm-only control reaches
-the absolute MAE of 8M+FEP.}
+\includegraphics[width=\textwidth]{supp_fig02_transfer_controls}
+\caption{Robustness controls for the FEP result.
+\textbf{(a)} Paired FEP-minus-Tm-only MAE for fine-tuned ESM2 encoders. Negative
+values mean lower Tm error with FEP. The 8M point is the staged-selected
+five-seed model; the 35M and 650M points are exploratory fixed-configuration
+ten-seed controls and were not subjected to the same search. Whiskers are
+nominal 90\% paired bootstrap intervals over the 396 test proteins.
+\textbf{(b)} Change in each scaled FEP label after the analytical periodic
+net-charge correction at dielectric 78. Of 844 labels, 284 were
+charge-changing. Corrected and uncorrected labels had Pearson $r=0.99989$, and
+the maximum absolute shift was 0.008.}
 \label{fig:supp_transfer_controls}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[width=\textwidth]{supp_fig04_fep_checks}
-\caption{Provenance and charge-change checks for the retained FEP labels.
-\textbf{(a)} Rows from the retained Ala, Asp, Ile, and Gln scans, grouped by
-structure.
-\textbf{(b)} Distribution of formal mutation charge changes; 284 of 844 rows
-change charge.
-\textbf{(c)} Per-label shift after the analytical periodic net-charge correction
-at dielectric 78, plotted against the unadjusted scaled label. The dashed line
-marks zero shift.
-\textbf{(d)} Maximum scaled-label shift under two periodicity estimates and two
-larger sensitivity values in kcal mol$^{-1}$ per $(\Delta q)^2$. Numbers above
-the bars give the maximum shift and corrected-versus-uncorrected correlation.
-The larger values are sensitivity bounds, not estimates of omitted correction
-terms.}
-\label{fig:supp_fep_checks}
 \end{figure}
