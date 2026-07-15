@@ -7,20 +7,18 @@ settings. The sequences chosen before simulation mattered: MD native-contact
 labels from local mutation scans on 1MEL and 4IDL gave a clearer frozen-encoder
 gain than labels from a heterogeneous sequence screen. The calculated quantity
 also mattered. FEP mutation free energies improved both frozen and fine-tuned
-models, whereas matched MD native-contact values improved only the frozen model;
-Rosetta and ThermoMPNN scores gave no clear gain. Simulation data for experimental
-prediction should therefore be planned around controlled sequence changes and a
-quantity closely related to the measured property, rather than around data volume
-alone. The next test is to extend matched scans to more structures and evaluate the
-resulting models on new Tm measurements.
+models, whereas matched MD native-contact values improved only the frozen model.
+Simulation data for experimental prediction should therefore be planned around
+controlled sequence changes and a quantity closely related to the measured
+property, rather than around data volume alone.
 
-In the longer term, the same idea could guide an iterative design study. A model
-could choose which variant to calculate next, receive an FEP or MD result, and
-use that result to choose the following variant. Reinforcement learning is one
-way to make these sequential choices, but a computed score alone would not be a
-reliable reward. Our ESM2-proposed variants did not outperform random variants
-when both were scored by Rosetta, showing that a generator and a physics-based
-score do not by themselves make a useful design method. Any future reinforcement-
+In the longer term, matched scans could be extended to more structures and used
+in an iterative design study. A model could choose which variant to calculate
+next, receive an FEP or MD result, and use that result to choose the following
+variant. Reinforcement learning is one way to make these sequential choices,
+but a computed score alone would not be a reliable reward. Our comparison of
+ESM2 and random proposals under the same Rosetta score shows why variant
+generation and scoring must be tested together. Any future reinforcement-
 learning study should therefore be compared with random sampling and simpler
 active-learning methods, and its success should be judged prospectively by new
 experimental Tm measurements.

@@ -80,12 +80,8 @@ held-out Tm test data.}
 \label{fig:learning_framework}
 \end{figure*}
 
-Two results stand out. First, the choice of simulated variants matters. The MD
-native-contact label gives a much larger improvement with a frozen encoder when
-it is calculated for local mutation scans on fixed structures than for a mixed
-set of sequences. Second, the calculated quantity matters. FEP labels improve Tm
-prediction with both frozen and fine-tuned encoders, whereas native-contact labels
-help only the frozen encoder. Rosetta and ThermoMPNN scores give little or no
-improvement after separate tuning. These results show that useful simulation data
-require two choices before calculation: a controlled set of sequence changes and
-a quantity that is closely related to the experimental property.
+Both choices affected transfer: local mutation scans gave a larger frozen-encoder
+gain than a mixed sequence set, and FEP helped both encoder settings whereas
+native-contact values helped only the frozen encoder. Thus, useful simulation
+data require a controlled set of sequence changes and a quantity closely related
+to the experimental property.

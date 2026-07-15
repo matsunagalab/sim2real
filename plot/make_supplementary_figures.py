@@ -292,7 +292,13 @@ def fep_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame
 
 def fig_s2_controls(sizes: pd.DataFrame, corrected: pd.DataFrame) -> None:
     """Plot only the two robustness checks used in the manuscript."""
-    fig, axes = plt.subplots(1, 2, figsize=(6.4, 3.45), constrained_layout=True)
+    fig, axes = plt.subplots(
+        1,
+        2,
+        figsize=(6.4, 3.15),
+        gridspec_kw={"width_ratios": [0.95, 1.05]},
+        constrained_layout=True,
+    )
 
     ax = axes[0]
     order = ["8M", "35M", "650M"]
@@ -314,7 +320,6 @@ def fig_s2_controls(sizes: pd.DataFrame, corrected: pd.DataFrame) -> None:
     ax.set_xlim(min(-0.38, float(lo.min()) - 0.03), 0.04)
     ax.set_xlabel("FEP − Tm-only, paired ΔMAE (°C)")
     ax.set_ylabel("ESM2 encoder size")
-    ax.set_title("FEP effect across encoder sizes", loc="left", fontweight="bold")
     polish(ax, "x"); panel_label(ax, "a")
 
     ax = axes[1]
@@ -335,7 +340,6 @@ def fig_s2_controls(sizes: pd.DataFrame, corrected: pd.DataFrame) -> None:
             bbox={"facecolor": "white", "edgecolor": COL["light"], "alpha": 0.9, "pad": 3})
     ax.set_xlabel("Unadjusted scaled FEP label")
     ax.set_ylabel("Corrected − unadjusted label")
-    ax.set_title("Net-charge correction", loc="left", fontweight="bold")
     ax.legend(frameon=False, loc="lower left", ncol=2, fontsize=8.2)
     polish(ax); panel_label(ax, "b")
 

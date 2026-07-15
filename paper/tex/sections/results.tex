@@ -4,19 +4,12 @@
 
 \subsection{Computed labels were judged only by experimental Tm}
 
-We first set up a common test for all computed labels
-(Fig.~\ref{fig:learning_framework}). Experimental Tm was the prediction target.
-FEP, MD, Rosetta, and ThermoMPNN values were separate regression tasks; they
-were not treated as extra Tm measurements. Each task used the same ESM2 sequence
-model and either shared or task-specific regression layers. We tested a frozen
-ESM2 encoder and a fully fine-tuned, or hot, encoder.
-
-Only experimental Tm was used to choose a model. The 57 training proteins fit
-the model, the 114 validation proteins selected the architecture and training
-settings, and the 396 test proteins were used after selection. Every computed
-label was tuned separately in the frozen and hot settings. We then compared
-absolute errors on the same test proteins. This was necessary because a model
-can predict a computed value well without improving Tm.
+We tested every computed label with the same multi-task protocol
+(Fig.~\ref{fig:learning_framework}). Each computed quantity was a separate
+regression task, not an extra Tm measurement, and ESM2 was either frozen or
+fine-tuned. We used 57 proteins for training, 114 for validation, and 396 for
+testing. Only Tm validation error selected each label-specific model; final
+paired comparisons used the same held-out proteins.
 
 The selected Tm-only model had a test MAE of 7.23$^\circ$C with a frozen encoder
 and 6.55$^\circ$C with a hot encoder. The lower error of the hot baseline shows
@@ -58,11 +51,9 @@ frames used for averaging, as detailed in Materials and Methods. The result
 therefore compares the two complete simulation plans, not a single changed
 variable.
 
-Wild-type referencing does not explain the matched result. Its label was
-$\Delta Q=Q_{\mathrm{mutant}}-Q_{\mathrm{WT}}$, but the same wild-type constant
-was subtracted from every mutation in a structure table. The following min--max
-scaling removes this constant, so scaled $Q$ and scaled $\Delta Q$ are identical
-within that table.
+Subtracting a structure-specific wild-type constant does not affect the later
+min--max scaling, so scaled $Q$ and scaled $\Delta Q$ were identical within each
+matched table.
 
 The frozen label-count curves give a second view of the matched scan
 (Fig.~\ref{fig:data_design}b). Each point is the paired MAE change from the same
@@ -76,10 +67,8 @@ The four tested settings were not monotonic enough to support a scaling law.
 With a frozen encoder, the matched MD scan performed as well as FEP at the
 largest setting.
 
-The main conclusion from Fig.~\ref{fig:data_design} is narrow. The local
-mutation scans on fixed structures showed a larger frozen MD gain than the
-heterogeneous panel. They did not make the MD label helpful in the fine-tuned
-model. Sequence choice matters, but it is not the only choice that matters.
+Thus, matching the scan strengthened frozen transfer but did not make the MD
+label useful after encoder fine-tuning.
 
 \begin{figure*}[t]
 \centering
@@ -141,17 +130,13 @@ interval included zero. FEP changed from $+0.02^\circ$C at $n=20$ to
 $-0.15^\circ$C at $n=320$. These four tested settings show recovery and
 crossover; they do not establish a power law.
 
-FEP $\Delta\Delta G$ and Tm are different measurements. $\Delta\Delta G$ gives
-the change in folding free energy caused by a mutation, whereas Tm is the
-temperature at which folded and unfolded states are balanced under an
-experimental condition. They are nevertheless linked by protein folding
-thermodynamics. In this data set, the measured Tm examples supply absolute
-temperature values across nanobodies, while the FEP scans supply relative
-information about which local sequence changes stabilize or destabilize two
-structures. The matched MD scan also supplies local information, but contact
-retention is a more indirect measure of folding stability. This difference is a
-plausible reason why the two labels tie in the frozen model but separate in the
-hot model.
+FEP $\Delta\Delta G$ and Tm are distinct but linked by folding thermodynamics.
+Here, measured Tm supplied absolute temperatures across nanobodies, whereas the
+FEP scans supplied relative information about local stabilizing and
+destabilizing changes in two structures. The matched MD scan also supplied local
+information, but contact retention is a more indirect measure of folding
+stability. This difference may explain why the two labels tie in the frozen
+model but separate in the hot model.
 
 We describe this pattern as a difference in transfer depth. Here, ``deeper''
 means only that a benefit remains when the pretrained encoder is allowed to
@@ -195,33 +180,27 @@ structure table. Whiskers are nominal 90\% paired bootstrap intervals over the
 \label{fig:physical_observable}
 \end{figure*}
 
-\subsection{Controls, scope, and next tests}
+\subsection{Controls and scope}
 
-Several controls limit alternative explanations. Neither the 35M nor the 650M
-Tm-only model reached the absolute MAE of the 8M model trained with FEP labels,
-so encoder size alone did not substitute for the computed label. Within each
-larger-size exploratory control, however, adding FEP labels also reduced MAE
-relative to its corresponding Tm-only model (Supplementary Fig.~S2a). An
-analytical correction for periodic-image effects in charge-changing FEP
-mutations had almost no effect on the scaled labels (Supplementary Fig.~S2b).
-Tests that clipped the
-largest FEP values or added the available Phe scan did not improve transfer.
+Several controls limit alternative explanations. Exploratory fixed-configuration
+controls at 35M and 650M showed the same within-size direction as the
+staged-selected 8M model: FEP reduced MAE relative to the corresponding Tm-only
+model (Supplementary Fig.~S2a). An analytical correction for periodic-image
+effects in charge-changing FEP mutations had almost no effect on the scaled
+labels (Supplementary Fig.~S2b). Tests that clipped the largest FEP values or
+added the available Phe scan did not improve transfer.
 These checks support the use of the original FEP tables, although they do not
 prove that every large $\Delta\Delta G$ value is quantitatively accurate.
 
-The other label sources provide an important negative result. ThermoMPNN gave
-at most a weak frozen gain, and none of the Rosetta sources improved both
-encoder settings. ESM2-proposed variants scored by Rosetta did not beat random
-variants scored by the same method. We therefore treat these sets as
-comparisons of sequence choice and score type. The results do not support a
-claim that the ESM2 proposals form a successful protein-design loop.
+ESM2-proposed variants scored by Rosetta did not beat random variants scored by
+the same method. This comparison does not support a successful protein-design
+loop; it shows that sequence choice and score type must be assessed together.
 
-The findings agree with the main idea of Sim2Real learning: computed data are
-useful when they share information with the measured task
-\citep{Minami2025Scaling}. The protein case adds an earlier decision. Before a
-label can transfer, the simulated sequences must make the desired relationship
-easy to learn. A large mixed set is not automatically better than a smaller
-local scan. After the sequences are chosen, the computed quantity still matters.
+These findings extend the main Sim2Real idea that computed data help when they
+share information with the measured task: the simulated sequences must also
+make that relationship easy to learn \citep{Minami2025Scaling}. A large mixed
+set is therefore not automatically better than a smaller local scan, and the
+computed quantity still matters.
 FEP and matched MD used roughly similar simulation time per variant here, but
 we did not record wall-clock cost in a form that supports a general cost claim.
 
@@ -232,10 +211,3 @@ table includes eight exact matches to the test set. The source list does not
 cover every useful simulation measurement. The confidence intervals also show
 that small differences among the middle-ranked labels remain uncertain. Finally,
 we did not make new Tm measurements or test predictions prospectively.
-
-The next test should extend matched mutation scans to more nanobody structures
-while keeping the simulation and label-extraction settings fixed. It should
-compare several physical quantities on exactly the same variants and then test
-the selected Tm model on new experimental measurements. Such a study would
-separate sequence choice from label choice more cleanly and show whether the
-FEP result extends beyond 1MEL and 4IDL.

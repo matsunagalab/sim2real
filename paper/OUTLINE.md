@@ -119,8 +119,10 @@ These results support **selective transfer**, not a general claim that computati
 ### Explicitly excluded story
 
 This is not a reinforcement-learning, active-learning, generator–predictor, or closed-loop design
-paper. The ESM2-proposed and random variant sets are ordinary comparators. Do not describe the
-ESM2-proposed set as a successful design strategy.
+paper. The ESM2-proposed and random variant sets are ordinary comparators, and the present results
+must not be described as a successful design strategy. A short Conclusion paragraph may discuss
+reinforcement learning as a future sequential extension, provided it is clearly prospective and
+requires comparison with random sampling, simpler active-learning methods, and new experiments.
 
 ## 4. Evidence, Interpretation, and Scope
 
@@ -195,7 +197,8 @@ Figure labels should be reader-facing: “Tm labels only,” “mutation free en
 - Avoid: “FEP reshapes the encoder” as a directly observed fact.
   Use: “FEP remains beneficial during encoder fine-tuning, consistent with deeper transfer.”
 - Avoid: “statistically significant” without naming the interval or test convention.
-- Avoid all design-loop and reinforcement-learning framing.
+- Avoid framing the present study as a design-loop or reinforcement-learning result. Mention these
+  only as explicitly prospective work with appropriate baselines and experimental validation.
 
 ## 6. Contributions
 
@@ -369,21 +372,26 @@ A qualitative breadth-versus-fidelity trade-off is acceptable.
 
 ### Conclusion
 
-One compact paragraph:
+Two compact paragraphs:
 
-- computational labels help selectively;
-- matched sequence design strengthens native-contact transfer;
-- free-energy content sustains transfer during encoder fine-tuning;
-- simulation datasets for experimental prediction should be designed around both axes.
+1. State that computational labels help selectively, matched sequence design strengthens
+   native-contact transfer, free-energy labels remain useful during encoder fine-tuning, and
+   simulation datasets for experimental prediction should be designed around both axes.
+2. Give a clearly prospective view of sequential variant selection. Reinforcement learning is one
+   possible method, but computed scores alone are not adequate rewards; compare against random
+   sampling and simpler active learning, and judge success with new experimental Tm measurements.
 
 ### Declarations
 
 - Conflict of interest.
 - Author contributions using confirmed CRediT roles.
 - Data availability with final repository/archive identifiers.
-- Acknowledgements, funding, and AI-assistance disclosure.
+- Acknowledgements, funding, and computational resources.
 
-Exact CRediT roles for Soichiro Oda and Kazuma Okada remain a user-confirmation item.
+Current contribution statement: Yasuhiro Matsunaga conceived and designed the study; Matsunaga,
+Taihei Murakami, and Kentaro Sasaki carried out the overall computational study; Matsunaga and Murakami
+analyzed the data and wrote the manuscript; Soichiro Oda and Kazuma Okada performed the FEP
+calculations. Final repository and Zenodo identifiers remain submission-time items.
 
 ## 8. Figure Plan
 
@@ -604,15 +612,17 @@ Do not rerun GPU training unless a missing comparison is identified and explicit
 - **2026-07-13:** Fig. 2 was reduced from three panels to two. The acquisition-plan
   setup is stated in prose, while the main figure keeps only the transfer effect
   and frozen label-count evidence.
-- **2026-07-13:** Supplementary figures reduced from five to four and rebuilt around data checks,
-  validation selection, transfer controls, and FEP provenance/charge checks. The legacy descriptor
-  survey was removed from the active supplement.
+- **2026-07-15:** Repeated protocol summaries and supplementary audit prose were pruned. The two
+  supplementary figures were retained because they support the length-shortcut limitation and the
+  encoder-size/charge-correction controls. The model-size result is interpreted within each size;
+  the cross-size absolute-MAE claim was dropped because the larger encoders used exploratory fixed
+  configurations rather than the staged search used for the 8M model.
 
 ## 14. Final Drafting Checklist
 
 - [x] Two-axis story controls the Abstract, Results, Discussion, and main figures.
 - [x] Final claims use 57/114/396 and held-out paired test errors.
-- [x] No reinforcement-learning or design-loop claim.
+- [x] No claim that the present study is a reinforcement-learning or design-loop result.
 - [x] Three-main-figure structure.
 - [x] BPPB section order, significance statement, keywords, graphical abstract, and declarations.
 - [x] Supplementary figures and captions rebuilt from tuned results.
@@ -621,4 +631,5 @@ Do not rerun GPU training unless a missing comparison is identified and explicit
 - [ ] P-value convention and label-count definition unified.
 - [ ] Cover letter rewritten for BPPB and current results.
 - [ ] CRediT roles and data availability finalized.
-- [ ] Official BPPB template applied and final PDF audited.
+- [x] Official BPPB template applied.
+- [ ] Final PDF audited after replacement of the still-stale Fig. 1.

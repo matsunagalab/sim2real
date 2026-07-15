@@ -1043,8 +1043,6 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
         ("Matched · frozen", "matched mutation scan", "frozen", COL["design"], "s"),
         ("Matched · fine-tuned", "matched mutation scan", "hot", COL["design"], "o"),
     ]
-    ax.axvspan(-0.40, 0.0, color=COL["soft_blue"], alpha=0.55, zorder=0)
-    ax.axvspan(0.0, 0.30, color=COL["soft_orange"], alpha=0.55, zorder=0)
     ax.axvline(0.0, color=COL["baseline"], linestyle="--", linewidth=1.0, zorder=1)
     ypos = np.arange(len(rows_b), dtype=float)
     for y, (label, design, encoder, color, marker) in zip(ypos, rows_b):
@@ -1077,7 +1075,6 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_ylim(len(rows_b) - 0.45, -0.55)
     ax.set_xlim(-0.38, 0.28)
     ax.set_xlabel(r"$\Delta$MAE vs own Tm-only model (°C)")
-    ax.set_title("MD native-contact transfer", loc="left", fontweight="bold")
     ax.text(0.03, 0.97, "lower Tm error", transform=ax.transAxes, ha="left", va="top",
             fontsize=8.4, color=COL["design"])
     ax.text(0.97, 0.97, "higher Tm error", transform=ax.transAxes, ha="right", va="top",
@@ -1089,8 +1086,6 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     # the baseline and the direction of transfer explicit and avoid clipped
     # single-model confidence intervals.
     ax = axes[1]
-    ax.axhspan(-0.45, 0.0, color=COL["soft_blue"], alpha=0.45, zorder=0)
-    ax.axhspan(0.0, 0.28, color=COL["soft_orange"], alpha=0.45, zorder=0)
     ax.axhline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
     frozen_curves = [
         ("FEP $\Delta\Delta G$", RESULTS / "final_fep_frozen" / "scaling.json", COL["fep"], "o"),
@@ -1106,7 +1101,6 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_xticks([20, 80, 160, 320], ["20", "80", "160", "320"])
     ax.set_xlabel("Labels per scaffold, n")
     ax.set_ylabel(r"$\Delta$MAE vs Tm-only (°C)")
-    ax.set_title("Frozen label-count sweep", loc="left", fontweight="bold")
     ax.set_ylim(-0.42, 0.28)
     ax.text(0.03, 0.04, "negative = lower Tm error", transform=ax.transAxes, fontsize=8.3,
             color=COL["design"], va="bottom")
@@ -1158,8 +1152,6 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
     }
     deltas_all = encoder_delta_rows(map_sources)
     ypos = np.arange(len(map_sources), dtype=float)
-    ax.axvspan(-0.42, 0.0, color=COL["soft_blue"], alpha=0.55, zorder=0)
-    ax.axvspan(0.0, 0.70, color=COL["soft_orange"], alpha=0.55, zorder=0)
     ax.axvline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
     for encoder in ("frozen", "hot"):
         style = encoder_style[encoder]
@@ -1186,27 +1178,33 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
                 capthick=1.2,
                 zorder=4,
             )
-            offset = -0.018 if row["delta_mae"] < 0 else 0.018
-            clear_zero = row["delta_ci_hi"] < 0 or row["delta_ci_lo"] > 0
-            ax.text(
-                row["delta_mae"] + offset,
-                y,
-                f"{row['delta_mae']:+.2f}",
-                ha="right" if offset < 0 else "left",
-                va="center",
-                fontsize=8.2,
-                fontweight="bold" if clear_zero else "normal",
-                color=COL["black"],
-                bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.80, "pad": 0.3},
-                zorder=5,
+            # Directly label only the comparisons that carry the main message.
+            # The other intervals remain readable against the common zero line
+            # without repeating every numerical value in the panel.
+            label_value = source in ("FEP", MD_CONTACT_Q_SOURCE) or (
+                source == "rosetta_esm" and encoder == "hot"
             )
+            if label_value:
+                offset = -0.018 if row["delta_mae"] < 0 else 0.018
+                clear_zero = row["delta_ci_hi"] < 0 or row["delta_ci_lo"] > 0
+                ax.text(
+                    row["delta_mae"] + offset,
+                    y,
+                    f"{row['delta_mae']:+.2f}",
+                    ha="right" if offset < 0 else "left",
+                    va="center",
+                    fontsize=8.2,
+                    fontweight="bold" if clear_zero else "normal",
+                    color=COL["black"],
+                    bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.80, "pad": 0.3},
+                    zorder=5,
+                )
     ax.axhline(3.5, color="white", linewidth=2.0, zorder=1)
     ax.set_yticks(ypos)
     ax.set_yticklabels(source_labels, fontsize=8.8)
     ax.set_ylim(len(map_sources) - 0.50, -0.90)
     ax.set_xlim(-0.42, 0.70)
     ax.set_xlabel(r"$\Delta$MAE vs corresponding Tm-only model (°C)")
-    ax.set_title("Transfer depends on the computed physical quantity", loc="left", fontweight="bold")
     ax.text(0.03, 0.98, "lower Tm error", transform=ax.transAxes, ha="left", va="top",
             fontsize=8.5, color=COL["design"])
     ax.text(0.97, 0.98, "higher Tm error", transform=ax.transAxes, ha="right", va="top",
@@ -1234,8 +1232,6 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
     ax = fig.add_subplot(grid[1, 0])
     direct = fep_minus_md_rows()
     direct_markers = {"frozen": "s", "hot": "o"}
-    ax.axvspan(-0.42, 0.0, color=COL["soft_green"], alpha=0.70, zorder=0)
-    ax.axvspan(0.0, 0.24, color=COL["soft_orange"], alpha=0.55, zorder=0)
     ax.axvline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
     for y, encoder in enumerate(("frozen", "hot")):
         row = direct[direct["encoder"] == encoder].iloc[0]
@@ -1265,7 +1261,6 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_ylim(1.55, -0.55)
     ax.set_xlim(-0.42, 0.24)
     ax.set_xlabel("MAE(FEP) − MAE(MD Q) (°C)")
-    ax.set_title("Direct FEP–MD comparison", loc="left", fontweight="bold")
     ax.text(0.03, 0.97, "FEP lower", transform=ax.transAxes, ha="left", va="top",
             fontsize=8.5, color=COL["fep"])
     ax.text(0.97, 0.97, "MD Q lower", transform=ax.transAxes, ha="right", va="top",
@@ -1275,8 +1270,6 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
 
     # (c) Fine-tuned label-count behavior as paired changes from Tm-only.
     ax = fig.add_subplot(grid[1, 1])
-    ax.axhspan(-0.35, 0.0, color=COL["soft_blue"], alpha=0.45, zorder=0)
-    ax.axhspan(0.0, 0.70, color=COL["soft_orange"], alpha=0.45, zorder=0)
     ax.axhline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
     hot_curves = [
         ("FEP $\Delta\Delta G$", RESULTS / "final_fep_hot" / "scaling.json", COL["fep"], "o"),
@@ -1292,7 +1285,6 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_xticks([20, 80, 160, 320], ["20", "80", "160", "320"])
     ax.set_xlabel("Labels per scaffold, n")
     ax.set_ylabel(r"$\Delta$MAE vs Tm-only (°C)")
-    ax.set_title("Fine-tuned label-count sweep", loc="left", fontweight="bold")
     ax.set_ylim(-0.35, 0.70)
     ax.text(0.03, 0.04, "negative = lower Tm error", transform=ax.transAxes, fontsize=8.3,
             color=COL["design"], va="bottom")

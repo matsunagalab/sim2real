@@ -4,13 +4,12 @@
 
 \subsection{Additional details for the diverse MD panel}
 
-The diverse panel was assembled from an archived SAbDab summary containing
-2422 rows and the corresponding IMGT-renumbered structures
-\citep{Dunbar2014SAbDab}. For each PDB identifier, the workflow took the first
-heavy-chain entry whose chain identifier was present in the structure file. This
-deterministic rule gave 1177 initial structures. Of these, 1146 entered the
-400-K manifest and 1143 yielded a usable sequence, topology, trajectory, and
-native-contact label.
+The diverse panel was assembled from an archived SAbDab summary and the
+corresponding IMGT-renumbered structures \citep{Dunbar2014SAbDab}. For each PDB
+identifier, the workflow took the first heavy-chain entry whose chain identifier
+was present in the structure file. After availability checks, this deterministic
+selection yielded 1143 structures with a usable sequence, topology, trajectory,
+and native-contact label.
 
 The selected heavy chain was kept as an uncapped protein at pH 7.4, solvated in
 OPC water with 15~\AA{} padding and 0.15~M NaCl, and described with ff19SB
@@ -27,50 +26,30 @@ by more than three residues, within 0.45~nm in the reference structure, and with
 at least one atom in Asp, Glu, Gln, Asn, Arg, Lys, or His. For trajectories with
 more than 300 frames, the label was averaged over the larger of the final 300
 frames and the final one third of the trajectory; all frames were used for
-shorter trajectories. The processed table used 66--333 frames (median 333) and
-28--728 contacts (median 173) per system. Sequence lengths were 58--461 residues
-(median 122). Supplementary Fig.~S1 shows the relation between sequence length
-and the resulting raw $Q$ value.
+shorter trajectories. Supplementary Fig.~S1 shows the relation between sequence
+length and the resulting raw $Q$ value.
 
 \subsection{FEP provenance and charge-change check}
 
-The retained FEP tables contain Ala, Asp, Ile, and Gln scans. Their row counts
-were 116, 80, 119, and 120 for 1MEL and 105, 84, 113, and 107 for 4IDL,
-respectively. Row-level provenance was checked against the archived scan
-outputs; the available Phe scans were not included.
+The retained FEP tables contain Ala, Asp, Ile, and Gln scans. Row-level
+provenance was checked against the archived scan outputs; the available Phe
+scans were not included.
 
-Of the 844 retained mutations, 284 change formal charge. For a cubic 70-\AA{}
-box and solvent dielectric 78, we tested an analytical periodic net-charge
-correction of $0.086(\Delta q)^2$ kcal mol$^{-1}$. We applied the correction
-before repeating the sign reversal, robust scaling, Yeo--Johnson transform, and
-min--max scaling used for the model-facing labels. Corrected and uncorrected
-labels had Pearson $r=0.99989$; the largest scaled-label shift was 0.008, and no
-row shifted by more than 0.02 (Supplementary Fig.~S2b).
+For charge-changing mutations in a cubic 70-\AA{} box and solvent dielectric
+78, we tested an analytical periodic net-charge correction of
+$0.086(\Delta q)^2$ kcal mol$^{-1}$. We applied the correction before repeating
+the sign reversal, robust scaling, Yeo--Johnson transform, and min--max scaling
+used for the model-facing labels (Supplementary Fig.~S2b).
 
-\subsection{Model-selection audit}
-
-The completed search records contain 71 Stage-1 runs and 273 Stage-2
-candidates: 115 with frozen ESM2 and 158 with fine-tuned ESM2. Each candidate
-was evaluated as a three-seed ensemble on the experimental Tm validation split;
-the selected setting was evaluated on the held-out test split with five seeds.
-The run seed controlled Python, NumPy, PyTorch, and CUDA randomness, as well as
-computed-row sampling and the computed-label train--monitoring split. Candidate
-scores, selected settings, final errors, label-count results, and figure-level
-provenance are retained as machine-readable tables in the analysis archive.
-
-\clearpage
 \renewcommand{\thefigure}{S\arabic{figure}}
 
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth]{supp_fig01_data_and_design}
 \caption{Sequence length and native-contact $Q$ in the heterogeneous MD panel.
-Hexagons show the density of the 1143 processed rows. Dashed lines mark the
-fixed sequence lengths of the 1MEL and 4IDL matched mutation scans. In the
-heterogeneous panel, sequence length ranged from 58 to 461 residues and had a
-Pearson correlation of $r=+0.13$ with raw $Q$. This association identifies a
-possible shortcut but does not establish that length caused the transfer
-difference.}
+Hexagons show row density, and dashed lines mark the fixed sequence lengths of
+the 1MEL and 4IDL matched mutation scans. The observed association is
+descriptive and does not establish that length caused the transfer difference.}
 \label{fig:supp_data_design}
 \end{figure}
 
@@ -84,8 +63,6 @@ five-seed model; the 35M and 650M points are exploratory fixed-configuration
 ten-seed controls and were not subjected to the same search. Whiskers are
 nominal 90\% paired bootstrap intervals over the 396 test proteins.
 \textbf{(b)} Change in each scaled FEP label after the analytical periodic
-net-charge correction at dielectric 78. Of 844 labels, 284 were
-charge-changing. Corrected and uncorrected labels had Pearson $r=0.99989$, and
-the maximum absolute shift was 0.008.}
+net-charge correction at dielectric 78.}
 \label{fig:supp_transfer_controls}
 \end{figure}

@@ -9,13 +9,12 @@ multi-task models that used a shared ESM2 sequence
 model for experimental Tm and one computed label at a time. We used 57 sequences
 for training, 114 for validation, and 396 for held-out testing. Each label and
 encoder setting was tuned separately using only the Tm validation set, then
-compared on the same test proteins. The choice of simulated variants mattered. An
-MD native-contact label reduced frozen-encoder Tm error by 0.20$^\circ$C when
-computed for local mutation scans on two fixed structures, compared with
-0.05$^\circ$C for a heterogeneous structure panel. The measured quantity also
-mattered.
-Free-energy perturbation (FEP) labels improved both frozen and fine-tuned encoders,
-reducing the fine-tuned mean absolute error from 6.55$^\circ$C to 6.40$^\circ$C.
+compared on the same test proteins. An MD native-contact label reduced
+frozen-encoder Tm error by 0.20$^\circ$C when computed for local mutation scans
+on two fixed structures, compared with 0.05$^\circ$C for a heterogeneous
+structure panel. Free-energy perturbation (FEP) labels improved both frozen and
+fine-tuned encoders, reducing the fine-tuned mean absolute error from
+6.55$^\circ$C to 6.40$^\circ$C.
 Native-contact labels helped only the frozen encoder, while Rosetta and ThermoMPNN
 scores gave little or no improvement. These results show that simulation data for
 experimental prediction should be built from carefully chosen variants and from
@@ -28,11 +27,10 @@ learning, protein language model, molecular simulation labels
 \end{keywords}
 
 \begin{significance}
-We tested whether computed stability values improve nanobody melting-temperature
-prediction when only a small experimental training set is available.
-Native-contact values from local mutation scans gave a larger gain than values
-from a heterogeneous structure panel. FEP mutation free energies improved models
-with both frozen and fine-tuned sequence encoders, whereas native-contact values
-helped only the frozen model. These results show that both the simulated variants
-and the calculated quantity need to be considered when preparing training data.
+When experimental melting-temperature data are scarce, computed stability
+values may help a prediction model. We found that their usefulness depends on
+two choices made before model training: which variants are simulated and which
+physical quantity is calculated. Simulation effort should therefore be planned
+around the experimental prediction task, not only around the number of computed
+values.
 \end{significance}
