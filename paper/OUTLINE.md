@@ -148,9 +148,10 @@ possible explanations or sources of bias, not proof of a cause.
 
 Use one paragraph of at most 250 words.
 
-1. Experimental Tm values are scarce.
-2. Calculated stability quantities are related to Tm but are not Tm labels.
-3. Each calculated label and encoder setting was selected using Tm validation
+1. Begin with why nanobody thermal stability matters and why measuring Tm for
+   many sequences is costly.
+2. Explain that stability calculations can add data but do not measure Tm.
+3. Each calculated quantity and encoder setting was selected using Tm validation
    only, then compared using the same 396 test Tm values.
 4. The local mutation-scan MD plan gave a larger frozen-encoder gain than the
    heterogeneous plan, while the plans differed in several ways.
@@ -158,6 +159,16 @@ Use one paragraph of at most 250 words.
    95% interval included zero.
 6. Simulations should be planned around both the systems and the reported
    quantity, rather than data count alone.
+
+### Significance statement
+
+Use fewer than 100 words and write for a reader outside the immediate field.
+Begin with the importance of protein-stability measurements and the difficulty
+of obtaining many Tm values. Then explain that simulations measure related
+quantities rather than Tm itself, so making more simulated data is not enough.
+Only after this background, state the main practical result: the choice of
+variants and physical quantity must fit the experiment that the calculations
+are meant to support. Do not open with the study design or model results.
 
 ### Introduction
 
@@ -297,9 +308,9 @@ question raised by the main text.
 | Random variants + Rosetta | 7.216 | −0.013 | 6.692 | +0.144 |
 | ESM2 proposals + Rosetta | 7.312 | +0.083 | 6.959 | +0.411 |
 
-The displayed points and intervals must be recalculated from the saved 396
-per-sequence absolute errors. Do not copy the older 90% intervals stored in
-some result summaries.
+The displayed points and intervals are calculated from the saved 396
+per-sequence absolute errors. Use the paired 95% intervals (2.5th to 97.5th
+percentiles) throughout.
 
 ## 9. Wording
 
