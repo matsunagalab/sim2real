@@ -22,8 +22,8 @@ should use plain words wherever a technical term is not needed.
 
 ### Title
 
-**Transfer learning with simulated variants and calculated quantities for
-nanobody melting-temperature prediction**
+**Transfer learning from computed stability data for nanobody
+melting-temperature prediction**
 
 The short title is **Transfer learning for nanobody Tm prediction**.
 

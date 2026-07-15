@@ -1,7 +1,7 @@
 # sim2real
 
-**Transfer learning with simulated variants and calculated quantities for
-nanobody melting-temperature prediction**
+**Transfer learning from computed stability data for nanobody
+melting-temperature prediction**
 
 実験データが少ないナノボディ融解温度（Tm）予測で、どの計算ラベルが転移学習に役立つかを比較する研究リポジトリです。ESM-2 を使い、実験 Tm に加えて FEP、MD native-contact Q、Rosetta、ThermoMPNN の変異ラベルを補助課題として学習します。
 

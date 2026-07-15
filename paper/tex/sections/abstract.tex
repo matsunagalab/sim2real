@@ -1,27 +1,28 @@
 % abstract.tex
 
 \begin{abstract}
-Thermal stability is important for nanobody production, storage, and
-formulation, but measuring melting temperature (Tm) for many sequences is
-costly. Computer simulations can produce related stability values, but they do
-not measure Tm itself. We tested whether those values improve Tm prediction
-with only 57 measured values for training. Models shared an ESM2 sequence
-encoder between Tm and one calculated quantity. Each was tuned with 114
-validation Tm values and evaluated on the same 396 held-out values. We compared
-two ways of collecting molecular dynamics (MD) native-contact data. With a
-frozen encoder, local mutation scans of two fixed structures reduced mean
-absolute error by 0.20$^\circ$C relative to Tm-only. A separately tuned
-heterogeneous-panel study reduced it by 0.05$^\circ$C. The studies also differed
-in contact definitions, trajectory averaging, and model selection, so this
-difference cannot be assigned to variant choice alone. We also compared MD
-values with free-energy perturbation (FEP), Rosetta, and ThermoMPNN values. FEP
-gave the lowest observed error with both frozen and fine-tuned encoders. In the
-fine-tuned model, mean absolute error fell from 6.55$^\circ$C to
-6.40$^\circ$C, although the 95\% interval for the change included zero. MD
-native-contact values clearly helped only with the frozen encoder; Rosetta and
-ThermoMPNN values gave little or no improvement. More calculated values were
-not automatically more useful. The observed benefit differed with both the
-simulated variants and the quantity calculated.
+Thermal stability matters for nanobody production, storage, and formulation,
+but measuring melting temperature (Tm) for many sequences is costly. Simulations
+can provide related stability data, but they calculate quantities other than Tm.
+We tested whether such data improve Tm prediction from 57 training
+measurements. Multi-task models learned Tm and one computed property from ESM2
+sequence representations. Settings were selected with 114 Tm validation
+sequences, and final models were tested on the same 396 held-out sequences. We
+first compared two molecular dynamics (MD) data sets based on
+native-contact retention. With a frozen encoder, adding labels from local
+mutation scans of two fixed structures reduced mean absolute error by
+0.20$^\circ$C relative to Tm-only. Adding labels from a separately developed
+data set covering many structures reduced error by 0.05$^\circ$C. The MD protocols and model
+searches also differed, so this contrast cannot be assigned to variant choice
+alone. We then compared MD labels with free-energy perturbation (FEP), Rosetta,
+and ThermoMPNN labels. FEP gave the lowest test error with both frozen
+and fine-tuned encoders. With fine-tuning, mean absolute error decreased from
+6.55$^\circ$C to 6.40$^\circ$C, although the 95\% interval for the change
+included zero. MD labels reduced error only with the frozen encoder; Rosetta and
+ThermoMPNN labels gave little or no improvement. The number of computed labels
+alone did not predict their usefulness. Both the
+variants and the computed property should therefore be chosen before the
+calculations begin.
 \end{abstract}
 
 \begin{keywords}
@@ -30,12 +31,13 @@ learning, protein language model, molecular simulation labels
 \end{keywords}
 
 \begin{significance}
-Nanobodies need sufficient thermal stability for production, storage, and use.
-Melting temperature is a common measure, but testing many sequences is costly.
-Simulations can provide related stability data, but they do not measure melting
-temperature. A larger simulated data set does not necessarily give a better
-predictor. The best results in this study came from local mutation scans and
-free-energy calculations; several other calculated data sets gave little or no
-improvement. What to simulate and what to calculate should be decided with the
-intended experiment in mind.
+Thermal stability affects whether a nanobody can be produced, stored, and used
+reliably. Melting temperature is a common measure, but obtaining measurements
+for many sequences is costly. Simulations can add related stability data, but
+they calculate quantities other than melting temperature. We found that data
+from free-energy calculations and local mutation scans improved some prediction
+models, whereas several other calculated data sets did not. Larger calculated
+data sets were not consistently more useful. The variants to simulate and the
+physical quantity to calculate should be chosen for the melting-temperature
+prediction task before simulations begin.
 \end{significance}

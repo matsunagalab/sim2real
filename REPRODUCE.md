@@ -1,6 +1,8 @@
 # Reproducing the manuscript results
 
-This repository provides a compact rerun path for the selected configurations reported in **“Transfer learning with simulated variants and calculated quantities for nanobody melting-temperature prediction.”**
+This repository provides a compact rerun path for the selected configurations
+reported in **“Transfer learning from computed stability data for nanobody
+melting-temperature prediction.”**
 
 It starts from processed CSV tables. It does not launch the raw MD simulations, FEP calculations, Rosetta calculations, or ThermoMPNN scoring that produced those tables.
 

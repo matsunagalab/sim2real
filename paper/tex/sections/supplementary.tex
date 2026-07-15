@@ -4,48 +4,67 @@
 
 \subsection{Additional details for the heterogeneous MD panel}
 
-The heterogeneous panel was assembled from an archived SAbDab summary and the
+The heterogeneous panel was assembled from a SAbDab summary and the
 corresponding IMGT-renumbered structures \citep{Dunbar2014SAbDab}. For each PDB
-identifier, the procedure took the first heavy-chain entry whose chain identifier
-was present in the structure file. After availability checks, this rule yielded
-1143 PDB-derived rows with a usable sequence, topology,
-trajectory, and native-contact label. They represented 833 unique amino-acid
-sequences. Ninety-seven sequences occurred in more than one PDB entry, accounting
-for 407 rows. Their native-contact values were calculated separately from each
-PDB structure. Training sampled these rows rather than first combining entries
-with the same sequence, and the model received the sequence and $Q$ value but no
-PDB identifier. Eleven rows were longer than the 158-residue model input and
-were truncated at the end.
+identifier, we selected the first heavy-chain entry whose chain was present in
+the structure file. This rule yielded 1143 rows with a usable sequence,
+topology, trajectory, and native-contact label, representing 833 unique
+amino-acid sequences. Ninety-seven sequences occurred in more than one PDB
+entry and accounted for 407 rows. We calculated native-contact values separately
+for each structure and sampled rows individually during training; duplicate
+sequences were not collapsed, and the model did not receive the PDB identifier.
+Eleven rows exceeded the 158-residue model input and were truncated at the end.
 
-The selected heavy chain was kept as an uncapped protein at pH 7.4, solvated in
-OPC water with 15~\AA{} padding and 0.15~M NaCl, and described with ff19SB
-\citep{Tian2020ff19SB,Izadi2014OPC}. The 300-K branch comprised 1~ns NVT and
-1~ns NPT with a 2-fs timestep. Two 1-ns restrained NVT stages at 400~K preceded
-100~ns of unrestrained 400-K NVT production. Production used hydrogen-mass
-repartitioning to 4~amu, a 4-fs timestep, and output every 100~ps. OpenMM used
-PME electrostatics with a 1.0-nm cutoff, constraints on bonds to hydrogen, and a
-Langevin middle integrator with 1~ps$^{-1}$ friction
-\citep{Eastman2017OpenMM}.
+Structures were cleaned and missing atoms were added with PDBFixer. The
+preparation first attempted protonation at pH 7.4 with pdb2pqr and PROPKA
+\citep{Dolinsky2004PDB2PQR,Olsson2011PROPKA3}. If that step was unavailable or
+failed, the workflow used the geometry-based \texttt{pdb4amber --reduce}
+fallback, which does not apply the requested pH. If Amber conversion also
+failed, the PDBFixer output was retained. The available records do not show
+which route was used for each structure. The termini were left
+uncapped. Each protein was solvated in OPC water with 15~\AA{} padding and
+0.15~M NaCl and described with ff19SB
+\citep{Tian2020ff19SB,Izadi2014OPC}.
 
-The heterogeneous-panel contact calculation used backbone heavy-atom pairs separated
-by more than three residues, within 0.45~nm in the reference structure, and with
-at least one atom in Asp, Glu, Gln, Asn, Arg, Lys, or His. For trajectories with
-more than 300 frames, the label was averaged over the larger of the final 300
-frames and the final one third of the trajectory; all frames were used for
-shorter trajectories. Supplementary Fig.~S1 shows the relation between sequence
-length and the resulting raw $Q$ value.
+The 300-K branch comprised 1~ns NVT and 1~ns NPT with a 2-fs timestep. Two
+1-ns restrained NVT stages at 400~K preceded unrestrained 400-K NVT production
+scheduled for 100~ns. Production used hydrogen-mass repartitioning to 4~amu, a
+4-fs timestep, and output every 100~ps. OpenMM used PME electrostatics with a
+1.0-nm cutoff, constraints on bonds to hydrogen, and a Langevin middle
+integrator with 1~ps$^{-1}$ friction \citep{Eastman2017OpenMM}.
+
+The contact calculation used backbone heavy-atom pairs separated by more than
+three residues and within 0.45~nm in the first production frame. At least one
+atom in each pair belonged to Asp, Glu, Gln, Asn, Arg, Lys, or His. For a
+trajectory with $N>300$ saved frames, $Q$ was averaged over the final
+$\max(300,\lfloor N/3\rfloor)$ frames; all frames were used when $N\leq300$.
+At the 100-ps output interval, 300 frames correspond to approximately 30~ns.
+The number of frames entering a label ranged from 66 to 333 (median 333); nine
+rows had fewer than 300 available frames. Supplementary Fig.~S1 shows the
+relation between sequence length and raw $Q$.
 
 \subsection{FEP row and charge-change checks}
 
-The retained FEP tables contain Ala, Asp, Ile, and Gln scans. We checked each
-row against the archived scan outputs; the available Phe scans were not
-included.
+The FEP tables used here comprised Ala, Asp, Gln, and Ile scans. Raw Phe scans
+existed but were not included in the processed tables, and the original reason
+for their omission was not recorded. Our conclusions therefore apply to the
+four-scan tables.
 
-For charge-changing mutations in a cubic 70-\AA{} box and solvent dielectric
-78, we tested an analytical periodic net-charge correction of
+For charge-changing mutations in a cubic 70-\AA{} box and a solvent dielectric
+constant of 78, we tested an analytical periodic net-charge correction of
 $0.086(\Delta q)^2$ kcal mol$^{-1}$. We applied the correction before repeating
-the sign reversal, robust scaling, Yeo--Johnson transform, and min--max scaling
-used for the training labels (Supplementary Fig.~S2b).
+the sign reversal, robust scaling, Yeo--Johnson transform with standardization,
+and min--max scaling used for the training labels (Supplementary Fig.~S2b).
+
+\subsection{Model-size checks}
+
+We fine-tuned the 35M- and 650M-parameter ESM2 encoders without size-specific
+hyperparameter searches. For both sizes, the Tm-only model used the shared
+architecture, dropout 0.05, and an encoder learning rate of $1\times10^{-4}$.
+The FEP model used the shared architecture with separate 1MEL and 4IDL heads,
+$n=320$ rows per structure, dropout 0.15, and an encoder learning rate of
+$3\times10^{-5}$. Both conditions used a non-encoder learning rate of
+$3\times10^{-4}$, weight decay 0.04, and ten training seeds.
 
 \renewcommand{\thefigure}{S\arabic{figure}}
 
@@ -54,8 +73,8 @@ used for the training labels (Supplementary Fig.~S2b).
 \includegraphics[width=\textwidth]{supp_fig01_data_and_design}
 \caption{Sequence length and native-contact $Q$ in the heterogeneous MD panel.
 Hexagons show row density, and dashed lines mark the fixed sequence lengths of
-the 1MEL and 4IDL matched mutation scans. The observed association is
-descriptive and does not establish that length caused the transfer difference.}
+the 1MEL and 4IDL matched mutation scans. The association is descriptive and
+does not show that length caused the difference between the two MD data sets.}
 \label{fig:supp_data_design}
 \end{figure}
 
@@ -65,9 +84,9 @@ descriptive and does not establish that length caused the transfer difference.}
 \caption{Additional checks of the FEP result.
 \textbf{(a)} Paired FEP-minus-Tm-only MAE for fine-tuned ESM2 encoders. Negative
 values mean lower Tm error with FEP. The 8M point is the five-seed model selected
-after the two-stage search; the 35M and 650M points are exploratory ten-seed
-controls run with fixed settings and were not subjected to the same search. Whiskers are 95\%
-paired bootstrap intervals over the 396 Tm test values.
+by the two-stage search. The 35M and 650M points are ten-seed checks without
+size-specific tuning. Whiskers are 95\% paired bootstrap intervals over the 396
+Tm test sequences.
 \textbf{(b)} Change in each scaled FEP label after the analytical periodic
 net-charge correction at dielectric 78.}
 \label{fig:supp_transfer_controls}

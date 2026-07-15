@@ -2,25 +2,20 @@
 
 \section{Conclusion}
 
-Computed labels improved low-data nanobody Tm prediction only in specific
-settings. Among the complete MD plans tested here, native-contact labels from
-local mutation scans on 1MEL and 4IDL gave a larger observed frozen-encoder gain
-than labels from a heterogeneous structure panel. The plans differed in more
-than the choice of variants, so this result does not assign the difference to one
-factor. FEP mutation free energies gave the lowest observed error in both
-encoder settings, although the 95\% interval for the fine-tuned comparison
-included zero. Matched-scan MD native-contact values gave a clear gain only
-with the frozen model. Together, these results suggest planning simulations
-around both the systems to calculate and the quantity to report, rather than
-around data volume alone.
+Computed labels did not improve low-data nanobody Tm prediction uniformly.
+Among two independently developed MD data sets, matched mutation scans showed a
+larger reduction with the frozen encoder than the heterogeneous
+structure panel, although differences in their protocols prevent attribution to
+sequence selection alone. FEP had the lowest test MAE with both
+frozen and fine-tuned ESM2; its 95\% interval excluded zero only with the frozen
+encoder. The comparisons did not show a simple relation between label count and
+Tm error. When calculations are intended to support Tm prediction, both the
+variants and the physical property should be considered from the start.
 
-In the longer term, matched scans could be extended to more structures and used
-in an iterative design study. A model could choose which variant to calculate
-next, receive an FEP or MD result, and use that result to choose the following
-variant. Reinforcement learning is one way to make these sequential choices,
-but the present results caution against using a computed score as the only
-reward. Our comparison of ESM2 and random proposals under the same Rosetta score
-shows why variant generation and scoring must be tested together. Any future
-reinforcement-learning study should therefore be compared with random sampling
-and simpler active-learning methods, and its success should be tested with new
-experimental Tm measurements.
+One extension is to repeat matched scans across more nanobody structures and
+select new calculations adaptively. Reinforcement learning could support this
+sequential selection, but random sampling and simpler active-learning methods
+would be necessary baselines. A computed score alone should not define success:
+under the present Rosetta protocol, ESM2 proposals did not yield lower Tm
+prediction error than random variants. Any improvement should ultimately be
+tested with new experimental Tm measurements.

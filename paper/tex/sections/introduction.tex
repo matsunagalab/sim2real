@@ -2,91 +2,94 @@
 
 \section{Introduction}
 
-Machine-learning models for molecular design need measured examples, but many
-experiments are slow or expensive. Properties calculated with quantum chemistry,
-molecular simulation, or other physical models can be used as additional
-training data. This approach is often called simulation-to-real
-(Sim2Real) learning. It has been used in materials science to combine large
-computed data sets with smaller experimental data sets
-\citep{Yamada2019Predicting,Aoki2023Multitask,Minami2025Scaling}. In some cases,
-prediction improves as more computed data are added \citep{Minami2025Scaling}.
-This outcome is not guaranteed. A calculation may use an imperfect model, sample
-the wrong systems, or measure a property that is only weakly related to the
-experiment.
-
-Protein stability makes this problem clear because several common labels have
-different physical meanings. Melting temperature (Tm) is the experimental
-temperature at which folded and unfolded populations are balanced under a given
-assay. A mutation free-energy change ($\Delta\Delta G$) instead describes the
-change in folding free energy caused by a sequence change. Rosetta and learned
-stability models provide scores on their own scales, while molecular dynamics
-(MD) can provide structural measurements such as the fraction of native contacts
-that remain during a trajectory. All of these labels concern protein stability,
-but none is a Tm measurement. A poorly matched computed label may therefore leave
-Tm prediction unchanged or make it worse.
-
-We study this question in nanobodies, single-domain VHH antibodies used as small
-and modular binding proteins \citep{Muyldermans2013Nanobodies,Alexander2024Discovery}.
-Thermal stability affects their expression, storage, and formulation
-\citep{Kunz2018-qt,Mezzasalma2007-ci,Kumar2000-te}. Direct measurements and
-detailed simulations of stability remain costly
+Nanobodies are single-domain VHH antibody fragments used as small, modular
+binding proteins
+\citep{Muyldermans2013Nanobodies,Alexander2024Discovery}. Their thermal
+stability affects expression, storage, and formulation
+\citep{Kunz2018-qt,Mezzasalma2007-ci,Kumar2000-te}, yet both direct measurements
+and detailed stability simulations remain costly
 \citep{Bekker2019Thermal,Higashida2021-lt,Mohseni2019-lx,Tomimoto2023-ww}.
-Protein language models such as ESM2 can learn useful sequence features from
-large protein databases \citep{Rives2021Biological,Lin2023Evolutionary,Hayes2025-pd},
-and several methods use these features to predict Tm
-\citep{Blaabjerg2023Rapid,Li2023DeepTM,Alvarez2024TEMPRO,
-Savojardo2024-tv,Ramon2025-oy,Mao2026-yf}. However, a sequence model does not
-remove the need for measured Tm values from the protein family of interest.
+Melting temperature (Tm) is a common experimental measure of thermal stability,
+but only a limited number of nanobody Tm values are available for model
+training.
 
-Large protein-stability data sets are becoming available. For example,
-Tsuboyama et al. measured folding stability for about 776{,}000 natural and
-designed protein domains by cDNA-display proteolysis
-\citep{Tsuboyama2023MegaScale}. Those domains are 40--72 residues long and differ
-from VHH domains in both sequence and measurement type. Models trained on small
-domains also transfer less well to longer proteins \citep{Chu2024EsmTherm}.
-Nanobody-specific data and validation are therefore still needed
+Protein language models such as ESM2 learn sequence features from large protein
+databases \citep{Rives2021Biological,Lin2023Evolutionary,Hayes2025-pd}, and
+several methods use these features to predict Tm
+\citep{Blaabjerg2023Rapid,Li2023DeepTM,Alvarez2024TEMPRO,
+Savojardo2024-tv,Ramon2025-oy,Mao2026-yf}. For family-specific prediction,
+measured Tm values are still needed for training and evaluation.
+Tsuboyama et al., for example, reported approximately 776{,}000 high-quality
+folding-stability measurements for single mutants and selected double mutants
+of 331 natural and 148 designed protein domains
+\citep{Tsuboyama2023MegaScale}. The domains are 40--72 residues long and differ
+from VHH domains in both sequence and measurement type. A model fine-tuned on
+these short domains was substantially less accurate on longer proteins
+\citep{Chu2024EsmTherm}. Nanobody-specific data and validation remain necessary
 \citep{ValdesTresanco2023NbThermo,Zhang2025NbBench,
 Schmirler2024FineTuning}.
 
-The open question is not simply whether computed labels can be added to a Tm
-model. It is how to plan the simulations that produce those labels. A mixed set
-of unrelated sequences may contain unwanted differences such as sequence length.
-A mutation scan on one or two fixed structures gives a more controlled set of
-sequence changes. The calculated quantity also matters: a mutation free energy,
-a Rosetta score, and an MD native-contact value may differ in how closely they
-relate to Tm. Both the systems to calculate and the reported quantity are chosen
-before model training.
+Calculated properties offer another way to supplement scarce experimental
+data. Combining a large computed data set with a smaller experimental one is
+often called simulation-to-real (Sim2Real) learning. This approach has improved
+materials-property prediction in several settings
+\citep{Yamada2019Predicting,Aoki2023Multitask,Minami2025Scaling}. More computed
+examples do not guarantee a better experimental predictor, however. A
+calculation may be inaccurate, cover systems unrelated to the target, or report
+a quantity with only a weak connection to the experiment.
 
-Here, we compare several computed labels in the same low-data Tm task. The labels
-are mutation free energies from free-energy perturbation (FEP), Rosetta mutation
+This distinction is especially important for protein stability. Tm is the midpoint
+of a thermal-unfolding transition under specified assay conditions. A mutation
+free-energy change ($\Delta\Delta G$) instead describes how a sequence change
+alters folding free energy. Rosetta and learned stability models produce scores
+on their own scales, while molecular dynamics (MD) can be used to calculate
+structural quantities such as the fraction of native contacts retained during a
+trajectory. All concern protein stability, but none of the calculated
+quantities is Tm. Their value as auxiliary data for Tm prediction is therefore
+uncertain.
+
+Using calculated stability data requires two decisions before model training.
+The first is which sequence variants to include. A heterogeneous set may contain
+unwanted differences, such as sequence length, whereas a mutation scan on one
+or two fixed structures gives a narrower set of sequence changes. The second is
+which quantity to record. Mutation free energy, a Rosetta score, and an MD
+native-contact value need not carry the same information about Tm. The value of
+the added data may depend on both choices.
+
+We evaluated several calculated quantities in the same low-data Tm task:
+mutation free energies from free-energy perturbation (FEP), Rosetta mutation
 scores, ThermoMPNN scores, Rosetta scores for ESM2-proposed or random variants,
-and MD native-contact values. For the MD label, we compare two complete simulation
-plans: a heterogeneous structure panel and local mutation scans on the same 1MEL
-and 4IDL structures used for FEP. Both use 400 K MD and native-contact labels, but
-they also differ in contact selection and trajectory averaging. Their comparison
-therefore does not isolate the choice of variants. Each computed label is trained
-as a second task that shares an ESM2 sequence model with Tm prediction
-(Fig.~\ref{fig:learning_framework}). We tune every label separately using only
-the experimental Tm validation set. We then compare the selected models using
-paired errors on the same 396 test Tm labels, which were not used for training or
-model selection. In this paper, ``transfer'' means that adding a computed label
-lowers the test Tm error.
+and MD native-contact values. For MD, we examined a heterogeneous structure
+panel and local mutation scans on the same 1MEL and 4IDL structures used for
+FEP. Both studies used 400~K MD and native-contact values, but they differed in
+contact selection, trajectory averaging, and other details. We therefore
+compare the two MD studies as implemented and do not attribute their difference
+to sequence choice alone.
+
+Each model was trained on Tm and one calculated quantity using ESM2 sequence
+representations (Fig.~\ref{fig:learning_framework}). Model settings were
+selected using only experimental Tm validation data. The selected models were
+then compared using paired absolute errors for the same 396 test sequences,
+which were not used for training or model selection. We use ``transfer'' to mean
+a reduction in test Tm error after adding calculated data.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.66\textwidth]{figure_1_concept_protocol_v2}
-\caption{Multi-task model used to test computed stability labels.
-Experimental sequences and sequences with computed labels pass through the same
-ESM2 model and shared multilayer perceptron. Separate scalar heads predict Tm and
-the computed label. The ESM2 model is either kept frozen or fine-tuned. Models are
-selected using experimental Tm validation data, and the final comparison uses
-held-out Tm test data.}
+\caption{Conceptual multi-task setup used to evaluate calculated stability
+values. All models use ESM2 sequence representations and separate outputs for
+Tm and the calculated quantity. The diagram shows the shared-trunk
+architecture; the architectures tested differed in how much of the downstream
+model was shared. ESM2 is either kept frozen or fine-tuned. Models were selected
+with experimental Tm validation data and evaluated with held-out Tm data.}
 \label{fig:learning_framework}
 \end{figure*}
 
-We observed a larger frozen-encoder gain under the local mutation-scan MD plan
-than under the heterogeneous-panel plan. Among the calculated quantities, FEP
-gave the lowest observed error in both encoder settings, whereas native-contact
-values gave a clear gain only with the frozen encoder. These results suggest
-that simulations intended to support an experimental predictor should be
-planned around both the systems to calculate and the quantity to report.
+The local mutation-scan MD study gave a larger frozen-encoder gain than the
+heterogeneous-panel study. Among the calculated quantities, FEP gave the lowest
+test MAE with both encoder settings, whereas the 95\% interval for the
+change in MAE from MD native-contact labels excluded zero only with the frozen
+encoder. Across these comparisons, the number of calculated values alone did
+not predict transfer performance. Performance
+differed among data sets that varied in their selected sequences, calculated
+quantities, and other details.

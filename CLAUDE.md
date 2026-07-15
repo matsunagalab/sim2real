@@ -2,7 +2,10 @@
 
 ## Project
 
-This repository supports the manuscript **“Transfer learning with simulated variants and calculated quantities for nanobody melting-temperature prediction.”** It tests whether computational mutation labels improve nanobody Tm prediction with an ESM-2 encoder.
+This repository supports the manuscript **“Transfer learning from computed
+stability data for nanobody melting-temperature prediction.”** It tests whether
+computational mutation labels improve nanobody Tm prediction with an ESM-2
+encoder.
 
 The current comparison includes Tm-only training and auxiliary labels from FEP, a matched 400 K MD native-contact mutation scan, Rosetta, ThermoMPNN, random variants scored by Rosetta, and ESM2-proposed variants scored by Rosetta. Results must be reported separately for frozen and fine-tuned encoders.
 
