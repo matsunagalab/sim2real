@@ -12,10 +12,10 @@ encoder. The comparisons did not show a simple relation between label count and
 Tm error. When calculations are intended to support Tm prediction, both the
 variants and the physical property should be considered from the start.
 
-One extension is to repeat matched scans across more nanobody structures and
-select new calculations adaptively. Reinforcement learning could support this
-sequential selection, but random sampling and simpler active-learning methods
-would be necessary baselines. A computed score alone should not define success:
-under the present Rosetta protocol, ESM2 proposals did not yield lower Tm
-prediction error than random variants. Any improvement should ultimately be
-tested with new experimental Tm measurements.
+Matched scans could next be extended to more nanobody structures, with new
+calculations selected adaptively. Reinforcement learning could support this
+sequential selection, but it should be compared with random sampling and simpler
+active-learning methods. Because ESM2 proposals did not yield lower Tm
+prediction error than random variants under the present Rosetta protocol, a
+computed score alone should not define success. Any improvement should
+ultimately be tested with new experimental Tm measurements.

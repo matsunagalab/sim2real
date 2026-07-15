@@ -24,14 +24,13 @@ failed, the PDBFixer output was retained. The available records do not show
 which route was used for each structure. The termini were left
 uncapped. Each protein was solvated in OPC water with 15~\AA{} padding and
 0.15~M NaCl and described with ff19SB
-\citep{Tian2020ff19SB,Izadi2014OPC}.
-
-The 300-K branch comprised 1~ns NVT and 1~ns NPT with a 2-fs timestep. Two
-1-ns restrained NVT stages at 400~K preceded unrestrained 400-K NVT production
-scheduled for 100~ns. Production used hydrogen-mass repartitioning to 4~amu, a
-4-fs timestep, and output every 100~ps. OpenMM used PME electrostatics with a
-1.0-nm cutoff, constraints on bonds to hydrogen, and a Langevin middle
-integrator with 1~ps$^{-1}$ friction \citep{Eastman2017OpenMM}.
+\citep{Tian2020ff19SB,Izadi2014OPC}. The 300-K branch comprised 1~ns NVT and
+1~ns NPT with a 2-fs timestep. Two 1-ns restrained NVT stages at 400~K preceded
+unrestrained 400-K NVT production scheduled for 100~ns. Production used
+hydrogen-mass repartitioning to 4~amu, a 4-fs timestep, and output every 100~ps.
+OpenMM used PME electrostatics with a 1.0-nm cutoff, constraints on bonds to
+hydrogen, and a Langevin middle integrator with 1~ps$^{-1}$ friction
+\citep{Eastman2017OpenMM}.
 
 The contact calculation used backbone heavy-atom pairs separated by more than
 three residues and within 0.45~nm in the first production frame. At least one
@@ -48,13 +47,12 @@ relation between sequence length and raw $Q$.
 The FEP tables used here comprised Ala, Asp, Gln, and Ile scans. Raw Phe scans
 existed but were not included in the processed tables, and the original reason
 for their omission was not recorded. Our conclusions therefore apply to the
-four-scan tables.
-
-For charge-changing mutations in a cubic 70-\AA{} box and a solvent dielectric
-constant of 78, we tested an analytical periodic net-charge correction of
-$0.086(\Delta q)^2$ kcal mol$^{-1}$. We applied the correction before repeating
-the sign reversal, robust scaling, Yeo--Johnson transform with standardization,
-and min--max scaling used for the training labels (Supplementary Fig.~S2b).
+four-scan tables. For charge-changing mutations in a cubic 70-\AA{} box and a
+solvent dielectric constant of 78, we tested an analytical periodic net-charge
+correction of $0.086(\Delta q)^2$ kcal mol$^{-1}$. We applied the correction
+before repeating the sign reversal, robust scaling, Yeo--Johnson transform with
+standardization, and min--max scaling used for the training labels
+(Supplementary Fig.~S2b).
 
 \subsection{Model-size checks}
 

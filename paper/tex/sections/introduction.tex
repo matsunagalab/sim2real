@@ -37,7 +37,6 @@ materials-property prediction in several settings
 examples do not guarantee a better experimental predictor, however. A
 calculation may be inaccurate, cover systems unrelated to the target, or report
 a quantity with only a weak connection to the experiment.
-
 This distinction is especially important for protein stability. Tm is the midpoint
 of a thermal-unfolding transition under specified assay conditions. A mutation
 free-energy change ($\Delta\Delta G$) instead describes how a sequence change
@@ -64,10 +63,9 @@ panel and local mutation scans on the same 1MEL and 4IDL structures used for
 FEP. Both studies used 400~K MD and native-contact values, but they differed in
 contact selection, trajectory averaging, and other details. We therefore
 compare the two MD studies as implemented and do not attribute their difference
-to sequence choice alone.
-
-Each model was trained on Tm and one calculated quantity using ESM2 sequence
-representations (Fig.~\ref{fig:learning_framework}). Model settings were
+to sequence choice alone. For each data source, the model was trained on Tm
+and one calculated quantity using ESM2 sequence representations
+(Fig.~\ref{fig:learning_framework}). Model settings were
 selected using only experimental Tm validation data. The selected models were
 then compared using paired absolute errors for the same 396 test sequences,
 which were not used for training or model selection. We use ``transfer'' to mean
@@ -90,6 +88,5 @@ heterogeneous-panel study. Among the calculated quantities, FEP gave the lowest
 test MAE with both encoder settings, whereas the 95\% interval for the
 change in MAE from MD native-contact labels excluded zero only with the frozen
 encoder. Across these comparisons, the number of calculated values alone did
-not predict transfer performance. Performance
-differed among data sets that varied in their selected sequences, calculated
-quantities, and other details.
+not predict transfer performance. Performance differed among data sets that
+varied in their selected sequences, calculated quantities, and other details.

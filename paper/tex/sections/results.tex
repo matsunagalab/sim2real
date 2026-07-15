@@ -23,7 +23,6 @@ lengths. The matched data set contained local single mutations of the fixed
 native-contact $Q$ form, but their contact definitions, trajectory lengths,
 averaging windows, and model searches differed. The comparison therefore does
 not isolate the effect of sequence selection.
-
 Because the two studies were developed and selected separately, we compared
 the change from the Tm-only model within each study rather than their absolute
 MAEs (Fig.~\ref{fig:data_design}a). In the heterogeneous study, adding the MD
@@ -40,9 +39,8 @@ changes were $-0.049^\circ$C for the frozen encoder (95\% CI, $-0.094$ to
 $-0.005^\circ$C) and $+0.122^\circ$C for the fine-tuned encoder (95\% CI,
 $-0.005$ to $+0.248^\circ$C). We did not retrain after removing the overlapping
 computed-label rows, so this check addresses their contribution to test MAE but
-not a possible effect during training or model selection.
-
-Other differences between the data sets may also matter. In the heterogeneous
+not a possible effect during training or model selection. Other differences
+between the data sets may also matter. In the heterogeneous
 table, $Q$ had a Pearson correlation of $r=+0.13$ with sequence length
 (Supplementary Fig.~S1). The matched scans held length fixed within each
 structure and described the local effect of one mutation. The heterogeneous
@@ -88,9 +86,8 @@ reached 7.01$^\circ$C MAE, a paired change of $-0.221^\circ$C from Tm-only
 7.03$^\circ$C, a change of $-0.195^\circ$C (95\% CI, $-0.366$ to
 $-0.030^\circ$C). Both intervals were below zero. ThermoMPNN reached
 7.09$^\circ$C, but its interval included zero. The Rosetta-based labels were
-close to or worse than the Tm-only model.
-
-With a fine-tuned encoder, FEP reached 6.40$^\circ$C, the lowest MAE in the
+close to or worse than the Tm-only model. With a fine-tuned encoder, FEP reached
+6.40$^\circ$C, the lowest MAE in the
 study. Its paired change from the 6.55$^\circ$C Tm-only model
 was $-0.153^\circ$C (95\% CI, $-0.323$ to $+0.020^\circ$C), an interval that
 included zero. Matched MD, ThermoMPNN, plain Rosetta, and random variants scored
@@ -104,7 +101,6 @@ was $-0.026^\circ$C with a frozen encoder (95\% CI, $-0.243$ to
 $+0.192^\circ$C) and $-0.182^\circ$C with a fine-tuned encoder (95\% CI,
 $-0.393$ to $+0.024^\circ$C). Neither interval excluded zero at the largest
 label count.
-
 The fine-tuned label-count curves show how the two results changed with the
 amount of auxiliary data (Fig.~\ref{fig:physical_observable}c). At $n=20$,
 matched MD increased MAE by $+0.47^\circ$C (95\% CI, $+0.26$ to
@@ -118,11 +114,10 @@ FEP $\Delta\Delta G$ measures the free-energy effect of a mutation, whereas
 high-temperature $Q$ measures contact retention over a finite trajectory. The
 closer thermodynamic connection between $\Delta\Delta G$ and mutation stability
 may help explain why FEP had a lower MAE after ESM2 fine-tuning,
-although the present experiments do not test that mechanism.
-
-In a recent preprint, we used sparse autoencoders to examine ESM2 after
-fine-tuning on nanobody Tm and found features associated with surface charge,
-hydrophobic-core packing, the VHH tetrad, and disulfide bonds
+although the present experiments do not test that mechanism. In a recent
+preprint, we used sparse autoencoders to examine ESM2 after fine-tuning on
+nanobody Tm and found features associated with surface charge, hydrophobic-core
+packing, the VHH tetrad, and disulfide bonds
 \citep{Murakami2025Mechanistic}. We did not examine the representations learned
 here. A useful follow-up would be to test whether FEP supervision strengthens
 the same features by comparing Tm-only, Tm+FEP, and Tm+MD models with the same
@@ -152,14 +147,13 @@ Without size-specific tuning, FEP reduced MAE relative to Tm-only for both the
 search applied to the 8M model, so these tests do not compare performance across
 model sizes. An analytical correction for periodic
 images in charge-changing FEP mutations had almost no effect on the scaled
-labels (Supplementary Fig.~S2b).
-
-Under the Rosetta protocol used here, ESM2-proposed variants did not give lower
-Tm error than random variants. This comparison provides no evidence that the
-ESM2 proposal step improved transfer to Tm.
-
-The heterogeneous pool contained 1143 rows and the matched pool contained 837,
-but each ensemble member sampled at most 640 auxiliary rows in both studies.
+labels (Supplementary Fig.~S2b). Under the Rosetta protocol used here,
+ESM2-proposed variants did not give lower Tm error than random variants. This
+comparison provides no evidence that the ESM2 proposal step improved transfer
+to Tm.
+Data set size did not explain the contrast between the two MD studies. The
+heterogeneous pool contained 1143 rows and the matched pool contained 837, but
+each ensemble member sampled at most 640 auxiliary rows in both studies.
 The larger frozen-encoder reduction for the matched scans therefore
 cannot be explained by more training labels per model. FEP and matched
 MD required similar simulation time per variant, but wall-clock costs were not
@@ -172,9 +166,8 @@ sampled repeated PDB entries, contained eight exact matches to the Tm test
 sequences, included 11 rows longer than the model input, and contained
 trajectories that did not all reach the scheduled production length. The
 selected FEP and MD models also differed in regression architecture and in
-whether the auxiliary loss updated the encoder.
-
-The bootstrap intervals resample the fixed test proteins after predictions are
-averaged across trained models. They do not include uncertainty from selecting
-auxiliary rows, training seeds, or model settings. Finally, we did not make new
-Tm measurements or evaluate predictions on newly measured nanobodies.
+whether the auxiliary loss updated the encoder. The bootstrap intervals
+resample the fixed test proteins after predictions are averaged across trained
+models. They do not include uncertainty from selecting auxiliary rows, training
+seeds, or model settings. Finally, we did not make new Tm measurements or
+evaluate predictions on newly measured nanobodies.
