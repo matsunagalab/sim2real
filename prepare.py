@@ -3,7 +3,8 @@
 """
 prepare.py — データ読込・トークナイズ・評価・スケーリング解析
 
-NbBench thermo-tm データセット (train 396, val 57, test 114) を使用。
+NbBench thermo-tm の低データ設定 (train 57, val 114, test 396) を使用。
+公開データの validation / test / train split をそれぞれ割り当てている。
 train.py の train() を呼んで学習を実行し、アンサンブル評価でメトリクスを出力する。
 
 使い方:
@@ -316,10 +317,16 @@ def evaluate_runs(model_dir: str, n_runs: int, device: torch.device, split: str 
     return metrics, residuals
 
 
-def bootstrap_ci(residuals, n_boot=10000, alpha=0.10, seed=42, trim_pct=0.0):
+BOOTSTRAP_CI_LEVEL = 0.95
+BOOTSTRAP_CI_PERCENTILES = (2.5, 97.5)
+
+
+def bootstrap_ci(residuals, n_boot=10000, alpha=0.05, seed=42, trim_pct=0.0):
     """Bootstrap CI over test sample residuals, with optional trimming of top outliers.
 
-    trim_pct: fraction of largest residuals to remove before computing mean (default 10%).
+    The default interval is the 2.5th--97.5th percentile range (95%).
+    trim_pct is the fraction of largest residuals removed before computing the
+    mean; the default of zero leaves all residuals in the estimate.
     """
     residuals = np.asarray(residuals)
     residuals = residuals[~np.isnan(residuals)]
@@ -626,7 +633,11 @@ def main():
         ci_widths.append(ci_w)
         ci_bounds.append((float(lo), float(hi)))
         all_residuals[n_val] = residuals
-        print(f"    MAE: {mean_mae:.4f}  90% CI: [{lo:.4f}, {hi:.4f}]  width={ci_w:.4f}", flush=True)
+        print(
+            f"    MAE: {mean_mae:.4f}  {BOOTSTRAP_CI_LEVEL:.0%} CI: "
+            f"[{lo:.4f}, {hi:.4f}]  width={ci_w:.4f}",
+            flush=True,
+        )
 
     if args.skip_eval:
         elapsed = time.time() - total_start
@@ -679,11 +690,12 @@ def main():
 
         # Pairwise ΔMAE (scaling[i] - scaling[0]), testing if significantly < 0
         print(f"  ΔMAE vs {scaling_name}={scaling_list[0]} (paired bootstrap):")
-        print(f"  {scaling_name:>8s}  {'ΔMAE':>8s}  {'90% CI':>20s}  {'p(Δ>0)':>8s}")
+        ci_label = f"{BOOTSTRAP_CI_LEVEL:.0%} CI"
+        print(f"  {scaling_name:>8s}  {'ΔMAE':>8s}  {ci_label:>20s}  {'p(Δ>0)':>8s}")
         ref = boot_maes[scaling_list[0]]
         for n in scaling_list[1:]:
             delta = boot_maes[n] - ref
-            lo_d, hi_d = np.percentile(delta, [5, 95])
+            lo_d, hi_d = np.percentile(delta, BOOTSTRAP_CI_PERCENTILES)
             p_positive = float(np.mean(delta > 0))
             print(f"  {n:>8d}  {np.mean(delta):>+8.4f}  [{lo_d:>+7.4f}, {hi_d:>+7.4f}]  {p_positive:>8.4f}")
             paired_per_n.append({
@@ -694,13 +706,17 @@ def main():
 
         # Full range comparison
         delta_full = boot_maes[scaling_list[-1]] - boot_maes[scaling_list[0]]
-        lo_f, hi_f = np.percentile(delta_full, [5, 95])
+        lo_f, hi_f = np.percentile(delta_full, BOOTSTRAP_CI_PERCENTILES)
         delta_full_mean = float(np.mean(delta_full))
         delta_full_lo = float(lo_f)
         delta_full_hi = float(hi_f)
         p_full = float(np.mean(delta_full > 0))
         print(f"\n  Full range ({scaling_name}={scaling_list[0]}→{scaling_list[-1]}):")
-        print(f"    ΔMAE = {delta_full_mean:+.4f}°C  90% CI=[{delta_full_lo:+.4f}, {delta_full_hi:+.4f}]")
+        print(
+            f"    ΔMAE = {delta_full_mean:+.4f}°C  "
+            f"{BOOTSTRAP_CI_LEVEL:.0%} CI="
+            f"[{delta_full_lo:+.4f}, {delta_full_hi:+.4f}]"
+        )
         print(f"    p(ΔMAE > 0) = {p_full:.4f}  (one-sided test of no-improvement)")
         if p_full < 0.05:
             print(f"    → 有意 (p < 0.05)")

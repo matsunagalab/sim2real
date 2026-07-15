@@ -2,14 +2,20 @@
 
 \section{Supplementary methods}
 
-\subsection{Additional details for the diverse MD panel}
+\subsection{Additional details for the heterogeneous MD panel}
 
-The diverse panel was assembled from an archived SAbDab summary and the
+The heterogeneous panel was assembled from an archived SAbDab summary and the
 corresponding IMGT-renumbered structures \citep{Dunbar2014SAbDab}. For each PDB
-identifier, the workflow took the first heavy-chain entry whose chain identifier
-was present in the structure file. After availability checks, this deterministic
-selection yielded 1143 structures with a usable sequence, topology, trajectory,
-and native-contact label.
+identifier, the procedure took the first heavy-chain entry whose chain identifier
+was present in the structure file. After availability checks, this rule yielded
+1143 PDB-derived rows with a usable sequence, topology,
+trajectory, and native-contact label. They represented 833 unique amino-acid
+sequences. Ninety-seven sequences occurred in more than one PDB entry, accounting
+for 407 rows. Their native-contact values were calculated separately from each
+PDB structure. Training sampled these rows rather than first combining entries
+with the same sequence, and the model received the sequence and $Q$ value but no
+PDB identifier. Eleven rows were longer than the 158-residue model input and
+were truncated at the end.
 
 The selected heavy chain was kept as an uncapped protein at pH 7.4, solvated in
 OPC water with 15~\AA{} padding and 0.15~M NaCl, and described with ff19SB
@@ -21,7 +27,7 @@ PME electrostatics with a 1.0-nm cutoff, constraints on bonds to hydrogen, and a
 Langevin middle integrator with 1~ps$^{-1}$ friction
 \citep{Eastman2017OpenMM}.
 
-The diverse-panel contact calculation used backbone heavy-atom pairs separated
+The heterogeneous-panel contact calculation used backbone heavy-atom pairs separated
 by more than three residues, within 0.45~nm in the reference structure, and with
 at least one atom in Asp, Glu, Gln, Asn, Arg, Lys, or His. For trajectories with
 more than 300 frames, the label was averaged over the larger of the final 300
@@ -29,17 +35,17 @@ frames and the final one third of the trajectory; all frames were used for
 shorter trajectories. Supplementary Fig.~S1 shows the relation between sequence
 length and the resulting raw $Q$ value.
 
-\subsection{FEP provenance and charge-change check}
+\subsection{FEP row and charge-change checks}
 
-The retained FEP tables contain Ala, Asp, Ile, and Gln scans. Row-level
-provenance was checked against the archived scan outputs; the available Phe
-scans were not included.
+The retained FEP tables contain Ala, Asp, Ile, and Gln scans. We checked each
+row against the archived scan outputs; the available Phe scans were not
+included.
 
 For charge-changing mutations in a cubic 70-\AA{} box and solvent dielectric
 78, we tested an analytical periodic net-charge correction of
 $0.086(\Delta q)^2$ kcal mol$^{-1}$. We applied the correction before repeating
 the sign reversal, robust scaling, Yeo--Johnson transform, and min--max scaling
-used for the model-facing labels (Supplementary Fig.~S2b).
+used for the training labels (Supplementary Fig.~S2b).
 
 \renewcommand{\thefigure}{S\arabic{figure}}
 
@@ -56,12 +62,12 @@ descriptive and does not establish that length caused the transfer difference.}
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth]{supp_fig02_transfer_controls}
-\caption{Robustness controls for the FEP result.
+\caption{Additional checks of the FEP result.
 \textbf{(a)} Paired FEP-minus-Tm-only MAE for fine-tuned ESM2 encoders. Negative
-values mean lower Tm error with FEP. The 8M point is the staged-selected
-five-seed model; the 35M and 650M points are exploratory fixed-configuration
-ten-seed controls and were not subjected to the same search. Whiskers are
-nominal 90\% paired bootstrap intervals over the 396 test proteins.
+values mean lower Tm error with FEP. The 8M point is the five-seed model selected
+after the two-stage search; the 35M and 650M points are exploratory ten-seed
+controls run with fixed settings and were not subjected to the same search. Whiskers are 95\%
+paired bootstrap intervals over the 396 Tm test values.
 \textbf{(b)} Change in each scaled FEP label after the analytical periodic
 net-charge correction at dielectric 78.}
 \label{fig:supp_transfer_controls}

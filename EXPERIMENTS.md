@@ -1,7 +1,7 @@
 # Experiments
 
 Named-experiment registry for reproducing every Tm-prediction run in this project.
-Source of truth: `experiments.yaml`. Run any entry with:
+The entries are defined in `experiments.yaml`. Run any entry with:
 
 ```bash
 uv run python scripts/run_experiment.py <name>

@@ -1,635 +1,347 @@
 # Manuscript Outline — Sim2Real Nanobody Tm
 
-Last reconciled with the manuscript and tuned result files: **2026-07-12**.
+Last revised: 2026-07-15
 
-This file is the manuscript's scientific decision log and structural source of truth. It should describe
-the paper as it is now, not preserve superseded drafts. Numerical claims must be checked against
-`results/final_*/scaling.json`; journal structure must follow `AUTHOR_GUIDELINES.md`.
+This file is the working plan for the manuscript. It records the story, the
+figures, the numerical results, and the limits of the conclusions. The paper
+should use plain words wherever a technical term is not needed.
 
-## 1. Submission Snapshot
+## 1. Paper at a glance
 
-- **Journal:** Biophysics and Physicobiology (BPPB), Regular Article.
-- **Scientific area:** biomolecular simulation, protein engineering, and simulation-to-experiment
-  transfer learning.
-- **Target system:** low-data nanobody melting-temperature (Tm) prediction.
-- **Experimental split:** 57 training / 114 validation / 396 held-out test sequences.
-- **Main figures:** three, plus one graphical abstract.
-- **Current manuscript:** 12 pages in the official BPPB template; the BPPB section order is wired
-  into `tex/main.tex`.
-- **Production status:** scientific story and main figures are near-final; supplementary figures,
-  Fig. 1, terminology, and the cover letter remain.
+- **Journal and article type:** Biophysics and Physicobiology, Regular Article.
+- **Topic:** transfer learning from calculated protein-stability quantities to
+  nanobody melting-temperature (Tm) prediction.
+- **Experimental split:** 57 Tm values for training, 114 for validation, and
+  396 reserved for final testing.
+- **Main figures:** Fig. 1–3. Fig. 1 is being revised separately by the authors.
+- **Supplementary figures:** Fig. S1–S2.
+- **Main statistical display:** paired change in test MAE with a 95% bootstrap
+  interval over the same 396 test sequences.
 
-### Required section order
+## 2. Title, question, and answer
 
-`SECTION_ORDER: introduction -> methods -> results-and-discussion -> conclusion`
-
-Front matter: title, authors, abstract, keywords, and significance statement. The graphical abstract
-and its caption are separate submission files.
-
-Back matter: conflict of interest, author contributions, data availability, acknowledgements, and
-references. Supplementary Materials are submitted as a separate PDF.
-
-## 2. Title and One-Sentence Claim
-
-### Preferred title
+### Title
 
 **Transfer learning with simulated variants and calculated quantities for
 nanobody melting-temperature prediction**
 
-This title is used in `tex/main.tex` and `tex/supplementary_main.tex`.
+The short title is **Transfer learning for nanobody Tm prediction**.
 
-### One-sentence claim
+### Question
 
-Simulation-derived labels improve low-data nanobody Tm prediction most strongly when their sequence
-design is matched to the target problem, while the physical quantity encoded by the label determines
-whether the benefit remains when the protein-language-model encoder is fine-tuned.
+When experimental Tm values are scarce, which simulation plans and calculated
+quantities provide useful additional training labels?
 
-### Plain-language take-home message
+### Main answer
 
-The number of simulation labels alone does not determine their value. The simulated variants must
-probe a relevant sequence neighborhood, and the simulated quantity must carry information that
-transfers to the experimental phenotype.
+The number of calculated labels alone did not explain their value. Among the
+two complete MD plans tested, local mutation scans gave a larger observed gain
+with a frozen encoder than a heterogeneous structure panel. Among the calculated
+quantities, FEP gave the lowest observed test error with both frozen and
+fine-tuned encoders. The 95% interval for the fine-tuned FEP change included
+zero, so that result should be described as the lowest observed error, not as a
+clear improvement.
 
-## 3. Main Story
+### Practical lesson
 
-The paper asks a broad Sim2Real question through one biological case study:
+Before running simulations for an experimental prediction problem, consider
+both the systems to calculate and the quantity to report. More calculated
+values are not automatically more useful.
 
-> How should simulation-derived labels be designed and used when they are related to, but are not the
-> same quantity as, a scarce experimental target?
+## 3. What the data show
 
-The experimental target is nanobody Tm. The computational labels include mutation free energies,
-native-contact persistence, Rosetta scores, and ThermoMPNN scores. All labels are used as auxiliary
-prediction tasks sharing an ESM2-based sequence representation with the Tm task. Models are selected
-only on experimental Tm validation performance and compared on the same held-out Tm test proteins.
+### Result 1 — The two complete MD plans gave different results
 
-The answer has **two axes**.
+Both plans used 400 K MD and a native-contact quantity from the Best–Hummer
+family, but they differed in several other ways.
 
-### Axis 1 — Simulation design controls the strength of transfer
+- The heterogeneous plan contained 1,143 PDB-derived rows representing 833
+  unique sequences. Rows differed in sequence length, contact selection, and
+  structure.
+- The matched plan used single mutations of 1MEL and 4IDL, with 837 sequence
+  rows that were also present in the 844-row FEP pool.
+- The two plans used different contact definitions, averaging windows,
+  preprocessing, and independently selected model settings.
 
-The same type of MD native-contact observable has different value under two sequence designs:
+For the frozen encoder, the heterogeneous plan changed MAE by
+−0.049 °C (95% CI, −0.092 to −0.006 °C), whereas the matched plan changed it by
+−0.195 °C (95% CI, −0.366 to −0.030 °C). Neither plan gave a clear gain after
+encoder fine-tuning.
 
-- In a heterogeneous panel of nanobody structures, the label has only a small frozen-encoder
-  benefit ($\Delta$MAE $-0.049$ °C) and is harmful with a hot encoder ($+0.116$ °C). That panel spans
-  58–461 residues and has a nonzero label–length correlation (Pearson $r=+0.13$), identifying
-  heterogeneity and sequence length as potential shortcuts rather than proving one causal mechanism.
-- In mutation scans on the same 1MEL and 4IDL scaffolds used for FEP, sequence length is fixed and the
-  native-contact label gives a much larger frozen-encoder improvement ($-0.195$ °C), statistically
-  tying FEP at the largest tested label-count setting. It remains neutral rather than beneficial in
-  the hot regime ($+0.029$ °C).
-- Raw per-mutant Q and WT-referenced $\Delta Q$ differ by a scaffold-specific constant. After the
-  per-table min–max preprocessing used here, that offset does not explain the gain. The changed result
-  is therefore attributed to sequence design, not label arithmetic.
+This is a comparison of complete plans, not a test in which only the selected
+sequences changed. The paper must not assign the difference to one factor.
 
-**Claim boundary:** the two simulation-acquisition designs come from independently tuned experimental series, not a
-single preregistered factorial experiment. The evidence supports the conservative statement that a
-matched local mutation scan substantially strengthens frozen-encoder transfer and avoids the hot-
-encoder penalty seen in the heterogeneous screen. It does not prove that sequence length alone caused
-the difference or that every matched scan will transfer.
+### Result 2 — FEP gave the lowest observed error in both encoder settings
 
-### Axis 2 — Physical observable determines the depth of transfer
+At the largest label count:
 
-Once simulation design is matched, FEP and MD native contacts behave differently across encoder regimes:
+- Frozen FEP: ΔMAE = −0.221 °C (95% CI, −0.393 to −0.051 °C).
+- Frozen matched MD: ΔMAE = −0.195 °C (95% CI, −0.366 to −0.030 °C).
+- Fine-tuned FEP: ΔMAE = −0.153 °C (95% CI, −0.323 to +0.020 °C).
+- Fine-tuned matched MD: ΔMAE = +0.029 °C
+  (95% CI, −0.139 to +0.197 °C).
 
-- FEP mutation free energy improves Tm with both a frozen and a fine-tuned (hot) encoder.
-- The matched native-contact label improves Tm with a frozen encoder but gives no net benefit with a
-  hot encoder and is harmful at low label counts.
-- FEP directly beats the native-contact label in the hot regime but not in the frozen regime.
+FEP and matched MD both gave clear frozen-encoder gains. Their direct frozen
+difference was small and unresolved: FEP minus MD = −0.026 °C
+(95% CI, −0.243 to +0.192 °C). With a fine-tuned encoder, FEP had a lower
+observed error than MD by 0.182 °C, but the 95% interval still included zero
+(−0.393 to +0.024 °C).
 
-The regime contrast supports a **depth-of-transfer interpretation**: FEP labels remain useful during
-encoder fine-tuning, whereas native-contact labels are useful only when operating
-on a fixed pretrained representation.
+Plain Rosetta, ThermoMPNN, and Rosetta scores for random variants gave little or
+no gain. ESM2-proposed variants followed by Rosetta increased error by
+0.411 °C (95% CI, +0.140 to +0.698 °C).
 
-**Claim boundary:** the experiments compare frozen and hot training outcomes; they do not directly
-measure representational geometry or prove a molecular mechanism. Wording such as “consistent with
-beneficially reshaping the encoder” is justified. Wording that claims the representation was directly
-shown to be reshaped by a specific physical mechanism is too strong.
+### Result 3 — The amount of data did not give a simple rule
 
-### Supporting hierarchy
+For the frozen encoder, both FEP and matched MD improved between the smallest
+and largest label counts, but the four points were not monotonic enough to fit
+a scaling law. For the fine-tuned encoder, matched MD was harmful at the
+smallest count and returned near the Tm-only value at the largest count. FEP
+ended with the lowest observed error, but its 95% interval included zero.
 
-Under matched per-source tuning:
+Here, \(n\) is the number sampled from each scaffold table for each ensemble
+member. Eighty percent of those rows entered training and 20% were set aside
+for monitoring the calculated-label task. Sampling was repeated independently
+for each ensemble member.
 
-- FEP is the only computational label that robustly improves the hot regime.
-- FEP and matched-scan MD lead and statistically tie in the frozen regime.
-- ThermoMPNN gives a weak, non-significant frozen improvement.
-- Plain Rosetta and Rosetta scores on random or ESM2-proposed variants are null or harmful.
-- ESM2-proposed variants do not outperform random variants after tuning.
+## 4. Important checks and limits
 
-These results support **selective transfer**, not a general claim that computational labels help.
+### Sequence overlap
 
-### Explicitly excluded story
+The heterogeneous MD table had exact full-sequence matches to 2 Tm-training,
+4 Tm-validation, and 8 Tm-test sequences. The model could see calculated
+\(Q\) values for these sequences, but never their reserved test Tm values.
+Removing the eight test matches from the error calculation left the main
+contrast almost unchanged:
 
-This is not a reinforcement-learning, active-learning, generator–predictor, or closed-loop design
-paper. The ESM2-proposed and random variant sets are ordinary comparators, and the present results
-must not be described as a successful design strategy. A short Conclusion paragraph may discuss
-reinforcement learning as a future sequential extension, provided it is clearly prospective and
-requires comparison with random sampling, simpler active-learning methods, and new experiments.
+- frozen encoder: −0.049 °C, 95% CI −0.094 to −0.005 °C;
+- fine-tuned encoder: +0.122 °C, 95% CI −0.005 to +0.248 °C.
 
-## 4. Evidence, Interpretation, and Scope
+This check shows that the test errors of the eight matches did not drive the
+result. We did not retrain after removing overlapping calculated-label rows, so
+the check does not rule out an effect on training or model selection.
 
-### Directly supported by held-out test evidence
+### Repeated structures and sequence length
 
-1. The tuned frozen and hot baselines differ.
-2. Matched-scan MD and FEP improve the frozen baseline at the largest tested setting.
-3. Only FEP improves the hot baseline at that setting.
-4. FEP and matched MD are indistinguishable when frozen; FEP is better when hot.
-5. The matched MD scan produces a substantially larger frozen benefit than the diverse MD panel; the
-   diverse panel is heterogeneous and contains a possible length shortcut.
-6. Rosetta-family comparators do not robustly improve Tm under matched tuning.
+Ninety-seven sequences account for 407 of the 1,143 heterogeneous rows. The
+model did not receive PDB identifiers, but row sampling gives repeated
+sequences more weight. The heterogeneous \(Q\) value also has a weak positive
+correlation with sequence length (Pearson \(r=+0.13\)). Eleven rows are longer
+than the 158-residue input limit and are truncated. These observations are
+possible explanations or sources of bias, not proof of a cause.
 
-### Mechanistic interpretation
+### Limits on the conclusions
 
-1. Matching the mutation neighborhood removes a shortcut and exposes a transferable local stability
-   signal.
-2. Sparse experimental Tm labels anchor the absolute phenotype, while mutation-effect labels provide
-   local directions in sequence space.
-3. Mutation free energy is closer to the thermodynamic stability phenotype than native-contact
-   persistence and therefore remains useful during encoder adaptation.
+- The Tm training set contains only 57 nanobodies.
+- The matched calculations cover only 1MEL and 4IDL.
+- The two MD plans differ in more than one part of their setup.
+- The selected FEP and MD models do not always use the same regression form.
+- Bootstrap intervals resample the fixed test proteins after averaging trained
+  models. They do not include uncertainty from row sampling, training seeds,
+  or model selection.
+- Wall-clock costs were not saved consistently enough for a broad cost claim.
+- No new Tm measurements or prediction test on newly measured nanobodies was performed.
 
-These interpretations should be presented as the most coherent explanation of the controlled
-results, not as independently measured mechanisms.
-
-### Generalization boundary
-
-- One experimental benchmark and one deliberately low-data split.
-- Two mutation-scan scaffolds for the positive FEP/matched-MD result.
-- A limited menu of computational labels and model architectures.
-- No new experimental validation of predicted stabilizing variants.
-- Label-count curves are not sufficiently monotonic to claim a universal scaling law.
-- Absolute improvements are modest and describe predictor error, not assay-level changes in protein Tm.
-
-## 5. Reader Path and Terminology
-
-### Reader path
-
-1. The present low-data task uses 57 experimental Tm labels for training.
-2. Computed stability values can be used as additional training signals, but those values are not Tm.
-3. Multi-task learning provides a direct way to test transfer while model selection uses only Tm data.
-4. Simulation design controls how strongly an MD label transfers.
-5. Physical observable determines whether transfer survives encoder fine-tuning.
-6. These observations become practical rules for simulation-dataset construction.
-
-### Preferred terminology
-
-Use **computational label**, **computational task**, and **computational head** as the general terms.
-“Auxiliary” may be used sparingly when explaining the machine-learning role, but it should not create
-a second naming system.
-
-At first mention, give physical meaning before abbreviations:
-
-- “experimental melting temperature (Tm)”
-- “pretrained protein language model ESM2”
-- “mutation free-energy labels from alchemical free-energy perturbation (FEP)”
-- “MD-derived native-contact persistence (Q-value)”
-- “structure-based Rosetta mutation score”
-- “ThermoMPNN stability score”
-
-Figure labels should be reader-facing: “Tm labels only,” “mutation free energy,” “MD native contact
-(matched scan),” “Rosetta mutation score,” and “ThermoMPNN stability score.”
-
-### Language to avoid
-
-- Avoid: “simulation data improve Tm prediction.”
-  Use: “transfer depends on which variants are simulated.”
-- Avoid: “$\Delta\Delta G$ predicts Tm.”
-  Use: “mutation free-energy labels improve the Tm predictor.”
-- Avoid: “MD does not transfer” or “length confounding caused the null result.”
-  Use: “the matched mutation scan strengthens frozen transfer relative to the heterogeneous screen.”
-- Avoid: “FEP reshapes the encoder” as a directly observed fact.
-  Use: “FEP remains beneficial during encoder fine-tuning, consistent with deeper transfer.”
-- Avoid: “statistically significant” without naming the interval or test convention.
-- Avoid framing the present study as a design-loop or reinforcement-learning result. Mention these
-  only as explicitly prospective work with appropriate baselines and experimental validation.
-
-## 6. Contributions
-
-The manuscript should claim four contributions, in this order:
-
-1. **A clear model-selection and test procedure.** Computational labels share a sequence model with the Tm
-   task, but models are selected only with experimental Tm validation data and final comparisons use
-   paired errors on a common held-out test set.
-2. **A simulation-design contrast.** The same native-contact observable gives a much larger frozen benefit
-   in matched constant-length mutation scans than in a heterogeneous screen, while neither design is
-   sufficient for a hot-encoder benefit.
-3. **A physical-observable result.** FEP transfers in both frozen and hot regimes, whereas matched
-   native contacts transfer only with a frozen encoder.
-4. **A practical design rule.** Simulations intended for experimental prediction should be
-   designed around both relevant sequence perturbations and phenotype-aligned observables.
-
-The source-menu comparison and model-size controls support these contributions but are not separate
-headline claims.
-
-## 7. Manuscript Architecture
+## 5. Order of the manuscript
 
 ### Abstract
 
-One paragraph, at most 250 words, with no references.
+Use one paragraph of at most 250 words.
 
-1. Experimental problem: nanobody Tm labels are scarce.
-2. Domain gap: simulations produce related quantities rather than Tm itself.
-3. Protocol: independently tuned computational tasks, experimental validation selection, common
-   held-out test set.
-4. Axis 1: matched-scan MD gives a substantially larger frozen benefit than diverse-screen MD.
-5. Axis 2: FEP helps frozen and hot; matched MD only frozen.
-6. Implication: simulation design and physical observable jointly affect transfer.
-
-The abstract should report the best hot FEP result (6.40 °C from 6.55 °C) and the frozen matched-MD
-gain (approximately 0.20 °C), without crowding it with the full comparator table.
+1. Experimental Tm values are scarce.
+2. Calculated stability quantities are related to Tm but are not Tm labels.
+3. Each calculated label and encoder setting was selected using Tm validation
+   only, then compared using the same 396 test Tm values.
+4. The local mutation-scan MD plan gave a larger frozen-encoder gain than the
+   heterogeneous plan, while the plans differed in several ways.
+5. FEP gave the lowest observed error in both encoder settings; the fine-tuned
+   95% interval included zero.
+6. Simulations should be planned around both the systems and the reported
+   quantity, rather than data count alone.
 
 ### Introduction
 
-Paragraph logic:
+1. Explain why low-data Tm prediction matters for nanobody engineering.
+2. Explain why calculated labels may help but should not be called Tm data.
+3. Distinguish Tm, mutation free energy, native-contact persistence, Rosetta
+   scores, and ThermoMPNN predictions.
+4. Present multi-task transfer learning as the way these labels are tested.
+5. State the two questions: which simulation plan, and which calculated
+   quantity?
+6. Preview the results without claiming a single cause for the MD-plan
+   difference.
 
-1. Experimental property data constrain protein engineering.
-2. Sim2Real learning uses computed properties as auxiliary signals for experimental targets, but a
-   domain gap means that the calculated data may not improve the measured task.
-3. Protein stability is a particularly sharp case because Tm, mutation $\Delta\Delta G$, structural
-   scores, and trajectory summaries have related but non-identical meanings.
-4. Nanobodies provide a useful low-data testbed; ESM2 supplies a shared sequence representation.
-5. Gap: prior work does not establish which combination of sequence design and physical observable
-   makes computational labels useful for nanobody Tm prediction.
-6. Approach: compare independently tuned computational labels using target-only validation and paired
-   held-out evaluation.
-7. Preview the two axes and their practical design rule.
+### Materials and methods
 
-Use Minami et al. as the closest Sim2Real framing precedent, without claiming a universal biological
-scaling law. Use published PLM, Tm, nanobody, FEP, and MD literature to establish the biological case.
-The related in-house Murakami manuscript may guide framing but should be cited only if its submission
-status and journal policy permit.
+Describe enough detail to reproduce every plotted comparison:
 
-### Materials and Methods
+- NbBench source and the 57/114/396 split.
+- FEP mutation calculations for 1MEL and 4IDL.
+- Matched 400 K MD, native-contact definition, first 40 ns used for every
+  variant, and per-structure scaling.
+- Heterogeneous 400 K MD, 1,143 rows/833 unique sequences, row sampling,
+  repeated sequences, and the input-length limit.
+- Rosetta, ThermoMPNN, random variants, and ESM2-proposed variants.
+- The 8M ESM2 model, regression heads, frozen and fine-tuned settings, losses,
+  two-stage model search, and experimental-Tm-only selection.
+- The meaning of \(n\), the 80/20 split of sampled calculated rows, and the
+  independent sampling for each ensemble member.
+- Five-model prediction averaging and paired 95% bootstrap intervals over 396
+  test proteins.
 
-Methods should allow reconstruction of every comparison in the main figures.
+Use “fine-tuned encoder” in the paper. The code and result directories use the
+internal name `hot` for the same setting.
 
-#### Experimental target
+### Results and discussion
 
-- NbBench-derived nanobody Tm data.
-- Deliberately reassigned low-data split: 57 train / 114 validation / 396 test.
-- Tm scaling fitted on the 57-sequence training set only.
-- Explain the scientific reason for the low-data setting without implying that the split was chosen
-  after looking at final test performance.
+Keep Results and Discussion together.
 
-#### Computational labels
-
-- FEP mutation $\Delta\Delta G$: 1MEL and 4IDL mutation tables.
-- Matched MD native-contact label: the same mutation-scan scaffolds.
-- Diverse MD native-contact panel: heterogeneous simulation-design comparison with variable sequence length.
-- Plain Rosetta, ThermoMPNN, random-variant/Rosetta, and ESM2-proposed-variant/Rosetta comparators.
-- Define preprocessing, direction conventions, per-table scaling, and separate/contextual heads.
-
-#### Model
-
-- ESM2 encoder, frozen or fully fine-tuned.
-- Shared or architecture-specific MLP paths.
-- Tm head and computational head(s), all scalar outputs.
-- Shared-trunk implementation: encoder hidden size → 256 → 128 → 32; output heads 32 → 1.
-- Huber losses with uncertainty weighting; relevant fixed-weight controls in Supplementary Material.
-
-#### Selection protocol
-
-- Stage 1: architecture × computational-head coupling.
-- Stage 2: learning rate × dropout × weight decay around the selected skeleton.
-- Tune every computational label separately in frozen and hot regimes.
-- Three-seed validation ensembles; five-seed final test ensembles.
-- Checkpoint selection and HPO use experimental Tm validation rows only.
-- Final claims use the 396 held-out test proteins only after configuration selection.
-
-#### Statistics
-
-- Primary metric: ensemble MAE in °C.
-- Single-condition uncertainty: nonparametric bootstrap over test proteins.
-- Comparisons: paired bootstrap using the same resampled test indices for candidate and reference.
-- Primary evidence display: paired $\Delta$MAE and 90% CI; negative values favor the candidate.
-- Resolve and document the p-value convention before reporting p values. Current prose describes a
-  one-sided tail probability, while `plot/build_tuned_summaries.py` currently emits a two-sided value.
-
-#### Label-count notation
-
-`prepare.py --n-ddg-list` samples up to `n` rows from each template-specific table. Before final
-submission, ensure every occurrence of “n labels” states clearly whether `n` is a per-table cap or a
-total across the two scaffold tables. Figures, captions, Methods, and supplementary tables must use
-one convention.
-
-### Results
-
-The Results section should contain three movements aligned to the three main figures.
-
-#### Result 1 — Model selection and held-out test comparison
-
-- Define Tm as the target and computed quantities as related tasks rather than surrogate Tm labels.
-- Explain the common encoder, task-specific heads, frozen/hot regimes, and target-only validation.
-- Establish the low-data split and tuned baselines: 7.23 °C frozen, 6.55 °C hot.
-- End with the two questions: what makes a label transfer, and how deeply can it act?
-
-#### Result 2 — A matched mutation scan strengthens native-contact transfer
-
-- Define the heterogeneous variable-length panel and the fixed-scaffold local mutation scans
-  briefly in the text; do not spend a main-figure panel on this setup.
-- Compare diverse-panel and matched-scan native-contact labels as paired $\Delta$MAE against their
-  own training-series Tm-only references, in both frozen and hot regimes. Do not compare absolute
-  MAEs across the two series.
-- Report the diverse panel's 58–461-residue range and $r=+0.13$ label–length correlation in the text
-  and Supplementary Material as a possible shortcut, not a proven causal mechanism.
-- Explain why Q and $\Delta Q$ are equivalent after the applied scaling.
-- Show frozen label-count curves: FEP 7.13→7.01; matched MD 7.32→7.03 and crosses the baseline by the
-  largest setting.
-- At the largest setting, report FEP −0.22 °C and matched MD −0.20 °C versus baseline; their direct
-  paired difference is −0.03 °C with a CI crossing zero.
-- Conclude narrowly: the matched local scan substantially strengthens the frozen benefit and avoids
-  the hot penalty of the heterogeneous screen, but matching alone is not enough for hot transfer.
-
-#### Result 3 — Physical observable determines transfer depth
-
-- Present the frozen hierarchy: FEP ≈ matched MD, ThermoMPNN weak third, Rosetta family at baseline.
-- Contrast frozen and hot paired effects.
-- FEP helps both regimes and reaches the overall best MAE of 6.40 °C.
-- Matched MD helps only frozen, is harmful at the smallest hot setting (+0.47 °C), and returns to the
-  hot baseline by the largest setting.
-- Direct comparison: FEP ties matched MD when frozen but beats it when hot.
-- Interpret the pattern as shallow versus deep transfer, with the evidence/interpretation boundary
-  stated explicitly.
-- Close with the negative comparator result and explicitly reject design-loop framing.
-
-### Discussion
-
-The Discussion should move from finding to mechanism to scope.
-
-1. Restate the two axes without repeating the full Results table.
-2. Explain why matched mutation scans remove a sequence-length shortcut and offer local stability
-   directions.
-3. Explain why mutation free energy and Tm are distinct but thermodynamically related; sparse Tm
-   anchors the absolute phenotype while $\Delta\Delta G$ supplies relative mutation information.
-4. Interpret the frozen/hot contrast as evidence about transfer depth, while acknowledging that no
-   direct representation analysis was performed.
-5. Use model-size, charge-correction, clipping, and source-menu controls to delimit alternative
-   explanations.
-6. Position the result relative to Sim2Real learning: useful computational data require aligned
-   design, not just volume.
-7. State limitations and the next scientific experiment: broader scaffold coverage, other physical
-   observables, and prospective experimental validation.
-
-Do not turn computational cost into a quantitative conclusion; cost was not systematically measured.
-A qualitative breadth-versus-fidelity trade-off is acceptable.
+1. Establish the common Tm test and the Tm-only values: 7.23 °C frozen and
+   6.55 °C fine-tuned.
+2. Compare the two complete MD plans in Fig. 2.
+3. Report the sequence-overlap check and possible effects of length and
+   repeated structures without assigning cause.
+4. Compare FEP, matched MD, Rosetta, and ThermoMPNN in Fig. 3.
+5. Explain why FEP may be more closely related to folding stability, while
+   making clear that the molecular reason was not tested.
+6. Cite the group’s mechanistic preprint as a future question about learned
+   features, not as proof for the present models.
+7. End with the additional checks and the study limits.
 
 ### Conclusion
 
-Two compact paragraphs:
+The first paragraph should state the results and the practical lesson. The
+second should describe future use: more scaffolds, sequential choice of
+variants, active learning, and reinforcement learning. A future score used as
+a reward must be compared with random sampling and simpler methods, and the
+final test should use new experimental Tm measurements.
 
-1. State that computational labels help selectively, matched sequence design strengthens
-   native-contact transfer, free-energy labels remain useful during encoder fine-tuning, and
-   simulation datasets for experimental prediction should be designed around both axes.
-2. Give a clearly prospective view of sequential variant selection. Reinforcement learning is one
-   possible method, but computed scores alone are not adequate rewards; compare against random
-   sampling and simpler active learning, and judge success with new experimental Tm measurements.
+## 6. Figure plan
 
-### Declarations
+### Fig. 1 — Model and evaluation
 
-- Conflict of interest.
-- Author contributions using confirmed CRediT roles.
-- Data availability with final repository/archive identifiers.
-- Acknowledgements, funding, and computational resources.
+**Purpose:** show how experimental Tm labels and one calculated label train a
+shared sequence model, while model choice uses experimental Tm validation only
+and final results use the reserved Tm test set.
 
-Current contribution statement: Yasuhiro Matsunaga conceived and designed the study; Matsunaga,
-Taihei Murakami, and Kentaro Sasaki carried out the overall computational study; Matsunaga and Murakami
-analyzed the data and wrote the manuscript; Soichiro Oda and Kazuma Okada performed the FEP
-calculations. Final repository and Zenodo identifiers remain submission-time items.
+The authors are revising this figure separately. Do not replace it during the
+Fig. 2/3 work.
 
-## 8. Figure Plan
+### Fig. 2 — Complete MD plans
 
-### Graphical abstract — The two design decisions
+**Message:** the matched mutation-scan plan gave a larger observed frozen-
+encoder gain than the heterogeneous-panel plan; neither plan gave a clear
+fine-tuned gain.
 
-Show one flow with two gates:
+- **a:** horizontal paired ΔMAE for both plans and both encoder settings. Each
+  point is compared with the Tm-only model from the same study. Zero must be
+  clearly labelled.
+- **b:** frozen-encoder FEP and matched-MD changes over four label counts.
+  State that \(n\) is per scaffold table and ensemble member.
+- Use 95% intervals and boxed axes. Do not bold points solely because an
+  interval excludes zero.
 
-1. Is the simulated sequence neighborhood matched to the target? Matching strengthens the useful
-   signal and reduces heterogeneous shortcuts.
-2. Is the observable aligned strongly enough with stability? If yes, transfer can persist during
-   encoder fine-tuning; if not, benefit is limited to a fixed representation.
+### Fig. 3 — Calculated quantities
 
-Keep it conceptual and do not reproduce detailed result panels.
+**Message:** FEP gave the lowest observed Tm error with frozen and fine-tuned
+encoders; the fine-tuned FEP interval included zero.
 
-### Fig. 1 — Multi-task training and Tm-based model selection
+- **a:** horizontal paired ΔMAE for all calculated labels, with frozen and
+  fine-tuned points separated.
+- **b:** direct FEP-minus-MD comparison. Zero means equal test MAE; negative
+  values favor FEP and positive values favor MD.
+- **c:** fine-tuned FEP and matched-MD changes over four label counts.
+- Use 95% intervals and boxed axes. Keep labels and the zero reference readable
+  at final printed size.
 
-**Message:** computational labels influence a shared representation, while model selection and final
-evaluation remain anchored to experimental Tm.
+## 7. Supplementary material
 
-Required content:
+Keep only material that helps interpret a main figure.
 
-- experimental and computational sequence inputs;
-- ESM2 encoder and shared 256→128→32 MLP;
-- scalar Tm and computational heads;
-- frozen/hot encoder states;
-- train 57 / validation 114 / test 396;
-- target-only validation and paired test comparison.
+### Fig. S1 — Data and plan checks
 
-Current placed image is stale: it says “Source head,” shows a 64-unit final shared layer, and depicts
-the scalar heads as 32-unit layers. Regenerate it; do not merely relabel the existing boxes.
+- source-table sizes and sequence lengths;
+- label distributions;
+- the weak length–\(Q\) relation in the heterogeneous panel;
+- overlap counts, repeated sequences, and truncation are stated in the text or
+  source tables rather than expanded into extra panels unless needed.
 
-### Fig. 2 — Simulation-design axis
+### Fig. S2 — Additional checks
 
-**Message:** the matched local mutation scan shows a larger frozen-encoder native-contact gain than
-the heterogeneous structure panel, but it does not improve the fine-tuned encoder.
+- fixed-setting 35M and 650M ESM2 checks, clearly labelled as within-size
+  FEP-versus-Tm-only comparisons rather than a model-size ranking;
+- analytical charge correction for FEP;
+- clipping and added-Phe checks may remain in a compact panel or table only if
+  they are cited in the main text.
 
-- **(a)** Four directly labelled paired effects versus each series' own Tm-only reference. Diverse:
-  $-0.049/+0.116$ °C; matched: $-0.195/+0.029$ °C for frozen/fine-tuned, respectively. Zero means
-  equal MAE to the series-specific Tm-only model.
-- **(b)** Frozen FEP and matched-MD paired $\Delta$MAE over the four tested label counts on a log$_2$
-  count axis. Zero is the tuned frozen Tm-only model; show paired 90% bootstrap intervals rather
-  than single-model intervals and label the final values directly.
+Do not restore the removed supplementary figures unless they answer a specific
+question raised by the main text.
 
-The caption must state that the diverse and matched results come from independently tuned series and
-are expressed relative to their own Tm-only references. The length scatter moves to Supplementary
-Material; length is a plausible design shortcut, not a proven explanation by itself.
+## 8. Numerical reference
 
-### Fig. 3 — Physical-observable axis
+### Tm-only MAE
 
-**Message:** FEP transfers in both encoder regimes; native contacts transfer only with a frozen
-encoder.
-
-- **(a)** Full-width paired-effect forest plot for all tuned computational labels. Filled squares
-  and open circles distinguish frozen and fine-tuned encoders; source colors identify FEP, matched
-  MD, and neutral comparators. Zero means equal MAE to the corresponding Tm-only model.
-- **(b)** Direct FEP-minus-matched-MD forest plot only. Zero means equal MAE, negative values favor
-  FEP. Frozen: $-0.026$ °C with an interval crossing zero; fine-tuned: $-0.182$ °C with an interval
-  below zero.
-- **(c)** Fine-tuned paired $\Delta$MAE over the four tested label counts on a log$_2$ count axis.
-  FEP moves below the Tm-only zero line, whereas matched MD approaches it from higher error; label
-  the final values directly.
-
-Keep the main figure evidence-first. The old encoder-reshaping schematic moves out of the main figure;
-mechanistic interpretation belongs in the Discussion and graphical abstract with qualified wording.
-
-## 9. Supplementary Material Plan
-
-The supplementary material should support the two-axis paper rather than preserve the pre-pivot
-descriptor-screen narrative.
-
-### Keep and update
-
-- Additional diverse-panel simulation and label-extraction details that are not
-  already in Materials and Methods.
-- FEP provenance and the charge-correction check.
-- The model-size control.
-- Machine-readable HPO, final-metric, label-count, and provenance tables in the
-  analysis archive; these do not need to be repeated as display items.
-
-### Redesign or remove
-
-- Old source-screen panels using the 6.61/6.26/6.73 headline numbers.
-- Diverse-panel MD presented as the primary MD result.
-- FEP+MD combination panels that distract from the two-axis claim unless used as a clearly labeled
-  non-additivity control.
-- Legacy descriptor surveys as a headline supplementary figure. Retain only if they answer a current
-  manuscript claim; otherwise move them to an archive or supplementary table.
-- Per-count setting-selection figures that conflict with the final protocol of selecting one
-  configuration and varying label count.
-
-### Selected supplementary sequence
-
-1. **Supplementary Fig. S1:** sequence length versus native-contact $Q$ in the
-   heterogeneous MD panel, with the fixed lengths of the matched scans marked.
-   This is retained only because it supports the possible length-shortcut
-   limitation discussed in Results.
-2. **Supplementary Fig. S2:** paired FEP effects in the 8M, 35M, and 650M
-   encoder controls, together with the row-level effect of the analytical
-   net-charge correction on the scaled FEP labels.
-
-The old descriptor survey, source-combination panel, per-count retuning panel,
-diverse-MD trajectory-window panel, data-count display, HPO display, repeated
-absolute-error displays, direct count-curve contrast, scan-composition display,
-and arbitrary charge-sensitivity bounds are not used because they repeat the
-main text or do not support the current two-axis claim.
-
-`plot/make_supplementary_figures.py`, `paper/analysis/supplementary/MANIFEST.tsv`, captions in
-`tex/sections/supplementary.tex`, and `reproduce/manuscript_results.yaml` must be updated together.
-
-## 10. Definitive Numerical Results
-
-### Sources of truth
-
-- `results/final_{tm,fep,mdq,ros,rosesm,rosrnd,tmpnn}_{hot,frozen}/scaling.json`
-- `results/tuned_rep/{hot,frozen}_summary.json` for currently plotted paired summaries
-- `zenodo/_logs/tune_final_results.tsv` and `comp_final_results.tsv` as run-selection records
-
-Every final condition contains absolute errors for the same 396 held-out test proteins. Main claims
-should be recomputed from these vectors rather than copied from prose.
-
-### Baselines
-
-| Encoder regime | Tm-only MAE (°C) |
+| Encoder | Test MAE (°C) |
 |---|---:|
 | Frozen | 7.229 |
-| Hot | 6.548 |
+| Fine-tuned | 6.548 |
 
-### Largest label-count setting
+### Largest label count
 
-Bold means the nominal 90% paired bootstrap CI versus the tuned Tm-only baseline excludes zero.
-These intervals are not adjusted for multiple comparisons; P values are omitted.
-
-| Computational label | Frozen MAE | Frozen ΔMAE | Hot MAE | Hot ΔMAE |
+| Calculated label | Frozen MAE | Frozen ΔMAE | Fine-tuned MAE | Fine-tuned ΔMAE |
 |---|---:|---:|---:|---:|
-| FEP mutation free energy | 7.008 | **−0.221** | 6.395 | **−0.153** |
-| MD native contact, matched scan | 7.034 | **−0.195** | 6.577 | +0.029 |
+| FEP | 7.008 | −0.221 | 6.395 | −0.153 |
+| Matched MD \(Q\) | 7.034 | −0.195 | 6.577 | +0.029 |
 | ThermoMPNN | 7.089 | −0.141 | 6.621 | +0.073 |
-| Rosetta mutation score | 7.231 | +0.002 | 6.625 | +0.078 |
+| Rosetta | 7.231 | +0.002 | 6.625 | +0.078 |
 | Random variants + Rosetta | 7.216 | −0.013 | 6.692 | +0.144 |
-| ESM2-proposed variants + Rosetta | 7.312 | +0.083 | 6.959 | **+0.411** |
+| ESM2 proposals + Rosetta | 7.312 | +0.083 | 6.959 | +0.411 |
 
-Rounded paired 90% CIs used in the current manuscript:
+The displayed points and intervals must be recalculated from the saved 396
+per-sequence absolute errors. Do not copy the older 90% intervals stored in
+some result summaries.
 
-- Frozen FEP versus baseline: −0.22 °C, CI [−0.36, −0.08].
-- Frozen matched MD versus baseline: −0.20 °C, CI [−0.34, −0.05].
-- Hot FEP versus baseline: −0.15 °C, CI [−0.30, −0.01].
-- Hot matched MD versus baseline: +0.03 °C, CI crosses zero.
-- Frozen FEP minus matched MD: −0.03 °C, CI [−0.21, +0.16].
-- Hot FEP minus matched MD: −0.18 °C, CI [−0.36, −0.01].
+## 9. Wording
 
-### FEP and matched-MD label-count curves
+### Use
 
-| Setting | Frozen FEP | Frozen matched MD | Hot FEP | Hot matched MD |
-|---:|---:|---:|---:|---:|
-| 20 | 7.133 | 7.318 | 6.569 | 7.018 |
-| 80 | 7.182 | 7.157 | 6.474 | 6.785 |
-| 160 | 7.139 | 7.176 | 6.418 | 6.691 |
-| 320 | 7.008 | 7.034 | 6.395 | 6.577 |
+- calculated label or computed label;
+- experimental Tm validation set and reserved Tm test set;
+- complete simulation plan;
+- frozen encoder and fine-tuned encoder;
+- paired change in MAE;
+- lowest observed error when a 95% interval includes zero;
+- possible explanation when the cause was not tested.
 
-Do not describe these noisy four-point curves as a clean power law. Their role is to show label-count
-behavior and the recovery/crossover pattern.
+### Avoid
 
-## 11. Submission Metadata
+- “simulation provides more stability labels than experiments” as a general
+  statement;
+- “FEP improves the fine-tuned model” without noting its 95% interval;
+- “only FEP works”;
+- “the sequence design caused the difference”;
+- “FEP reshaped the encoder”;
+- “statistically significant” without naming the comparison and interval;
+- inflated terms where ordinary words such as plan, check, comparison, or
+  procedure are clearer.
 
-### Authors
+## 10. Submission details
 
-1. Taihei Murakami — Saitama University and Epsilon Molecular Engineering, Inc.; equal contribution.
-2. Kentaro Sasaki — Saitama University; equal contribution.
-3. Soichiro Oda — Saitama University.
-4. Kazuma Okada — Saitama University.
-5. Yasuhiro Matsunaga — RIKEN Center for Computational Science and Saitama University;
-   corresponding author.
+- Affiliation order: RIKEN; Saitama University; Epsilon Molecular Engineering.
+- Murakami alone has the Epsilon affiliation.
+- Saitama addresses use `Saitama 338–8570, Japan`; the city and prefecture name
+  are not repeated.
+- Conflict of interest, author contributions, data availability, and
+  acknowledgements follow the BPPB order.
+- GitHub: `https://github.com/matsunagalab/sim2real`.
+- Zenodo DOI remains a placeholder until deposition.
 
-Corresponding email: `ymatsunaga@riken.jp`
+## 11. Items still open
 
-Yasuhiro Matsunaga ORCID: `0000-0003-2872-3908`
-
-### Submission items still requiring confirmation
-
-- Exact CRediT roles for Soichiro Oda and Kazuma Okada.
-- Final data/archive DOI and raw-trajectory availability language.
-- Final license choice.
-- Final title.
-- Suggested reviewers and any author ORCIDs required by the submission system.
-
-## 12. Remaining Work in Priority Order
-
-1. **Regenerate Fig. 1** with correct architecture and “computational head” terminology.
-2. **Unify terminology** across Results, Discussion, Supplementary Material, and figures.
-3. **Resolve statistical conventions:** p-value sidedness and label-count notation.
-4. **Perform a claim audit:** every MAE, ΔMAE, CI, label count, and sample size against raw JSON/CSV.
-5. **Revise the cover letter** from the old CSBJ/FEP-only story to BPPB and the two-axis result.
-6. **Refresh repository-facing documentation** that still reports the original split or legacy best run.
-7. **Run final format/citation/figure-resolution checks** in the official BPPB template.
-8. **Confirm archive identifiers.**
-
-Do not rerun GPU training unless a missing comparison is identified and explicitly approved.
-
-## 13. Compact Decision Log
-
-- **2026-06-05:** Experimental split deliberately reassigned to 57 train / 114 validation / 396 test
-  to study transfer in a low-data target regime.
-- **2026-07-03:** Main MD source changed from a diverse nanobody screen to FEP-matched 1MEL/4IDL
-  mutation scans. Story pivoted from “MD is a negative control” to the two-axis simulation-design/physical-
-  observable result. Target journal changed to BPPB.
-- **2026-07-04:** Per-source, per-regime staged tuning completed. FEP remained beneficial frozen and
-  hot; matched MD tied FEP frozen but not hot; Rosetta-family results became weak-to-null.
-- **2026-07-04:** ESM2-proposed and random Rosetta-scored sets fixed as ordinary comparators. All
-  reinforcement-learning and design-loop claims dropped.
-- **2026-07-12:** Main text rewritten around the two axes; main figures reduced to three; BPPB front
-  matter, declarations, conclusion, graphical abstract, and numeric citations added.
-- **2026-07-12:** This outline was rewritten to remove superseded CSBJ, FEP-only, descriptor-screen,
-  and four-figure planning from the active manuscript specification.
-- **2026-07-13:** Supplementary figures reduced from four to two, retaining only the
-  length--$Q$ limitation and the encoder-size and charge-correction controls;
-  repeated HPO, source-error, count-curve, and provenance displays were moved to
-  tracked tables.
-- **2026-07-13:** Fig. 2 was reduced from three panels to two. The acquisition-plan
-  setup is stated in prose, while the main figure keeps only the transfer effect
-  and frozen label-count evidence.
-- **2026-07-15:** Repeated protocol summaries and supplementary audit prose were pruned. The two
-  supplementary figures were retained because they support the length-shortcut limitation and the
-  encoder-size/charge-correction controls. The model-size result is interpreted within each size;
-  the cross-size absolute-MAE claim was dropped because the larger encoders used exploratory fixed
-  configurations rather than the staged search used for the 8M model.
-
-## 14. Final Drafting Checklist
-
-- [x] Two-axis story controls the Abstract, Results, Discussion, and main figures.
-- [x] Final claims use 57/114/396 and held-out paired test errors.
-- [x] No claim that the present study is a reinforcement-learning or design-loop result.
-- [x] Three-main-figure structure.
-- [x] BPPB section order, significance statement, keywords, graphical abstract, and declarations.
-- [x] Supplementary figures and captions rebuilt from tuned results.
-- [ ] Fig. 1 architecture and terminology corrected.
-- [ ] Computational/auxiliary terminology unified.
-- [ ] P-value convention and label-count definition unified.
-- [ ] Cover letter rewritten for BPPB and current results.
-- [ ] CRediT roles and data availability finalized.
-- [x] Official BPPB template applied.
-- [ ] Final PDF audited after replacement of the still-stale Fig. 1.
+1. Finish the author-led revision of Fig. 1 and check it against the code.
+2. Replace the Zenodo DOI placeholder after the public record is created.
+3. Confirm final author names, order, corresponding-author details, grants,
+   and project numbers before submission.
+4. Add final page and line numbers only if requested by the journal.
+5. Build both main and supplementary PDFs after every final text or figure
+   change.

@@ -1,132 +1,109 @@
-# Reproducing The Manuscript Results
+# Reproducing the manuscript results
 
-This repository can rerun the manuscript-facing calculations downstream of the
-fixed computational source-label tables. The raw MD simulations, FEP
-calculations, Rosetta calculations, and ThermoMPNN scoring are not rerun by this
-workflow; their processed CSV outputs under `data/` are treated as fixed input
-data.
+This repository provides a compact rerun path for the selected configurations reported in **“Transfer learning with simulated variants and calculated quantities for nanobody melting-temperature prediction.”**
 
-## Scope
+It starts from processed CSV tables. It does not launch the raw MD simulations, FEP calculations, Rosetta calculations, or ThermoMPNN scoring that produced those tables.
 
-The reproducible downstream scope includes:
-
-- model training with the fixed NbBench train, validation, and test splits;
-- candidate-setting searches selected by experimental Tm validation MAE;
-- held-out experimental Tm test evaluation;
-- paired-bootstrap summaries;
-- summary JSON files used by the manuscript figures;
-- main and supplementary figure regeneration;
-- LaTeX PDF typesetting.
-
-The workflow entry point is:
+## Install
 
 ```bash
+git clone https://github.com/matsunagalab/sim2real.git
+cd sim2real
 uv sync
-uv run python scripts/reproduce_paper_results.py --stage all --gpus 0,1,2,3,4,5,6
 ```
 
-By default, existing outputs are skipped. To rerun training from scratch, add
-`--force`:
+The steps are defined in `reproduce/manuscript_results.yaml` and run by `scripts/reproduce_paper_results.py`.
 
-```bash
-uv run python scripts/reproduce_paper_results.py --stage all --gpus 0,1,2,3,4,5,6 --force
-```
-
-This is the full downstream rerun path: it starts from the fixed CSV source
-labels and regenerates the downstream model results. It will take a long time.
-
-The workflow is manifest-driven. The stage definitions and expected outputs are
-stored in `reproduce/manuscript_results.yaml`; the runner is
-`scripts/reproduce_paper_results.py`. See `reproduce/README.md` and `EXTENDING.md`
-for how to add new calculations.
-
-The fixed computational mutation-label inputs are catalogued in
-`data/source_labels/MANIFEST.tsv`. That file records which processed CSVs are
-used for FEP, Rosetta, ThermoMPNN, random Rosetta variants, and ESM2-proposed
-Rosetta-scored variants.
-
-## Fast Integrity Checks
-
-Check that fixed inputs and manuscript-facing outputs exist without writing
-anything:
+## Check the repository contents
 
 ```bash
 uv run python scripts/reproduce_paper_results.py --check-only
 ```
 
-Print the full command plan without running anything:
+This command only checks whether the listed inputs and outputs exist. It does not retrain a model, rewrite a file, or confirm that numbers are numerically equal to the manuscript.
+
+The experimental Tm split is fixed as follows:
+
+| Local file | Source split on Hugging Face | Use | n |
+|---|---|---|---:|
+| `data/nbbench/train.csv` | validation | training | 57 |
+| `data/nbbench/val.csv` | test | setting selection | 114 |
+| `data/nbbench/test.csv` | train | held-out test | 396 |
+
+`data/nbbench/download.py` recreates this deliberate reassignment.
+
+## Rebuild summaries, figures, and PDFs
+
+Rebuild compact result summaries from the tracked final `scaling.json` files:
 
 ```bash
-uv run python scripts/reproduce_paper_results.py --stage all --force --dry-run
+uv run python scripts/reproduce_paper_results.py --stage summaries --force
 ```
 
-Regenerate only the figures and PDF from existing summary JSON files:
+This step also checks the selected representative results against the reference values stored in `plot/build_tuned_summaries.py`.
+
+Rebuild Figs. 2 and 3, the supplementary figures and tables, and both PDFs:
 
 ```bash
-uv sync
-uv run python scripts/reproduce_paper_results.py --stage figures
+uv run python scripts/reproduce_paper_results.py --stage figures --force
 ```
 
-Regenerate summary JSON files from existing `results/*/scaling.json` files
-without launching training:
+The PDF outputs are:
+
+- `paper/tex/main.pdf`
+- `paper/tex/supplementary_main.pdf`
+
+The command leaves the author-edited Fig. 1 unchanged and uses its current PNG
+when typesetting the main paper.
+
+Typesetting uses `tectonic` from `PATH` or from the `TECTONIC` environment variable. If Tectonic is unavailable, the script uses `pdflatex` and `bibtex` when both are installed.
+
+## Rerun the reported model results
+
+The `reported-results` stage reruns the selected final conditions for seven source-label settings under both frozen and fine-tuned encoders:
 
 ```bash
-uv run python scripts/reproduce_paper_results.py --stage source-screen,ddg-head,md-candidate,abcd,architecture --collect-only
+uv run python scripts/reproduce_paper_results.py \
+  --stage reported-results --gpus 0 --force
 ```
 
-## Stages
-
-- `preflight`: check fixed input CSV files.
-- `core-scaling`: regenerate the main experimental Tm, FEP, and MD Q-value
-  label-count curves.
-- `source-screen`: rerun the source-label candidate search and final test
-  comparison for hot and frozen encoders.
-- `ddg-head`: rerun source-head controls for FEP labels.
-- `md-candidate`: rerun the per-source-count MD Q-value candidate-setting
-  search and final test evaluation.
-- `abcd`: rerun Tm-only, FEP-only, MD-only, and FEP+MD controls and rebuild the
-  additional Q-value summary used in the supplementary analysis.
-- `architecture`: rerun MD-derived feature and architecture controls.
-- `model-size`: rerun ESM2 35M and 650M controls.
-- `trajectory`: rerun terminal-trajectory-window controls.
-- `figures`: regenerate main figures, supplementary figures/tables, and
-  `paper/tex/main.pdf`.
-- `diagnostic`: regenerate a legacy diagnostic summary that is not a primary
-  manuscript input.
-
-Run one stage at a time when debugging:
+Each result uses five training seeds, the 114-example validation set for setting selection, and the 396-example test set for final evaluation. The selected conditions run sequentially on the first GPU ID supplied to `--gpus`. To use another device, replace `0` with its ID. To inspect the planned commands without running them:
 
 ```bash
-uv run python scripts/reproduce_paper_results.py --stage source-screen --gpus 0,1,2,3,4,5,6 --force
+uv run python scripts/reproduce_paper_results.py \
+  --stage reported-results --gpus 0 --force --dry-run
 ```
 
-## Practical Notes
-
-The 650M ESM2 controls are included in `--stage model-size` and therefore in
-`--stage all`. They require substantially more GPU memory than the 8M and 35M
-models. If they fail because of local GPU memory constraints, keep the failed
-log and report that hardware limitation explicitly rather than substituting an
-old summary.
-
-The script does not download models intentionally. If a Hugging Face model is
-not already cached, the run will fail in an offline environment. Cache the
-model explicitly before a full rerun.
-
-All output claims should be made from tracked summary JSON files and the
-generated tables under `paper/analysis/supplementary/tables/`, not from
-untracked scratch run directories.
-
-## Environment
-
-`uv sync` installs the packages needed for the manuscript-facing workflow:
-model training, candidate-setting searches, summary aggregation, figure
-generation, and MD-feature extraction from raw trajectories. Notebook support is
-optional and can be installed with:
+After training, rebuild summaries and paper outputs:
 
 ```bash
-uv sync --extra notebooks
+uv run python scripts/reproduce_paper_results.py --stage summaries,figures --force
 ```
 
-The PDF typesetting step is launched through `scripts/typeset_paper.py`. It
-uses `tectonic` from `PATH` or from the `TECTONIC` environment variable. If
-Tectonic is unavailable, it falls back to `pdflatex` plus `bibtex`.
+To run the full sequence in one command:
+
+```bash
+uv run python scripts/reproduce_paper_results.py \
+  --stage all --gpus 0 --force
+```
+
+## What is and is not repeated
+
+These steps repeat the selected final configurations. They do not repeat every architecture and hyperparameter candidate that preceded selection. Candidate records and the selected settings are preserved in:
+
+- `paper/analysis/supplementary/tables/candidate_validation.tsv`
+- `paper/analysis/supplementary/tables/selected_settings.tsv`
+
+The main figures also retain a heterogeneous-nanobody MD comparison and 35M/650M model-size controls as tracked result inputs. These older controls are checked for availability but are not retrained by these steps.
+
+Raw simulation data are not needed to rebuild model summaries, figures, or PDFs. They are needed only to regenerate processed computational labels. The planned large-data deposit and its present limitations are described in `zenodo/README.md`; the DOI remains an explicit placeholder until a Zenodo record is created.
+
+## Outputs used by the paper
+
+- Selected results: `results/final_*_{frozen,hot}/scaling.json`
+- Compact main-figure summaries: `results/tuned_rep/`
+- Main figures: `paper/tex/figures/fig_outline*.{pdf,png,svg}`
+- Supplementary tables and figures: `paper/analysis/supplementary/`
+- Main and supplementary PDFs: `paper/tex/main.pdf`, `paper/tex/supplementary_main.pdf`
+
+See `results/README.md` for the exact current result families and the distinction between tracked manuscript inputs and scratch runs.

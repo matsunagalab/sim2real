@@ -5,9 +5,9 @@ Reproducible record for two questions about the FEP ΔΔG source labels:
 2. Do periodic-PME net-charge finite-size artifacts affect the ML labels? (charge correction)
 
 **Provenance script:** `scripts/fep_charge_correction.py` (regenerates `PROVENANCE.tsv`
-and the raw-energy correction audit). The current model-facing scaled-label audit is
-recomputed by `plot/make_supplementary_figures.py` using the complete preprocessing
-pipeline described below.
+and the raw-energy correction check). The current scaled-label check is recomputed
+by `plot/make_supplementary_figures.py` using the preprocessing steps described
+below.
 **Raw data:** `/data/{odas,kazu,yasu}/vhh_fep/<system>_<scan>/`. **Post-processing:** `/data/share/ddG.jl`.
 
 ---

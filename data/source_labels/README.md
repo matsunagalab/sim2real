@@ -1,7 +1,7 @@
 # Computational Source-Label Catalog
 
 This directory is the canonical store for computational mutation-label datasets
-used by the manuscript workflow. The actual CSV files now live here, organized
+used by the manuscript analysis. The actual CSV files live here, organized
 by source:
 
 - `fep/`
@@ -13,14 +13,13 @@ by source:
 `MANIFEST.tsv` records the processed CSV files used by `prepare.py` for the
 computational mutation-label tasks. `prepare.py` reads this file directly, so
 new manuscript source-label datasets should be added here rather than hard-coded
-in Python. The manifest is meant to answer three questions before a
-downstream rerun:
+in Python. The manifest answers three questions before a model rerun:
 
 1. Which `--ddg-source` argument selects this table?
 2. Which processed CSVs are the fixed source labels?
 3. Which raw or parent files document where the processed table came from?
 
-## Training Contract
+## How the labels are used
 
 For mutation-label source tasks, `prepare.py` loads two files per source: one
 for the 1MEL-derived variant set and one for the 4IDL-derived variant set. It
@@ -34,7 +33,7 @@ uses:
 For each random seed, source rows are sampled after loading when `--n-ddg-list`
 or `--fixed-n-ddg` is specified. The sampled source rows are then split into an
 internal source-label train/validation split. The experimental Tm validation set
-is still the model-selection target for manuscript-facing comparisons.
+is still used to select models for the manuscript comparisons.
 
 ## Included Source Types
 

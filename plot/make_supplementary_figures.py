@@ -2,7 +2,7 @@
 """Build the selected supplementary figures for the current two-axis paper.
 
 The script reads final held-out results, staged-validation runs, and tracked
-processed label tables. It writes compact TSV audit tables and two figures to
+processed label tables. It writes compact TSV result tables and two figures to
 paper/analysis/supplementary/ and paper/tex/figures/. It never launches training.
 """
 
@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 from pathlib import Path
 
 os.environ.setdefault("XDG_CACHE_HOME", "/tmp/codex-cache")
@@ -66,7 +67,7 @@ def representative(run: dict) -> dict:
     return points[0] if len(points) == 1 else max(points, key=lambda x: int(x["n"]))
 
 
-def paired_delta(reference, candidate, level: float = 0.90, seed: int = 42) -> tuple[float, float, float]:
+def paired_delta(reference, candidate, level: float = 0.95, seed: int = 42) -> tuple[float, float, float]:
     a, b = np.asarray(reference, float), np.asarray(candidate, float)
     if len(a) != len(b):
         raise ValueError("paired comparisons require equal-length error vectors")
@@ -76,6 +77,52 @@ def paired_delta(reference, candidate, level: float = 0.90, seed: int = 42) -> t
     q = (1.0 - level) * 50.0
     lo, hi = np.percentile(boot, [q, 100.0 - q])
     return float((b - a).mean()), float(lo), float(hi)
+
+
+def mae_interval(errors, level: float = 0.95, seed: int = 42) -> tuple[float, float, float]:
+    """MAE and its bootstrap interval over test proteins."""
+    values = np.asarray(errors, float)
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, len(values), size=(10000, len(values)))
+    boot = values[idx].mean(axis=1)
+    q = (1.0 - level) * 50.0
+    lo, hi = np.percentile(boot, [q, 100.0 - q])
+    return float(values.mean()), float(lo), float(hi)
+
+
+def heterogeneous_overlap_check() -> pd.DataFrame:
+    """Recalculate the heterogeneous-plan effects after omitting eight exact test matches."""
+    test = pd.read_csv(DATA / "nbbench/test.csv")
+    diverse = pd.read_csv(DATA / "md/nanobody_qvalue_400K.csv")
+    keep = ~test["text"].isin(set(diverse["seq"])).to_numpy()
+    specs = [
+        (
+            "frozen",
+            RESULTS / "sourcefinal_frozen_tm_shared_drop0.30/scaling.json",
+            RESULTS / "sourcefinal_frozen_md_q-hphil-400k_drop0.30/scaling.json",
+        ),
+        (
+            "fine-tuned",
+            RESULTS / "sourcefinal_tm_shared_drop0.05/scaling.json",
+            RESULTS / "sourcefinal_md_q-hphil-400k_lr1e-4_enc3e-5/scaling.json",
+        ),
+    ]
+    rows = []
+    for encoder, reference_path, candidate_path in specs:
+        reference = np.asarray(representative(read_json(reference_path))["abs_errors"], float)
+        candidate = np.asarray(representative(read_json(candidate_path))["abs_errors"], float)
+        for label, mask in [("all test proteins", np.ones(len(test), dtype=bool)),
+                            ("excluding eight exact matches", keep)]:
+            delta, lo, hi = paired_delta(reference[mask], candidate[mask], level=0.95)
+            rows.append({
+                "encoder": encoder,
+                "test_set": label,
+                "n_test": int(mask.sum()),
+                "delta_mae_deg_c": delta,
+                "ci95_lo_deg_c": lo,
+                "ci95_hi_deg_c": hi,
+            })
+    return pd.DataFrame(rows)
 
 
 def panel_label(ax, letter: str) -> None:
@@ -99,10 +146,13 @@ def save_table(df: pd.DataFrame, name: str) -> None:
 
 
 def save_figure(fig, stem: str) -> None:
-    for directory in (ANALYSIS_FIGS, TEX_FIGS):
-        directory.mkdir(parents=True, exist_ok=True)
-        fig.savefig(directory / f"{stem}.pdf", bbox_inches="tight")
-        fig.savefig(directory / f"{stem}.png", dpi=600, bbox_inches="tight")
+    ANALYSIS_FIGS.mkdir(parents=True, exist_ok=True)
+    TEX_FIGS.mkdir(parents=True, exist_ok=True)
+    for suffix, kwargs in (("pdf", {}), ("png", {"dpi": 600})):
+        source = ANALYSIS_FIGS / f"{stem}.{suffix}"
+        target = TEX_FIGS / f"{stem}.{suffix}"
+        fig.savefig(source, bbox_inches="tight", **kwargs)
+        shutil.copyfile(source, target)
     plt.close(fig)
     print(f"wrote {TEX_FIGS / (stem + '.pdf')}")
 
@@ -205,13 +255,14 @@ def selected_table(candidates: pd.DataFrame) -> pd.DataFrame:
             selected = candidates[(candidates["regime"] == regime) & (candidates["source"] == source)].nsmallest(1, "validation_mae").iloc[0]
             run = final_run(source, regime); args, hp = run["args"], run["hparams"]
             point = representative(run)
+            _, ci_lo, ci_hi = mae_interval(point["abs_errors"])
             expected = (args.get("model_arch"), "-" if source == "Tm_only" else args.get("ddg_head_mode"),
                         hp.get("learning_rate"), hp.get("encoder_lr"), hp.get("dropout_rate"), hp.get("weight_decay"))
             observed = (selected["architecture"], selected["head"], selected["learning_rate"], selected["encoder_lr"], selected["dropout"], selected["weight_decay"])
             if expected != observed:
                 raise ValueError(f"selected validation setting does not match final run: {source} {regime}\n{expected}\n{observed}")
             records.append({"regime": regime, "source": source, "validation_mae": selected["validation_mae"],
-                            "test_mae": point["mae"], "ci_lo": point["ci_lo"], "ci_hi": point["ci_hi"],
+                            "test_mae": point["mae"], "ci_lo": ci_lo, "ci_hi": ci_hi,
                             "architecture": expected[0], "head": expected[1], "learning_rate": expected[2],
                             "encoder_lr": expected[3], "dropout": expected[4], "weight_decay": expected[5],
                             "validation_run": selected["run"],
@@ -225,10 +276,11 @@ def effect_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         base = representative(final_run("Tm_only", regime))["abs_errors"]
         for source in SOURCES:
             point = representative(final_run(source, regime))
+            _, ci_lo, ci_hi = mae_interval(point["abs_errors"])
             if source == "Tm_only": delta, lo, hi = 0.0, 0.0, 0.0
             else: delta, lo, hi = paired_delta(base, point["abs_errors"])
             effects.append({"regime": regime, "source": source, "test_mae": point["mae"],
-                            "ci_lo": point["ci_lo"], "ci_hi": point["ci_hi"],
+                            "ci_lo": ci_lo, "ci_hi": ci_hi,
                             "delta_mae": delta, "delta_ci_lo": lo, "delta_ci_hi": hi})
     direct = []
     for regime in ("frozen", "hot"):
@@ -369,10 +421,12 @@ def main() -> None:
     counts, qvalues, overlap = data_tables()
     candidates = candidate_table(); selected = selected_table(candidates)
     effects, direct, sizes = effect_tables()
+    overlap_check = heterogeneous_overlap_check()
     composition, sensitivity, corrected, provenance = fep_tables()
     for df, name in [(counts, "data_sources.tsv"), (qvalues, "data_design_qvalues.tsv"), (overlap, "sequence_overlap.tsv"),
                      (candidates, "candidate_validation.tsv"), (selected, "selected_settings.tsv"),
                      (effects, "final_source_effects.tsv"), (direct, "fep_md_direct.tsv"), (sizes, "model_size_controls.tsv"),
+                     (overlap_check, "heterogeneous_overlap_check.tsv"),
                      (composition, "fep_scan_composition.tsv"), (sensitivity, "fep_charge_sensitivity.tsv"),
                      (corrected, "fep_charge_corrected_labels.tsv")]:
         save_table(df, name)

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Build the main figure set for the current paper outline.
+"""Build the main comparison figures for the current paper.
 
-The figures are tied to the controlled source-screen results:
+Figure 1 can also be generated for reference, but the manuscript currently uses
+an author-edited Figure 1. Pass ``--skip-fig1`` to leave that figure untouched.
 
-  results/source_screen/final_source_screen_summary.json
-
-Outputs are written to both plot/ and paper/tex/figures/ as PDF, SVG, and
-high-resolution PNG files.
+Outputs are written to both ``plot/`` and ``paper/tex/figures/`` as PDF, SVG,
+and high-resolution PNG files.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 from pathlib import Path
@@ -146,7 +146,7 @@ FIG3B_MATCHED_CSVS = [
 FIG3C_MD_FROZEN = RESULTS / "final_mdq_frozen" / "scaling.json"
 FIG3C_TM_FROZEN = RESULTS / "final_tm_frozen" / "scaling.json"
 
-# Hot-regime label-count curves used in the evidence-first physical-observable figure.
+# Fine-tuned label-count curves used in the calculated-quantity figure.
 FIG3_HOT_TM_BASELINE = RESULTS / "final_tm_hot" / "scaling.json"
 FIG3_HOT_CURVES = [
     ("FEP mutation free energy", RESULTS / "final_fep_hot" / "scaling.json", COL["fep"], "o"),
@@ -272,20 +272,29 @@ def encoder_core_rows(sources: list) -> pd.DataFrame:
 
 
 def encoder_delta_rows(sources: list) -> pd.DataFrame:
-    """Paired ΔMAE vs Tm-only per source, for frozen and hot."""
+    """Paired ΔMAE vs Tm-only per source, for frozen and fine-tuned models."""
     records = []
     for encoder, path in [("frozen", FROZEN_SUMMARY_JSON), ("hot", SUMMARY_JSON)]:
-        comparisons = read_json(path)["paired_comparisons"]
+        summary = read_json(path)
+        row_map = {str(row["source"]): row for row in summary["rows"]}
+        reference = select_scaling_point(
+            rebase_results(row_map["Tm_only"]["scaling_json"]), "single"
+        )
         for source in sources:
-            comp = comparisons[paired_key(source)]
+            candidate = select_scaling_point(
+                rebase_results(row_map[source]["scaling_json"]), "single"
+            )
+            delta, lo, hi = paired_delta_ci(
+                np.asarray(reference["abs_errors"], dtype=float),
+                np.asarray(candidate["abs_errors"], dtype=float),
+            )
             records.append(
                 {
                     "encoder": encoder,
                     "source": source,
-                    "delta_mae": float(comp["delta_mae"]),
-                    "delta_ci_lo": float(comp["delta_ci_lo"]),
-                    "delta_ci_hi": float(comp["delta_ci_hi"]),
-                    "p_value": float(comp.get("p_value", np.nan)),
+                    "delta_mae": delta,
+                    "delta_ci_lo": lo,
+                    "delta_ci_hi": hi,
                 }
             )
     return pd.DataFrame.from_records(records)
@@ -443,7 +452,7 @@ def paired_delta_ci(a: np.ndarray, b: np.ndarray, n_boot: int = 10000) -> tuple[
     n = len(a)
     idx = rng.integers(0, n, size=(n_boot, n))
     delta = np.mean(b[idx], axis=1) - np.mean(a[idx], axis=1)
-    lo, hi = np.percentile(delta, [5, 95])
+    lo, hi = np.percentile(delta, [2.5, 97.5])
     return float(np.mean(b) - np.mean(a)), float(lo), float(hi)
 
 
@@ -967,7 +976,7 @@ def fig04_boundary_mdq(rows: pd.DataFrame, paired: dict) -> None:
     polish(ax, "x")
     panel_label(ax, "A")
 
-    # (b) paired ΔMAE vs Tm-only per source x encoder regime, with 90% CI.
+    # (b) paired ΔMAE vs Tm-only per source x encoder regime, with 95% CI.
     ax = axd["B"]
     delta_sources = ["FEP", MD_CONTACT_Q_SOURCE, "rosetta", "thermoMPNN"]
     deltas = encoder_delta_rows(delta_sources)
@@ -1038,10 +1047,10 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     ax = axes[0]
     effects = design_delta_rows()
     rows_b = [
-        ("Heterogeneous · frozen", "heterogeneous screen", "frozen", COL["gray"], "s"),
-        ("Heterogeneous · fine-tuned", "heterogeneous screen", "hot", COL["gray"], "o"),
-        ("Matched · frozen", "matched mutation scan", "frozen", COL["design"], "s"),
-        ("Matched · fine-tuned", "matched mutation scan", "hot", COL["design"], "o"),
+        ("Heterogeneous PDB panel\nfrozen encoder", "heterogeneous screen", "frozen", COL["gray"], "s"),
+        ("Heterogeneous PDB panel\nfine-tuned encoder", "heterogeneous screen", "hot", COL["gray"], "o"),
+        ("Matched mutation scan\nfrozen encoder", "matched mutation scan", "frozen", COL["design"], "s"),
+        ("Matched mutation scan\nfine-tuned encoder", "matched mutation scan", "hot", COL["design"], "o"),
     ]
     ax.axvline(0.0, color=COL["baseline"], linestyle="--", linewidth=1.0, zorder=1)
     ypos = np.arange(len(rows_b), dtype=float)
@@ -1056,7 +1065,6 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
             color,
             marker=marker,
         )
-        significant = row["delta_ci_hi"] < 0 or row["delta_ci_lo"] > 0
         offset = -0.018 if row["delta_mae"] < 0 else 0.018
         ax.text(
             row["delta_mae"] + offset,
@@ -1066,7 +1074,7 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
             va="center",
             fontsize=8.6,
             color=color,
-            fontweight="bold" if significant else "normal",
+            fontweight="normal",
             bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.75, "pad": 0.5},
         )
     ax.axhline(1.5, color="white", linewidth=2.0, zorder=1)
@@ -1099,7 +1107,7 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_xscale("log", base=2)
     ax.set_xlim(16, 520)
     ax.set_xticks([20, 80, 160, 320], ["20", "80", "160", "320"])
-    ax.set_xlabel("Labels per scaffold, n")
+    ax.set_xlabel("Labels per scaffold and model, n")
     ax.set_ylabel(r"$\Delta$MAE vs Tm-only (°C)")
     ax.set_ylim(-0.42, 0.28)
     ax.text(0.03, 0.04, "negative = lower Tm error", transform=ax.transAxes, fontsize=8.3,
@@ -1186,7 +1194,6 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
             )
             if label_value:
                 offset = -0.018 if row["delta_mae"] < 0 else 0.018
-                clear_zero = row["delta_ci_hi"] < 0 or row["delta_ci_lo"] > 0
                 ax.text(
                     row["delta_mae"] + offset,
                     y,
@@ -1194,7 +1201,7 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
                     ha="right" if offset < 0 else "left",
                     va="center",
                     fontsize=8.2,
-                    fontweight="bold" if clear_zero else "normal",
+                    fontweight="normal",
                     color=COL["black"],
                     bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.80, "pad": 0.3},
                     zorder=5,
@@ -1245,7 +1252,6 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
             markerfacecolor=COL["baseline"] if encoder == "frozen" else "white",
             markeredgecolor=COL["baseline"], markeredgewidth=1.3, zorder=3,
         )
-        clear_zero = row["delta_ci_hi"] < 0 or row["delta_ci_lo"] > 0
         ax.text(
             row["delta_mae"] - 0.014,
             y - 0.22,
@@ -1254,7 +1260,7 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
             va="center",
             fontsize=8.7,
             color=COL["baseline"],
-            fontweight="bold" if clear_zero else "normal",
+            fontweight="normal",
             bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.80, "pad": 0.4},
         )
     ax.set_yticks([0, 1], ["Frozen encoder", "Fine-tuned encoder"])
@@ -1283,16 +1289,16 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_xscale("log", base=2)
     ax.set_xlim(16, 560)
     ax.set_xticks([20, 80, 160, 320], ["20", "80", "160", "320"])
-    ax.set_xlabel("Labels per scaffold, n")
+    ax.set_xlabel("Labels per scaffold and model, n")
     ax.set_ylabel(r"$\Delta$MAE vs Tm-only (°C)")
     ax.set_ylim(-0.35, 0.70)
     ax.text(0.03, 0.04, "negative = lower Tm error", transform=ax.transAxes, fontsize=8.3,
             color=COL["design"], va="bottom")
-    for (label, value, color), dy in zip(hot_endpoints, (-2, 7)):
-        ax.annotate(f"{endpoint_labels[label]}  {value:+.2f}", xy=(320, value), xytext=(8, dy),
-                    textcoords="offset points", ha="left", va="center", fontsize=8.3,
-                    fontweight="bold", color=color,
-                    bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.78, "pad": 0.4})
+    for (label, value, color), dy in zip(hot_endpoints, (-0.045, 0.075)):
+        ax.text(0.96, value + dy, f"{endpoint_labels[label]}  {value:+.2f}",
+                transform=ax.get_yaxis_transform(), ha="right", va="center", fontsize=8.3,
+                fontweight="bold", color=color,
+                bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.78, "pad": 0.4})
     polish(ax, "both", boxed=True)
     panel_label(ax, "C")
 
@@ -1331,7 +1337,12 @@ def write_summary_tsv(rows: pd.DataFrame, paired: dict) -> None:
     df = pd.DataFrame(out_rows)
     for out_dir in (PLOT_DIR, PAPER_FIG_DIR):
         out_dir.mkdir(parents=True, exist_ok=True)
-        df.to_csv(out_dir / "outline_figure_source_screen.tsv", sep="\t", index=False)
+        df.to_csv(
+            out_dir / "outline_figure_source_screen.tsv",
+            sep="\t",
+            index=False,
+            na_rep="NA",
+        )
 
 
 def verify_abs_error_alignment(rows: pd.DataFrame) -> None:
@@ -1342,12 +1353,21 @@ def verify_abs_error_alignment(rows: pd.DataFrame) -> None:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--skip-fig1",
+        action="store_true",
+        help="Generate Figs. 2 and 3 without changing the author-edited Fig. 1.",
+    )
+    args = parser.parse_args()
+
     configure_style()
     rows = source_rows()
     verify_abs_error_alignment(rows)
     paired = paired_comparisons()
     write_summary_tsv(rows, paired)
-    fig01_concept_protocol(rows)
+    if not args.skip_fig1:
+        fig01_concept_protocol(rows)
     fig2_data_design(rows, paired)
     fig3_physical_observable(rows, paired)
 

@@ -1,103 +1,102 @@
-# Manifest for reproducing manuscript-facing results downstream of fixed
-# computational source-label tables. Raw MD, FEP, Rosetta, and ThermoMPNN
-# calculations are fixed upstream inputs and are not run here.
+# Reproduce the selected configurations reported in the current manuscript.
+# Raw MD, FEP, Rosetta, and ThermoMPNN calculations are not launched here;
+# their processed tables are fixed inputs. The earlier candidate searches are
+# documented in the tracked supplementary tables and are not repeated here.
 
 fixed_inputs:
-  - data/source_labels/MANIFEST.tsv
+  # Experimental target split used in this study: 57 train / 114 validation /
+  # 396 held-out test examples.
   - data/nbbench/train.csv
   - data/nbbench/val.csv
   - data/nbbench/test.csv
+
+  # Processed source labels used by the selected final runs.
+  - data/source_labels/MANIFEST.tsv
   - data/source_labels/fep/fep1mel_435_processed.csv
   - data/source_labels/fep/fep4idl_409_processed.csv
+  - data/source_labels/fep/PROVENANCE.tsv
+  - data/source_labels/md_fep400k/1mel_mdq_processed.csv
+  - data/source_labels/md_fep400k/4idl_mdq_processed.csv
   - data/source_labels/rosetta/measured/1mel_rosettaddg_processed.csv
   - data/source_labels/rosetta/measured/4idl_rosettaddg_processed.csv
+  - data/source_labels/thermompnn/1melMPNN2_processed.csv
+  - data/source_labels/thermompnn/4idlMPNN2_processed.csv
   - data/source_labels/rosetta/random1000/random_2mut_1mel_1000_with_ddg_processed.csv
   - data/source_labels/rosetta/random1000/random_2mut_4idl_1000_with_ddg_processed.csv
   - data/source_labels/rosetta/esm1000/esm2_650M_2muts_1mel_100000_top1pct_with_ddg_processed.csv
   - data/source_labels/rosetta/esm1000/esm2_650M_2muts_4idl_100000_top1pct_with_ddg_processed.csv
-  - data/source_labels/thermompnn/1melMPNN2_processed.csv
-  - data/source_labels/thermompnn/4idlMPNN2_processed.csv
-  - data/md/nanobody_qvalue_hphil_400K.csv
-  - data/md/feat_q_hphil_400K_shuffled.csv
-  - data/md/nanobody_rmsf.csv
-  - data/md/feat_rmsf_max.csv
-  - data/md/feat_ss_dist_std.csv
-  - data/md/feat_q_min_400K.csv
-  - data/md/feat_q_std_400K.csv
-  - data/md/feat_q_slope_400K.csv
-  - data/md/feat_rmsf_max_400K.csv
-  - data/md/feat_rg_std_400K.csv
-  - data/md/feat_q_cdr3.csv
-  - data/md/feat_q_framework.csv
-  - data/md/feat_rmsf_cdr3.csv
-  - data/md/feat_rmsf_framework.csv
-  - data/md/feat_saltbridge.csv
-  - data/md/feat_ss_dist_mean.csv
-  - data/md/feat_cdr3_len.csv
-  - data/md/feat_q_hphil_400K_t5ns.csv
-  - data/md/feat_q_hphil_400K_t10ns.csv
-  - data/md/feat_q_hphil_400K_t17ns.csv
-  - data/md/feat_q_hphil_400K_t30ns.csv
-  - data/md/feat_q_hphil_400K_t50ns.csv
-  - data/md/feat_q_hphil_400K_t100ns.csv
 
-expected_outputs:
+  # Data used for the matched-versus-heterogeneous MD comparison and controls.
+  - data/md/nanobody_qvalue_400K.csv
+  - data/md/nanobody_qvalue_hphil_400K.csv
+  - data/md/study_qvalue_fep400k_1mel.csv
+  - data/md/study_qvalue_fep400k_4idl.csv
+  - paper/analysis/supplementary/tables/candidate_validation.tsv
+  - results/source_screen/final_source_screen_summary.json
+  - results/source_screen/final_frozen_core_summary.json
   - results/tm_ref_hot_mtl_tmselect/scaling.json
   - results/fep_hot_tmselect_enc3e-5/scaling.json
-  - results/hot_q_400k_tmselect/scaling.json
-  - results/source_screen/hpo_summary.json
-  - results/source_screen/final_source_screen_summary.json
-  - results/source_screen/hpo_frozen_core_summary.json
-  - results/source_screen/final_frozen_core_summary.json
-  - results/ddg_head_search/hpo_summary.json
-  - results/ddg_head_search/final_ddg_head_summary.json
-  - results/ddg_head_search/frozen/hpo_summary.json
-  - results/ddg_head_search/frozen/final_ddg_head_summary.json
-  - results/hparam_search/per_nmd_summary.json
-  - results/hparam_search/per_nmd_test_summary.json
-  - results/abcd_search/hpo_summary.json
-  - results/abcd_search/final_abcd_summary.json
-  - results/abcd_search/final_abcd_with_dq_summary.json
-  - results/arch_search/feature_summary.json
-  - results/arch_search/final_summary.json
+  - results/final_residual_q_hphil_400k/scaling.json
+  - results/sourcefinal_tm_shared_drop0.05/scaling.json
+  - results/sourcefinal_md_q-hphil-400k_lr1e-4_enc3e-5/scaling.json
+  - results/sourcefinal_frozen_tm_shared_drop0.30/scaling.json
+  - results/sourcefinal_frozen_md_q-hphil-400k_drop0.30/scaling.json
   - results/size35_tm_shared_drop005/scaling.json
   - results/size35_ddg_fep_enc3e-5/scaling.json
   - results/size650_tm_shared_drop005/scaling.json
   - results/size650_ddg_fep_enc3e-5/scaling.json
-  - results/short_hot_t5/scaling.json
-  - results/short_hot_t10/scaling.json
-  - results/short_hot_t17/scaling.json
-  - results/short_hot_t30/scaling.json
-  - results/short_hot_t50/scaling.json
-  - results/short_hot_t100/scaling.json
-  - results/short_frozen_t5/scaling.json
-  - results/short_frozen_t10/scaling.json
-  - results/short_frozen_t17/scaling.json
-  - results/short_frozen_t30/scaling.json
-  - results/short_frozen_t50/scaling.json
-  - results/short_frozen_t100/scaling.json
+
+expected_outputs:
+  - results/final_tm_frozen/scaling.json
+  - results/final_tm_hot/scaling.json
+  - results/final_fep_frozen/scaling.json
+  - results/final_fep_hot/scaling.json
+  - results/final_mdq_frozen/scaling.json
+  - results/final_mdq_hot/scaling.json
+  - results/final_tmpnn_frozen/scaling.json
+  - results/final_tmpnn_hot/scaling.json
+  - results/final_ros_frozen/scaling.json
+  - results/final_ros_hot/scaling.json
+  - results/final_rosrnd_frozen/scaling.json
+  - results/final_rosrnd_hot/scaling.json
+  - results/final_rosesm_frozen/scaling.json
+  - results/final_rosesm_hot/scaling.json
+  - results/tuned_rep/frozen_summary.json
+  - results/tuned_rep/hot_summary.json
+  - results/tuned_rep/Tm_only_frozen/scaling.json
+  - results/tuned_rep/Tm_only_hot/scaling.json
+  - results/tuned_rep/FEP_frozen/scaling.json
+  - results/tuned_rep/FEP_hot/scaling.json
+  - results/tuned_rep/MD_FEP400K_frozen/scaling.json
+  - results/tuned_rep/MD_FEP400K_hot/scaling.json
+  - results/tuned_rep/thermoMPNN_frozen/scaling.json
+  - results/tuned_rep/thermoMPNN_hot/scaling.json
+  - results/tuned_rep/rosetta_frozen/scaling.json
+  - results/tuned_rep/rosetta_hot/scaling.json
+  - results/tuned_rep/rosetta_random_frozen/scaling.json
+  - results/tuned_rep/rosetta_random_hot/scaling.json
+  - results/tuned_rep/rosetta_esm_frozen/scaling.json
+  - results/tuned_rep/rosetta_esm_hot/scaling.json
+  - paper/tex/figures/figure_1_concept_protocol_v2.png
+  - paper/tex/figures/fig_outline02_data_design.pdf
+  - paper/tex/figures/fig_outline03_physical_observable.pdf
+  - paper/tex/figures/supp_fig01_data_and_design.pdf
+  - paper/tex/figures/supp_fig02_transfer_controls.pdf
   - paper/analysis/supplementary/MANIFEST.tsv
   - paper/tex/main.pdf
+  - paper/tex/supplementary_main.pdf
 
 stage_order:
-  - preflight
-  - core-scaling
-  - source-screen
-  - ddg-head
-  - md-candidate
-  - abcd
-  - architecture
-  - model-size
-  - trajectory
+  - reported-results
+  - summaries
   - figures
 
 stages:
-  preflight: []
-
-  core-scaling:
-    - name: core experimental Tm scaling
+  reported-results:
+    - name: frozen encoder, Tm labels only
       type: prepare
-      outputs: [results/tm_ref_hot_mtl_tmselect/scaling.json]
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/final_tm_frozen/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -105,275 +104,29 @@ stages:
         - tm
         - --final-eval-split
         - test
-        - --encoder-mode
-        - hot
-        - --ddg-source
-        - none
-        - --md-source
-        - none
-        - --n-tm-list
-        - 10,20,30,40,57
-        - --n-runs
-        - 10
-        - --exp-name
-        - tm_ref_hot_mtl_tmselect
-        - --result-dir
-        - results/tm_ref_hot_mtl_tmselect
-
-    - name: core FEP label-count scaling
-      type: prepare
-      outputs: [results/fep_hot_tmselect_enc3e-5/scaling.json]
-      args:
-        - --train-mode
-        - mtl
-        - --selection-scope
-        - tm
-        - --final-eval-split
-        - test
-        - --encoder-mode
-        - hot
-        - --model-arch
-        - shared
-        - --ddg-source
-        - FEP
-        - --n-ddg-list
-        - 10,40,80,160,320
-        - --md-source
-        - none
-        - --ddg-head-mode
-        - separate
-        - --encoder-lr
-        - 3e-5
-        - --n-runs
-        - 10
-        - --exp-name
-        - fep_hot_tmselect_enc3e-5
-        - --result-dir
-        - results/fep_hot_tmselect_enc3e-5
-
-    - name: core MD Q-value label-count scaling
-      type: prepare
-      outputs: [results/hot_q_400k_tmselect/scaling.json]
-      args:
-        - --train-mode
-        - mtl
-        - --selection-scope
-        - tm
-        - --final-eval-split
-        - test
-        - --encoder-mode
-        - hot
-        - --ddg-source
-        - none
-        - --md-source
-        - MD_Q_HPHIL_400K
-        - --n-md-list
-        - 10,40,80,160,320,640
-        - --n-runs
-        - 10
-        - --exp-name
-        - hot_q_400k_tmselect
-        - --result-dir
-        - results/hot_q_400k_tmselect
-
-  source-screen:
-    - name: source screen candidate search, fine-tuned encoder
-      type: script
-      script: scripts/source_screen.py
-      outputs: [results/source_screen/hpo_summary.json]
-      args: [--mode, hpo, --gpus, "{gpus}"]
-
-    - name: source screen final test, fine-tuned encoder
-      type: script
-      script: scripts/source_screen.py
-      outputs:
-        - results/source_screen/final_jobs_summary.json
-        - results/source_screen/final_source_screen_summary.json
-      args: [--mode, final, --gpus, "{gpus}"]
-
-    - name: source screen candidate search, frozen encoder
-      type: script
-      script: scripts/source_screen.py
-      outputs: [results/source_screen/hpo_frozen_core_summary.json]
-      args:
-        - --mode
-        - hpo
-        - --gpus
-        - "{gpus}"
         - --encoder-mode
         - frozen
-        - --ddg-sources
-        - FEP,rosetta
-        - --md-sources
-        - MD_Q_HPHIL_400K
-        - --summary-name
-        - hpo_frozen_core_summary.json
-        - --exp-prefix
-        - frozen_
-
-    - name: source screen final test, frozen encoder
-      type: script
-      script: scripts/source_screen.py
-      outputs:
-        - results/source_screen/final_frozen_core_jobs_summary.json
-        - results/source_screen/final_frozen_core_summary.json
-      args:
-        - --mode
-        - final
-        - --gpus
-        - "{gpus}"
-        - --hpo-summary
-        - results/source_screen/hpo_frozen_core_summary.json
-        - --summary-name
-        - final_frozen_core_jobs_summary.json
-        - --final-summary-name
-        - final_frozen_core_summary.json
-
-  ddg-head:
-    - name: FEP source-head candidate search, fine-tuned encoder
-      type: script
-      script: scripts/ddg_head_search.py
-      outputs: [results/ddg_head_search/hpo_summary.json]
-      args: [--mode, hpo, --encoder-mode, hot, --gpus, "{gpus}"]
-
-    - name: FEP source-head final test, fine-tuned encoder
-      type: script
-      script: scripts/ddg_head_search.py
-      outputs:
-        - results/ddg_head_search/final_jobs_summary.json
-        - results/ddg_head_search/final_ddg_head_summary.json
-      args: [--mode, final, --encoder-mode, hot, --gpus, "{gpus}"]
-
-    - name: FEP source-head candidate search, frozen encoder
-      type: script
-      script: scripts/ddg_head_search.py
-      outputs: [results/ddg_head_search/frozen/hpo_summary.json]
-      args: [--mode, hpo, --encoder-mode, frozen, --gpus, "{gpus}"]
-
-    - name: FEP source-head final test, frozen encoder
-      type: script
-      script: scripts/ddg_head_search.py
-      outputs:
-        - results/ddg_head_search/frozen/final_jobs_summary.json
-        - results/ddg_head_search/frozen/final_ddg_head_summary.json
-      args: [--mode, final, --encoder-mode, frozen, --gpus, "{gpus}"]
-
-  md-candidate:
-    - name: MD Q-value per-count candidate search
-      type: script
-      script: scripts/hparam_search.py
-      outputs: [results/hparam_search/per_nmd_summary.json]
-      args: [--mode, per-nmd, --gpus, "{gpus}"]
-
-    - name: MD Q-value per-count final test
-      type: script
-      script: scripts/hparam_search.py
-      outputs: [results/hparam_search/per_nmd_test_summary.json]
-      args: [--mode, final-selected, --gpus, "{gpus}"]
-
-  abcd:
-    - name: A-D candidate search
-      type: script
-      script: scripts/abcd_search.py
-      outputs: [results/abcd_search/hpo_summary.json]
-      args: [--mode, hpo, --gpus, "{gpus}"]
-
-    - name: A-D final test
-      type: script
-      script: scripts/abcd_search.py
-      outputs:
-        - results/abcd_search/final_jobs_summary.json
-        - results/abcd_search/final_abcd_summary.json
-      args: [--mode, final, --gpus, "{gpus}"]
-
-    - name: A-D extra FEP plus MD Q-value final test
-      type: prepare
-      env:
-        DETACH_AUX_ENCODER: "true"
-      outputs:
-        - results/abcdfinal_D_ddg320_md640_q-hphil-400k_latent_lr1e-4_enc3e-5/scaling.json
-      args:
-        - --train-mode
-        - mtl
-        - --selection-scope
-        - tm
-        - --final-eval-split
-        - test
-        - --encoder-mode
-        - hot
+        - --ddg-source
+        - none
+        - --n-ddg-list
+        - 20
         - --model-arch
         - latent
         - --learning-rate
-        - 1e-4
-        - --encoder-lr
-        - 3e-5
-        - --ddg-source
-        - FEP
-        - --fixed-n-ddg
-        - 320
-        - --md-source
-        - MD_Q_HPHIL_400K
-        - --n-md-list
-        - 640
-        - --n-runs
-        - 10
-        - --exp-name
-        - abcdfinal_D_ddg320_md640_q-hphil-400k_latent_lr1e-4_enc3e-5
-        - --result-dir
-        - results/abcd_search/final/abcdfinal_D_ddg320_md640_q-hphil-400k_latent_lr1e-4_enc3e-5
-
-    - name: derive A-D summary with extra MD Q-value condition
-      type: derive_abcd_with_q
-      outputs: [results/abcd_search/final_abcd_with_dq_summary.json]
-
-  architecture:
-    - name: MD-derived feature survey
-      type: script
-      script: scripts/arch_search.py
-      outputs: [results/arch_search/feature_summary.json]
-      args: [--mode, feature, --archs, residual, --gpus, "{gpus}"]
-
-    - name: architecture final controls
-      type: script
-      script: scripts/arch_search.py
-      outputs: [results/arch_search/final_summary.json]
-      args: [--mode, final, --gpus, "{gpus}"]
-
-  model-size:
-    - name: ESM2 35M Tm-only final test
-      type: prepare
-      outputs: [results/size35_tm_shared_drop005/scaling.json]
-      args:
-        - --train-mode
-        - mtl
-        - --selection-scope
-        - tm
-        - --final-eval-split
-        - test
-        - --encoder-mode
-        - hot
-        - --base-model
-        - facebook/esm2_t12_35M_UR50D
-        - --model-arch
-        - shared
+        - 0.001
         - --dropout-rate
         - 0.05
-        - --ddg-source
-        - none
-        - --md-source
-        - none
-        - --n-ddg-list
-        - 0
+        - --weight-decay
+        - 0.1
         - --n-runs
-        - 10
+        - 5
         - --exp-name
-        - size35_tm_shared_drop005
-        - --result-dir
-        - results/model_size/final/size35_tm
+        - final_tm_frozen
 
-    - name: ESM2 35M FEP final test
+    - name: fine-tuned encoder, Tm labels only
       type: prepare
-      outputs: [results/size35_ddg_fep_enc3e-5/scaling.json]
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/final_tm_hot/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -383,30 +136,91 @@ stages:
         - test
         - --encoder-mode
         - hot
-        - --base-model
-        - facebook/esm2_t12_35M_UR50D
+        - --ddg-source
+        - none
+        - --n-ddg-list
+        - 20
         - --model-arch
-        - shared
+        - residual
+        - --encoder-lr
+        - 5e-5
+        - --dropout-rate
+        - 0.30
+        - --weight-decay
+        - 0.02
+        - --n-runs
+        - 5
+        - --exp-name
+        - final_tm_hot
+
+    - name: frozen encoder with FEP labels
+      type: prepare
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/final_fep_frozen/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - frozen
         - --ddg-source
         - FEP
         - --n-ddg-list
-        - 320
-        - --md-source
-        - none
+        - 20,80,160,320
+        - --model-arch
+        - shared
+        - --ddg-head-mode
+        - separate
+        - --learning-rate
+        - 0.001
+        - --dropout-rate
+        - 0.05
+        - --weight-decay
+        - 0.02
+        - --n-runs
+        - 5
+        - --exp-name
+        - final_fep_frozen
+
+    - name: fine-tuned encoder with FEP labels
+      type: prepare
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/final_fep_hot/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - hot
+        - --ddg-source
+        - FEP
+        - --n-ddg-list
+        - 20,80,160,320
+        - --model-arch
+        - shared
         - --ddg-head-mode
         - separate
         - --encoder-lr
         - 3e-5
+        - --dropout-rate
+        - 0.15
+        - --weight-decay
+        - 0.1
         - --n-runs
-        - 10
+        - 5
         - --exp-name
-        - size35_ddg_fep_enc3e-5
-        - --result-dir
-        - results/model_size/final/size35_fep
+        - final_fep_hot
 
-    - name: ESM2 650M Tm-only final test
+    - name: frozen encoder with matched MD native-contact labels
       type: prepare
-      outputs: [results/size650_tm_shared_drop005/scaling.json]
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/final_mdq_frozen/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -415,29 +229,30 @@ stages:
         - --final-eval-split
         - test
         - --encoder-mode
-        - hot
-        - --base-model
-        - facebook/esm2_t33_650M_UR50D
+        - frozen
+        - --ddg-source
+        - MD_FEP400K
+        - --n-ddg-list
+        - 20,80,160,320
         - --model-arch
         - shared
+        - --ddg-head-mode
+        - separate
+        - --learning-rate
+        - 0.001
         - --dropout-rate
         - 0.05
-        - --ddg-source
-        - none
-        - --md-source
-        - none
-        - --n-ddg-list
-        - 0
+        - --weight-decay
+        - 0.02
         - --n-runs
-        - 10
+        - 5
         - --exp-name
-        - size650_tm_shared_drop005
-        - --result-dir
-        - results/model_size/final/size650_tm
+        - final_mdq_frozen
 
-    - name: ESM2 650M FEP final test
+    - name: fine-tuned encoder with matched MD native-contact labels
       type: prepare
-      outputs: [results/size650_ddg_fep_enc3e-5/scaling.json]
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/final_mdq_hot/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -447,67 +262,312 @@ stages:
         - test
         - --encoder-mode
         - hot
-        - --base-model
-        - facebook/esm2_t33_650M_UR50D
+        - --ddg-source
+        - MD_FEP400K
+        - --n-ddg-list
+        - 20,80,160,320
+        - --model-arch
+        - latent
+        - --ddg-head-mode
+        - context
+        - --encoder-lr
+        - 1e-5
+        - --dropout-rate
+        - 0.15
+        - --weight-decay
+        - 0.02
+        - --n-runs
+        - 5
+        - --exp-name
+        - final_mdq_hot
+
+    - name: frozen encoder with ThermoMPNN labels
+      type: prepare
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/final_tmpnn_frozen/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - frozen
+        - --ddg-source
+        - thermoMPNN
+        - --n-ddg-list
+        - 20,80,160,320
         - --model-arch
         - shared
+        - --ddg-head-mode
+        - separate
+        - --learning-rate
+        - 0.0005
+        - --dropout-rate
+        - 0.30
+        - --weight-decay
+        - 0.02
+        - --n-runs
+        - 5
+        - --exp-name
+        - final_tmpnn_frozen
+
+    - name: fine-tuned encoder with ThermoMPNN labels
+      type: prepare
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/final_tmpnn_hot/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - hot
         - --ddg-source
-        - FEP
+        - thermoMPNN
         - --n-ddg-list
-        - 320
-        - --md-source
-        - none
+        - 20,80,160,320
+        - --model-arch
+        - latent
+        - --ddg-head-mode
+        - context
+        - --encoder-lr
+        - 1e-5
+        - --dropout-rate
+        - 0.15
+        - --weight-decay
+        - 0.1
+        - --n-runs
+        - 5
+        - --exp-name
+        - final_tmpnn_hot
+
+    - name: frozen encoder with Rosetta labels
+      type: prepare
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/final_ros_frozen/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - frozen
+        - --ddg-source
+        - rosetta
+        - --n-ddg-list
+        - 20,80,160,320
+        - --model-arch
+        - shared
+        - --ddg-head-mode
+        - separate
+        - --learning-rate
+        - 0.0005
+        - --dropout-rate
+        - 0.30
+        - --weight-decay
+        - 0.02
+        - --n-runs
+        - 5
+        - --exp-name
+        - final_ros_frozen
+
+    - name: fine-tuned encoder with Rosetta labels
+      type: prepare
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/final_ros_hot/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - hot
+        - --ddg-source
+        - rosetta
+        - --n-ddg-list
+        - 20,80,160,320
+        - --model-arch
+        - latent
         - --ddg-head-mode
         - separate
         - --encoder-lr
-        - 3e-5
+        - 1e-5
+        - --dropout-rate
+        - 0.15
+        - --weight-decay
+        - 0.1
         - --n-runs
-        - 10
+        - 5
         - --exp-name
-        - size650_ddg_fep_enc3e-5
-        - --result-dir
-        - results/model_size/final/size650_fep
+        - final_ros_hot
 
-  trajectory:
-    - name: trajectory-window control {encoder} encoder {time_ns} ns
-      type: prepare_matrix
-      matrix:
-        encoder: [hot, frozen]
-        time_ns: [5, 10, 17, 30, 50, 100]
+    - name: frozen encoder with random-variant Rosetta labels
+      type: prepare
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/final_rosrnd_frozen/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - frozen
+        - --ddg-source
+        - rosetta_random
+        - --n-ddg-list
+        - 20,80,160,320
+        - --model-arch
+        - shared
+        - --ddg-head-mode
+        - separate
+        - --learning-rate
+        - 0.001
+        - --dropout-rate
+        - 0.15
+        - --weight-decay
+        - 0.1
+        - --n-runs
+        - 5
+        - --exp-name
+        - final_rosrnd_frozen
+
+    - name: fine-tuned encoder with random-variant Rosetta labels
+      type: prepare
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/final_rosrnd_hot/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - hot
+        - --ddg-source
+        - rosetta_random
+        - --n-ddg-list
+        - 20,80,160,320
+        - --model-arch
+        - residual
+        - --ddg-head-mode
+        - separate
+        - --encoder-lr
+        - 1e-5
+        - --dropout-rate
+        - 0.30
+        - --weight-decay
+        - 0.1
+        - --n-runs
+        - 5
+        - --exp-name
+        - final_rosrnd_hot
+
+    - name: frozen encoder with ESM2-proposed Rosetta labels
+      type: prepare
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/final_rosesm_frozen/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - frozen
+        - --ddg-source
+        - rosetta_esm
+        - --n-ddg-list
+        - 20,80,160,320
+        - --model-arch
+        - shared
+        - --ddg-head-mode
+        - separate
+        - --learning-rate
+        - 0.001
+        - --dropout-rate
+        - 0.05
+        - --weight-decay
+        - 0.02
+        - --n-runs
+        - 5
+        - --exp-name
+        - final_rosesm_frozen
+
+    - name: fine-tuned encoder with ESM2-proposed Rosetta labels
+      type: prepare
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/final_rosesm_hot/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - hot
+        - --ddg-source
+        - rosetta_esm
+        - --n-ddg-list
+        - 20,80,160,320
+        - --model-arch
+        - shared
+        - --ddg-head-mode
+        - separate
+        - --encoder-lr
+        - 1e-5
+        - --dropout-rate
+        - 0.15
+        - --weight-decay
+        - 0.1
+        - --n-runs
+        - 5
+        - --exp-name
+        - final_rosesm_hot
+
+  summaries:
+    - name: rebuild selected-result summaries
+      type: command
+      command: [uv, run, python, plot/build_tuned_summaries.py]
       outputs:
-        - results/short_{encoder}_t{time_ns}/scaling.json
-      args:
-        - --train-mode
-        - mtl
-        - --selection-scope
-        - tm
-        - --final-eval-split
-        - test
-        - --encoder-mode
-        - "{encoder}"
-        - --ddg-source
-        - none
-        - --md-source
-        - MD_Q_HPHIL_400K_T{time_ns}
-        - --n-md-list
-        - 640
-        - --n-runs
-        - 10
-        - --exp-name
-        - short_{encoder}_t{time_ns}
-        - --result-dir
-        - results/short_{encoder}_t{time_ns}
+        - results/tuned_rep/frozen_summary.json
+        - results/tuned_rep/hot_summary.json
+        - results/tuned_rep/Tm_only_frozen/scaling.json
+        - results/tuned_rep/Tm_only_hot/scaling.json
+        - results/tuned_rep/FEP_frozen/scaling.json
+        - results/tuned_rep/FEP_hot/scaling.json
+        - results/tuned_rep/MD_FEP400K_frozen/scaling.json
+        - results/tuned_rep/MD_FEP400K_hot/scaling.json
+        - results/tuned_rep/thermoMPNN_frozen/scaling.json
+        - results/tuned_rep/thermoMPNN_hot/scaling.json
+        - results/tuned_rep/rosetta_frozen/scaling.json
+        - results/tuned_rep/rosetta_hot/scaling.json
+        - results/tuned_rep/rosetta_random_frozen/scaling.json
+        - results/tuned_rep/rosetta_random_hot/scaling.json
+        - results/tuned_rep/rosetta_esm_frozen/scaling.json
+        - results/tuned_rep/rosetta_esm_hot/scaling.json
 
   figures:
-    - name: main figure regeneration
+    - name: rebuild Figs. 2 and 3
       type: command
-      command: [uv, run, python, plot/make_outline_figures.py]
+      command: [uv, run, python, plot/make_outline_figures.py, --skip-fig1]
       outputs:
-        - paper/tex/figures/fig_outline01_concept_protocol.pdf
         - paper/tex/figures/fig_outline02_data_design.pdf
         - paper/tex/figures/fig_outline03_physical_observable.pdf
 
-    - name: supplementary figure and table regeneration
+    - name: rebuild supplementary figures and tables
       type: command
       command: [uv, run, python, plot/make_supplementary_figures.py]
       outputs:
@@ -515,15 +575,9 @@ stages:
         - paper/tex/figures/supp_fig01_data_and_design.pdf
         - paper/tex/figures/supp_fig02_transfer_controls.pdf
 
-    - name: LaTeX typesetting
+    - name: typeset main and supplementary PDFs
       type: command
       command: [uv, run, python, scripts/typeset_paper.py]
       outputs:
         - paper/tex/main.pdf
-
-  diagnostic:
-    - name: legacy representative MD candidate summary
-      type: script
-      script: scripts/hparam_search.py
-      outputs: [results/hparam_search/summary.json]
-      args: [--mode, representative, --gpus, "{gpus}"]
+        - paper/tex/supplementary_main.pdf

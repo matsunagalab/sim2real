@@ -6,7 +6,7 @@ training results under `results/`.
 ## Layout
 
 - `supplementary/tables/`: compact TSV source tables for supplementary figures.
-- `supplementary/figures/`: rendered supplementary figures for review and handoff.
+- `supplementary/figures/`: rendered supplementary figures for review.
 - `supplementary/MANIFEST.tsv`: panel-level map from each supplementary
   figure panel to its source table, upstream result/source file, and generator
   function.
@@ -16,7 +16,7 @@ The LaTeX-ready copies of rendered figures are written to
 
 ## Fixed Inputs
 
-The manuscript workflow treats raw MD, FEP, Rosetta, and ThermoMPNN
+The manuscript analysis treats raw MD, FEP, Rosetta, and ThermoMPNN
 calculations as fixed upstream inputs. The processed tables used by training are
 kept in the repository under:
 
@@ -54,6 +54,6 @@ uv run python scripts/typeset_paper.py
 The figure builders only read existing results and source data. They do not
 launch training jobs.
 
-To add or audit an analysis, start from
+To add or check an analysis, start from
 `supplementary/MANIFEST.tsv` to identify which result summary or source table
 feeds each panel.

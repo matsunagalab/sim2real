@@ -1,277 +1,118 @@
 # sim2real
 
-**Sim2Real Transfer Learning for Nanobody Thermal Stability Prediction**
+**Transfer learning with simulated variants and calculated quantities for
+nanobody melting-temperature prediction**
 
-ナノボディの熱安定性（Tm）予測を改善するために、シミュレーション由来の補助タスク（ddG, MD-derived structural features）をマルチタスク学習で活用する研究プロジェクトです。タンパク質言語モデル ESM-2 を NbBench thermo-tm データで fine-tuning する際に、計算科学ツール（FEP / FoldX / Rosetta / ThermoMPNN）の ddG や、all-atom MD trajectory から計算した Q-value, RMSF, 塩橋持続率を補助タスクとして同時に学習させます。
+実験データが少ないナノボディ融解温度（Tm）予測で、どの計算ラベルが転移学習に役立つかを比較する研究リポジトリです。ESM-2 を使い、実験 Tm に加えて FEP、MD native-contact Q、Rosetta、ThermoMPNN の変異ラベルを補助課題として学習します。
 
-最良構成 (`hot_lowflex_sweep`): **MAE = 6.76°C, 90% CI 幅 = 0.86** (frozen ベースライン 7.32 から **-0.56°C 改善**)。
+現在の結果では、計算データを作る条件の組み合わせによって、観測された転移効果が異なります。FEP-matched 変異系列では、FEP は frozen／fine-tuned の両方で Tm-only より低い test MAE を示しました。ただし、fine-tuned の差の95%区間はゼロを含みます。MD native-contact Q は frozen encoder では改善しましたが、fine-tuned encoder では改善しませんでした。異なるナノボディを広く集めた以前の MD 系列は、配列選択だけでなく contact の定義と trajectory の集計方法も異なり、配列長との交絡も含むため、一要因の比較ではなく計算設計全体の比較対照として扱っています。
 
-## 手法の概要
+| Encoder | Tm labels only | + FEP | + matched MD Q |
+|---|---:|---:|---:|
+| Frozen | 7.229 °C | 7.008 °C (−0.221) | 7.034 °C (−0.195) |
+| Fine-tuned | 6.548 °C | 6.395 °C (−0.153) | 6.577 °C (+0.029) |
 
-- **ベースモデル**: ESM-2 8M (`facebook/esm2_t6_8M_UR50D`、デフォルト) / 35M / 650M を切替可
-- **エンコーダーモード**: `frozen` (head のみ学習・最速) / `lora` (PEFT) / `hot` (フル fine-tuning、ベスト)
-- **タスク**:
-  - Primary: Tm 回帰 (NbBench thermo-tm)
-  - Auxiliary 1-2: ddG (1MEL / 4IDL のペア)
-  - Auxiliary 3-4: MD-derived scalar feature (Q-value 各種、RMSF、塩橋)
-- **損失重み**: Kendall et al. 2018 の learnable uncertainty weighting (デフォルト) / 固定重み
-- **アンサンブル評価**: 複数 seed の予測を平均してから MAE / 90% bootstrap CI を算出
+括弧内は、同じ encoder の Tm-only に対する held-out test MAE の差です。全条件の結果は `results/final_*_{frozen,hot}/scaling.json` と `results/tuned_rep/{frozen,hot}_summary.json` にあります。
 
-## セットアップ
+## Experimental Tm split
+
+NbBench `ZYMScott/thermo-tm` の公開 split を、低データ学習のため次のように割り当てています。
+
+| Local file | Published split | Purpose | n |
+|---|---|---|---:|
+| `data/nbbench/train.csv` | validation | training | 57 |
+| `data/nbbench/val.csv` | test | model selection | 114 |
+| `data/nbbench/test.csv` | train | final held-out evaluation | 396 |
+
+`data/nbbench/download.py` はこの割り当てを再現します。最終 test は候補設定の選択には使いません。
+
+## Setup
 
 [uv](https://docs.astral.sh/uv/) で依存関係を管理しています。
-
-```bash
-uv sync                    # 仮想環境作成 + 解析・学習・図生成の依存関係をインストール
-uv sync --extra notebooks  # notebook を使う場合のみ
-```
-
-Linux x86_64 の GPU 環境では PyTorch cu124 wheel を使います。Mac などの非 Linux 環境では
-通常の PyPI wheel を使う設定にしてあります。
-`uv sync` には、論文の下流再現に使う学習・集計・図生成パッケージに加えて、
-raw trajectory から MD-derived 特徴量を再抽出するための `mdtraj` と `MDAnalysis` も含めています。
-
-## クイックスタート
-
-### 0. 論文解析・図の再現
-
-新しいマシンでは、まず以下を実行します。
 
 ```bash
 git clone https://github.com/matsunagalab/sim2real.git
 cd sim2real
 uv sync
+```
+
+Notebook を使う場合だけ追加依存を入れます。
+
+```bash
+uv sync --extra notebooks
+```
+
+## Reproduce the current manuscript
+
+固定入力と、論文で参照する結果・図・PDFが揃っているかを読み取り専用で確認します。
+
+```bash
 uv run python scripts/reproduce_paper_results.py --check-only
 ```
 
-`--check-only` は、論文解析に必要な固定入力テーブルと、現在の論文図を作るための
-集計済み出力が揃っているかだけを確認します。raw trajectory は確認対象ではありません。
+既存の最終結果から集計を作り直すには、次を実行します。
 
-GitHub に含まれる集計結果から、main figures、supplementary figures/tables、
-manuscript PDF を再生成するには以下を使います。
+```bash
+uv run python scripts/reproduce_paper_results.py --stage summaries --force
+```
+
+Fig. 2/3、supplementary figures/tables、main PDF、supplementary PDF を作り直すには、次を実行します。著者が編集中の Fig. 1 は変更しません。
 
 ```bash
 uv run python scripts/reproduce_paper_results.py --stage figures --force
 ```
 
-既存の `results/*/scaling.json` から集計JSONと図を作り直す場合：
+PDF 生成には `tectonic`、または `pdflatex` と `bibtex` が必要です。Tectonic の場所を指定する場合は `TECTONIC=/path/to/tectonic` を設定します。
+
+論文で報告する 14 個の選択済み構成（7 source conditions × frozen/fine-tuned）を固定 CSV から再学習し、その後に集計・図・PDFを作るには次を使います。
 
 ```bash
 uv run python scripts/reproduce_paper_results.py \
-  --stage source-screen,ddg-head,md-candidate,abcd,architecture \
-  --collect-only
-uv run python scripts/reproduce_paper_results.py --stage figures --force
+  --stage all --gpus 0 --force
 ```
 
-固定入力CSVからモデル学習、モデル選択、held-out test評価、解析集計、
-図作成まで下流計算をすべて再実行する場合：
+これは長時間の GPU 計算で、選択済み条件を順番に実行します。別の GPU を使う場合は `--gpus` にその ID を指定してください。実行コマンドだけを確認する場合は `--dry-run` を加えてください。
+
+この簡潔な再現手順は、論文で採用した設定を再学習します。候補設定の全探索そのものは繰り返しません。候補と採用設定は `paper/analysis/supplementary/tables/candidate_validation.tsv` と `selected_settings.tsv` に保存されています。
+
+raw MD、FEP、Rosetta、ThermoMPNN 計算はこの手順では実行しません。処理済み CSV を固定入力として使います。定義は `reproduce/manuscript_results.yaml`、実行スクリプトは `scripts/reproduce_paper_results.py` です。詳しくは `REPRODUCE.md` を参照してください。
+
+## Run one selected configuration
+
+例として、fine-tuned encoder と FEP labels の最終条件は次のコマンドです。
 
 ```bash
-uv run python scripts/reproduce_paper_results.py --stage all --gpus 0,1,2,3,4,5,6 --force
+DETACH_AUX_ENCODER=true CUDA_VISIBLE_DEVICES=0 uv run python prepare.py \
+  --train-mode mtl --selection-scope tm --final-eval-split test \
+  --encoder-mode hot --ddg-source FEP --n-ddg-list 20,80,160,320 \
+  --model-arch shared --ddg-head-mode separate --encoder-lr 3e-5 \
+  --dropout-rate 0.15 --weight-decay 0.1 --n-runs 5 \
+  --exp-name final_fep_hot
 ```
 
-この full rerun は長時間かかります。ESM2 650M controls も含むため、GPU memory が
-不足するマシンでは失敗する可能性があります。`--gpus` には利用するGPU IDを
-カンマ区切りで指定します。単一GPUなら `--gpus 0` です。
+利用可能な引数は `uv run python prepare.py --help` で確認できます。過去の名前付き実験は `EXPERIMENTS.md` と `experiments.yaml` に残していますが、現在の論文結果とは区別してください。
 
-この workflow は、raw MD/FEP/Rosetta/ThermoMPNN 計算そのものは再実行しません。
-それらから作った処理済みCSVを固定入力として、学習・モデル選択・テスト評価・図生成を再実行します。
-PDF生成には `tectonic` か `pdflatex`/`bibtex` がPATH上に必要です。`tectonic` の
-場所を明示したい場合は `TECTONIC=/path/to/tectonic` を設定します。
+## Repository layout
 
-再現workflowの定義は `reproduce/manuscript_results.yaml`、実行器は
-`scripts/reproduce_paper_results.py` です。各supplementary panelがどの表から作られるかは
-`paper/analysis/supplementary/MANIFEST.tsv` に記録されます。
-
-### 1. データ準備（MD 系を使う場合のみ）
-
-NbBench、mutation-effect source labels、MD-derived 特徴量CSVはリポジトリに同梱済みです。
-論文図の再生成や下流学習の再実行だけなら、Zenodo の raw trajectory は不要です。
-
-raw trajectory から MD-derived 特徴量CSV自体を再抽出する場合のみ、Zenodo の raw data を
-配置してから以下を実行します。
-
-```bash
-uv run python scripts/extract_all_features.py
+```text
+prepare.py                         data loading, training driver, evaluation
+train.py                           ESM-2 multitask model and training loop
+data/nbbench/                      fixed 57/114/396 experimental Tm split
+data/source_labels/                processed mutation-label tables
+data/md/                           processed MD-derived quantities
+results/final_*/scaling.json       selected held-out test results
+results/tuned_rep/                 compact summaries used by main figures
+plot/                              manuscript figure and table builders
+paper/tex/                         main and supplementary LaTeX sources
+reproduce/manuscript_results.yaml  current reproduction steps
 ```
 
-これで `data/md/` 以下に以下が生成されます：
+## Manuscript
 
-| CSV | 内容 | 抽出元 |
-|-----|------|-------|
-| `nanobody_qvalue_hphil.csv` | hphil-all Q-value (Best-Hummer, β=50, λ=1.8) | `extract_q_values.py` |
-| `nanobody_rmsf.csv` | mean Cα RMSF | `extract_rmsf.py` |
-| `feat_q_highflex.csv` | top 30% RMSF 残基のみで計算した hphil-Q (CDR proxy) | `extract_features_pilot.py` |
-| `feat_q_lowflex.csv` | bottom 70% RMSF 残基のみで計算した hphil-Q (framework proxy) | 同上 |
-| `feat_saltbridge.csv` | native 塩橋の persistence | 同上 |
-| `rosetta_qvalue_hphil.csv` | Rosetta backrub MC trajectory の Q-value | `extract_rosetta_qvalues.py` |
+Authors: Taihei Murakami, Kentaro Sasaki, Soichiro Oda, Kazuma Okada, and Yasuhiro Matsunaga.
 
-Rosetta 系は別途 `scripts/run_rosetta_backrub.py` で trajectory を作成してから抽出。
+The public repository is <https://github.com/matsunagalab/sim2real>. The large-data deposit is described in `zenodo/README.md`; its DOI is intentionally left as a placeholder until the record is created.
 
-### 2. 名前付き実験を再現する
-
-すべての過去実験は `experiments.yaml` に登録されており、1 コマンドで再現可能：
-
-```bash
-# 登録実験を一覧
-uv run python scripts/run_experiment.py --list
-
-# ベスト構成 (8M Hot + Q_LOWFLEX) を再現
-CUDA_VISIBLE_DEVICES=1 uv run python scripts/run_experiment.py hot_lowflex_sweep
-
-# 期待値と比較しつつ実行
-uv run python scripts/run_experiment.py hot_lowflex_sweep --check
-
-# 既存の結果を verify するだけ (再実行しない)
-uv run python scripts/run_experiment.py hot_lowflex_sweep --check-only
-
-# コマンドだけ表示 (実行しない)
-uv run python scripts/run_experiment.py hot_lowflex_sweep --dry-run
-```
-
-出力：
-- `logs/<name>.log` — stdout/stderr 全文
-- `results/<name>/scaling.json` — args / env / hparams / per-scaling MAE+CI / paired bootstrap ΔMAE
-- `results.tsv` — 拡張スキーマで 1 行追記
-
-主な実験名（詳細は `EXPERIMENTS.md`）：
-
-| name | 概要 | best MAE |
-|------|------|----------|
-| `frozen_q_hphil_full` | Frozen ESM-2 8M ベースライン | 7.32 |
-| `combo_lowflex_highflex_frozen` | Framework Q + CDR Q 並列 (frozen) | 7.22 |
-| **`hot_lowflex_sweep`** | **8M Hot + Q_LOWFLEX (overall best)** | **6.76** |
-| `hot_650m_lowflex_640` | 650M Hot + Q_LOWFLEX | 6.78 |
-| `lora_650m_lowflex_640` | 650M LoRA + Q_LOWFLEX | 7.04 |
-| `rosetta_full` | Rosetta backrub Q (ROSETTA_Q_HPHIL) | 7.32 |
-
-### 3. 直接 prepare.py を呼ぶ（旧式・互換維持）
-
-`run_experiment.py` を介さず prepare.py を直接起動することも可能：
-
-```bash
-# Frozen baseline
-uv run python prepare.py --ddg-source none --md-source MD_Q_HPHIL \
-  --n-md-list 10,20,40,80,160,320,640 --n-runs 10
-
-# Hot encoder + Q_LOWFLEX (ベスト)
-uv run python prepare.py --encoder-mode hot --ddg-source none \
-  --md-source MD_Q_LOWFLEX --n-md-list 10,40,160,640 --n-runs 10
-
-# 650M Hot
-uv run python prepare.py --encoder-mode hot --base-model facebook/esm2_t33_650M_UR50D \
-  --ddg-source none --md-source MD_Q_LOWFLEX --n-md-list 640 --n-runs 5
-
-# DDG ベースライン (Tm + 1MEL/4IDL ペア)
-uv run python prepare.py --ddg-source FEP --n-ddg-list 10,20,40,80,160,320 --n-runs 10
-```
-
-CLI 引数（`--encoder-mode` など）は環境変数 (`ENCODER_MODE` など) より優先。env var 経由の旧呼び出しも依然動作：
-
-```bash
-ENCODER_MODE=hot CUDA_VISIBLE_DEVICES=1 uv run python prepare.py \
-  --ddg-source none --md-source MD_Q_LOWFLEX --n-md-list 640 --n-runs 5
-```
-
-## CLI 引数リファレンス（prepare.py）
-
-| flag | 既定 | 説明 |
-|------|------|------|
-| `--ddg-source` | FEP | `FEP` / `FoldX` / `rosetta` / `thermoMPNN` / `rosetta_esm` / `rosetta_random` / `none` |
-| `--n-ddg-list` | "20,80,280" | DDG スケーリングのサンプル数（カンマ区切り） |
-| `--md-source` | none | `MD_Q` / `MD_Q_HPHIL` / `ROSETTA_Q_HPHIL` / `MD_RMSF` / `MD_Q_HIGHFLEX` / `MD_Q_LOWFLEX` / `MD_SALTBRIDGE` |
-| `--md-aux-source` | none | 並列の 2 番目の MD task (task_id=4) |
-| `--n-md-list` | "" | MD スケーリングのサンプル数（指定時は MD axis） |
-| `--n-runs` | 3 | アンサンブルする seed 数 |
-| `--encoder-mode` | env / frozen | `frozen` / `lora` / `hot` |
-| `--base-model` | env / esm2_t6_8M_UR50D | HF model id |
-| `--mtl-weight-mode` | env / uncertainty | `uncertainty` / `fixed` |
-| `--md-weight` | env / 1.0 | `mtl-weight-mode=fixed` 時の MD タスク重み |
-| `--exp-name` | None | 出力 dir 名 / results.tsv ラベル |
-| `--result-dir` | tempdir | チェックポイント保存先 |
-
-## リポジトリ構成
-
-```
-sim2real/
-├── prepare.py             # データ読込・評価・スケーリング解析（CLI ドライバ）
-├── train.py               # MultiTaskModel + 学習ループ（HPARAMS）
-├── experiments.yaml       # 名前付き実験レジストリ
-├── EXPERIMENTS.md         # 実験一覧（人間用）
-├── results.tsv            # 全実験のサマリログ（拡張スキーマ）
-│
-├── scripts/
-│   ├── run_experiment.py          # experiments.yaml から実験を起動
-│   ├── extract_all_features.py    # 全 MD 抽出スクリプトの wrapper
-│   ├── extract_q_values.py        # MD trajectory → Q-value (hphil-all)
-│   ├── extract_rmsf.py            # MD trajectory → mean Cα RMSF
-│   ├── extract_features_pilot.py  # → q_highflex / q_lowflex / saltbridge
-│   ├── extract_rosetta_qvalues.py # Rosetta MC trajectory → Q-value
-│   ├── run_rosetta_backrub.py     # Rosetta backrub の並列実行
-│   └── mlm_finetune.py            # ESM-2 を VHH NGS で MLM fine-tuning
-│
-├── data/
-│   ├── nbbench/                # NbBench thermo-tm (train 396 / val 57 / test 114)
-│   ├── md/                     # MD-derived 特徴量 CSV (上記スクリプトで生成)
-│   ├── fep/ foldX/ rosetta/    # ddG データ (1MEL + 4IDL ペア)
-│   ├── mpnn/ rosetta_esm1000/ rosetta_random1000/
-│   └── Tm/                     # 旧 Tm データ（NbBench 切替前のレガシー）
-│
-├── results/<exp-name>/scaling.json   # 構造化された実験結果
-├── logs/<exp-name>.log               # run_experiment.py 経由のログ
-├── logs/archive/                     # リファクタ前の古いログ群（96 件）
-├── plot/                             # 可視化ノートブック
-└── paper/                            # 論文（LaTeX）
-```
-
-## アーキテクチャ詳細
-
-`MultiTaskModel` (`train.py`):
-- **Encoder**: ESM-2 (frozen / LoRA / hot)
-- **Shared layers**: `Linear(hs, 256) → ReLU → Dropout → Linear(256, 128) → ReLU → Dropout → Linear(128, 32) → ReLU`
-- **Heads** (32 → 1):
-  - `tm_head` (task_id=0): Tm 回帰
-  - `ddg_head` (task_id=1): 1MEL ddG
-  - `ddg_head2` (task_id=2): 4IDL ddG
-  - `md_head` (task_id=3): primary MD scalar
-  - `md_head2` (task_id=4): aux MD scalar
-- **Loss**: HuberLoss(δ=1.0) per task、uncertainty weighting (`log_sigma_*`)
-- **Early stopping**: patience=15 (HPARAMS で調整可)
-
-Hot mode 時は encoder と head で別 LR (encoder=1e-4, head=3e-4) を `HotModeTrainer.create_optimizer` で適用。
-
-## 結果の構造
-
-`results/<exp-name>/scaling.json`:
-
-```json
-{
-  "exp_name": "hot_lowflex_sweep",
-  "git_commit": "abc1234",
-  "args": {...},
-  "env": {"ENCODER_MODE": "hot", ...},
-  "resolved_encoder_mode": "hot",
-  "hparams": {...},
-  "scaling": [
-    {"n": 10, "mae": 6.94, "ci_lo": 6.52, "ci_hi": 7.35, "ci_width": 0.84},
-    ...
-  ],
-  "best": {"n": 640, "mae": 6.76, "ci_width": 0.86},
-  "summary": {"slope": -0.43, "ci_width_avg": 0.86, "mae_avg": 6.83},
-  "paired_bootstrap": {
-    "ref_n": 10,
-    "per_n": [{"n": 40, "delta_mae": -0.10, ...}, ...],
-    "full_range": {"from": 10, "to": 640, "delta_mae": -0.17, "p_positive": 0.014}
-  }
-}
-```
-
-## 新しい実験の追加
-
-1. `experiments.yaml` に entry を追加（`args` / `env` / `expected`）
-2. 抽出 CSV が必要なら `scripts/extract_*.py` を実行
-3. `uv run python scripts/run_experiment.py <new_name>`
-
-## ライセンス
+## License
 
 MIT License

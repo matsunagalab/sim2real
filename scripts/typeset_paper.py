@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Typeset the manuscript PDF without hard-coding a machine-local TeX path."""
+"""Typeset the main manuscript and supplementary-information PDFs."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 TEX_DIR = REPO / "paper" / "tex"
-MAIN = "main.tex"
+DOCUMENTS = ("main.tex", "supplementary_main.tex")
 
 
 def run(cmd: list[str]) -> None:
@@ -33,17 +33,20 @@ def main() -> int:
         env = os.environ.copy()
         env.setdefault("XDG_CACHE_HOME", "/tmp/tectonic-cache")
         print(f"Using tectonic: {tectonic}")
-        subprocess.run([tectonic, MAIN], cwd=TEX_DIR, env=env, check=True)
+        for document in DOCUMENTS:
+            subprocess.run([tectonic, document], cwd=TEX_DIR, env=env, check=True)
         return 0
 
     pdflatex = shutil.which("pdflatex")
     bibtex = shutil.which("bibtex")
     if pdflatex and bibtex:
         print(f"Using pdflatex: {pdflatex}")
-        run([pdflatex, "-interaction=nonstopmode", MAIN])
-        run([bibtex, "main"])
-        run([pdflatex, "-interaction=nonstopmode", MAIN])
-        run([pdflatex, "-interaction=nonstopmode", MAIN])
+        for document in DOCUMENTS:
+            stem = Path(document).stem
+            run([pdflatex, "-interaction=nonstopmode", document])
+            run([bibtex, stem])
+            run([pdflatex, "-interaction=nonstopmode", document])
+            run([pdflatex, "-interaction=nonstopmode", document])
         return 0
 
     print(

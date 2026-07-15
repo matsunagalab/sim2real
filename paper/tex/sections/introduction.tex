@@ -5,7 +5,7 @@
 Machine-learning models for molecular design need measured examples, but many
 experiments are slow or expensive. Properties calculated with quantum chemistry,
 molecular simulation, or other physical models can be used as additional
-training signals. This approach is often called simulation-to-real
+training data. This approach is often called simulation-to-real
 (Sim2Real) learning. It has been used in materials science to combine large
 computed data sets with smaller experimental data sets
 \citep{Yamada2019Predicting,Aoki2023Multitask,Minami2025Scaling}. In some cases,
@@ -49,24 +49,28 @@ Nanobody-specific data and validation are therefore still needed
 Schmirler2024FineTuning}.
 
 The open question is not simply whether computed labels can be added to a Tm
-model. It is which variants should be simulated and which quantity should be
-calculated. A mixed set of unrelated sequences may contain unwanted differences
-such as sequence length. A mutation scan on one or two fixed structures gives a
-more controlled set of sequence changes. Even with the same variants, a mutation
-free energy, a Rosetta score, and an MD native-contact value may differ in how
-well they relate to Tm. These choices are made before model training, so they
-should be tested as part of the simulation plan.
+model. It is how to plan the simulations that produce those labels. A mixed set
+of unrelated sequences may contain unwanted differences such as sequence length.
+A mutation scan on one or two fixed structures gives a more controlled set of
+sequence changes. The calculated quantity also matters: a mutation free energy,
+a Rosetta score, and an MD native-contact value may differ in how closely they
+relate to Tm. Both the systems to calculate and the reported quantity are chosen
+before model training.
 
 Here, we compare several computed labels in the same low-data Tm task. The labels
 are mutation free energies from free-energy perturbation (FEP), Rosetta mutation
 scores, ThermoMPNN scores, Rosetta scores for ESM2-proposed or random variants,
-and MD native-contact values. For the MD label, we compare a mixed sequence set
-with local mutation scans on the same 1MEL and 4IDL structures used for FEP. Each
-computed label is trained as a second task that shares an ESM2 sequence model with
-Tm prediction (Fig.~\ref{fig:learning_framework}). We tune every label separately
-using only the experimental Tm validation set. We then compare the selected models
-on the same held-out Tm test proteins using paired errors. In this paper,
-``transfer'' means that adding a computed label lowers the held-out Tm error.
+and MD native-contact values. For the MD label, we compare two complete simulation
+plans: a heterogeneous structure panel and local mutation scans on the same 1MEL
+and 4IDL structures used for FEP. Both use 400 K MD and native-contact labels, but
+they also differ in contact selection and trajectory averaging. Their comparison
+therefore does not isolate the choice of variants. Each computed label is trained
+as a second task that shares an ESM2 sequence model with Tm prediction
+(Fig.~\ref{fig:learning_framework}). We tune every label separately using only
+the experimental Tm validation set. We then compare the selected models using
+paired errors on the same 396 test Tm labels, which were not used for training or
+model selection. In this paper, ``transfer'' means that adding a computed label
+lowers the test Tm error.
 
 \begin{figure*}[t]
 \centering
@@ -80,8 +84,9 @@ held-out Tm test data.}
 \label{fig:learning_framework}
 \end{figure*}
 
-Both choices affected transfer: local mutation scans gave a larger frozen-encoder
-gain than a mixed sequence set, and FEP helped both encoder settings whereas
-native-contact values helped only the frozen encoder. Thus, useful simulation
-data require a controlled set of sequence changes and a quantity closely related
-to the experimental property.
+We observed a larger frozen-encoder gain under the local mutation-scan MD plan
+than under the heterogeneous-panel plan. Among the calculated quantities, FEP
+gave the lowest observed error in both encoder settings, whereas native-contact
+values gave a clear gain only with the frozen encoder. These results suggest
+that simulations intended to support an experimental predictor should be
+planned around both the systems to calculate and the quantity to report.

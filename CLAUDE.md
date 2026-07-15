@@ -1,63 +1,57 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Project
 
-## Project Overview
+This repository supports the manuscript **“Transfer learning with simulated variants and calculated quantities for nanobody melting-temperature prediction.”** It tests whether computational mutation labels improve nanobody Tm prediction with an ESM-2 encoder.
 
-Sim2Real Transfer Learning for Nanobody Thermal Stability Prediction. A protein language model (ESM-2) is fine-tuned on experimental Tm data (NbBench thermo-tm: train 396, val 57, test 114) while simultaneously training on simulation-derived ddG data (FEP, FoldX, Rosetta, ThermoMPNN) as auxiliary tasks. Evaluation uses ensemble averaging across model seeds.
+The current comparison includes Tm-only training and auxiliary labels from FEP, a matched 400 K MD native-contact mutation scan, Rosetta, ThermoMPNN, random variants scored by Rosetta, and ESM2-proposed variants scored by Rosetta. Results must be reported separately for frozen and fine-tuned encoders.
 
-## autoresearch Structure
+## Experimental split
 
-This repo follows the [karpathy/autoresearch](https://github.com/karpathy/autoresearch) pattern:
+The local NbBench files intentionally use a low-data reassignment:
 
-| File | Owner | Role |
-|------|-------|------|
-| `train.py` | Agent | Model architecture, hyperparameters, training loop. **Freely editable.** |
-| `prepare.py` | Human | Data loading, evaluation, scaling metrics. |
-| `program.md` | Human | Research goals and constraints. **Do not modify.** |
-| `results.tsv` | Auto | Experiment log (auto-appended by prepare.py) |
+- `data/nbbench/train.csv`: published `validation`, 57 examples
+- `data/nbbench/val.csv`: published `test`, 114 examples; model selection only
+- `data/nbbench/test.csv`: published `train`, 396 examples; final evaluation only
 
-## Running an Experiment
+Do not restore the published split names. `data/nbbench/download.py` preserves this mapping.
+
+## Main files
+
+| File | Purpose |
+|---|---|
+| `prepare.py` | Loads data, launches training, and writes held-out metrics. |
+| `train.py` | Defines the ESM-2 multitask model and training loop. |
+| `data/source_labels/MANIFEST.tsv` | Lists processed computational labels and their provenance. |
+| `results/final_*_{frozen,hot}/scaling.json` | Selected final results used by the current paper. |
+| `plot/build_tuned_summaries.py` | Rebuilds compact summaries from the final results. |
+| `plot/make_outline_figures.py` | Builds main figures. |
+| `plot/make_supplementary_figures.py` | Builds supplementary figures and tables. |
+| `reproduce/manuscript_results.yaml` | Lists the current reproduction steps. |
+
+Older named experiments in `experiments.yaml` and `EXPERIMENTS.md` are retained for history. Do not describe them as the current best result without checking the final result files above.
+
+## Reproduction
 
 ```bash
-uv sync                                                                    # install deps
-uv run python prepare.py --ddg-source FEP --n-ddg-list 20,80,280 --n-runs 3  # full run
-uv run python prepare.py --ddg-source FEP --n-ddg-list 20 --n-runs 1         # quick test
+uv sync
+uv run python scripts/reproduce_paper_results.py --check-only
+uv run python scripts/reproduce_paper_results.py --stage figures --force
 ```
 
-Output ends with a machine-readable line:
+The figure stage builds both `paper/tex/main.pdf` and `paper/tex/supplementary_main.pdf`. A full selected-configuration rerun is GPU-intensive:
+
+```bash
+uv run python scripts/reproduce_paper_results.py \
+  --stage all --gpus 0 --force
 ```
-RESULT: slope=-0.234000 ci_width=1.450000 mae_mean=7.120000
-```
 
-## Research Loop
+This reruns the 14 selected final configurations. It does not repeat every candidate search or regenerate raw MD, FEP, Rosetta, or ThermoMPNN calculations.
 
-1. Edit `train.py` (HPARAMS, MultiTaskModel architecture, etc.)
-2. `git commit`
-3. Run `uv run python prepare.py ...` → read RESULT line
-4. If improved: keep. If not: `git revert HEAD`
-5. Repeat
+## Reporting rules
 
-## Optimization Targets
-
-- **slope**: Power law exponent `b` in `MAE(n) = a*(n/1000)^b + c`. More negative = better scaling.
-- **ci_width**: Average 90% bootstrap CI width across scaling points. Smaller = more stable.
-
-## Model Architecture
-
-`MultiTaskModel` in `train.py`:
-- **Encoder**: Frozen ESM-2 (`facebook/esm2_t6_8M_UR50D`, 8M params)
-- **Shared layers**: Linear→ReLU→Dropout (configurable in train.py)
-- **Task heads**: `tm_head` (task_id=0), `ddg_head` (task_id=1), `ddg_head2` (task_id=2)
-- **Loss**: Uncertainty-weighted MTL (Kendall et al. 2018, learnable per-task weights)
-- **Early stopping**: Enabled (patience configurable)
-
-## Repository Structure
-
-- `train.py` / `prepare.py` / `program.md` — autoresearch core
-- `data/nbbench/` — NbBench thermo-tm Tm data (train/val/test CSVs)
-- `data/` — DDG datasets: `fep/`, `foldX/`, `rosetta/`, `mpnn/`, `rosetta_esm1000/`, `rosetta_random1000/`
-- `results/` — historical evaluation results
-- `results.tsv` — experiment log
-- `plot/simscail.ipynb` — scaling analysis visualization
-- `paper/` — LaTeX paper (has its own `CLAUDE.md`)
+- Select settings with the 114-example validation set; never select on the 396-example test set.
+- Compare computational-label conditions with the Tm-only result from the same encoder regime.
+- Keep the heterogeneous nanobody MD panel separate from the FEP-matched mutation scan.
+- Base manuscript numbers on tracked `scaling.json` files and generated supplementary tables, not an untracked scratch directory.
+- Record the source label, encoder mode, selected settings, seeds, and evaluation split for new results.

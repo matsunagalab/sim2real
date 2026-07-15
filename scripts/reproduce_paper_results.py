@@ -215,7 +215,7 @@ def paired_delta(ref: np.ndarray, other: np.ndarray, seed: int = 42) -> dict[str
     n = len(ref)
     idx = rng.integers(0, n, size=(n_boot, n))
     delta = np.mean(other[idx], axis=1) - np.mean(ref[idx], axis=1)
-    lo, hi = np.percentile(delta, [5, 95])
+    lo, hi = np.percentile(delta, [2.5, 97.5])
     return {
         "delta_mae": float(np.mean(delta)),
         "delta_ci_lo": float(lo),

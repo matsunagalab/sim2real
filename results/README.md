@@ -1,91 +1,65 @@
-# Results Directory Handoff
+# Results directory
 
-This directory contains training outputs and compact result summaries. The
-manuscript and supplementary figures should be regenerated from tracked summary
-JSON files, not by scanning arbitrary run directories.
+This directory contains compact tracked results and many local training runs. Manuscript numbers should come from the tracked files listed here, not from an arbitrary scratch directory.
 
-For a downstream rerun from fixed source-label CSV files, use
-`scripts/reproduce_paper_results.py`. See `REPRODUCE.md` for the full workflow.
+## Selected current results
 
-## Current Manuscript Inputs
+The current paper compares seven source-label conditions under frozen and fine-tuned (`hot`) ESM-2 encoders:
 
-The current manuscript-facing figure generators read these summaries directly:
+| Condition | Frozen result | Fine-tuned result |
+|---|---|---|
+| Tm labels only | `final_tm_frozen/scaling.json` | `final_tm_hot/scaling.json` |
+| FEP mutation free energy | `final_fep_frozen/scaling.json` | `final_fep_hot/scaling.json` |
+| matched MD native-contact Q | `final_mdq_frozen/scaling.json` | `final_mdq_hot/scaling.json` |
+| ThermoMPNN score | `final_tmpnn_frozen/scaling.json` | `final_tmpnn_hot/scaling.json` |
+| Rosetta mutation score | `final_ros_frozen/scaling.json` | `final_ros_hot/scaling.json` |
+| random variants + Rosetta | `final_rosrnd_frozen/scaling.json` | `final_rosrnd_hot/scaling.json` |
+| ESM2-proposed variants + Rosetta | `final_rosesm_frozen/scaling.json` | `final_rosesm_hot/scaling.json` |
 
-- `results/source_screen/final_source_screen_summary.json`
-- `results/source_screen/final_frozen_core_summary.json`
-- `results/source_screen/hpo_summary.json`
-- `results/source_screen/hpo_frozen_core_summary.json`
-- `results/ddg_head_search/final_ddg_head_summary.json`
-- `results/ddg_head_search/frozen/final_ddg_head_summary.json`
-- `results/ddg_head_search/hpo_summary.json`
-- `results/abcd_search/final_abcd_with_dq_summary.json`
-- `results/arch_search/final_summary.json`
-- `results/arch_search/feature_summary.json`
-- `results/hparam_search/per_nmd_test_summary.json`
-- `results/tm_ref_hot_mtl_tmselect/scaling.json`
-- `results/fep_hot_tmselect_enc3e-5/scaling.json`
-- `results/hot_q_400k_tmselect/scaling.json`
-- `results/size35_tm_shared_drop005/scaling.json`
-- `results/size35_ddg_fep_enc3e-5/scaling.json`
-- `results/size650_tm_shared_drop005/scaling.json`
-- `results/size650_ddg_fep_enc3e-5/scaling.json`
-- `results/short_hot_t*/scaling.json`
-- `results/short_frozen_t*/scaling.json`
+Each file records the command arguments, resolved hyperparameters, held-out MAE and interval, and per-example absolute errors. Computational-label conditions contain label-count curves; the paper uses the 320-label point for its representative comparison.
 
-The exact panel mapping is recorded in
-`paper/analysis/supplementary/MANIFEST.tsv`.
+`plot/build_tuned_summaries.py` reduces these files to the main-figure inputs under `tuned_rep/`:
 
-## Legacy And Diagnostic Summaries
+- `tuned_rep/frozen_summary.json`
+- `tuned_rep/hot_summary.json`
+- `tuned_rep/<source>_<encoder>/scaling.json`
 
-These tracked summaries are retained because older summaries or diagnostics
-refer to them, but the current manuscript figures do not use them as primary
-inputs:
+The reference held-out MAEs are:
 
-- `results/hot_q_400k/scaling.json`
-- `results/frozen_q_400k/scaling.json`
-- `results/hparam_search/summary.json`
+| Encoder | Tm only | FEP | matched MD Q |
+|---|---:|---:|---:|
+| Frozen | 7.229 °C | 7.008 °C | 7.034 °C |
+| Fine-tuned | 6.548 °C | 6.395 °C | 6.577 °C |
 
-Historical filenames may contain short internal labels. Manuscript text and
-figure labels should use reader-facing descriptions such as `hot encoder`,
-`frozen encoder`, `FEP mutation free energy`, and `MD Q-value`.
+## Tracked comparison inputs
 
-## Scratch Run Directories
+The figures also use compact results from earlier, clearly labelled controls:
 
-Many untracked subdirectories under `results/` are full training runs produced
-during source-label, encoder, architecture, model-size, and trajectory-window
-searches. Treat them as scratch run outputs unless they have been reduced to a
-tracked summary JSON and listed above.
+- `source_screen/final_source_screen_summary.json` and `source_screen/final_frozen_core_summary.json`: heterogeneous-nanobody source comparison.
+- `tm_ref_hot_mtl_tmselect/scaling.json`, `fep_hot_tmselect_enc3e-5/scaling.json`, and `final_residual_q_hphil_400k/scaling.json`: matched references for the heterogeneous MD comparison.
+- `size35_*` and `size650_*`: exploratory fixed-configuration model-size controls.
 
-Do not make a manuscript claim from an untracked run directory alone. First
-write a compact summary JSON with resolved settings, validation metrics, final
-test metrics, bootstrap intervals, and seed-level or example-level records when
-available.
+These controls are retained so the figures can be rebuilt. The availability check confirms that they exist, but the current retraining step does not rerun them.
 
-## Derived Analyses
+## Candidate selection records
 
-Some quantities are computed directly from the tracked scaling summaries, with no
-new training. `plot/equivalent_sample_size.py` estimates the equivalent sample
-size (computational labels worth one experimental Tm label; Minami et al. 2025)
-from `tm_ref_hot_mtl_tmselect/scaling.json`,
-`fep_hot_tmselect_enc3e-5/scaling.json`, and `hot_q_400k_tmselect/scaling.json`,
-writing `results/equivalent_sample_size.json` and
-`results/equivalent_sample_size.md`.
+Candidate runs may exist as untracked `tune_*` directories. The paper-facing records are the tracked tables:
 
-## Adding New Analysis Results
+- `paper/analysis/supplementary/tables/candidate_validation.tsv`
+- `paper/analysis/supplementary/tables/selected_settings.tsv`
 
-1. Write new jobs under a new directory, for example
-   `results/<analysis_name>/<run_name>/`.
-2. Preserve the command-line arguments, git commit, random seed, selected split,
-   source-label file, encoder mode, loss weights, and checkpoint-selection
-   criterion.
-3. Select candidate settings using only the experimental Tm validation split.
-4. Report final numbers on the held-out experimental Tm test split.
-5. Store a compact summary JSON in the analysis directory.
-6. Add a table builder and manifest row in
-   `plot/make_supplementary_figures.py`.
-7. Regenerate the supplementary analysis with
-   `uv run python plot/make_supplementary_figures.py`.
+The validation split is used for selecting settings. The held-out test split is used only for the final result files.
 
-This convention keeps the paper outputs reproducible while allowing additional
-analyses to be added without overwriting the current result
-set.
+## Rebuild
+
+```bash
+uv run python scripts/reproduce_paper_results.py --check-only
+uv run python scripts/reproduce_paper_results.py --stage summaries --force
+uv run python scripts/reproduce_paper_results.py --stage figures --force
+```
+
+See `REPRODUCE.md` for the GPU-intensive retraining command, the inputs kept fixed, and the calculations that are repeated.
+
+## Adding a result
+
+For a new paper-facing result, preserve the source table, encoder mode, model settings, seeds, selection split, final evaluation split, and per-example errors. Reduce the run to a compact tracked `scaling.json` or summary table before citing it in text or a figure.
