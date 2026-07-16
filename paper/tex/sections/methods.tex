@@ -137,12 +137,12 @@ with its first 100,000 steps assigned to equilibration. The folded-state free
 energy was combined with a residue-specific unfolded-state reference to obtain
 $\Delta\Delta G$ relative to the wild type.
 About a third of the mutations changed the net charge, for which the periodic
-lattice-sum electrostatics introduces a finite-size artifact. We estimated the
+lattice-sum electrostatics introduces a finite-size artifact. We applied the
 leading analytical (net-charge periodicity) correction
-\citep{Rocklin2013ChargeFEP} and found it was of order
-$0.09$~kcal~mol$^{-1}$ per unit charge change in the 70-\AA{} cubic box, small
-enough that it left the scaled labels essentially unchanged; we therefore did
-not apply it (Supplementary Fig.~S2b).
+\citep{Rocklin2013ChargeFEP}, of order $0.09$~kcal~mol$^{-1}$ per unit charge
+change in the 70-\AA{} cubic box, and found that it barely changed the scaled
+labels (Supplementary Fig.~S2b); the training labels therefore use the
+uncorrected $\Delta\Delta G$.
 
 \subsection{MD native-contact labels}
 
