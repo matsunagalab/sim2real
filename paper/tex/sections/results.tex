@@ -14,22 +14,34 @@ the heterogeneous study had MAEs of 7.38 and 6.61$^\circ$C,
 respectively. Each computed-label model was compared only with the Tm-only
 model selected in the same study and encoder setting.
 
-\subsection{The frozen-encoder MAE reduction was numerically larger for mutation scans}
+\subsection{Variant selection outweighed label count for the MD label}
 
-We compared two ways of building an MD label set. The heterogeneous data set
-contained 1143 samples representing 833 unique sequences of different lengths.
-The mutation-scan data set contained local single mutations of the fixed 1MEL and 4IDL
-structures. Both used the same 400~K MD and Best--Hummer native-contact $Q$
-protocol, with the same contact set and averaging window, so they differed only
-in the variants they covered. The models for the two studies were tuned
-separately, so we compared the change from the Tm-only model within each study
-rather than their absolute MAEs (Fig.~\ref{fig:data_design}c). In the heterogeneous study, adding the MD
-label changed MAE by $-0.049^\circ$C with a frozen encoder (95\% CI,
-$-0.092$ to $-0.006^\circ$C) and by $+0.116^\circ$C with a fine-tuned encoder
-(95\% CI, $-0.009$ to $+0.243^\circ$C). In the mutation-scan study, the corresponding
-changes were $-0.195^\circ$C (95\% CI, $-0.366$ to $-0.030^\circ$C) and
-$+0.029^\circ$C (95\% CI, $-0.139$ to $+0.197^\circ$C). The frozen-encoder MAE
-reduction was therefore larger for the mutation scans.
+We first varied the number of computed labels for FEP and mutation-scan MD,
+which cover the same 1MEL and 4IDL variants. With a frozen encoder, the paired
+MAE changes at $n=20$ were $-0.10^\circ$C for FEP and $+0.09^\circ$C for
+mutation-scan MD, and at $n=320$ they were $-0.22^\circ$C and $-0.20^\circ$C,
+respectively, with both 95\% intervals below zero
+(Fig.~\ref{fig:data_design}a). With a fine-tuned encoder, mutation-scan MD began
+well above Tm-only ($+0.47^\circ$C at $n=20$; 95\% CI, $+0.26$ to
+$+0.69^\circ$C) and improved as $n$ grew, reaching an interval that included zero
+by $n=160$, while FEP moved only from $+0.02^\circ$C at $n=20$ to
+$-0.15^\circ$C at $n=320$ (Fig.~\ref{fig:data_design}b). These four label counts
+are nonmonotonic and too few to establish a scaling relation.
+
+We then compared two ways of building the MD label set
+(Fig.~\ref{fig:data_design}c). The heterogeneous data set contained 1143 samples
+representing 833 unique sequences of different lengths, whereas the mutation-scan
+data set contained local single mutations of the fixed 1MEL and 4IDL structures.
+Both used the same 400~K MD and Best--Hummer native-contact $Q$ protocol, with
+the same contact set and averaging window, so they differed only in the variants
+they covered. Because the models for the two studies were tuned separately, we
+compared the change from each study's own Tm-only model rather than their
+absolute MAEs. Adding the MD label changed MAE by $-0.049^\circ$C with a frozen
+encoder (95\% CI, $-0.092$ to $-0.006^\circ$C) and by $+0.116^\circ$C with a
+fine-tuned encoder (95\% CI, $-0.009$ to $+0.243^\circ$C) in the heterogeneous
+study, and by $-0.195^\circ$C (95\% CI, $-0.366$ to $-0.030^\circ$C) and
+$+0.029^\circ$C (95\% CI, $-0.139$ to $+0.197^\circ$C) in the mutation-scan
+study. The frozen-encoder reduction was therefore larger for the mutation scans.
 
 Eight sequences in the heterogeneous MD data set also occurred in the Tm test
 set. Excluding their test errors barely changed either estimate, and the paired
@@ -39,19 +51,11 @@ $-0.005$ to $+0.248^\circ$C). We did not retrain after removing the overlapping
 computed-label samples, so this check addresses their contribution to test MAE
 but not a possible effect during training or model selection. Other differences
 between the data sets may also matter. In the heterogeneous data set, $Q$ had a
-Pearson correlation of $r=+0.13$ with sequence length
-(Supplementary Fig.~S1). The mutation scans held length fixed within each
-structure and described the local effect of one mutation. The heterogeneous data
-set also included each structure separately, giving more weight to sequences
-represented by multiple structures. These observations do not identify the cause
-of the difference.
-
-The frozen-encoder label-count curves provide a second comparison of FEP and
-mutation-scan MD (Fig.~\ref{fig:data_design}a). At $n=20$, the paired MAE changes were
-$-0.10^\circ$C for FEP and $+0.09^\circ$C for mutation-scan MD. At $n=320$, they were
-$-0.22^\circ$C and $-0.20^\circ$C, respectively, and both 95\% intervals were
-below zero. Four label counts, with nonmonotonic changes, are too few to
-establish a scaling relation.
+Pearson correlation of $r=+0.13$ with sequence length (Supplementary Fig.~S1),
+whereas the mutation scans held length fixed within each structure and described
+the local effect of one mutation. The heterogeneous set also gave more weight to
+sequences represented by multiple structures. These observations do not identify
+the cause of the difference.
 
 \begin{figure*}[t]
 \centering
@@ -93,19 +97,12 @@ with Rosetta differed from Tm-only by $+0.029$ to $+0.144^\circ$C; their
 intervals also included zero. ESM2-proposed variants scored with Rosetta
 increased error by $+0.411^\circ$C (95\% CI, $+0.140$ to $+0.698^\circ$C).
 
-We also compared FEP and mutation-scan MD directly. The difference in test MAE (FEP
+Comparing FEP and mutation-scan MD directly, the difference in test MAE (FEP
 minus MD) was $-0.026^\circ$C with a frozen encoder (95\% CI, $-0.243$ to
 $+0.192^\circ$C) and $-0.182^\circ$C with a fine-tuned encoder (95\% CI,
 $-0.393$ to $+0.024^\circ$C). Neither interval excluded zero, so the two labels
-were not distinguishable at the largest label count.
-The fine-tuned label-count curves show how the two results changed with the
-amount of auxiliary data (Fig.~\ref{fig:data_design}b). At $n=20$,
-mutation-scan MD increased MAE by $+0.47^\circ$C (95\% CI, $+0.26$ to
-$+0.69^\circ$C). Its error decreased as $n$ increased, and the interval
-included zero by $n=160$. FEP changed from $+0.02^\circ$C at $n=20$ to
-$-0.15^\circ$C at $n=320$, but the interval at the largest setting also
-included zero. These four label counts show the direction of the changes but
-are too few to establish a scaling relation.
+were not distinguishable, consistent with the label-count curves in
+Fig.~\ref{fig:data_design}a,b.
 
 FEP $\Delta\Delta G$ measures the free-energy effect of a mutation, whereas
 high-temperature $Q$ measures contact retention over a finite trajectory. The

@@ -1,28 +1,27 @@
 % abstract.tex
 
 \begin{abstract}
-Thermal stability is important for nanobody production, storage, and formulation,
-but measuring melting temperature (Tm) for many sequences is costly. Simulations
-can provide stability-related data, but they do not directly calculate Tm.
-We tested whether simulation data related to Tm improve prediction from 57
-training measurements. Multi-task models learned Tm and one computed property
-from ESM2 sequence representations. Settings were selected with 114 Tm
-validation sequences, and final models were tested on the same 396 held-out
-sequences. We first compared two molecular dynamics (MD) data sets based on the
-fraction of native contacts. With a frozen encoder, adding labels from local
-mutation scans of two fixed structures reduced mean absolute error by
-0.20$^\circ$C relative to Tm-only. Adding labels from a separately developed
-data set covering many structures reduced error by 0.05$^\circ$C. Because the
-two MD studies also used different MD protocols and model searches, this
-comparison does not isolate the effect of variant choice. We then compared FEP,
-Rosetta, ThermoMPNN, and MD labels based on the fraction of native contacts.
-FEP gave the lowest test error with both frozen and fine-tuned encoders. With
-fine-tuning, mean absolute error decreased from 6.55$^\circ$C to 6.40$^\circ$C,
-although the 95\% interval for the change included zero. Native-contact MD labels
-reduced error only with the frozen encoder; Rosetta and ThermoMPNN labels gave
-little or no improvement. Thus, transfer was determined by the selected variants
-and calculated physical quantity rather than by the number of computed labels
-alone, so these choices should be made before simulations begin.
+Thermal stability affects how reliably a nanobody can be expressed, purified,
+and stored, but measuring melting temperature (Tm) for many sequences is costly.
+Simulations can provide stability-related data, but they do not compute Tm
+directly. We tested whether adding one computed property to a 57-sequence Tm
+training set improves prediction. Multi-task models learned Tm and the computed
+property from ESM2 sequence representations; settings were selected with 114 Tm
+validation sequences, and final models were tested on 396 held-out sequences.
+We first compared two molecular-dynamics (MD) data sets that used one
+native-contact protocol and differed only in the variants they covered. With a
+frozen encoder, labels from local mutation scans of two fixed structures reduced
+mean absolute error (MAE) by 0.20$^\circ$C relative to the same-study Tm-only
+model, whereas labels from a heterogeneous set of many structures reduced it by
+0.05$^\circ$C. We then compared free-energy perturbation (FEP), Rosetta,
+ThermoMPNN, and the mutation-scan MD labels. FEP gave the lowest test MAE with
+both frozen and fine-tuned encoders, and after fine-tuning it reduced MAE by
+0.15$^\circ$C, although the 95\% interval for the change included zero.
+Native-contact MD labels reduced error only with the frozen encoder, and Rosetta
+and ThermoMPNN labels gave little or no improvement. Transfer therefore depended
+on the variants selected and the physical quantity computed rather than on the
+number of computed labels, so these choices should be made before the
+simulations begin.
 \end{abstract}
 
 \begin{keywords}
