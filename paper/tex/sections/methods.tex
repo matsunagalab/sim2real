@@ -56,13 +56,14 @@ Table~\ref{tab:datasets} summarizes the seven data sets.
 $\Delta\Delta G$ is the computed change in folding free energy on mutation, and
 $Q$ is the smooth native-contact fraction retained in a high-temperature
 simulation. The three Rosetta data sets used one scoring protocol and differed
-only in the variants they covered. Row counts are given per structure table for
-the two-structure data sets and as a single total for the heterogeneous panel,
-which represented 833 unique sequences.}
+only in the variants they covered. Each sample is one amino-acid sequence with
+its computed label. Sample counts are given per structure table for the
+two-structure data sets and as a single total for the heterogeneous panel, which
+had 1143 samples over 833 unique sequences.}
 \label{tab:datasets}
 \begin{tabular}{@{}lllll@{}}
 \toprule
-Data set & Computed quantity & Variant set & Rows (1MEL, 4IDL) & Computed by \\
+Data set & Computed quantity & Variant set & Samples (1MEL, 4IDL) & Computed by \\
 \midrule
 FEP & $\Delta\Delta G$ & Single mutations & 435, 409 & NAMD alchemical FEP, 300~K \\
 Matched MD & Native-contact $Q$ & Single mutations, FEP set & 431, 406 & OpenMM MD, 400~K \\
