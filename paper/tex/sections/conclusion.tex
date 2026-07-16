@@ -3,10 +3,11 @@
 \section{Conclusion}
 
 Computed labels did not improve low-data nanobody Tm prediction uniformly.
-Among two independently developed MD data sets, mutation scans showed a
-larger reduction with the frozen encoder than the heterogeneous
-structure panel, although differences in their protocols prevent attribution to
-sequence selection alone. FEP had the lowest test MAE with both
+Among two MD data sets that shared one protocol and differed in the variants
+they covered, the mutation scans showed a larger reduction with the frozen
+encoder than the heterogeneous structure set, although the two data sets still
+differed in variant composition and were tuned separately. FEP had the lowest
+test MAE with both
 frozen and fine-tuned ESM2; its 95\% interval excluded zero only with the frozen
 encoder. The comparisons did not show a simple relation between label count and
 Tm error. When calculations are intended to support Tm prediction, both the
