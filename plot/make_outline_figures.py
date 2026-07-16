@@ -1068,18 +1068,6 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
             marker=marker,
             face=color if encoder == "frozen" else "white",
         )
-        offset = -0.018 if row["delta_mae"] < 0 else 0.018
-        ax.text(
-            row["delta_mae"] + offset,
-            y - 0.23,
-            f"{row['delta_mae']:+.2f}",
-            ha="right" if offset < 0 else "left",
-            va="center",
-            fontsize=8.6,
-            color=color,
-            fontweight="normal",
-            bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.75, "pad": 0.5},
-        )
     ax.axhline(1.5, color="white", linewidth=2.0, zorder=1)
     ax.set_yticks(ypos)
     ax.set_yticklabels([r[0] for r in rows_b], fontsize=9.2)
@@ -1136,7 +1124,7 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     endpoint_labels = {"FEP $\\Delta\\Delta G$": "FEP ΔΔG",
                        "MD native-contact $Q$": "MD Q"}
     for (label, value, color), dy in zip(frozen_endpoints, (-0.025, 0.035)):
-        ax.text(0.97, value + dy, f"{endpoint_labels[label]}  {value:+.2f}",
+        ax.text(0.97, value + dy, endpoint_labels[label],
                 transform=ax.get_yaxis_transform(), ha="right", va="center", fontsize=8.3,
                 fontweight="bold", color=color,
                 bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.78, "pad": 0.4})
