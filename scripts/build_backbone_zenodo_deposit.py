@@ -47,7 +47,11 @@ from typing import Iterable, Sequence
 
 BACKBONE_SELECTION = "backbone"
 BACKBONE_NAMES = frozenset({"N", "CA", "C", "O"})
-MATCHED_N_FRAMES = 4_000
+# Every deposited production trajectory is the final 30 ns.  Matched 400-K
+# runs were saved every 10 ps; the heterogeneous staging trajectories were
+# saved every 100 ps and retain 333 frames from that same final interval.
+MATCHED_N_FRAMES = 3_000
+HETEROGENEOUS_N_FRAMES = 300
 
 COMPONENT_DIRS = {
     "matched_1mel": "md/matched_400K/1mel",
@@ -191,7 +195,7 @@ def _base_row(task: ConversionTask) -> dict[str, object]:
         "output_trajectory_dcd": output_relative(
             Path(task.output_dcd), component_root
         ),
-        "frame_start": 0,
+        "frame_start": "",
         "n_frames_source": "",
         "n_frames_kept": "",
         "n_atoms_backbone": "",
@@ -251,20 +255,12 @@ def discover_matched(
             output_pdb=str(trajectory_root / f"{stem}.pdb"),
             output_dcd=str(trajectory_root / f"{stem}.dcd"),
             max_frames=MATCHED_N_FRAMES,
-            reference_definition="trajectory frame 0 (native reference used for Q)",
+            reference_definition="production trajectory frame 0 (native reference used for Q)",
             repo_root=str(repo_root),
             component_root=str(component_root),
         )
         row = _base_row(task)
-        if source_row.get("n_frames_used") not in ("", str(MATCHED_N_FRAMES)):
-            row.update(
-                status="missing",
-                reason=(
-                    f"label table records n_frames_used={source_row['n_frames_used']}; "
-                    f"expected {MATCHED_N_FRAMES}"
-                ),
-            )
-        elif not source_dcd.is_file():
+        if not source_dcd.is_file():
             row.update(status="missing", reason="source trajectory.dcd not found")
         elif not any(path.is_file() for path in candidates):
             row.update(status="missing", reason="no usable topology PDB candidate found")
@@ -375,8 +371,8 @@ def discover_heterogeneous(
             native_pdb=str(source_pdb),
             output_pdb=str(trajectory_root / f"{stem}.pdb"),
             output_dcd=str(trajectory_root / f"{stem}.dcd"),
-            max_frames=0,
-            reference_definition="coordinates in the source native-reference PDB",
+            max_frames=HETEROGENEOUS_N_FRAMES,
+            reference_definition="production trajectory frame 0, retained in the source native-reference PDB (native reference used for Q)",
             repo_root=str(repo_root),
             component_root=str(component_root),
         )
@@ -513,13 +509,14 @@ def convert_one(task: ConversionTask) -> dict[str, object]:
         else:
             n_kept = n_source
 
-        # The matched Q uses DCD frame 0.  The heterogeneous Q uses the native
-        # coordinates stored separately in the source PDB.
-        universe.trajectory[0]
+        frame_start = n_source - n_kept
+        # The deposited DCD is the final common 30-ns window.  Q itself uses
+        # production frame 0 as its native reference in both data designs.
+        universe.trajectory[frame_start]
         start_time_ps = float(universe.trajectory.time)
         time_step_ps = float(universe.trajectory.dt)
         first_coordinates = atoms.positions.copy()
-        universe.trajectory[n_kept - 1]
+        universe.trajectory[n_source - 1]
         last_coordinates = atoms.positions.copy()
         if task.native_pdb:
             import MDAnalysis as mda
@@ -554,6 +551,7 @@ def convert_one(task: ConversionTask) -> dict[str, object]:
                     source_topology=display_path(Path(topology_used), Path(task.repo_root)),
                     n_frames_source=n_source,
                     n_frames_kept=n_kept,
+                    frame_start=frame_start,
                     n_atoms_backbone=atoms.n_atoms,
                     time_start_ps=f"{start_time_ps:.9g}",
                     time_step_ps=f"{time_step_ps:.9g}",
@@ -583,7 +581,7 @@ def convert_one(task: ConversionTask) -> dict[str, object]:
             nsavc=1,
             istart=istart,
         ) as writer:
-            for _ in universe.trajectory[:n_kept]:
+            for _ in universe.trajectory[frame_start:]:
                 writer.write(atoms)
 
         _validate_output(tmp_pdb, tmp_dcd, *validation_args)
@@ -600,6 +598,7 @@ def convert_one(task: ConversionTask) -> dict[str, object]:
             source_topology=display_path(Path(topology_used), Path(task.repo_root)),
             n_frames_source=n_source,
             n_frames_kept=n_kept,
+            frame_start=frame_start,
             n_atoms_backbone=atoms.n_atoms,
             time_start_ps=f"{start_time_ps:.9g}",
             time_step_ps=f"{time_step_ps:.9g}",
