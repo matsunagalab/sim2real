@@ -23,7 +23,7 @@ structures. Both used the same 400~K MD and Best--Hummer native-contact $Q$
 protocol, with the same contact set and averaging window, so they differed only
 in the variants they covered. The models for the two studies were tuned
 separately, so we compared the change from the Tm-only model within each study
-rather than their absolute MAEs (Fig.~\ref{fig:data_design}a). In the heterogeneous study, adding the MD
+rather than their absolute MAEs (Fig.~\ref{fig:data_design}b). In the heterogeneous study, adding the MD
 label changed MAE by $-0.049^\circ$C with a frozen encoder (95\% CI,
 $-0.092$ to $-0.006^\circ$C) and by $+0.116^\circ$C with a fine-tuned encoder
 (95\% CI, $-0.009$ to $+0.243^\circ$C). In the matched study, the corresponding
@@ -47,13 +47,11 @@ represented by multiple structures. These observations do not identify the cause
 of the difference.
 
 The frozen-encoder label-count curves provide a second comparison of FEP and
-matched MD (Fig.~\ref{fig:data_design}b). At $n=20$, the paired MAE changes were
+matched MD (Fig.~\ref{fig:data_design}a). At $n=20$, the paired MAE changes were
 $-0.10^\circ$C for FEP and $+0.09^\circ$C for matched MD. At $n=320$, they were
 $-0.22^\circ$C and $-0.20^\circ$C, respectively, and both 95\% intervals were
-below zero. The direct FEP-minus-MD difference at $n=320$ was
-$-0.03^\circ$C (95\% CI, $-0.24$ to $+0.19^\circ$C), which did not resolve a
-difference between the labels. Four label counts, with nonmonotonic changes,
-are too few to establish a scaling relation.
+below zero. Four label counts, with nonmonotonic changes, are too few to
+establish a scaling relation.
 
 \begin{figure*}[t]
 \centering
@@ -63,22 +61,22 @@ matched mutation scans than for the heterogeneous MD data set.
 The heterogeneous data set covered nanobody structures of different lengths,
 whereas the matched scans used local mutations of 1MEL and 4IDL. Both used the
 same 400~K MD and $Q$ protocol and differed only in the variants they covered.
-(a) Paired MAE change from the Tm-only model within each study. Zero means equal
-MAE, and negative values mean lower Tm error after adding the MD label.
-Predictions were averaged across ten training seeds for the heterogeneous data
-set and five for the matched scans.
-(b) Paired MAE change from the frozen Tm-only model at four label counts. Here
-$n$ is the number sampled from each structure for each ensemble member;
-80\% of the sampled data entered training. In both panels, points and whiskers
-show the paired change and its 95\% bootstrap interval over the 396 test
-sequences.}
+(a) Paired MAE change from the frozen Tm-only model for FEP and matched MD at
+four label counts. Here $n$ is the number sampled from each structure for each
+ensemble member; 80\% of the sampled data entered training.
+(b) Paired MAE change from the Tm-only model within each study at the largest
+label count. Zero means equal MAE, and negative values mean lower Tm error after
+adding the MD label. Predictions were averaged across ten training seeds for the
+heterogeneous data set and five for the matched scans. In both panels, points
+and whiskers show the paired change and its 95\% bootstrap interval over the 396
+test sequences.}
 \label{fig:data_design}
 \end{figure*}
 
 \subsection{FEP had the lowest test MAE with both encoders}
 
 We next compared all computed labels after selecting the model for each source
-separately (Fig.~\ref{fig:physical_observable}a). With a frozen encoder, FEP
+separately (Fig.~\ref{fig:physical_observable}b). With a frozen encoder, FEP
 reached 7.01$^\circ$C MAE, a paired change of $-0.221^\circ$C from Tm-only
 (95\% CI, $-0.393$ to $-0.051^\circ$C). Matched MD reached
 7.03$^\circ$C, a change of $-0.195^\circ$C (95\% CI, $-0.366$ to
@@ -93,14 +91,13 @@ with Rosetta differed from Tm-only by $+0.029$ to $+0.144^\circ$C; their
 intervals also included zero. ESM2-proposed variants scored with Rosetta
 increased error by $+0.411^\circ$C (95\% CI, $+0.140$ to $+0.698^\circ$C).
 
-The direct FEP-minus-MD comparison is shown in
-Fig.~\ref{fig:physical_observable}b. Negative values favor FEP. The difference
-was $-0.026^\circ$C with a frozen encoder (95\% CI, $-0.243$ to
+We also compared FEP and matched MD directly. The difference in test MAE (FEP
+minus MD) was $-0.026^\circ$C with a frozen encoder (95\% CI, $-0.243$ to
 $+0.192^\circ$C) and $-0.182^\circ$C with a fine-tuned encoder (95\% CI,
-$-0.393$ to $+0.024^\circ$C). Neither interval excluded zero at the largest
-label count.
+$-0.393$ to $+0.024^\circ$C). Neither interval excluded zero, so the two labels
+were not distinguishable at the largest label count.
 The fine-tuned label-count curves show how the two results changed with the
-amount of auxiliary data (Fig.~\ref{fig:physical_observable}c). At $n=20$,
+amount of auxiliary data (Fig.~\ref{fig:physical_observable}a). At $n=20$,
 matched MD increased MAE by $+0.47^\circ$C (95\% CI, $+0.26$ to
 $+0.69^\circ$C). Its error decreased as $n$ increased, and the interval
 included zero by $n=160$. FEP changed from $+0.02^\circ$C at $n=20$ to
@@ -125,15 +122,13 @@ regression architecture.
 \centering
 \includegraphics[width=\textwidth]{fig_outline03_physical_observable}
 \caption{FEP had the lowest test Tm MAE with both encoders.
-(a) Paired MAE change from the corresponding Tm-only model for each computed
-label. Negative values mean lower Tm error. Filled squares and open circles
-denote frozen and fine-tuned encoders, respectively.
-(b) Direct FEP-minus-MD comparison. Zero means equal Tm test-set MAE, negative
-values favor FEP, and positive values favor MD native-contact $Q$.
-(c) Paired MAE change from the fine-tuned Tm-only model at four label counts.
-Here $n$ is the number sampled from each structure for each ensemble
-member; 80\% entered training. Whiskers in all panels are 95\% bootstrap
-intervals over the 396 test sequences.}
+(a) Paired MAE change from the fine-tuned Tm-only model for FEP and matched MD
+at four label counts. Here $n$ is the number sampled from each structure for
+each ensemble member; 80\% entered training.
+(b) Paired MAE change from the shared Tm-only model for each computed label.
+Negative values mean lower Tm error. Filled squares and open circles denote
+frozen and fine-tuned encoders, respectively. Whiskers in both panels are 95\%
+bootstrap intervals over the 396 test sequences.}
 \label{fig:physical_observable}
 \end{figure*}
 

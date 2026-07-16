@@ -1040,13 +1040,13 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
         1,
         2,
         figsize=(7.2, 3.65),
-        gridspec_kw={"width_ratios": [1.12, 1.0]},
+        gridspec_kw={"width_ratios": [1.0, 1.12]},
         layout="constrained",
     )
 
-    # (a) Four directly labelled effects; every zero is the corresponding
+    # (b) Four directly labelled effects; every zero is the corresponding
     # independently tuned series' own Tm-only model.
-    ax = axes[0]
+    ax = axes[1]
     effects = design_delta_rows()
     rows_b = [
         ("Heterogeneous sequences\nfrozen encoder", "heterogeneous screen", "frozen", COL["gray"], "s"),
@@ -1107,12 +1107,12 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
         fontsize=8.2,
     )
     polish(ax, "x", boxed=True)
-    panel_label(ax, "A")
+    panel_label(ax, "B")
 
-    # (b) Paired changes from the frozen Tm-only model. Paired intervals make
+    # (a) Paired changes from the frozen Tm-only model. Paired intervals make
     # the baseline and the direction of transfer explicit and avoid clipped
     # single-model confidence intervals.
-    ax = axes[1]
+    ax = axes[0]
     ax.axhline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
     frozen_curves = [
         ("FEP $\Delta\Delta G$", RESULTS / "final_fep_frozen" / "scaling.json", COL["fep"], "o"),
@@ -1141,15 +1141,15 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
                 fontweight="bold", color=color,
                 bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.78, "pad": 0.4})
     polish(ax, "both", boxed=True)
-    panel_label(ax, "B")
+    panel_label(ax, "A")
 
     save_figure(fig, "fig_outline02_data_design")
 
 
 def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
     """Physical-observable axis with explicit difference semantics."""
-    fig = plt.figure(figsize=(7.2, 5.75), layout="constrained")
-    grid = fig.add_gridspec(2, 2, height_ratios=[1.30, 1.0], width_ratios=[1.0, 1.0])
+    fig = plt.figure(figsize=(7.2, 5.2), layout="constrained")
+    grid = fig.add_gridspec(2, 1, height_ratios=[1.0, 1.35])
     endpoint_labels = {"FEP $\\Delta\\Delta G$": "FEP ΔΔG",
                        "MD native-contact $Q$": "MD Q"}
     encoder_style = {
@@ -1157,17 +1157,17 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
         "hot": {"offset": 0.17, "marker": "o", "face": "white"},
     }
 
-    # (a) Horizontal paired effects. Marker shape/fill, not color, encodes the
+    # (b) Horizontal paired effects. Marker shape/fill, not color, encodes the
     # encoder regime; color is reserved for the physical label source.
-    ax = fig.add_subplot(grid[0, :])
+    ax = fig.add_subplot(grid[1])
     map_sources = ["FEP", MD_CONTACT_Q_SOURCE, "thermoMPNN", "rosetta", "rosetta_random", "rosetta_esm"]
     source_labels = [
-        "FEP mutation free energy",
-        "MD native-contact Q (matched)",
-        "ThermoMPNN stability score",
-        "Rosetta mutation score",
-        "random variants + Rosetta",
-        "ESM2 variants + Rosetta",
+        "FEP ΔΔG",
+        "Matched MD, native-contact Q",
+        "ThermoMPNN ΔΔG",
+        "Rosetta ΔΔG",
+        "Rosetta, random variants",
+        "Rosetta, ESM2 variants",
     ]
     display_color = {
         "FEP": COL["fep"],
@@ -1205,32 +1205,12 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
                 capthick=1.2,
                 zorder=4,
             )
-            # Directly label only the comparisons that carry the main message.
-            # The other intervals remain readable against the common zero line
-            # without repeating every numerical value in the panel.
-            label_value = source in ("FEP", MD_CONTACT_Q_SOURCE) or (
-                source == "rosetta_esm" and encoder == "hot"
-            )
-            if label_value:
-                offset = -0.018 if row["delta_mae"] < 0 else 0.018
-                ax.text(
-                    row["delta_mae"] + offset,
-                    y,
-                    f"{row['delta_mae']:+.2f}",
-                    ha="right" if offset < 0 else "left",
-                    va="center",
-                    fontsize=8.2,
-                    fontweight="normal",
-                    color=COL["black"],
-                    bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.80, "pad": 0.3},
-                    zorder=5,
-                )
     ax.axhline(3.5, color="white", linewidth=2.0, zorder=1)
     ax.set_yticks(ypos)
     ax.set_yticklabels(source_labels, fontsize=8.8)
     ax.set_ylim(len(map_sources) - 0.50, -0.90)
     ax.set_xlim(-0.42, 0.70)
-    ax.set_xlabel(r"$\Delta$MAE vs corresponding Tm-only model (°C)")
+    ax.set_xlabel(r"$\Delta$MAE vs Tm-only model (°C)")
     ax.text(0.03, 0.98, "lower Tm error", transform=ax.transAxes, ha="left", va="top",
             fontsize=8.5, color=COL["design"])
     ax.text(0.97, 0.98, "higher Tm error", transform=ax.transAxes, ha="right", va="top",
@@ -1251,50 +1231,10 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
         handlelength=1.5,
     )
     polish(ax, "x", boxed=True)
-    panel_label(ax, "A")
-
-    # (b) Only the direct comparison remains here. Zero now has one meaning:
-    # equal held-out Tm MAE for FEP and matched native-contact Q.
-    ax = fig.add_subplot(grid[1, 0])
-    direct = fep_minus_md_rows()
-    direct_markers = {"frozen": "s", "hot": "o"}
-    ax.axvline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
-    for y, encoder in enumerate(("frozen", "hot")):
-        row = direct[direct["encoder"] == encoder].iloc[0]
-        ax.errorbar(
-            row["delta_mae"], y,
-            xerr=[[row["delta_mae"] - row["delta_ci_lo"]],
-                  [row["delta_ci_hi"] - row["delta_mae"]]],
-            fmt=direct_markers[encoder], color=COL["baseline"],
-            ecolor=COL["baseline"], elinewidth=1.5, capsize=3.8, capthick=1.2,
-            markersize=7.0,
-            markerfacecolor=COL["baseline"] if encoder == "frozen" else "white",
-            markeredgecolor=COL["baseline"], markeredgewidth=1.3, zorder=3,
-        )
-        ax.text(
-            row["delta_mae"] - 0.014,
-            y - 0.22,
-            f"{row['delta_mae']:+.2f}",
-            ha="right",
-            va="center",
-            fontsize=8.7,
-            color=COL["baseline"],
-            fontweight="normal",
-            bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.80, "pad": 0.4},
-        )
-    ax.set_yticks([0, 1], ["Frozen encoder", "Fine-tuned encoder"])
-    ax.set_ylim(1.55, -0.55)
-    ax.set_xlim(-0.42, 0.24)
-    ax.set_xlabel("MAE(FEP) − MAE(MD Q) (°C)")
-    ax.text(0.03, 0.97, "FEP lower", transform=ax.transAxes, ha="left", va="top",
-            fontsize=8.5, color=COL["fep"])
-    ax.text(0.97, 0.97, "MD Q lower", transform=ax.transAxes, ha="right", va="top",
-            fontsize=8.5, color=COL["mdq"])
-    polish(ax, "x", boxed=True)
     panel_label(ax, "B")
 
-    # (c) Fine-tuned label-count behavior as paired changes from Tm-only.
-    ax = fig.add_subplot(grid[1, 1])
+    # (a) Fine-tuned label-count behavior as paired changes from Tm-only.
+    ax = fig.add_subplot(grid[0])
     ax.axhline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
     hot_curves = [
         ("FEP $\Delta\Delta G$", RESULTS / "final_fep_hot" / "scaling.json", COL["fep"], "o"),
@@ -1314,12 +1254,12 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
     ax.text(0.03, 0.04, "negative = lower Tm error", transform=ax.transAxes, fontsize=8.3,
             color=COL["design"], va="bottom")
     for (label, value, color), dy in zip(hot_endpoints, (-0.045, 0.075)):
-        ax.text(0.96, value + dy, f"{endpoint_labels[label]}  {value:+.2f}",
+        ax.text(0.96, value + dy, endpoint_labels[label],
                 transform=ax.get_yaxis_transform(), ha="right", va="center", fontsize=8.3,
                 fontweight="bold", color=color,
                 bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.78, "pad": 0.4})
     polish(ax, "both", boxed=True)
-    panel_label(ax, "C")
+    panel_label(ax, "A")
 
     save_figure(fig, "fig_outline03_physical_observable")
 
