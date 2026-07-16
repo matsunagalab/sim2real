@@ -1034,19 +1034,59 @@ def fig04d_schematic(ax) -> None:
             ha="center", fontsize=6.4, color=COL["mdq"], fontweight="bold")
 
 
-def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
-    """Simulation-plan evidence at the journal's final printed width."""
-    fig, axes = plt.subplots(
-        1,
-        2,
-        figsize=(7.2, 3.65),
-        gridspec_kw={"width_ratios": [1.0, 1.12]},
-        layout="constrained",
-    )
+def draw_scaling_panel(ax, curves, baseline, title, ylim, xlim=(16, 560)):
+    """FEP/MD label-count scaling with an encoder-titled series legend."""
+    ax.axhline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
+    for label, path, color, marker in curves:
+        curve = paired_scaling_rows(path, baseline)
+        paired_scaling_plot(ax, curve, color, label, marker)
+    ax.set_xscale("log", base=2)
+    ax.set_xlim(*xlim)
+    ax.set_xticks([20, 80, 160, 320], ["20", "80", "160", "320"])
+    ax.set_xlabel("Labels per structure and model, n")
+    ax.set_ylabel(r"$\Delta$MAE vs Tm-only (°C)")
+    ax.set_ylim(*ylim)
+    ax.text(0.03, 0.03, "negative = lower Tm error", transform=ax.transAxes,
+            fontsize=8.3, color=COL["design"], va="bottom")
+    leg = ax.legend(handles=[
+        Line2D([], [], color=COL["fep"], marker="o", markeredgecolor="white",
+               markersize=6, label="FEP ΔΔG"),
+        Line2D([], [], color=COL["mdq"], marker="D", markeredgecolor="white",
+               markersize=6, label="MD Q"),
+    ], title=title, frameon=False, loc="upper right",
+       bbox_to_anchor=(0.99, 1.0), ncol=1, fontsize=8.4, handlelength=1.8)
+    leg.get_title().set_fontweight("bold")
+    leg.get_title().set_fontsize(8.8)
+    polish(ax, "both", boxed=True)
 
-    # (b) Four directly labelled effects; every zero is the corresponding
-    # independently tuned series' own Tm-only model.
-    ax = axes[1]
+
+def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
+    """Label-count scaling (both encoders) plus the design contrast."""
+    fig = plt.figure(figsize=(7.2, 6.0), layout="constrained")
+    gs = fig.add_gridspec(2, 2, height_ratios=[1.0, 0.88])
+
+    # (a) Frozen label-count scaling for FEP and mutation-scan MD.
+    ax = fig.add_subplot(gs[0, 0])
+    draw_scaling_panel(
+        ax,
+        [("FEP $\Delta\Delta G$", RESULTS / "final_fep_frozen" / "scaling.json", COL["fep"], "o"),
+         ("MD native-contact $Q$", RESULTS / "final_mdq_frozen" / "scaling.json", COL["mdq"], "D")],
+        FIG3C_TM_FROZEN, "Frozen encoder", (-0.42, 0.44), xlim=(16, 520))
+    ax.text(505, 0.015, "Tm-only", ha="right", va="bottom", fontsize=8.0,
+            color=COL["baseline"])
+    panel_label(ax, "A")
+
+    # (b) Fine-tuned label-count scaling for FEP and mutation-scan MD.
+    ax = fig.add_subplot(gs[0, 1])
+    draw_scaling_panel(
+        ax,
+        [("FEP $\Delta\Delta G$", RESULTS / "final_fep_hot" / "scaling.json", COL["fep"], "o"),
+         ("MD native-contact $Q$", RESULTS / "final_mdq_hot" / "scaling.json", COL["mdq"], "D")],
+        FIG3_HOT_TM_BASELINE, "Fine-tuned encoder", (-0.35, 1.02))
+    panel_label(ax, "B")
+
+    # (c) Design contrast: heterogeneous sequences vs local mutation scan.
+    ax = fig.add_subplot(gs[1, :])
     effects = design_delta_rows()
     rows_b = [
         ("Heterogeneous sequences\nfrozen encoder", "heterogeneous screen", "frozen", COL["gray"], "s"),
@@ -1096,64 +1136,21 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
         fontsize=8.2,
     )
     polish(ax, "x", boxed=True)
-    panel_label(ax, "B")
-
-    # (a) Paired changes from the frozen Tm-only model. Paired intervals make
-    # the baseline and the direction of transfer explicit and avoid clipped
-    # single-model confidence intervals.
-    ax = axes[0]
-    ax.axhline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
-    frozen_curves = [
-        ("FEP $\Delta\Delta G$", RESULTS / "final_fep_frozen" / "scaling.json", COL["fep"], "o"),
-        ("MD native-contact $Q$", RESULTS / "final_mdq_frozen" / "scaling.json", COL["mdq"], "D"),
-    ]
-    frozen_endpoints = []
-    for label, path, color, marker in frozen_curves:
-        curve = paired_scaling_rows(path, FIG3C_TM_FROZEN)
-        paired_scaling_plot(ax, curve, color, label, marker)
-        frozen_endpoints.append((label, float(curve.iloc[-1]["delta_mae"]), color))
-    ax.set_xscale("log", base=2)
-    ax.set_xlim(16, 520)
-    ax.set_xticks([20, 80, 160, 320], ["20", "80", "160", "320"])
-    ax.set_xlabel("Labels per structure and model, n")
-    ax.set_ylabel(r"$\Delta$MAE vs Tm-only (°C)")
-    ax.set_ylim(-0.42, 0.44)
-    ax.text(0.03, 0.03, "negative = lower Tm error", transform=ax.transAxes, fontsize=8.3,
-            color=COL["design"], va="bottom")
-    ax.text(505, 0.015, "Tm-only", ha="right", va="bottom", fontsize=8.0,
-            color=COL["baseline"])
-    leg = ax.legend(handles=[
-        Line2D([], [], color=COL["fep"], marker="o", markeredgecolor="white",
-               markersize=6, label="FEP ΔΔG"),
-        Line2D([], [], color=COL["mdq"], marker="D", markeredgecolor="white",
-               markersize=6, label="MD Q"),
-    ], title="Frozen encoder", frameon=False, loc="upper right",
-       bbox_to_anchor=(0.99, 1.0), ncol=1, fontsize=8.4, handlelength=1.8)
-    leg.get_title().set_fontweight("bold")
-    leg.get_title().set_fontsize(8.8)
-    polish(ax, "both", boxed=True)
-    panel_label(ax, "A")
+    panel_label(ax, "C")
 
     save_figure(fig, "fig_outline02_data_design")
 
 
 def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
-    """Physical-observable axis with explicit difference semantics."""
-    fig, axes = plt.subplots(
-        1, 2, figsize=(7.2, 3.9),
-        gridspec_kw={"width_ratios": [1.0, 1.35]},
-        layout="constrained",
-    )
-    endpoint_labels = {"FEP $\\Delta\\Delta G$": "FEP ΔΔG",
-                       "MD native-contact $Q$": "MD Q"}
+    """Physical-observable axis: one paired comparison across all label sources."""
+    fig, ax = plt.subplots(figsize=(7.2, 3.7), layout="constrained")
     encoder_style = {
         "frozen": {"offset": -0.17, "marker": "s", "face": "source"},
         "hot": {"offset": 0.17, "marker": "o", "face": "white"},
     }
 
-    # (b) Horizontal paired effects. Marker shape/fill, not color, encodes the
+    # Horizontal paired effects. Marker shape/fill, not color, encodes the
     # encoder regime; color is reserved for the physical label source.
-    ax = axes[1]
     map_sources = ["FEP", MD_CONTACT_Q_SOURCE, "thermoMPNN", "rosetta", "rosetta_random", "rosetta_esm"]
     source_labels = [
         "FEP ΔΔG",
@@ -1226,39 +1223,6 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
         columnspacing=1.2,
     )
     polish(ax, "x", boxed=True)
-    panel_label(ax, "B")
-
-    # (a) Fine-tuned label-count behavior as paired changes from Tm-only.
-    ax = axes[0]
-    ax.axhline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
-    hot_curves = [
-        ("FEP $\Delta\Delta G$", RESULTS / "final_fep_hot" / "scaling.json", COL["fep"], "o"),
-        ("MD native-contact $Q$", RESULTS / "final_mdq_hot" / "scaling.json", COL["mdq"], "D"),
-    ]
-    hot_endpoints = []
-    for label, path, color, marker in hot_curves:
-        curve = paired_scaling_rows(path, FIG3_HOT_TM_BASELINE)
-        paired_scaling_plot(ax, curve, color, label, marker)
-        hot_endpoints.append((label, float(curve.iloc[-1]["delta_mae"]), color))
-    ax.set_xscale("log", base=2)
-    ax.set_xlim(16, 560)
-    ax.set_xticks([20, 80, 160, 320], ["20", "80", "160", "320"])
-    ax.set_xlabel("Labels per structure and model, n")
-    ax.set_ylabel(r"$\Delta$MAE vs Tm-only (°C)")
-    ax.set_ylim(-0.35, 1.02)
-    ax.text(0.03, 0.03, "negative = lower Tm error", transform=ax.transAxes, fontsize=8.3,
-            color=COL["design"], va="bottom")
-    leg = ax.legend(handles=[
-        Line2D([], [], color=COL["fep"], marker="o", markeredgecolor="white",
-               markersize=6, label="FEP ΔΔG"),
-        Line2D([], [], color=COL["mdq"], marker="D", markeredgecolor="white",
-               markersize=6, label="MD Q"),
-    ], title="Fine-tuned encoder", frameon=False, loc="upper right",
-       bbox_to_anchor=(0.99, 1.0), ncol=1, fontsize=8.4, handlelength=1.8)
-    leg.get_title().set_fontweight("bold")
-    leg.get_title().set_fontsize(8.8)
-    polish(ax, "both", boxed=True)
-    panel_label(ax, "A")
 
     save_figure(fig, "fig_outline03_physical_observable")
 
