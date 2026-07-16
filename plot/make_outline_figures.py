@@ -562,7 +562,9 @@ def save_figure(fig, stem: str) -> None:
     print(f"wrote {PLOT_DIR / (stem + '.pdf')}")
 
 
-def horizontal_interval(ax, y, mid, lo, hi, color, marker="o", label=None, zorder=3):
+def horizontal_interval(ax, y, mid, lo, hi, color, marker="o", label=None, zorder=3,
+                        face=None):
+    open_marker = face is not None and face != color
     ax.errorbar(
         [mid],
         [y],
@@ -574,9 +576,9 @@ def horizontal_interval(ax, y, mid, lo, hi, color, marker="o", label=None, zorde
         capsize=3.8,
         capthick=1.2,
         markersize=6.8,
-        markerfacecolor=color,
-        markeredgecolor="white",
-        markeredgewidth=0.7,
+        markerfacecolor=face if face is not None else color,
+        markeredgecolor=color if open_marker else "white",
+        markeredgewidth=1.3 if open_marker else 0.7,
         label=label,
         zorder=zorder,
     )
@@ -1047,10 +1049,10 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     ax = axes[0]
     effects = design_delta_rows()
     rows_b = [
-        ("Heterogeneous data set\nfrozen encoder", "heterogeneous screen", "frozen", COL["gray"], "s"),
-        ("Heterogeneous data set\nfine-tuned encoder", "heterogeneous screen", "hot", COL["gray"], "o"),
-        ("Matched mutation scan\nfrozen encoder", "matched mutation scan", "frozen", COL["design"], "s"),
-        ("Matched mutation scan\nfine-tuned encoder", "matched mutation scan", "hot", COL["design"], "o"),
+        ("Heterogeneous sequences\nfrozen encoder", "heterogeneous screen", "frozen", COL["gray"], "s"),
+        ("Heterogeneous sequences\nfine-tuned encoder", "heterogeneous screen", "hot", COL["gray"], "o"),
+        ("Local mutation scan\nfrozen encoder", "matched mutation scan", "frozen", COL["design"], "s"),
+        ("Local mutation scan\nfine-tuned encoder", "matched mutation scan", "hot", COL["design"], "o"),
     ]
     ax.axvline(0.0, color=COL["baseline"], linestyle="--", linewidth=1.0, zorder=1)
     ypos = np.arange(len(rows_b), dtype=float)
@@ -1064,6 +1066,7 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
             row["delta_ci_hi"],
             color,
             marker=marker,
+            face=color if encoder == "frozen" else "white",
         )
         offset = -0.018 if row["delta_mae"] < 0 else 0.018
         ax.text(
@@ -1087,6 +1090,22 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
             fontsize=8.4, color=COL["design"])
     ax.text(0.97, 0.97, "higher Tm error", transform=ax.transAxes, ha="right", va="top",
             fontsize=8.4, color=COL["rosetta"])
+    ax.legend(
+        handles=[
+            Line2D([], [], marker="s", linestyle="none", markerfacecolor=COL["gray"],
+                   markeredgecolor=COL["gray"], markersize=7, label="frozen encoder"),
+            Line2D([], [], marker="o", linestyle="none", markerfacecolor="white",
+                   markeredgecolor=COL["gray"], markeredgewidth=1.3, markersize=7,
+                   label="fine-tuned encoder"),
+        ],
+        frameon=False,
+        loc="upper right",
+        ncol=1,
+        bbox_to_anchor=(0.99, 0.86),
+        borderaxespad=0.2,
+        handlelength=1.5,
+        fontsize=8.2,
+    )
     polish(ax, "x", boxed=True)
     panel_label(ax, "A")
 
