@@ -14,11 +14,11 @@ the heterogeneous study had MAEs of 7.38 and 6.61$^\circ$C,
 respectively. Each computed-label model was compared only with the Tm-only
 model selected in the same study and encoder setting.
 
-\subsection{The frozen-encoder MAE reduction was numerically larger for matched scans}
+\subsection{The frozen-encoder MAE reduction was numerically larger for mutation scans}
 
 We compared two ways of building an MD label set. The heterogeneous data set
 contained 1143 samples representing 833 unique sequences of different lengths.
-The matched data set contained local single mutations of the fixed 1MEL and 4IDL
+The mutation-scan data set contained local single mutations of the fixed 1MEL and 4IDL
 structures. Both used the same 400~K MD and Best--Hummer native-contact $Q$
 protocol, with the same contact set and averaging window, so they differed only
 in the variants they covered. The models for the two studies were tuned
@@ -26,10 +26,10 @@ separately, so we compared the change from the Tm-only model within each study
 rather than their absolute MAEs (Fig.~\ref{fig:data_design}b). In the heterogeneous study, adding the MD
 label changed MAE by $-0.049^\circ$C with a frozen encoder (95\% CI,
 $-0.092$ to $-0.006^\circ$C) and by $+0.116^\circ$C with a fine-tuned encoder
-(95\% CI, $-0.009$ to $+0.243^\circ$C). In the matched study, the corresponding
+(95\% CI, $-0.009$ to $+0.243^\circ$C). In the mutation-scan study, the corresponding
 changes were $-0.195^\circ$C (95\% CI, $-0.366$ to $-0.030^\circ$C) and
 $+0.029^\circ$C (95\% CI, $-0.139$ to $+0.197^\circ$C). The frozen-encoder MAE
-reduction was therefore larger for the matched mutation scans.
+reduction was therefore larger for the mutation scans.
 
 Eight sequences in the heterogeneous MD data set also occurred in the Tm test
 set. Excluding their test errors barely changed either estimate, and the paired
@@ -40,15 +40,15 @@ computed-label samples, so this check addresses their contribution to test MAE
 but not a possible effect during training or model selection. Other differences
 between the data sets may also matter. In the heterogeneous data set, $Q$ had a
 Pearson correlation of $r=+0.13$ with sequence length
-(Supplementary Fig.~S1). The matched scans held length fixed within each
+(Supplementary Fig.~S1). The mutation scans held length fixed within each
 structure and described the local effect of one mutation. The heterogeneous data
 set also included each structure separately, giving more weight to sequences
 represented by multiple structures. These observations do not identify the cause
 of the difference.
 
 The frozen-encoder label-count curves provide a second comparison of FEP and
-matched MD (Fig.~\ref{fig:data_design}a). At $n=20$, the paired MAE changes were
-$-0.10^\circ$C for FEP and $+0.09^\circ$C for matched MD. At $n=320$, they were
+mutation-scan MD (Fig.~\ref{fig:data_design}a). At $n=20$, the paired MAE changes were
+$-0.10^\circ$C for FEP and $+0.09^\circ$C for mutation-scan MD. At $n=320$, they were
 $-0.22^\circ$C and $-0.20^\circ$C, respectively, and both 95\% intervals were
 below zero. Four label counts, with nonmonotonic changes, are too few to
 establish a scaling relation.
@@ -57,17 +57,17 @@ establish a scaling relation.
 \centering
 \includegraphics[width=\textwidth]{fig_outline02_data_design}
 \caption{The frozen-encoder MAE reduction was larger for the
-matched mutation scans than for the heterogeneous MD data set.
+mutation scans than for the heterogeneous MD data set.
 The heterogeneous data set covered nanobody structures of different lengths,
-whereas the matched scans used local mutations of 1MEL and 4IDL. Both used the
+whereas the mutation scans used local mutations of 1MEL and 4IDL. Both used the
 same 400~K MD and $Q$ protocol and differed only in the variants they covered.
-(a) Paired MAE change from the frozen Tm-only model for FEP and matched MD at
+(a) Paired MAE change from the frozen Tm-only model for FEP and mutation-scan MD at
 four label counts. Here $n$ is the number sampled from each structure for each
 ensemble member; 80\% of the sampled data entered training.
 (b) Paired MAE change from the Tm-only model within each study at the largest
 label count. Zero means equal MAE, and negative values mean lower Tm error after
 adding the MD label. Predictions were averaged across ten training seeds for the
-heterogeneous data set and five for the matched scans. In both panels, points
+heterogeneous data set and five for the mutation scans. In both panels, points
 and whiskers show the paired change and its 95\% bootstrap interval over the 396
 test sequences.}
 \label{fig:data_design}
@@ -78,7 +78,7 @@ test sequences.}
 We next compared all computed labels after selecting the model for each source
 separately (Fig.~\ref{fig:physical_observable}b). With a frozen encoder, FEP
 reached 7.01$^\circ$C MAE, a paired change of $-0.221^\circ$C from Tm-only
-(95\% CI, $-0.393$ to $-0.051^\circ$C). Matched MD reached
+(95\% CI, $-0.393$ to $-0.051^\circ$C). Mutation-scan MD reached
 7.03$^\circ$C, a change of $-0.195^\circ$C (95\% CI, $-0.366$ to
 $-0.030^\circ$C). Both intervals were below zero. ThermoMPNN reached
 7.09$^\circ$C, but its interval included zero. The Rosetta-based labels were
@@ -86,19 +86,19 @@ close to or worse than the Tm-only model. With a fine-tuned encoder, FEP reached
 6.40$^\circ$C, the lowest MAE in the
 study. Its paired change from the 6.55$^\circ$C Tm-only model
 was $-0.153^\circ$C (95\% CI, $-0.323$ to $+0.020^\circ$C), an interval that
-included zero. Matched MD, ThermoMPNN, plain Rosetta, and random variants scored
+included zero. Mutation-scan MD, ThermoMPNN, plain Rosetta, and random variants scored
 with Rosetta differed from Tm-only by $+0.029$ to $+0.144^\circ$C; their
 intervals also included zero. ESM2-proposed variants scored with Rosetta
 increased error by $+0.411^\circ$C (95\% CI, $+0.140$ to $+0.698^\circ$C).
 
-We also compared FEP and matched MD directly. The difference in test MAE (FEP
+We also compared FEP and mutation-scan MD directly. The difference in test MAE (FEP
 minus MD) was $-0.026^\circ$C with a frozen encoder (95\% CI, $-0.243$ to
 $+0.192^\circ$C) and $-0.182^\circ$C with a fine-tuned encoder (95\% CI,
 $-0.393$ to $+0.024^\circ$C). Neither interval excluded zero, so the two labels
 were not distinguishable at the largest label count.
 The fine-tuned label-count curves show how the two results changed with the
 amount of auxiliary data (Fig.~\ref{fig:physical_observable}a). At $n=20$,
-matched MD increased MAE by $+0.47^\circ$C (95\% CI, $+0.26$ to
+mutation-scan MD increased MAE by $+0.47^\circ$C (95\% CI, $+0.26$ to
 $+0.69^\circ$C). Its error decreased as $n$ increased, and the interval
 included zero by $n=160$. FEP changed from $+0.02^\circ$C at $n=20$ to
 $-0.15^\circ$C at $n=320$, but the interval at the largest setting also
@@ -122,7 +122,7 @@ regression architecture.
 \centering
 \includegraphics[width=\textwidth]{fig_outline03_physical_observable}
 \caption{FEP had the lowest test Tm MAE with both encoders.
-(a) Paired MAE change from the fine-tuned Tm-only model for FEP and matched MD
+(a) Paired MAE change from the fine-tuned Tm-only model for FEP and mutation-scan MD
 at four label counts. Here $n$ is the number sampled from each structure for
 each ensemble member; 80\% entered training.
 (b) Paired MAE change from the shared Tm-only model for each computed label.
@@ -145,18 +145,18 @@ ESM2-proposed variants did not give lower Tm error than random variants. This
 comparison provides no evidence that the ESM2 proposal step improved transfer
 to Tm.
 Data set size did not explain the contrast between the two MD studies. The
-heterogeneous data set contained 1143 samples and the matched data set contained
+heterogeneous data set contained 1143 samples and the mutation-scan data set contained
 837, but each ensemble member sampled at most 640 auxiliary samples in both
 studies.
-The larger frozen-encoder reduction for the matched scans therefore
-cannot be explained by more training labels per model. FEP and matched
+The larger frozen-encoder reduction for the mutation scans therefore
+cannot be explained by more training labels per model. FEP and mutation-scan
 MD required similar simulation time per variant, but wall-clock costs were not
 recorded consistently enough to support a general cost comparison.
 
 The study has several limitations. The Tm training set contains only 57
-nanobodies, and the matched calculations cover two structures. Although the two
+nanobodies, and the mutation-scan calculations cover two structures. Although the two
 MD data sets now share one $Q$ protocol, the heterogeneous data set still
-differs from the matched scans in its variant composition. It includes repeated
+differs from the mutation scans in its variant composition. It includes repeated
 PDB entries, eight exact matches to the Tm test sequences, and sequences of
 widely varying length, and its trajectories did not all reach the scheduled
 production length. The selected FEP and MD models also differed in regression

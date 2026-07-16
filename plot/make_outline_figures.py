@@ -1071,12 +1071,12 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     ax.axhline(1.5, color="white", linewidth=2.0, zorder=1)
     ax.set_yticks(ypos)
     ax.set_yticklabels([r[0] for r in rows_b], fontsize=9.2)
-    ax.set_ylim(len(rows_b) - 0.45, -0.55)
+    ax.set_ylim(len(rows_b) - 0.45, -1.30)
     ax.set_xlim(-0.38, 0.28)
     ax.set_xlabel(r"$\Delta$MAE vs own Tm-only model (°C)")
-    ax.text(0.03, 0.97, "lower Tm error", transform=ax.transAxes, ha="left", va="top",
+    ax.text(0.03, 0.99, "lower Tm error", transform=ax.transAxes, ha="left", va="top",
             fontsize=8.4, color=COL["design"])
-    ax.text(0.97, 0.97, "higher Tm error", transform=ax.transAxes, ha="right", va="top",
+    ax.text(0.97, 0.99, "higher Tm error", transform=ax.transAxes, ha="right", va="top",
             fontsize=8.4, color=COL["rosetta"])
     ax.legend(
         handles=[
@@ -1087,11 +1087,12 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
                    label="fine-tuned encoder"),
         ],
         frameon=False,
-        loc="center right",
-        ncol=1,
-        bbox_to_anchor=(0.99, 0.40),
+        loc="upper center",
+        ncol=2,
+        bbox_to_anchor=(0.52, 0.90),
         borderaxespad=0.2,
-        handlelength=1.5,
+        handlelength=1.3,
+        columnspacing=1.2,
         fontsize=8.2,
     )
     polish(ax, "x", boxed=True)
@@ -1116,18 +1117,20 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_xticks([20, 80, 160, 320], ["20", "80", "160", "320"])
     ax.set_xlabel("Labels per structure and model, n")
     ax.set_ylabel(r"$\Delta$MAE vs Tm-only (°C)")
-    ax.set_ylim(-0.42, 0.28)
-    ax.text(0.03, 0.04, "negative = lower Tm error", transform=ax.transAxes, fontsize=8.3,
+    ax.set_ylim(-0.42, 0.44)
+    ax.text(0.03, 0.03, "negative = lower Tm error", transform=ax.transAxes, fontsize=8.3,
             color=COL["design"], va="bottom")
     ax.text(505, 0.015, "Tm-only", ha="right", va="bottom", fontsize=8.0,
             color=COL["baseline"])
-    endpoint_labels = {"FEP $\\Delta\\Delta G$": "FEP ΔΔG",
-                       "MD native-contact $Q$": "MD Q"}
-    for (label, value, color), dy in zip(frozen_endpoints, (-0.025, 0.035)):
-        ax.text(0.97, value + dy, endpoint_labels[label],
-                transform=ax.get_yaxis_transform(), ha="right", va="center", fontsize=8.3,
-                fontweight="bold", color=color,
-                bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.78, "pad": 0.4})
+    leg = ax.legend(handles=[
+        Line2D([], [], color=COL["fep"], marker="o", markeredgecolor="white",
+               markersize=6, label="FEP ΔΔG"),
+        Line2D([], [], color=COL["mdq"], marker="D", markeredgecolor="white",
+               markersize=6, label="MD Q"),
+    ], title="Frozen encoder", frameon=False, loc="upper right",
+       bbox_to_anchor=(0.99, 1.0), ncol=1, fontsize=8.4, handlelength=1.8)
+    leg.get_title().set_fontweight("bold")
+    leg.get_title().set_fontsize(8.8)
     polish(ax, "both", boxed=True)
     panel_label(ax, "A")
 
@@ -1154,7 +1157,7 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
     map_sources = ["FEP", MD_CONTACT_Q_SOURCE, "thermoMPNN", "rosetta", "rosetta_random", "rosetta_esm"]
     source_labels = [
         "FEP ΔΔG",
-        "Matched MD, native-contact Q",
+        "MD native-contact Q",
         "ThermoMPNN ΔΔG",
         "Rosetta ΔΔG",
         "Rosetta, random variants",
@@ -1199,12 +1202,12 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
     ax.axhline(3.5, color="white", linewidth=2.0, zorder=1)
     ax.set_yticks(ypos)
     ax.set_yticklabels(source_labels, fontsize=8.8)
-    ax.set_ylim(len(map_sources) - 0.50, -0.90)
+    ax.set_ylim(len(map_sources) - 0.50, -1.75)
     ax.set_xlim(-0.42, 0.70)
     ax.set_xlabel(r"$\Delta$MAE vs Tm-only model (°C)")
-    ax.text(0.03, 0.98, "lower Tm error", transform=ax.transAxes, ha="left", va="top",
+    ax.text(0.03, 0.99, "lower Tm error", transform=ax.transAxes, ha="left", va="top",
             fontsize=8.5, color=COL["design"])
-    ax.text(0.97, 0.98, "higher Tm error", transform=ax.transAxes, ha="right", va="top",
+    ax.text(0.97, 0.99, "higher Tm error", transform=ax.transAxes, ha="right", va="top",
             fontsize=8.5, color=COL["rosetta"])
     ax.legend(
         handles=[
@@ -1215,11 +1218,12 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
                    label="fine-tuned encoder"),
         ],
         frameon=False,
-        loc="upper right",
-        ncol=1,
-        bbox_to_anchor=(0.99, 0.82),
+        loc="upper center",
+        ncol=2,
+        bbox_to_anchor=(0.5, 0.93),
         borderaxespad=0.2,
-        handlelength=1.5,
+        handlelength=1.3,
+        columnspacing=1.2,
     )
     polish(ax, "x", boxed=True)
     panel_label(ax, "B")
@@ -1241,14 +1245,18 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_xticks([20, 80, 160, 320], ["20", "80", "160", "320"])
     ax.set_xlabel("Labels per structure and model, n")
     ax.set_ylabel(r"$\Delta$MAE vs Tm-only (°C)")
-    ax.set_ylim(-0.35, 0.70)
-    ax.text(0.03, 0.04, "negative = lower Tm error", transform=ax.transAxes, fontsize=8.3,
+    ax.set_ylim(-0.35, 1.02)
+    ax.text(0.03, 0.03, "negative = lower Tm error", transform=ax.transAxes, fontsize=8.3,
             color=COL["design"], va="bottom")
-    for (label, value, color), dy in zip(hot_endpoints, (-0.045, 0.075)):
-        ax.text(0.96, value + dy, endpoint_labels[label],
-                transform=ax.get_yaxis_transform(), ha="right", va="center", fontsize=8.3,
-                fontweight="bold", color=color,
-                bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.78, "pad": 0.4})
+    leg = ax.legend(handles=[
+        Line2D([], [], color=COL["fep"], marker="o", markeredgecolor="white",
+               markersize=6, label="FEP ΔΔG"),
+        Line2D([], [], color=COL["mdq"], marker="D", markeredgecolor="white",
+               markersize=6, label="MD Q"),
+    ], title="Fine-tuned encoder", frameon=False, loc="upper right",
+       bbox_to_anchor=(0.99, 1.0), ncol=1, fontsize=8.4, handlelength=1.8)
+    leg.get_title().set_fontweight("bold")
+    leg.get_title().set_fontsize(8.8)
     polish(ax, "both", boxed=True)
     panel_label(ax, "A")
 
