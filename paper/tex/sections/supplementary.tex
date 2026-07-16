@@ -2,18 +2,19 @@
 
 \section{Supplementary methods}
 
-\subsection{Additional details for the heterogeneous MD panel}
+\subsection{Additional details for the heterogeneous MD data set}
 
-The heterogeneous panel was assembled from a SAbDab summary and the
-corresponding IMGT-renumbered structures \citep{Dunbar2014SAbDab}. For each PDB
-identifier, we selected the first heavy-chain entry whose chain was present in
-the structure file. This rule yielded 1143 rows with a usable sequence,
-topology, trajectory, and native-contact label, representing 833 unique
-amino-acid sequences. Ninety-seven sequences occurred in more than one PDB
-entry and accounted for 407 rows. We calculated native-contact values separately
-for each structure and sampled rows individually during training; duplicate
+The heterogeneous data set was assembled from a SAbDab summary and the
+corresponding structures \citep{Dunbar2014SAbDab}. For each PDB identifier, we
+selected the first heavy-chain entry whose chain was present in the structure
+file. This rule yielded 1143 samples with a usable sequence, topology,
+trajectory, and native-contact label, representing 833 unique amino-acid
+sequences. Ninety-seven sequences occurred in more than one PDB entry and
+accounted for 407 samples. We calculated native-contact values separately for
+each structure and sampled them individually during training; duplicate
 sequences were not collapsed, and the model did not receive the PDB identifier.
-Eleven rows exceeded the 158-residue model input and were truncated at the end.
+Eleven sequences exceeded the 158-residue model input and were truncated at the
+end.
 
 Structures were cleaned and missing atoms were added with PDBFixer. The
 preparation first attempted protonation at pH 7.4 with pdb2pqr and PROPKA
@@ -32,17 +33,15 @@ OpenMM used PME electrostatics with a 1.0-nm cutoff, constraints on bonds to
 hydrogen, and a Langevin middle integrator with 1~ps$^{-1}$ friction
 \citep{Eastman2017OpenMM}.
 
-The contact calculation used backbone heavy-atom pairs separated by more than
-three residues and within 0.45~nm in the first production frame. At least one
-atom in each pair belonged to Asp, Glu, Gln, Asn, Arg, Lys, or His. For a
-trajectory with $N>300$ saved frames, $Q$ was averaged over the final
-$\max(300,\lfloor N/3\rfloor)$ frames; all frames were used when $N\leq300$.
-At the 100-ps output interval, 300 frames correspond to approximately 30~ns.
-The number of frames entering a label ranged from 66 to 333 (median 333); nine
-rows had fewer than 300 available frames. Supplementary Fig.~S1 shows the
+The contact calculation used all backbone heavy-atom pairs separated by more
+than three residues and within 0.45~nm in the first production frame, as for the
+matched scans. $Q$ was averaged over the final 30~ns of production, that is the
+last 300 frames of 100-ps output. The two MD data sets therefore used the same
+$Q$ definition, contact set, native reference, and averaging window, and
+differed only in the variants they covered. Supplementary Fig.~S1 shows the
 relation between sequence length and raw $Q$.
 
-\subsection{FEP row and charge-change checks}
+\subsection{FEP variant and charge-change checks}
 
 The FEP tables used here comprised Ala, Asp, Gln, and Ile scans. Raw Phe scans
 existed but were not included in the processed tables, and the original reason
@@ -60,7 +59,7 @@ We fine-tuned the 35M- and 650M-parameter ESM2 encoders without size-specific
 hyperparameter searches. For both sizes, the Tm-only model used the shared
 architecture, dropout 0.05, and an encoder learning rate of $1\times10^{-4}$.
 The FEP model used the shared architecture with separate 1MEL and 4IDL heads,
-$n=320$ rows per structure, dropout 0.15, and an encoder learning rate of
+$n=320$ samples per structure, dropout 0.15, and an encoder learning rate of
 $3\times10^{-5}$. Both conditions used a non-encoder learning rate of
 $3\times10^{-4}$, weight decay 0.04, and ten training seeds.
 
@@ -69,8 +68,8 @@ $3\times10^{-4}$, weight decay 0.04, and ten training seeds.
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth]{supp_fig01_data_and_design}
-\caption{Sequence length and native-contact $Q$ in the heterogeneous MD panel.
-Hexagons show row density, and dashed lines mark the fixed sequence lengths of
+\caption{Sequence length and native-contact $Q$ in the heterogeneous MD data set.
+Hexagons show sample density, and dashed lines mark the fixed sequence lengths of
 the 1MEL and 4IDL matched mutation scans. The association is descriptive and
 does not show that length caused the difference between the two MD data sets.}
 \label{fig:supp_data_design}
