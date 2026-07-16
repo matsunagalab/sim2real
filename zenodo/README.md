@@ -3,9 +3,14 @@
 Supporting data for **“Transfer learning with simulated variants and calculated quantities for nanobody melting-temperature prediction.”**
 
 - Code and processed tables: <https://github.com/matsunagalab/sim2real>
-- Zenodo DOI: **10.5281/zenodo.XXXXXXX** — replace only after the record is created
 
 This directory is a local staging area, not a completed public record. File counts, checksums, archive names, and the total size must be regenerated immediately before upload.
+
+The consolidated backbone-only deposit prepared from this staging area is in
+`sim2real_deposit/`. Use `sim2real_deposit/README.md`, its manifests, and its
+checksums as the source of truth for the assembled bundle. The component
+directories described below are preparation inputs and should not be uploaded
+in addition to that bundle.
 
 ## What is currently staged
 
@@ -58,6 +63,5 @@ These reductions must be described independently of the first-40-ns matched MD d
 - Create one archive per component and test extraction and checksum verification on a clean machine.
 - Record archive names, compressed sizes, file counts, software versions, and license information.
 - Verify that the repository tag named in the record reproduces both `paper/tex/main.pdf` and `paper/tex/supplementary_main.pdf`.
-- Replace `10.5281/zenodo.XXXXXXX` only after Zenodo assigns the real DOI, then update the manuscript and repository together.
 
 Scripts used to prepare the existing staged components include `scripts/strip_md_solvent.py`, `scripts/thin_rosetta_traj.py`, `scripts/build_zenodo_manifest.py`, `scripts/build_fep_labels.py`, and `scripts/build_fep_inputs.py`. The matched MD label extraction is performed by `scripts/extract_study_qvalue.py` and must be documented with the exact deposited inputs if option 1 is chosen.
