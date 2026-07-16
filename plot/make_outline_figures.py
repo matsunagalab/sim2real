@@ -1087,9 +1087,9 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
                    label="fine-tuned encoder"),
         ],
         frameon=False,
-        loc="upper right",
+        loc="center right",
         ncol=1,
-        bbox_to_anchor=(0.99, 0.86),
+        bbox_to_anchor=(0.99, 0.40),
         borderaxespad=0.2,
         handlelength=1.5,
         fontsize=8.2,
@@ -1136,8 +1136,11 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
 
 def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
     """Physical-observable axis with explicit difference semantics."""
-    fig = plt.figure(figsize=(7.2, 5.2), layout="constrained")
-    grid = fig.add_gridspec(2, 1, height_ratios=[1.0, 1.35])
+    fig, axes = plt.subplots(
+        1, 2, figsize=(7.2, 3.9),
+        gridspec_kw={"width_ratios": [1.0, 1.35]},
+        layout="constrained",
+    )
     endpoint_labels = {"FEP $\\Delta\\Delta G$": "FEP ΔΔG",
                        "MD native-contact $Q$": "MD Q"}
     encoder_style = {
@@ -1147,7 +1150,7 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
 
     # (b) Horizontal paired effects. Marker shape/fill, not color, encodes the
     # encoder regime; color is reserved for the physical label source.
-    ax = fig.add_subplot(grid[1])
+    ax = axes[1]
     map_sources = ["FEP", MD_CONTACT_Q_SOURCE, "thermoMPNN", "rosetta", "rosetta_random", "rosetta_esm"]
     source_labels = [
         "FEP ΔΔG",
@@ -1222,7 +1225,7 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
     panel_label(ax, "B")
 
     # (a) Fine-tuned label-count behavior as paired changes from Tm-only.
-    ax = fig.add_subplot(grid[0])
+    ax = axes[0]
     ax.axhline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
     hot_curves = [
         ("FEP $\Delta\Delta G$", RESULTS / "final_fep_hot" / "scaling.json", COL["fep"], "o"),
