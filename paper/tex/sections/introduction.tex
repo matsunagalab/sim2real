@@ -71,7 +71,7 @@ of the same two structures, the anti-lysozyme VHH 1MEL
 \citep{Desmyter1996CamelVHH} and the anti-cholera-toxin VHH 4IDL
 \citep{Legler2013AntiCholeraVHH}, with a comparable amount of simulation per
 variant, so the two quantities were compared at a similar computational cost.
-For MD we also built a heterogeneous panel of nanobody structures. The two MD
+For MD we also built a heterogeneous data set of many nanobody structures. The two MD
 data sets used the same contact definition and the same averaging window, and
 they differ in the variants they cover. For each data set we trained a
 multi-task model that predicts Tm and one computed quantity from a shared ESM2
@@ -98,7 +98,7 @@ quantities, FEP $\Delta\Delta G$ gave the lowest test error with both the frozen
 and the fine-tuned ESM2 encoder, and MD native-contact labels reduced error with
 the frozen ESM2 encoder, whereas Rosetta and ThermoMPNN labels gave little or no
 improvement. Among the two ways of choosing sequences, the local mutation scans
-gave a larger frozen-encoder gain than the heterogeneous panel. The amount of
+gave a larger frozen-encoder gain than the heterogeneous data set. The amount of
 computed data mattered as well, but data sets of similar size differed in how
 much they helped, so size alone did not predict transfer. These findings suggest
 spending a computational budget on a targeted mutation scan of a quantity close

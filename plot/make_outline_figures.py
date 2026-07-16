@@ -1047,8 +1047,8 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     ax = axes[0]
     effects = design_delta_rows()
     rows_b = [
-        ("Heterogeneous PDB panel\nfrozen encoder", "heterogeneous screen", "frozen", COL["gray"], "s"),
-        ("Heterogeneous PDB panel\nfine-tuned encoder", "heterogeneous screen", "hot", COL["gray"], "o"),
+        ("Heterogeneous data set\nfrozen encoder", "heterogeneous screen", "frozen", COL["gray"], "s"),
+        ("Heterogeneous data set\nfine-tuned encoder", "heterogeneous screen", "hot", COL["gray"], "o"),
         ("Matched mutation scan\nfrozen encoder", "matched mutation scan", "frozen", COL["design"], "s"),
         ("Matched mutation scan\nfine-tuned encoder", "matched mutation scan", "hot", COL["design"], "o"),
     ]
@@ -1107,7 +1107,7 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_xscale("log", base=2)
     ax.set_xlim(16, 520)
     ax.set_xticks([20, 80, 160, 320], ["20", "80", "160", "320"])
-    ax.set_xlabel("Labels per scaffold and model, n")
+    ax.set_xlabel("Labels per structure and model, n")
     ax.set_ylabel(r"$\Delta$MAE vs Tm-only (°C)")
     ax.set_ylim(-0.42, 0.28)
     ax.text(0.03, 0.04, "negative = lower Tm error", transform=ax.transAxes, fontsize=8.3,
@@ -1289,7 +1289,7 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_xscale("log", base=2)
     ax.set_xlim(16, 560)
     ax.set_xticks([20, 80, 160, 320], ["20", "80", "160", "320"])
-    ax.set_xlabel("Labels per scaffold and model, n")
+    ax.set_xlabel("Labels per structure and model, n")
     ax.set_ylabel(r"$\Delta$MAE vs Tm-only (°C)")
     ax.set_ylim(-0.35, 0.70)
     ax.text(0.03, 0.04, "negative = lower Tm error", transform=ax.transAxes, fontsize=8.3,
