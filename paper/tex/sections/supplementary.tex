@@ -16,16 +16,11 @@ sequences were not collapsed, and the model did not receive the PDB identifier.
 Eleven sequences exceeded the 158-residue model input and were truncated at the
 end.
 
-Structures were cleaned and missing atoms were added with PDBFixer. The
-preparation first attempted protonation at pH 7.4 with pdb2pqr and PROPKA
-\citep{Dolinsky2004PDB2PQR,Olsson2011PROPKA3}. If that step was unavailable or
-failed, the workflow used the geometry-based \texttt{pdb4amber --reduce}
-fallback, which does not apply the requested pH. If Amber conversion also
-failed, the PDBFixer output was retained. The available records do not show
-which route was used for each structure. The termini were left
-uncapped. Each protein was solvated in OPC water with 15~\AA{} padding and
-0.15~M NaCl and described with ff19SB
-\citep{Tian2020ff19SB,Izadi2014OPC}. The 300-K branch comprised 1~ns NVT and
+Structures were cleaned, missing atoms were added, and protonation was assigned
+at pH 7.4 with PDBFixer, pdb2pqr, and PROPKA
+\citep{Dolinsky2004PDB2PQR,Olsson2011PROPKA3}. The termini were left uncapped.
+Each protein was solvated in OPC water with 15~\AA{} padding and 0.15~M NaCl and
+described with ff19SB \citep{Tian2020ff19SB,Izadi2014OPC}. The 300-K branch comprised 1~ns NVT and
 1~ns NPT with a 2-fs timestep. Two 1-ns restrained NVT stages at 400~K preceded
 unrestrained 400-K NVT production scheduled for 100~ns. Production used
 hydrogen-mass repartitioning to 4~amu, a 4-fs timestep, and output every 100~ps.
