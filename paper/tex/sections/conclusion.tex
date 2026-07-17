@@ -4,12 +4,12 @@
 
 We tested whether computed protein-stability labels can improve nanobody
 melting-temperature (Tm) prediction when only a few dozen measured Tm values are
-available, and we asked which of two design choices governs the benefit, the
-sequence variants that are computed and the physical quantity that is computed.
+available, and we asked which of two design choices matters more: the sequence
+variants that are computed, or the physical quantity that is computed.
 Adding computed labels did not help uniformly. Among two MD data sets that used
-the same MD and $Q$ definition and differed only in the variants they covered,
+the same MD and $Q$ definition and differed only in the variants they included,
 the local mutation scans gave a larger frozen-encoder reduction than the
-heterogeneous structure set, although the two data sets still differed in variant
+heterogeneous data set, although the two data sets still differed in variant
 composition and were tuned separately. FEP gave the lowest test MAE with both
 frozen and fine-tuned ESM2, and its 95\% interval excluded zero only with the
 frozen encoder. The comparisons showed no simple relation between the number of
@@ -19,8 +19,8 @@ should therefore be chosen for that task from the start.
 
 A natural next step is to extend the mutation scans to more nanobody structures
 and to select new calculations adaptively, running each round of simulations
-where it is most likely to help the Tm model. Reinforcement learning offers one
-framework for this expensive, sequential design problem
+where it is most likely to help the Tm model. Reinforcement learning is one
+approach to this expensive, sequential design problem
 \citep{Angermueller2020RLSequence}, though it would need to be compared against
 random sampling and simpler active-learning baselines to show a real benefit.
 Because ESM2-proposed variants did not give lower Tm error than random variants

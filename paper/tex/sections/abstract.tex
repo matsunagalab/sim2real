@@ -8,21 +8,20 @@ directly. We tested whether adding one computed property to a 57-sequence Tm
 training set improves prediction. Multi-task models learned Tm and the computed
 property from ESM2 sequence representations; settings were selected with 114 Tm
 validation sequences, and final models were tested on 396 held-out sequences.
-We first compared two molecular-dynamics (MD) data sets that used the same
-simulations and native-contact definition and differed only in the variants they
-covered. With a frozen encoder, labels from local mutation scans of two fixed
-structures reduced mean absolute error (MAE) by 0.20$^\circ$C relative to the
-same-study Tm-only baseline, whereas labels from a heterogeneous set of many
-structures reduced it by 0.05$^\circ$C. We then compared these MD labels with
-free-energy perturbation (FEP), Rosetta, and ThermoMPNN labels. FEP gave the
-lowest test MAE with both frozen and fine-tuned encoders, and after fine-tuning
-it reduced MAE by 0.15$^\circ$C, although the 95\% interval for the change
-included zero. Native-contact MD labels reduced error only with the frozen
-encoder, and Rosetta and ThermoMPNN labels gave little or no improvement. Whether
-the computed labels improved Tm prediction therefore depended on the variants
-selected and the physical quantity computed, not on the number of labels, so
-both should be planned for the prediction task, because the simulations that
-follow cannot recover a poor choice.
+We first compared two molecular-dynamics (MD) data sets that shared the same
+simulations and native-contact definition but covered different variants. With a
+frozen encoder, labels from local mutation scans of two fixed structures reduced
+mean absolute error (MAE) by 0.20$^\circ$C relative to the same-study Tm-only
+baseline, whereas labels from a heterogeneous set of many structures reduced it
+by 0.05$^\circ$C. We then compared these MD labels with free-energy perturbation
+(FEP), Rosetta, and ThermoMPNN labels. FEP gave the lowest test MAE with both
+frozen and fine-tuned encoders, and after fine-tuning it reduced MAE by
+0.15$^\circ$C, although the 95\% interval for the change included zero.
+Native-contact MD labels reduced error only with the frozen encoder, and Rosetta
+and ThermoMPNN labels gave little or no improvement. Whether the computed labels
+improved Tm prediction therefore depended on the variants selected and the
+physical quantity computed, not on the number of labels. Both choices should be
+made for the prediction task before the simulations are run.
 \end{abstract}
 
 \begin{keywords}
@@ -32,13 +31,12 @@ learning, protein language model, molecular simulation labels
 
 \begin{significance}
 Thermal stability affects whether a nanobody can be produced, stored, and used
-reliably. Melting temperature is a common measure, but obtaining measurements
-for many sequences is costly. Simulations can add related stability data, but
-they cannot directly calculate melting temperature. FEP mutation-free-energy
-labels and MD labels based on the fraction of native contacts from local mutation
-scans improved Tm prediction in some model settings, whereas several other
-calculated data sets did not. Larger calculated data sets were not consistently
-more useful. The variants to simulate and the physical quantity to calculate
-should be chosen for the melting-temperature prediction task itself, because the
-simulations that follow cannot recover a poor choice.
+reliably. Melting temperature is a common measure, but obtaining it for many
+sequences is costly. Simulations can add related stability data, but they cannot
+give the melting temperature directly. FEP mutation-free-energy labels, and MD
+native-contact labels from local mutation scans, improved Tm prediction with a
+frozen encoder, whereas several other computed data sets did not, and larger
+computed data sets were not consistently more useful. The variants to simulate
+and the physical quantity to compute should therefore be chosen for the
+melting-temperature prediction task from the start.
 \end{significance}

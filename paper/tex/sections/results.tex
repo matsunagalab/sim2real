@@ -51,11 +51,11 @@ $+0.122^\circ$C, 95\% CI $-0.005$ to $+0.248^\circ$C). We did not retrain after
 removing the overlapping samples, so this check addresses their contribution to
 the test MAE but not a possible effect during training or model selection.
 
-Why did the mutation scan lower the Tm error while the heterogeneous set did
-not? Because the two data sets shared the same $Q$ definition, the difference
-lies in the variants each covered. A mutation scan holds the structural
-background fixed, so each label (through $\Delta Q$) isolates the local effect of
-a single mutation, the same kind of stability change the model must learn for Tm.
+The two data sets shared the same $Q$ definition, so their different effect on
+the Tm error must come from the variants each covered. A mutation scan holds the
+structural background fixed, so each label (through $\Delta Q$) isolates the
+local effect of a single mutation, the same kind of stability change the model
+must learn for Tm.
 The heterogeneous set instead compares many different nanobodies, each against
 its own native structure, so its $Q$ reflects whole-protein differences such as
 length and fold rather than the effect of a mutation. An auxiliary label tied to
@@ -65,13 +65,13 @@ representation little useful signal and can bias it toward features that do not
 generalize to the target. Such a mismatch between the auxiliary and target tasks
 is a known source of negative transfer, where a poorly matched auxiliary task
 fails to help or degrades performance \citep{Zhang2023NegativeTransfer}.
-Consistent with our main result, what mattered was how well the computed variants
-matched the prediction task rather than how many labels were available.
+Here again, what mattered was how well the computed variants matched the
+prediction task, not how many labels were available.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline02_data_design}
-\caption{The MD label: label-count scaling and the variant-set contrast.
+\caption{Label-count scaling and the variant-set contrast for the MD label.
 (a) $\Delta$MAE from the Tm-only baseline for the
 mutation-scan MD label at four label counts, with a frozen (filled, solid) and a
 fine-tuned (open, dashed) encoder. Here $n$ is the number of labels sampled per
@@ -80,7 +80,7 @@ structure for each ensemble member; 80\% entered training.
 heterogeneous data set and the local mutation scan, with a frozen (filled) and a
 fine-tuned (open) encoder. Negative values mean lower Tm error after adding the
 MD label. Both MD data sets used the same 400~K MD and $Q$ definition and
-differed only in the variants they covered; the heterogeneous data set covered
+differed only in their variant composition; the heterogeneous data set covered
 nanobody structures of different lengths, whereas the mutation scans used local
 mutations of 1MEL and 4IDL. Predictions in (b) were averaged across ten training
 seeds for the heterogeneous data set and five for the mutation scans. In both
@@ -91,8 +91,8 @@ interval over the 396 test sequences.}
 
 \subsection{FEP had the lowest test MAE with both encoders}
 
-We then compared all seven computed labels, each with a model tuned on its own
-(Fig.~\ref{fig:physical_observable}). With a frozen encoder, FEP reached
+We then compared all seven computed labels, each with a model tuned separately
+on the Tm validation set (Fig.~\ref{fig:physical_observable}). With a frozen encoder, FEP reached
 7.01$^\circ$C MAE, a $\Delta$MAE of $-0.221^\circ$C from the Tm-only baseline
 (95\% CI, $-0.393$ to $-0.051^\circ$C). Mutation-scan MD reached 7.03$^\circ$C
 ($\Delta$MAE $-0.195^\circ$C; 95\% CI, $-0.366$ to $-0.030^\circ$C), and both
@@ -120,10 +120,10 @@ although the present experiments do not test that mechanism. In a recent study,
 we used sparse autoencoders to examine ESM2 after fine-tuning on nanobody Tm and
 found features associated with surface charge, hydrophobic-core packing, the VHH
 tetrad, and disulfide bonds \citep{Murakami2025Mechanistic}. We did not examine
-the representations learned here, but because FEP $\Delta\Delta G$ is close to
-the stability signal, we expect it to strengthen the same features; comparing
-Tm-only, Tm+FEP, and Tm+MD models with one regression architecture would show
-this directly.
+the representations learned here. Because FEP $\Delta\Delta G$ is close to
+the stability signal, we would expect it to strengthen the same features, and
+comparing Tm-only, Tm+FEP, and Tm+MD models under one regression architecture
+would test this directly.
 
 \begin{figure*}[t]
 \centering
