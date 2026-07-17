@@ -8,7 +8,7 @@ available, and we asked which of two design choices matters more: the sequence
 variants that are computed, or the physical quantity that is computed.
 Adding computed labels did not help uniformly. Among two MD data sets that used
 the same MD and $Q$ definition and differed only in the variants they included,
-the local mutation scans gave a larger frozen-encoder reduction than the
+the single mutation scans gave a larger frozen-encoder reduction than the
 heterogeneous data set, although the two data sets still differed in variant
 composition and were tuned separately. FEP gave the lowest test MAE with both
 frozen and fine-tuned ESM2, and its 95\% interval excluded zero only with the
@@ -17,7 +17,7 @@ computed labels and Tm error. When calculations are intended to support Tm
 prediction, both the variants to simulate and the physical quantity to compute
 should therefore be chosen for that task from the start.
 
-A natural next step is to extend the local mutation scans to more nanobody structures
+A natural next step is to extend the single mutation scans to more nanobody structures
 and to select new calculations adaptively, running each round of simulations
 where it is most likely to help the Tm model. Reinforcement learning is one
 approach to this expensive, sequential design problem

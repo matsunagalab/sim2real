@@ -17,10 +17,10 @@ and had its own Tm-only baseline (7.38 and 6.61$^\circ$C), so each computed-labe
 model was compared only with the Tm-only baseline from its own study and encoder
 setting.
 
-\subsection{The local mutation scan reduced Tm error more than a heterogeneous set}
+\subsection{The single mutation scan reduced Tm error more than a heterogeneous set}
 
 We first varied $n$, the number of computed labels sampled per structure, for
-the local mutation scan label (Fig.~\ref{fig:data_design}a). With a frozen encoder,
+the single mutation scan label (Fig.~\ref{fig:data_design}a). With a frozen encoder,
 $\Delta$MAE moved from $+0.09^\circ$C at $n=20$ to $-0.20^\circ$C at $n=320$,
 where its 95\% interval lay below zero. With a fine-tuned encoder it began well
 above the baseline ($+0.47^\circ$C at $n=20$; 95\% CI, $+0.26$ to
@@ -31,8 +31,8 @@ consistent.
 
 We then compared two ways of building the MD label set
 (Fig.~\ref{fig:data_design}b). The heterogeneous data set contained 1143 samples
-representing 833 unique sequences of different lengths, whereas the local
-mutation scan data set contained single mutations of the fixed 1MEL and 4IDL structures.
+representing 833 unique sequences of different lengths, whereas the single
+mutation scan data set covered mutations of the fixed 1MEL and 4IDL structures.
 Both used the same 400~K MD simulations and the same Best--Hummer native-contact
 $Q$ definition, with the same contact set and averaging window, so they differed
 only in the variants they covered. Because the models for the two studies were
@@ -41,8 +41,8 @@ MD label changed MAE by $-0.049^\circ$C with a frozen encoder (95\% CI,
 $-0.092$ to $-0.006^\circ$C) and by $+0.116^\circ$C with a fine-tuned encoder
 (95\% CI, $-0.009$ to $+0.243^\circ$C) in the heterogeneous study, and by
 $-0.195^\circ$C (95\% CI, $-0.366$ to $-0.030^\circ$C) and $+0.029^\circ$C
-(95\% CI, $-0.139$ to $+0.197^\circ$C) in the local mutation scan study. The
-frozen-encoder reduction was therefore larger for the local mutation scans.
+(95\% CI, $-0.139$ to $+0.197^\circ$C) in the single mutation scan study. The
+frozen-encoder reduction was therefore larger for the single mutation scans.
 
 Eight sequences in the heterogeneous MD data set also occurred in the Tm test
 set, but excluding their test errors barely changed either estimate (frozen
@@ -52,7 +52,7 @@ removing the overlapping samples, so this check addresses their contribution to
 the test MAE but not a possible effect during training or model selection.
 
 The two data sets shared the same $Q$ definition, so their different effect on
-the Tm error must come from the variants each covered. A local mutation scan holds the
+the Tm error must come from the variants each covered. A single mutation scan holds the
 structural background fixed, so each label (through $\Delta Q$) isolates the
 local effect of a single mutation, the same kind of stability change the model
 must learn for Tm.
@@ -73,17 +73,17 @@ prediction task, not how many labels were available.
 \includegraphics[width=\textwidth]{fig_outline02_data_design}
 \caption{Label-count scaling and the variant-set contrast for the MD label.
 (a) $\Delta$MAE from the Tm-only baseline for the
-local mutation scan label at four label counts, with a frozen (filled, solid) and a
+single mutation scan label at four label counts, with a frozen (filled, solid) and a
 fine-tuned (open, dashed) encoder. Here $n$ is the number of labels sampled per
 structure for each ensemble member; 80\% entered training.
 (b) $\Delta$MAE within each study at the largest label count, for the
-heterogeneous data set and the local mutation scan, with a frozen (filled) and a
+heterogeneous data set and the single mutation scan, with a frozen (filled) and a
 fine-tuned (open) encoder. Negative values mean lower Tm error after adding the
 MD label. Both MD data sets used the same 400~K MD and $Q$ definition and
 differed only in their variant composition; the heterogeneous data set covered
-nanobody structures of different lengths, whereas the local mutation scans used
+nanobody structures of different lengths, whereas the single mutation scans used
 mutations of 1MEL and 4IDL. Predictions in (b) were averaged across ten training
-seeds for the heterogeneous data set and five for the local mutation scans. In both
+seeds for the heterogeneous data set and five for the single mutation scans. In both
 panels, points and whiskers show the $\Delta$MAE and its 95\% bootstrap
 interval over the 396 test sequences.}
 \label{fig:data_design}
@@ -91,22 +91,27 @@ interval over the 396 test sequences.}
 
 \subsection{FEP had the lowest test MAE with both encoders}
 
-We then compared all seven computed labels, each with a model tuned separately
-on the Tm validation set (Fig.~\ref{fig:physical_observable}). With a frozen encoder, FEP reached
+We then compared the labels by the physical quantity they report, each with a
+model tuned separately on the Tm validation set
+(Fig.~\ref{fig:physical_observable}). FEP, MD native-contact $Q$, Rosetta, and
+ThermoMPNN were all computed on the same single mutation scan of 1MEL and 4IDL,
+that is the same single point mutations, so these four labels differ only in the
+physical quantity; the two remaining Rosetta labels scored two-mutation variants
+of the same structures. With a frozen encoder, FEP reached
 7.01$^\circ$C MAE, a $\Delta$MAE of $-0.221^\circ$C from the Tm-only baseline
-(95\% CI, $-0.393$ to $-0.051^\circ$C). The local mutation scan reached 7.03$^\circ$C
+(95\% CI, $-0.393$ to $-0.051^\circ$C). The single mutation scan reached 7.03$^\circ$C
 ($\Delta$MAE $-0.195^\circ$C; 95\% CI, $-0.366$ to $-0.030^\circ$C), and both
 intervals were below zero. The Rosetta labels were close to or worse than the
 Tm-only baseline, and ThermoMPNN reached 7.09$^\circ$C with an interval that
 included zero. With a fine-tuned encoder, FEP reached 6.40$^\circ$C, the lowest
 MAE in the study; its $\Delta$MAE from the 6.55$^\circ$C Tm-only baseline was
 $-0.153^\circ$C (95\% CI, $-0.323$ to $+0.020^\circ$C), an interval that included
-zero. The local mutation scan, Rosetta, ThermoMPNN, and random variants scored with
+zero. The single mutation scan, Rosetta, ThermoMPNN, and random variants scored with
 Rosetta differed from Tm-only by $+0.029$ to $+0.144^\circ$C, with intervals
 that also included zero. ESM2-proposed variants scored with Rosetta increased
 error by $+0.411^\circ$C (95\% CI, $+0.140$ to $+0.698^\circ$C).
 
-Comparing FEP and the local mutation scan directly, the difference in test MAE (FEP
+Comparing FEP and the single mutation scan directly, the difference in test MAE (FEP
 minus MD) was $-0.026^\circ$C with a frozen encoder (95\% CI, $-0.243$ to
 $+0.192^\circ$C) and $-0.182^\circ$C with a fine-tuned encoder (95\% CI,
 $-0.393$ to $+0.024^\circ$C). Neither interval excluded zero, so the two labels
@@ -129,7 +134,11 @@ would test this directly.
 \centering
 \includegraphics[width=\textwidth]{fig_outline03_physical_observable}
 \caption{FEP had the lowest test Tm MAE with both encoders.
-$\Delta$MAE from the shared Tm-only baseline for each computed label. Negative
+$\Delta$MAE from the shared Tm-only baseline for each computed label. FEP, MD
+native-contact $Q$, Rosetta, and ThermoMPNN were computed on the same single
+mutation scan of 1MEL and 4IDL and differ only in the physical quantity, whereas
+the two Rosetta variant-selection labels (random and ESM2) used two-mutation
+variants of the same structures. Negative
 values mean lower Tm error. Filled squares and open circles denote frozen and
 fine-tuned encoders, respectively. Whiskers are 95\% bootstrap intervals over
 the 396 test sequences.}
@@ -149,18 +158,18 @@ ESM2-proposed variants did not give lower Tm error than random variants. This
 comparison provides no evidence that the ESM2 proposal step improved transfer
 to Tm.
 Data set size did not explain the contrast between the two MD studies. The
-heterogeneous data set contained 1143 samples and the local mutation scan data set contained
+heterogeneous data set contained 1143 samples and the single mutation scan data set contained
 837, but each ensemble member sampled at most 640 auxiliary samples in both
 studies.
-The larger frozen-encoder reduction for the local mutation scans therefore
-cannot be explained by more training labels per model. FEP and the local mutation
+The larger frozen-encoder reduction for the single mutation scans therefore
+cannot be explained by more training labels per model. FEP and the single mutation
 scan required similar simulation time per variant, but wall-clock costs were not
 recorded consistently enough to support a general cost comparison.
 
 The study has several limitations. The Tm training set contains only 57
-nanobodies, and the local mutation scan calculations cover two structures. Although the two
+nanobodies, and the single mutation scan calculations cover two structures. Although the two
 MD data sets now share one $Q$ definition, the heterogeneous data set still
-differs from the local mutation scans in its variant composition. It includes repeated
+differs from the single mutation scans in its variant composition. It includes repeated
 PDB entries, eight exact matches to the Tm test sequences, and sequences of
 widely varying length, and its trajectories did not all reach the scheduled
 production length. The selected FEP and MD models also differed in regression

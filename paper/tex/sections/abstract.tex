@@ -10,7 +10,7 @@ property from ESM2 sequence representations; settings were selected with 114 Tm
 validation sequences, and final models were tested on 396 held-out sequences.
 We first compared two molecular-dynamics (MD) data sets that shared the same
 simulations and native-contact definition but covered different variants. With a
-frozen encoder, labels from local mutation scans of two fixed structures reduced
+frozen encoder, labels from single mutation scans of two fixed structures reduced
 mean absolute error (MAE) by 0.20$^\circ$C relative to the same-study Tm-only
 baseline, whereas labels from a heterogeneous set of many structures reduced it
 by 0.05$^\circ$C. We then compared these MD labels with free-energy perturbation
@@ -34,7 +34,7 @@ Thermal stability affects whether a nanobody can be produced, stored, and used
 reliably. Melting temperature is a common measure, but obtaining it for many
 sequences is costly. Simulations can add related stability data, but they cannot
 give the melting temperature directly. FEP mutation-free-energy labels, and MD
-native-contact labels from local mutation scans, improved Tm prediction with a
+native-contact labels from single mutation scans, improved Tm prediction with a
 frozen encoder, whereas several other computed data sets did not, and larger
 computed data sets were not consistently more useful. The variants to simulate
 and the physical quantity to compute should therefore be chosen for the

@@ -1042,7 +1042,7 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
         layout="constrained",
     )
 
-    # (a) Local mutation scan label-count scaling, frozen and fine-tuned encoders.
+    # (a) Single mutation scan label-count scaling, frozen and fine-tuned encoders.
     ax = axes[0]
     ax.axhline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
     md_series = [
@@ -1071,7 +1071,7 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_ylim(-0.35, 1.02)
     ax.text(0.03, 0.03, "negative = lower Tm error", transform=ax.transAxes,
             fontsize=8.3, color=COL["design"], va="bottom")
-    leg = ax.legend(title="Local mutation scan", frameon=False, loc="upper right",
+    leg = ax.legend(title="Single mutation scan", frameon=False, loc="upper right",
                     bbox_to_anchor=(0.99, 1.0), ncol=1, fontsize=8.4,
                     handlelength=2.0)
     leg.get_title().set_fontweight("bold")
@@ -1080,14 +1080,14 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     polish(ax, "both", boxed=True)
     panel_label(ax, "A")
 
-    # (b) Design contrast: heterogeneous sequences vs local mutation scan.
+    # (b) Design contrast: heterogeneous sequences vs single mutation scan.
     ax = axes[1]
     effects = design_delta_rows()
     rows_b = [
         ("Heterogeneous sequences\nfrozen encoder", "heterogeneous screen", "frozen", COL["gray"], "s"),
         ("Heterogeneous sequences\nfine-tuned encoder", "heterogeneous screen", "hot", COL["gray"], "o"),
-        ("Local mutation scan\nfrozen encoder", "matched mutation scan", "frozen", COL["design"], "s"),
-        ("Local mutation scan\nfine-tuned encoder", "matched mutation scan", "hot", COL["design"], "o"),
+        ("Single mutation scan\nfrozen encoder", "matched mutation scan", "frozen", COL["design"], "s"),
+        ("Single mutation scan\nfine-tuned encoder", "matched mutation scan", "hot", COL["design"], "o"),
     ]
     ax.axvline(0.0, color=COL["baseline"], linestyle="--", linewidth=1.0, zorder=1)
     ypos = np.arange(len(rows_b), dtype=float)
