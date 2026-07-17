@@ -1042,7 +1042,7 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
         layout="constrained",
     )
 
-    # (a) Mutation-scan MD label-count scaling, frozen and fine-tuned encoders.
+    # (a) Local mutation scan label-count scaling, frozen and fine-tuned encoders.
     ax = axes[0]
     ax.axhline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
     md_series = [
@@ -1071,7 +1071,7 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_ylim(-0.35, 1.02)
     ax.text(0.03, 0.03, "negative = lower Tm error", transform=ax.transAxes,
             fontsize=8.3, color=COL["design"], va="bottom")
-    leg = ax.legend(title="Mutation-scan MD", frameon=False, loc="upper right",
+    leg = ax.legend(title="Local mutation scan", frameon=False, loc="upper right",
                     bbox_to_anchor=(0.99, 1.0), ncol=1, fontsize=8.4,
                     handlelength=2.0)
     leg.get_title().set_fontweight("bold")
