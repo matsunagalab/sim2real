@@ -80,7 +80,6 @@ expected_outputs:
   - paper/tex/figures/figure_1_concept_protocol_v2.png
   - paper/tex/figures/fig_outline02_data_design.pdf
   - paper/tex/figures/fig_outline03_physical_observable.pdf
-  - paper/tex/figures/supp_fig01_data_and_design.pdf
   - paper/tex/figures/supp_fig02_transfer_controls.pdf
   - paper/analysis/supplementary/MANIFEST.tsv
   - paper/tex/main.pdf
@@ -572,7 +571,6 @@ stages:
       command: [uv, run, python, plot/make_supplementary_figures.py]
       outputs:
         - paper/analysis/supplementary/MANIFEST.tsv
-        - paper/tex/figures/supp_fig01_data_and_design.pdf
         - paper/tex/figures/supp_fig02_transfer_controls.pdf
 
     - name: typeset main and supplementary PDFs
