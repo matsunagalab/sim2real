@@ -38,8 +38,7 @@ than three residues and within 0.45~nm in the first production frame, as for the
 mutation scans. $Q$ was averaged over the final 30~ns of production, that is the
 last 300 frames of 100-ps output. The two MD data sets therefore used the same
 $Q$ definition, contact set, native reference, and averaging window, and
-differed only in the variants they covered. Supplementary Fig.~S1 shows the
-relation between sequence length and raw $Q$.
+differed only in the variants they covered.
 
 \subsection{FEP variant and charge-change checks}
 
@@ -49,10 +48,12 @@ for their omission was not recorded. Our conclusions therefore apply to the
 four-scan tables. For charge-changing mutations in a cubic 70-\AA{} box and a
 solvent dielectric constant of 78, we tested the leading analytical periodic
 net-charge (Ewald self-energy) correction \citep{Rocklin2013ChargeFEP},
-$0.086(\Delta q)^2$ kcal mol$^{-1}$. We applied the correction
-before repeating the sign reversal, robust scaling, Yeo--Johnson transform with
-standardization, and min--max scaling used for the training labels
-(Supplementary Fig.~S2b).
+$0.086(\Delta q)^2$ kcal mol$^{-1}$. We applied it and repeated the sign
+reversal, robust scaling, Yeo--Johnson transform with standardization, and
+min--max scaling used for the training labels. Across the 284 charge-changing
+mutations the scaled labels barely moved, with a maximum shift of $0.008$ on the
+$[0,1]$ scale and a correlation of $0.99989$ with the uncorrected labels, so the
+training labels use the uncorrected $\Delta\Delta G$.
 
 \subsection{Model-size checks}
 
@@ -68,24 +69,11 @@ $3\times10^{-4}$, weight decay 0.04, and ten training seeds.
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{supp_fig01_data_and_design}
-\caption{Sequence length and native-contact $Q$ in the heterogeneous MD data set.
-Hexagons show sample density, and dashed lines mark the fixed sequence lengths of
-the 1MEL and 4IDL mutation scans. The association is descriptive and
-does not show that length caused the difference between the two MD data sets.}
-\label{fig:supp_data_design}
-\end{figure}
-
-\begin{figure}[p]
-\centering
-\includegraphics[width=\textwidth]{supp_fig02_transfer_controls}
-\caption{Additional checks of the FEP result.
-\textbf{(a)} Paired FEP-minus-Tm-only MAE for fine-tuned ESM2 encoders. Negative
-values mean lower Tm error with FEP. The 8M point is the five-seed model selected
-by the two-stage search. The 35M and 650M points are ten-seed checks without
-size-specific tuning. Whiskers are 95\% paired bootstrap intervals over the 396
-Tm test sequences.
-\textbf{(b)} Change in each scaled FEP label after the analytical periodic
-net-charge correction at dielectric 78.}
+\includegraphics[width=0.62\textwidth]{supp_fig02_transfer_controls}
+\caption{The FEP result held across ESM2 encoder sizes. FEP-minus-Tm-only MAE
+($\Delta$MAE) with a fine-tuned encoder; negative values mean lower Tm error with
+FEP. The 8M point is the five-seed model selected by the two-stage search, and
+the 35M and 650M points are ten-seed checks without size-specific tuning.
+Whiskers are 95\% paired bootstrap intervals over the 396 Tm test sequences.}
 \label{fig:supp_transfer_controls}
 \end{figure}

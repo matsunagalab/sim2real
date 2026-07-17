@@ -201,30 +201,6 @@ def data_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     return pd.DataFrame(counts), qvalues, pd.DataFrame(overlap)
 
 
-def fig_s1(qvalues: pd.DataFrame) -> None:
-    fig, ax = plt.subplots(figsize=(6.4, 3.65), constrained_layout=True)
-    div = qvalues[qvalues["design"] == "heterogeneous panel"]
-    density = ax.hexbin(div["length"], div["raw_q"], gridsize=(34, 22), mincnt=1,
-                        cmap="Blues", linewidths=0.25, edgecolors="white", alpha=0.95)
-    for system, color in [("1MEL", COL["md"]), ("4IDL", COL["fep"])]:
-        d = qvalues[(qvalues["design"] == "matched mutation scan") & (qvalues["system"] == system)]
-        length = float(d["length"].iloc[0])
-        ax.axvline(length, color=color, linestyle="--", linewidth=1.7,
-                   label=f"{system} matched scan ({int(length)} aa)")
-    r = np.corrcoef(div["length"], div["raw_q"])[0, 1]
-    ax.text(0.97, 0.94, f"heterogeneous panel\nr = {r:+.2f}; n = {len(div):,}",
-            transform=ax.transAxes, ha="right", va="top", fontsize=10.0,
-            bbox={"facecolor": "white", "edgecolor": COL["light"], "alpha": 0.9, "pad": 4})
-    ax.set_xlim(45, 475); ax.set_ylim(0, 1.02)
-    ax.set_xlabel("Sequence length (residues)")
-    ax.set_ylabel("Raw native-contact Q")
-    ax.legend(frameon=False, loc="lower right", fontsize=9.1)
-    cbar = fig.colorbar(density, ax=ax, pad=0.02, aspect=25)
-    cbar.set_label("Rows per hexagon")
-    polish(ax)
-    save_figure(fig, "supp_fig01_data_and_design")
-
-
 def candidate_table() -> pd.DataFrame:
     records = []
     for regime in ("frozen", "hot"):
@@ -342,17 +318,9 @@ def fep_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame
     return composition, pd.DataFrame(sensitivity), pd.DataFrame(corrected_rows), prov
 
 
-def fig_s2_controls(sizes: pd.DataFrame, corrected: pd.DataFrame) -> None:
-    """Plot only the two robustness checks used in the manuscript."""
-    fig, axes = plt.subplots(
-        1,
-        2,
-        figsize=(6.4, 3.15),
-        gridspec_kw={"width_ratios": [0.95, 1.05]},
-        constrained_layout=True,
-    )
-
-    ax = axes[0]
+def fig_s2_controls(sizes: pd.DataFrame) -> None:
+    """The FEP result across ESM2 encoder sizes."""
+    fig, ax = plt.subplots(figsize=(5.2, 3.1), constrained_layout=True)
     order = ["8M", "35M", "650M"]
     d = sizes.set_index("size").loc[order]
     y = np.arange(len(order))
@@ -366,46 +334,22 @@ def fig_s2_controls(sizes: pd.DataFrame, corrected: pd.DataFrame) -> None:
                     fmt="o", color=COL["fep"], markerfacecolor=face,
                     markeredgecolor=COL["fep"], markeredgewidth=1.3,
                     markersize=7.8, capsize=4.0, elinewidth=1.6, zorder=3)
-        ax.text(hi[i] + 0.006, y[i], f"{mid[i]:+.2f}", ha="left", va="center",
+        ax.text(hi[i] + 0.008, y[i], f"{mid[i]:+.2f}", ha="left", va="center",
                 fontsize=9.0, fontweight="bold", color=COL["fep"])
     ax.set_yticks(y, order); ax.invert_yaxis()
-    ax.set_xlim(min(-0.38, float(lo.min()) - 0.03), 0.04)
-    ax.set_xlabel("FEP − Tm-only, paired ΔMAE (°C)")
+    ax.set_xlim(min(-0.38, float(lo.min()) - 0.03), 0.09)
+    ax.set_xlabel(r"FEP $-$ Tm-only, $\Delta$MAE (°C)")
     ax.set_ylabel("ESM2 encoder size")
-    polish(ax, "x"); panel_label(ax, "a")
-
-    ax = axes[1]
-    d = corrected.copy()
-    d["shift"] = d["corrected"] - d["unadjusted"]
-    neutral = d["dq"] == 0
-    ax.scatter(d.loc[neutral, "unadjusted"], d.loc[neutral, "shift"],
-               s=13, alpha=0.30, color=COL["gray"], edgecolor="none", label="Δq = 0")
-    ax.scatter(d.loc[~neutral, "unadjusted"], d.loc[~neutral, "shift"],
-               s=16, alpha=0.48, color=COL["md"], edgecolor="none", label="Δq ≠ 0")
-    ax.axhline(0, color=COL["black"], linewidth=1.0, linestyle="--")
-    corr = np.corrcoef(d["unadjusted"], d["corrected"])[0, 1]
-    shift = float(np.max(np.abs(d["shift"])))
-    limit = max(0.009, shift * 1.16)
-    ax.set_ylim(-limit, limit)
-    ax.text(0.04, 0.94, f"284/844 charge-changing\nr = {corr:.5f}\nmax |shift| = {shift:.3f}",
-            transform=ax.transAxes, va="top", fontsize=8.8,
-            bbox={"facecolor": "white", "edgecolor": COL["light"], "alpha": 0.9, "pad": 3})
-    ax.set_xlabel("Unadjusted scaled FEP label")
-    ax.set_ylabel("Corrected − unadjusted label")
-    ax.legend(frameon=False, loc="lower left", ncol=2, fontsize=8.2)
-    polish(ax); panel_label(ax, "b")
-
+    polish(ax, "x")
     save_figure(fig, "supp_fig02_transfer_controls")
 
 
 def write_manifest() -> None:
     rows = []
     specs = {
-        "Supplementary Fig. S1": ("supp_fig01_data_and_design.pdf", ["data_design_qvalues.tsv"],
-                                   ["Q versus sequence length"]),
-        "Supplementary Fig. S2": ("supp_fig02_transfer_controls.pdf",
-                                   ["model_size_controls.tsv", "fep_charge_corrected_labels.tsv"],
-                                   ["paired FEP effect across ESM2 sizes", "per-label periodicity shift"]),
+        "Supplementary Fig. S1": ("supp_fig02_transfer_controls.pdf",
+                                   ["model_size_controls.tsv"],
+                                   ["FEP effect across ESM2 sizes"]),
     }
     for figure, (file, tables, questions) in specs.items():
         for i, question in enumerate(questions):
@@ -430,8 +374,7 @@ def main() -> None:
                      (composition, "fep_scan_composition.tsv"), (sensitivity, "fep_charge_sensitivity.tsv"),
                      (corrected, "fep_charge_corrected_labels.tsv")]:
         save_table(df, name)
-    fig_s1(qvalues)
-    fig_s2_controls(sizes, corrected)
+    fig_s2_controls(sizes)
     write_manifest()
     print("supplementary figure build complete")
 

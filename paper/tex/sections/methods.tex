@@ -114,8 +114,7 @@ sequences also present in NbBench. When one of these sequences was sampled for
 auxiliary training, the model saw the target sequence with a computed $Q$ label.
 It did not see the experimental validation or test Tm value, which remained
 unused in training. We retained them; the heterogeneous data set was therefore
-not fully disjoint from the target sequences. The relation between sequence
-length and this MD label is shown in Supplementary Fig.~S1.
+not fully disjoint from the target sequences.
 
 \subsection{FEP mutation free energies}
 
@@ -141,8 +140,7 @@ lattice-sum electrostatics introduces a finite-size artifact. We applied the
 leading analytical (net-charge periodicity) correction
 \citep{Rocklin2013ChargeFEP}, of order $0.09$~kcal~mol$^{-1}$ per unit charge
 change in the 70-\AA{} cubic box, and found that it barely changed the scaled
-labels (Supplementary Fig.~S2b); the training labels therefore use the
-uncorrected $\Delta\Delta G$.
+labels; the training labels therefore use the uncorrected $\Delta\Delta G$.
 
 \subsection{MD native-contact labels}
 

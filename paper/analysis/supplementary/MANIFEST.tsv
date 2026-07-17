@@ -1,4 +1,2 @@
 figure	panel	figure_file	tex_figure_file	source_tables	generator	question
-Supplementary Fig. S1	-	figures/supp_fig01_data_and_design.pdf	../../tex/figures/supp_fig01_data_and_design.pdf	tables/data_design_qvalues.tsv	plot/make_supplementary_figures.py	Q versus sequence length
-Supplementary Fig. S2	A	figures/supp_fig02_transfer_controls.pdf	../../tex/figures/supp_fig02_transfer_controls.pdf	tables/model_size_controls.tsv;tables/fep_charge_corrected_labels.tsv	plot/make_supplementary_figures.py	paired FEP effect across ESM2 sizes
-Supplementary Fig. S2	B	figures/supp_fig02_transfer_controls.pdf	../../tex/figures/supp_fig02_transfer_controls.pdf	tables/model_size_controls.tsv;tables/fep_charge_corrected_labels.tsv	plot/make_supplementary_figures.py	per-label periodicity shift
+Supplementary Fig. S1	-	figures/supp_fig02_transfer_controls.pdf	../../tex/figures/supp_fig02_transfer_controls.pdf	tables/model_size_controls.tsv	plot/make_supplementary_figures.py	FEP effect across ESM2 sizes

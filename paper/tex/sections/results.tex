@@ -58,8 +58,8 @@ background fixed, so each label (through $\Delta Q$) isolates the local effect o
 a single mutation, the same kind of stability change the model must learn for Tm.
 The heterogeneous set instead compares many different nanobodies, each against
 its own native structure, so its $Q$ reflects whole-protein differences such as
-length and fold rather than the effect of a mutation (Supplementary Fig.~S1). An
-auxiliary label tied to protein identity rather than to a mutation's
+length and fold rather than the effect of a mutation. An auxiliary label tied to
+protein identity rather than to a mutation's
 thermodynamic effect is only loosely related to Tm, so it offers the shared
 representation little useful signal and can bias it toward features that do not
 generalize to the target. Such a mismatch between the auxiliary and target tasks
@@ -140,11 +140,11 @@ the 396 test sequences.}
 
 Without size-specific tuning, FEP reduced MAE relative to Tm-only for both the
 35M- and 650M-parameter ESM2 models; both paired 95\% intervals were below zero
-(Supplementary Fig.~S2a). The larger models used fixed settings rather than the
+(Supplementary Fig.~S1). The larger models used fixed settings rather than the
 search applied to the 8M model, so these tests do not compare performance across
 model sizes. An analytical correction for periodic
 images in charge-changing FEP mutations had almost no effect on the scaled
-labels (Supplementary Fig.~S2b). Under the Rosetta protocol used here,
+labels. Under the Rosetta protocol used here,
 ESM2-proposed variants did not give lower Tm error than random variants. This
 comparison provides no evidence that the ESM2 proposal step improved transfer
 to Tm.
