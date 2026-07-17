@@ -96,7 +96,7 @@ model tuned separately on the Tm validation set
 (Fig.~\ref{fig:physical_observable}). FEP, MD native-contact $Q$, Rosetta, and
 ThermoMPNN were all computed on the same single mutation scan of 1MEL and 4IDL,
 that is the same single point mutations, so these four labels differ only in the
-physical quantity; the two remaining Rosetta labels scored two-mutation variants
+physical quantity; the two remaining Rosetta labels scored two-point-mutation variants
 of the same structures. With a frozen encoder, FEP reached
 7.01$^\circ$C MAE, a $\Delta$MAE of $-0.221^\circ$C from the Tm-only baseline
 (95\% CI, $-0.393$ to $-0.051^\circ$C). The single mutation scan reached 7.03$^\circ$C
@@ -137,7 +137,7 @@ would test this directly.
 $\Delta$MAE from the shared Tm-only baseline for each computed label. FEP, MD
 native-contact $Q$, Rosetta, and ThermoMPNN were computed on the same single
 mutation scan of 1MEL and 4IDL and differ only in the physical quantity, whereas
-the two Rosetta variant-selection labels (random and ESM2) used two-mutation
+the two Rosetta variant-selection labels (random and ESM2) used two-point-mutation
 variants of the same structures. Negative
 values mean lower Tm error. Filled squares and open circles denote frozen and
 fine-tuned encoders, respectively. Whiskers are 95\% bootstrap intervals over
