@@ -1146,12 +1146,12 @@ def fig3_physical_observable(rows: pd.DataFrame, paired: dict) -> None:
 
     # Horizontal paired effects. Marker shape/fill, not color, encodes the
     # encoder regime; color is reserved for the physical label source.
-    map_sources = ["FEP", MD_CONTACT_Q_SOURCE, "thermoMPNN", "rosetta", "rosetta_random", "rosetta_esm"]
+    map_sources = ["FEP", MD_CONTACT_Q_SOURCE, "rosetta", "thermoMPNN", "rosetta_random", "rosetta_esm"]
     source_labels = [
         "FEP ΔΔG",
         "MD native-contact Q",
-        "ThermoMPNN ΔΔG",
         "Rosetta ΔΔG",
+        "ThermoMPNN ΔΔG",
         "Rosetta, random variants",
         "Rosetta, ESM2 variants",
     ]

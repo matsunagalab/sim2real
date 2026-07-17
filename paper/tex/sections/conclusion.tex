@@ -2,21 +2,28 @@
 
 \section{Conclusion}
 
-Computed labels did not improve low-data nanobody Tm prediction uniformly.
-Among two MD data sets that used the same MD and $Q$ definition and differed in
-the variants they covered, the mutation scans showed a larger reduction with the frozen
-encoder than the heterogeneous structure set, although the two data sets still
-differed in variant composition and were tuned separately. FEP had the lowest
-test MAE with both
-frozen and fine-tuned ESM2; its 95\% interval excluded zero only with the frozen
-encoder. The comparisons did not show a simple relation between label count and
-Tm error. When calculations are intended to support Tm prediction, both the
-variants and the physical property should be considered from the start.
+We tested whether computed protein-stability labels can improve nanobody
+melting-temperature (Tm) prediction when only a few dozen measured Tm values are
+available, and we asked which of two design choices governs the benefit, the
+sequence variants that are computed and the physical quantity that is computed.
+Adding computed labels did not help uniformly. Among two MD data sets that used
+the same MD and $Q$ definition and differed only in the variants they covered,
+the local mutation scans gave a larger frozen-encoder reduction than the
+heterogeneous structure set, although the two data sets still differed in variant
+composition and were tuned separately. FEP gave the lowest test MAE with both
+frozen and fine-tuned ESM2, and its 95\% interval excluded zero only with the
+frozen encoder. The comparisons showed no simple relation between the number of
+computed labels and Tm error. When calculations are intended to support Tm
+prediction, both the variants to simulate and the physical quantity to compute
+should therefore be chosen for that task from the start.
 
-Mutation scans could next be extended to more nanobody structures, with new
-calculations selected adaptively. Reinforcement learning could support this
-sequential selection, but it should be compared with random sampling and simpler
-active-learning methods. Because ESM2 proposals did not yield lower Tm
-prediction error than random variants under the present Rosetta protocol, a
-computed score alone should not define success. Any improvement should
-ultimately be tested with new experimental Tm measurements.
+A natural next step is to extend the mutation scans to more nanobody structures
+and to select new calculations adaptively, running each round of simulations
+where it is most likely to help the Tm model. Reinforcement learning offers one
+framework for this expensive, sequential design problem
+\citep{Angermueller2020RLSequence}, though it would need to be compared against
+random sampling and simpler active-learning baselines to show a real benefit.
+Because ESM2-proposed variants did not give lower Tm error than random variants
+under the Rosetta protocol used here, a computed score alone should not define
+which variants are worth simulating. Any gain from such a loop should ultimately
+be confirmed with new experimental Tm measurements.
