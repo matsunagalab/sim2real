@@ -1107,7 +1107,7 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     ax.set_yticks(ypos)
     ax.set_yticklabels([r[0] for r in rows_b], fontsize=9.2)
     ax.set_ylim(len(rows_b) - 0.45, -1.30)
-    ax.set_xlim(-0.38, 0.28)
+    ax.set_xlim(-0.50, 0.42)
     ax.set_xlabel(r"$\Delta$MAE vs own Tm-only model (°C)")
     ax.text(0.03, 0.99, "lower Tm error", transform=ax.transAxes, ha="left", va="top",
             fontsize=8.4, color=COL["design"])
