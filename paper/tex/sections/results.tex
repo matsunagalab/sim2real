@@ -51,6 +51,22 @@ $+0.122^\circ$C, 95\% CI $-0.005$ to $+0.248^\circ$C). We did not retrain after
 removing the overlapping samples, so this check addresses their contribution to
 the test MAE but not a possible effect during training or model selection.
 
+Why did the mutation scan lower the Tm error while the heterogeneous set did
+not? Because the two data sets shared the same $Q$ definition, the difference
+lies in the variants each covered. A mutation scan holds the structural
+background fixed, so each label (through $\Delta Q$) reflects the local effect of
+a single mutation, the same kind of stability change the model must learn for Tm.
+The heterogeneous set instead spans many nanobodies that differ in length and
+fold, and its $Q$ carried this extra structural variation: $Q$ correlated with
+sequence length ($r=+0.13$; Supplementary Fig.~S1). An auxiliary label that
+encodes length or fold rather than the thermodynamic effect of a mutation is only
+loosely tied to Tm, so it offers the shared representation little useful signal
+and can bias it toward features that do not generalize to the target. This is a
+form of negative transfer, in which a poorly matched auxiliary task fails to help
+or degrades performance \citep{Zhang2023NegativeTransfer}. The contrast thus
+reinforces the main finding: what mattered was how well the computed variants
+matched the prediction task, not how many labels were available.
+
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig_outline02_data_design}
