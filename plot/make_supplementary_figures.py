@@ -336,7 +336,9 @@ def fig_s2_controls(sizes: pd.DataFrame) -> None:
                     markersize=7.8, capsize=4.0, elinewidth=1.6, zorder=3)
         ax.text(hi[i] + 0.008, y[i], f"{mid[i]:+.2f}", ha="left", va="center",
                 fontsize=9.0, fontweight="bold", color=COL["fep"])
-    ax.set_yticks(y, order); ax.invert_yaxis()
+    ax.set_yticks(y, order)
+    ax.set_ylim(-0.8, len(order) - 1 + 0.8)
+    ax.invert_yaxis()
     ax.set_xlim(min(-0.38, float(lo.min()) - 0.03), 0.09)
     ax.set_xlabel(r"FEP $-$ Tm-only, $\Delta$MAE (°C)")
     ax.set_ylabel("ESM2 encoder size")
