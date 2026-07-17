@@ -2,7 +2,7 @@
 
 \section{Supplementary methods}
 
-\subsection{Additional details for the heterogeneous MD data set}
+\subsection{Details of the heterogeneous MD data set}
 
 The heterogeneous data set was assembled from a SAbDab summary and the
 corresponding structures \citep{Dunbar2014SAbDab}. For each PDB identifier, we
@@ -16,13 +16,12 @@ sequences were not collapsed, and the model did not receive the PDB identifier.
 Eleven sequences exceeded the 158-residue model input and were truncated at the
 end.
 
-Structures were cleaned, missing atoms were added, and protonation was assigned
-at pH 7.4 with PDBFixer, pdb2pqr, and PROPKA
-\citep{Dolinsky2004PDB2PQR,Olsson2011PROPKA3}. The termini were left uncapped.
-Each protein was solvated in OPC water with 15~\AA{} padding and 0.15~M NaCl and
-described with ff19SB \citep{Tian2020ff19SB,Izadi2014OPC}. The 300-K branch comprised 1~ns NVT and
-1~ns NPT with a 2-fs timestep. Two 1-ns restrained NVT stages at 400~K preceded
-unrestrained 400-K NVT production scheduled for 100~ns. Production used
+Structures were prepared and protonated at pH 7.4 with PDBFixer, pdb2pqr, and
+PROPKA \citep{Dolinsky2004PDB2PQR,Olsson2011PROPKA3}. Each protein was solvated
+in OPC water with 15~\r{A} padding and 0.15~M NaCl and described with ff19SB
+\citep{Tian2020ff19SB,Izadi2014OPC}. Equilibration at 300~K used 1~ns NVT and
+1~ns NPT with a 2-fs timestep, after which two 1-ns restrained NVT stages at
+400~K preceded 100~ns of unrestrained 400-K NVT production. Production used
 hydrogen-mass repartitioning to 4~amu, a 4-fs timestep, and output every 100~ps.
 OpenMM used PME electrostatics with a 1.0-nm cutoff, constraints on bonds to
 hydrogen, and a Langevin middle integrator with 1~ps$^{-1}$ friction
@@ -37,10 +36,10 @@ differed only in the variants they covered.
 
 \subsection{FEP variant and charge-change checks}
 
-The FEP tables used here comprised Ala, Asp, Gln, and Ile scans. Raw Phe scans
-existed but were not included in the processed tables, and the original reason
-for their omission was not recorded. Our conclusions therefore apply to the
-four-scan tables. For charge-changing mutations in a cubic 70-\AA{} box and a
+The FEP tables here covered Ala, Asp, Gln, and Ile scans. Raw Phe scans existed
+but were not included in the processed tables, and the original reason for their
+omission was not recorded. Our conclusions therefore apply to the four-scan
+tables. For charge-changing mutations in a cubic 70-\r{A} box and a
 solvent dielectric constant of 78, we tested the leading analytical periodic
 net-charge (Ewald self-energy) correction \citep{Rocklin2013ChargeFEP},
 $0.086(\Delta q)^2$ kcal mol$^{-1}$. We applied it and repeated the sign
