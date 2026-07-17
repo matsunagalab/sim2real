@@ -1034,59 +1034,54 @@ def fig04d_schematic(ax) -> None:
             ha="center", fontsize=6.4, color=COL["mdq"], fontweight="bold")
 
 
-def draw_scaling_panel(ax, curves, baseline, title, ylim, xlim=(16, 560)):
-    """FEP/MD label-count scaling with an encoder-titled series legend."""
+def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
+    """The MD label alone: label-count scaling and the variant-set contrast."""
+    fig, axes = plt.subplots(
+        1, 2, figsize=(7.2, 3.5),
+        gridspec_kw={"width_ratios": [1.0, 1.18]},
+        layout="constrained",
+    )
+
+    # (a) Mutation-scan MD label-count scaling, frozen and fine-tuned encoders.
+    ax = axes[0]
     ax.axhline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
-    for label, path, color, marker in curves:
-        curve = paired_scaling_rows(path, baseline)
-        paired_scaling_plot(ax, curve, color, label, marker)
+    md_series = [
+        ("frozen encoder", RESULTS / "final_mdq_frozen" / "scaling.json",
+         FIG3C_TM_FROZEN, "s", "-", True),
+        ("fine-tuned encoder", RESULTS / "final_mdq_hot" / "scaling.json",
+         FIG3_HOT_TM_BASELINE, "o", "--", False),
+    ]
+    for label, path, baseline, marker, linestyle, filled in md_series:
+        c = paired_scaling_rows(path, baseline)
+        x = c["n"].to_numpy(float)
+        y = c["delta_mae"].to_numpy(float)
+        yerr = np.vstack([y - c["delta_ci_lo"].to_numpy(float),
+                          c["delta_ci_hi"].to_numpy(float) - y])
+        ax.errorbar(
+            x, y, yerr=yerr, fmt=marker, linestyle=linestyle, color=COL["mdq"],
+            ecolor=COL["mdq"], elinewidth=1.2, capsize=3.5, capthick=1.1,
+            markersize=6.2, markerfacecolor=COL["mdq"] if filled else "white",
+            markeredgecolor=COL["mdq"], markeredgewidth=1.3, label=label, zorder=3,
+        )
     ax.set_xscale("log", base=2)
-    ax.set_xlim(*xlim)
+    ax.set_xlim(16, 560)
     ax.set_xticks([20, 80, 160, 320], ["20", "80", "160", "320"])
     ax.set_xlabel("Labels per structure and model, n")
     ax.set_ylabel(r"$\Delta$MAE vs Tm-only (°C)")
-    ax.set_ylim(*ylim)
+    ax.set_ylim(-0.35, 1.02)
     ax.text(0.03, 0.03, "negative = lower Tm error", transform=ax.transAxes,
             fontsize=8.3, color=COL["design"], va="bottom")
-    leg = ax.legend(handles=[
-        Line2D([], [], color=COL["fep"], marker="o", markeredgecolor="white",
-               markersize=6, label="FEP ΔΔG"),
-        Line2D([], [], color=COL["mdq"], marker="D", markeredgecolor="white",
-               markersize=6, label="MD Q"),
-    ], title=title, frameon=False, loc="upper right",
-       bbox_to_anchor=(0.99, 1.0), ncol=1, fontsize=8.4, handlelength=1.8)
+    leg = ax.legend(title="Mutation-scan MD", frameon=False, loc="upper right",
+                    bbox_to_anchor=(0.99, 1.0), ncol=1, fontsize=8.4,
+                    handlelength=2.0)
     leg.get_title().set_fontweight("bold")
     leg.get_title().set_fontsize(8.8)
+    leg.get_title().set_color(COL["mdq"])
     polish(ax, "both", boxed=True)
-
-
-def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
-    """Label-count scaling (both encoders) plus the design contrast."""
-    fig = plt.figure(figsize=(7.2, 6.0), layout="constrained")
-    gs = fig.add_gridspec(2, 2, height_ratios=[1.0, 0.88])
-
-    # (a) Frozen label-count scaling for FEP and mutation-scan MD.
-    ax = fig.add_subplot(gs[0, 0])
-    draw_scaling_panel(
-        ax,
-        [("FEP $\Delta\Delta G$", RESULTS / "final_fep_frozen" / "scaling.json", COL["fep"], "o"),
-         ("MD native-contact $Q$", RESULTS / "final_mdq_frozen" / "scaling.json", COL["mdq"], "D")],
-        FIG3C_TM_FROZEN, "Frozen encoder", (-0.42, 0.44), xlim=(16, 520))
-    ax.text(505, 0.015, "Tm-only", ha="right", va="bottom", fontsize=8.0,
-            color=COL["baseline"])
     panel_label(ax, "A")
 
-    # (b) Fine-tuned label-count scaling for FEP and mutation-scan MD.
-    ax = fig.add_subplot(gs[0, 1])
-    draw_scaling_panel(
-        ax,
-        [("FEP $\Delta\Delta G$", RESULTS / "final_fep_hot" / "scaling.json", COL["fep"], "o"),
-         ("MD native-contact $Q$", RESULTS / "final_mdq_hot" / "scaling.json", COL["mdq"], "D")],
-        FIG3_HOT_TM_BASELINE, "Fine-tuned encoder", (-0.35, 1.02))
-    panel_label(ax, "B")
-
-    # (c) Design contrast: heterogeneous sequences vs local mutation scan.
-    ax = fig.add_subplot(gs[1, :])
+    # (b) Design contrast: heterogeneous sequences vs local mutation scan.
+    ax = axes[1]
     effects = design_delta_rows()
     rows_b = [
         ("Heterogeneous sequences\nfrozen encoder", "heterogeneous screen", "frozen", COL["gray"], "s"),
@@ -1136,7 +1131,7 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
         fontsize=8.2,
     )
     polish(ax, "x", boxed=True)
-    panel_label(ax, "C")
+    panel_label(ax, "B")
 
     save_figure(fig, "fig_outline02_data_design")
 
