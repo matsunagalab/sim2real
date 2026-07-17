@@ -2,60 +2,57 @@
 
 \section{Results and discussion}
 
-\subsection{Models were selected using experimental Tm error}
+\subsection{Experimental Tm was the target and Tm-only the baseline}
 
-All comparisons used experimental Tm as the target and the same 396-sequence
-test set; computed labels entered only as auxiliary training targets
-(Fig.~\ref{fig:learning_framework}). For each data source, model settings were
-selected with the experimental Tm validation set. The Tm-only test MAE was
+Every model predicted experimental Tm for the same 396 held-out sequences, and
+every setting was chosen on the Tm validation set
+(Fig.~\ref{fig:learning_framework}); the computed labels entered only as
+auxiliary training targets. We report each computed-label model against a
+baseline trained on Tm alone in the same way, which we call the Tm-only model. A
+change in mean absolute error ($\Delta$MAE) below zero therefore means the
+computed labels lowered the Tm error. The Tm-only baseline reached
 7.23$^\circ$C with frozen ESM2 and 6.55$^\circ$C with fine-tuned ESM2 in the
-structure-matched comparison. The separately selected Tm-only references for
-the heterogeneous study had MAEs of 7.38 and 6.61$^\circ$C,
-respectively. Each computed-label model was compared only with the Tm-only
-model selected in the same study and encoder setting.
+structure-matched comparison. The heterogeneous MD study was tuned separately
+and had its own Tm-only baseline (7.38 and 6.61$^\circ$C), so each computed-label
+model was compared only with the Tm-only baseline from its own study and encoder
+setting.
 
-\subsection{Variant selection outweighed label count for the MD label}
+\subsection{The mutation scan reduced Tm error more than a heterogeneous set}
 
-We first varied the number of computed labels for FEP and mutation-scan MD,
-which cover the same 1MEL and 4IDL variants. With a frozen encoder, the paired
-MAE changes at $n=20$ were $-0.10^\circ$C for FEP and $+0.09^\circ$C for
-mutation-scan MD, and at $n=320$ they were $-0.22^\circ$C and $-0.20^\circ$C,
-respectively, with both 95\% intervals below zero
+We first varied $n$, the number of computed labels sampled per structure, for
+FEP and mutation-scan MD, which cover the same 1MEL and 4IDL variants. With a
+frozen encoder, $\Delta$MAE at $n=20$ was $-0.10^\circ$C for FEP and
+$+0.09^\circ$C for mutation-scan MD, and at $n=320$ it was $-0.22^\circ$C and
+$-0.20^\circ$C, respectively, with both 95\% intervals below zero
 (Fig.~\ref{fig:data_design}a). With a fine-tuned encoder, mutation-scan MD began
-well above Tm-only ($+0.47^\circ$C at $n=20$; 95\% CI, $+0.26$ to
+well above the baseline ($+0.47^\circ$C at $n=20$; 95\% CI, $+0.26$ to
 $+0.69^\circ$C) and improved as $n$ grew, reaching an interval that included zero
-by $n=160$, while FEP moved only from $+0.02^\circ$C at $n=20$ to
-$-0.15^\circ$C at $n=320$ (Fig.~\ref{fig:data_design}b). These four label counts
-are nonmonotonic and too few to establish a scaling relation.
+by $n=160$, while FEP moved only from $+0.02^\circ$C at $n=20$ to $-0.15^\circ$C
+at $n=320$ (Fig.~\ref{fig:data_design}b). Error tended to fall as $n$ increased,
+but the four points were nonmonotonic and too few to establish a scaling
+relation.
 
 We then compared two ways of building the MD label set
 (Fig.~\ref{fig:data_design}c). The heterogeneous data set contained 1143 samples
 representing 833 unique sequences of different lengths, whereas the mutation-scan
 data set contained local single mutations of the fixed 1MEL and 4IDL structures.
-Both used the same 400~K MD and Best--Hummer native-contact $Q$ protocol, with
-the same contact set and averaging window, so they differed only in the variants
-they covered. Because the models for the two studies were tuned separately, we
-compared the change from each study's own Tm-only model rather than their
-absolute MAEs. Adding the MD label changed MAE by $-0.049^\circ$C with a frozen
-encoder (95\% CI, $-0.092$ to $-0.006^\circ$C) and by $+0.116^\circ$C with a
-fine-tuned encoder (95\% CI, $-0.009$ to $+0.243^\circ$C) in the heterogeneous
-study, and by $-0.195^\circ$C (95\% CI, $-0.366$ to $-0.030^\circ$C) and
-$+0.029^\circ$C (95\% CI, $-0.139$ to $+0.197^\circ$C) in the mutation-scan
-study. The frozen-encoder reduction was therefore larger for the mutation scans.
+Both used the same 400~K MD simulations and the same Best--Hummer native-contact
+$Q$ definition, with the same contact set and averaging window, so they differed
+only in the variants they covered. Because the models for the two studies were
+tuned separately, we compared each against its own Tm-only baseline. Adding the
+MD label changed MAE by $-0.049^\circ$C with a frozen encoder (95\% CI,
+$-0.092$ to $-0.006^\circ$C) and by $+0.116^\circ$C with a fine-tuned encoder
+(95\% CI, $-0.009$ to $+0.243^\circ$C) in the heterogeneous study, and by
+$-0.195^\circ$C (95\% CI, $-0.366$ to $-0.030^\circ$C) and $+0.029^\circ$C
+(95\% CI, $-0.139$ to $+0.197^\circ$C) in the mutation-scan study. The
+frozen-encoder reduction was therefore larger for the mutation scans.
 
 Eight sequences in the heterogeneous MD data set also occurred in the Tm test
-set. Excluding their test errors barely changed either estimate, and the paired
-changes were $-0.049^\circ$C for the frozen encoder (95\% CI, $-0.094$ to
-$-0.005^\circ$C) and $+0.122^\circ$C for the fine-tuned encoder (95\% CI,
-$-0.005$ to $+0.248^\circ$C). We did not retrain after removing the overlapping
-computed-label samples, so this check addresses their contribution to test MAE
-but not a possible effect during training or model selection. Other differences
-between the data sets may also matter. In the heterogeneous data set, $Q$ had a
-Pearson correlation of $r=+0.13$ with sequence length (Supplementary Fig.~S1),
-whereas the mutation scans held length fixed within each structure and described
-the local effect of one mutation. The heterogeneous set also gave more weight to
-sequences represented by multiple structures. These observations do not identify
-the cause of the difference.
+set, but excluding their test errors barely changed either estimate (frozen
+$-0.049^\circ$C, 95\% CI $-0.094$ to $-0.005^\circ$C; fine-tuned
+$+0.122^\circ$C, 95\% CI $-0.005$ to $+0.248^\circ$C). We did not retrain after
+removing the overlapping samples, so this check addresses their contribution to
+the test MAE but not a possible effect during training or model selection.
 
 \begin{figure*}[t]
 \centering
@@ -71,7 +68,7 @@ means equal MAE, and negative values mean lower Tm error after adding the MD
 label; filled squares and open circles denote frozen and fine-tuned encoders.
 The heterogeneous data set covered nanobody structures of different lengths,
 whereas the mutation scans used local mutations of 1MEL and 4IDL; both used the
-same 400~K MD and $Q$ protocol and differed only in the variants they covered.
+same 400~K MD and $Q$ definition and differed only in the variants they covered.
 Predictions in (c) were averaged across ten training seeds for the heterogeneous
 data set and five for the mutation scans. In all panels, points and whiskers
 show the paired change and its 95\% bootstrap interval over the 396 test
@@ -151,7 +148,7 @@ recorded consistently enough to support a general cost comparison.
 
 The study has several limitations. The Tm training set contains only 57
 nanobodies, and the mutation-scan calculations cover two structures. Although the two
-MD data sets now share one $Q$ protocol, the heterogeneous data set still
+MD data sets now share one $Q$ definition, the heterogeneous data set still
 differs from the mutation scans in its variant composition. It includes repeated
 PDB entries, eight exact matches to the Tm test sequences, and sequences of
 widely varying length, and its trajectories did not all reach the scheduled

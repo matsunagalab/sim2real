@@ -18,7 +18,7 @@ whose ESM2 encoder was frozen or fine-tuned in the same way.
 
 \subsection{Experimental Tm data}
 
-We used the thermo-tm data set from NbBench, a public nanobody benchmark
+We used the Tm data set from NbBench, a public nanobody benchmark
 \citep{Zhang2025NbBench}. To create the low-data setting, we used the published
 validation split (57 sequences) for training, the published test split (114
 sequences) for model selection, and the published training split (396
@@ -65,13 +65,13 @@ single set of 1143 samples over 833 unique sequences.}
 \toprule
 Data set & Computed quantity & Variant set & Samples & Computed by \\
 \midrule
-FEP & $\Delta\Delta G$ & 1MEL, 4IDL single mutations & 435, 409 & NAMD alchemical FEP, 300~K \\
-Mutation-scan MD & Native-contact $Q$ & 1MEL, 4IDL single mutations & 431, 406 & OpenMM MD, 400~K \\
+FEP & $\Delta\Delta G$ & 1MEL, 4IDL single mutations & 435, 409 & Alchemical FEP, 300~K \\
+Mutation-scan MD & Native-contact $Q$ & 1MEL, 4IDL single mutations & 431, 406 & MD, 400~K \\
 Rosetta & $\Delta\Delta G$ & 1MEL, 4IDL single mutations & 435, 409 & Rosetta \texttt{ddg\_monomer} \\
 ThermoMPNN & $\Delta\Delta G$ & 1MEL, 4IDL single mutations & 435, 409 & ThermoMPNN (structure) \\
 Rosetta (random) & $\Delta\Delta G$ & 1MEL, 4IDL random doubles & 1000, 1000 & Rosetta \texttt{ddg\_monomer} \\
 Rosetta (ESM2) & $\Delta\Delta G$ & 1MEL, 4IDL ESM2 doubles & 1000, 1000 & Rosetta \texttt{ddg\_monomer} \\
-Heterogeneous MD & Native-contact $Q$ & SAbDab nanobody structures & 1143 & OpenMM MD, 400~K \\
+Heterogeneous MD & Native-contact $Q$ & SAbDab nanobody structures & 1143 & MD, 400~K \\
 \bottomrule
 \end{tabular}
 \end{table*}
