@@ -5,16 +5,19 @@
 \subsection{The prediction target and the Tm-only baseline}
 
 Every model predicted experimental Tm for the same 396 held-out sequences, and
-every setting was chosen on the Tm validation set
-(Fig.~\ref{fig:learning_framework}); the computed labels entered only as
-auxiliary training targets. We report each computed-label model against a
+every model's architecture, hyperparameters, and checkpoint were chosen on the Tm
+validation set (Fig.~\ref{fig:learning_framework}); the computed labels entered
+only as auxiliary training targets. We report each computed-label model against a
 baseline trained on Tm alone in the same way, the Tm-only model, so that a change
-in mean absolute error ($\Delta$MAE) below zero means the computed labels lowered
-the Tm error. In the structure-matched comparison the Tm-only baseline reached
-7.23$^\circ$C with frozen ESM2 and 6.55$^\circ$C with fine-tuned ESM2. The
-heterogeneous MD study was tuned separately and carried its own Tm-only baseline
-(7.38 and 6.61$^\circ$C), so we compared each computed-label model only with the
-Tm-only baseline from its own study and encoder setting.
+in MAE ($\Delta$MAE) below zero means the computed labels lowered the Tm error.
+We ran two comparisons that were tuned separately, so each has its own Tm-only
+baseline. In the comparison among labels computed on the 1MEL and 4IDL
+structures, the Tm-only baseline reached MAE $=7.23^\circ$C with frozen ESM2 and
+$6.55^\circ$C with fine-tuned ESM2. The heterogeneous MD study used a separate
+validation search, with a different sample budget and more training seeds, and so
+had a different Tm-only baseline ($7.38$ and $6.61^\circ$C). We therefore
+compared each computed-label model only with the Tm-only baseline from its own
+comparison and encoder setting.
 
 \subsection{The single mutation scan reduced Tm error more than a heterogeneous set}
 
@@ -155,8 +158,8 @@ ESM2-proposed variants did not give lower Tm error than random variants. This
 comparison provides no evidence that the ESM2 proposal step improved transfer
 to Tm.
 Data set size did not explain the contrast between the two MD studies. The
-heterogeneous data set contained 1143 samples and the single mutation scan data set contained
-837, but each ensemble member sampled at most 640 auxiliary samples in both
+heterogeneous data set contained 1143 samples and the single mutation scan data set 844,
+but each ensemble member sampled at most 640 auxiliary samples in both
 studies, so the larger frozen-encoder reduction for the single mutation scans
 cannot be explained by more training labels per model. FEP and the single mutation
 scan required similar simulation time per variant, but wall-clock costs were not
