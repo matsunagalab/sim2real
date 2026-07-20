@@ -1,0 +1,21 @@
+{
+  "_note": "Validation of canonical (side-chain-inclusive, 'heavy') Best-Hummer Q vs the backbone-only Q used in the manuscript. Representative point n_ddg=320, test split, dMAE vs Tm-only baseline (negative = auxiliary MD label improves Tm prediction). B1 = hyperparameters re-selected on the 114-example validation set for the heavy label. Conclusion: heavy Q is worse in both regimes and HP re-selection does not recover it; the manuscript retains backbone-only Q. Attributed to side-chain contact noise from repack-radius-0 mutant construction. B1 raw scaling.json was reverted from results/final_mdq_* and is captured here numerically.",
+  "frozen": {
+    "Tm_only_mae": 7.229,
+    "backbone":      {"mae_n320": 7.0337, "dMAE_vs_Tm": -0.1953},
+    "heavy_fixedHP": {"mae_n320": 7.1097, "dMAE_vs_Tm": -0.1193},
+    "heavy_B1":      {"mae_n320": 7.1849, "dMAE_vs_Tm": -0.0443, "dMAE_95CI": [-0.175, 0.086]}
+  },
+  "hot": {
+    "Tm_only_mae": 6.548,
+    "backbone":      {"mae_n320": 6.5767, "dMAE_vs_Tm": 0.0287},
+    "heavy_fixedHP": {"mae_n320": 6.6374, "dMAE_vs_Tm": 0.0894},
+    "heavy_B1":      {"mae_n320": 6.8478, "dMAE_vs_Tm": 0.2999, "dMAE_95CI": [0.116, 0.487]}
+  },
+  "hpo_winners_heavy": {
+    "frozen": {"config": "drop0.05", "val_mae": 6.8922, "hparams": {"lr": 0.0003, "dropout": 0.05, "wd": 0.04}},
+    "hot":    {"config": "default",  "val_mae": 6.0906, "hparams": {"lr": 0.0003, "encoder_lr": 0.0001, "dropout": 0.15, "wd": 0.04}}
+  },
+  "label_spread": {"backbone_sd": 0.0145, "heavy_sd_1mel": 0.0207, "heavy_sd_4idl": 0.0193,
+    "comment": "heavy Q has ~1.4x the spread but the extra spread is dominated by side-chain noise, not signal"}
+}
