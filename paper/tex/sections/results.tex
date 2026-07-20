@@ -8,8 +8,10 @@ Every model predicted experimental Tm for the same 396 held-out sequences, and
 every model's architecture, hyperparameters, and checkpoint were chosen on the Tm
 validation set (Fig.~\ref{fig:learning_framework}); the computed labels entered
 only as auxiliary training targets. We report each computed-label model against a
-baseline trained on Tm alone in the same way, the Tm-only model, so that a change
-in MAE ($\Delta$MAE) below zero means the computed labels lowered the Tm error.
+baseline trained on Tm alone under matched conditions (the same regression
+architecture family, encoder setting, and training budget), the Tm-only model, so
+that a change in MAE ($\Delta$MAE) below zero means the computed labels lowered the
+Tm error.
 We ran two comparisons that were tuned separately, so each has its own Tm-only
 baseline. In the comparison among labels computed on the 1MEL and 4IDL
 structures, the Tm-only baseline reached an MAE of $7.23^\circ$C with frozen ESM2
@@ -40,7 +42,9 @@ mutation scan data set covered mutations of the fixed 1MEL and 4IDL structures.
 Both used the same 400~K MD simulations and the same native-contact
 $Q$ definition, with the same contact set and averaging window, so they differed
 only in the variants they covered. Because the models for the two studies were
-tuned separately, we compared each against its own Tm-only baseline. Adding the
+tuned separately, we compared each against its own Tm-only baseline. At the
+largest label count (640 auxiliary samples per model: $n=320$ per structure for
+the single mutation scan and $n=640$ for the heterogeneous set), adding the
 MD label changed MAE by $-0.049^\circ$C with a frozen encoder (95\% CI,
 $-0.092$ to $-0.006^\circ$C) and by $+0.116^\circ$C with a fine-tuned encoder
 (95\% CI, $-0.009$ to $+0.243^\circ$C) in the heterogeneous study, and by
@@ -59,10 +63,10 @@ Because the two data sets shared one $Q$ definition, their different effect on
 the Tm error must come from the variants each covered. A single mutation scan
 holds the structural background fixed, so each label (through $\Delta Q$)
 isolates the local effect of a single point mutation, the very kind of stability
-change the model must learn for Tm. The heterogeneous set, by contrast, compares
-many different nanobodies, each against its own native structure, so its $Q$
-reflects whole-protein differences such as length and fold rather than the effect
-of a mutation. A label tied to protein identity in this way carries only a loose
+change the model must learn for Tm. The heterogeneous set, by contrast, spans
+many different nanobodies, so its $Q$ reflects whole-protein differences such as
+length and fold rather than the effect of a single mutation. A label tied to
+protein identity in this way carries only a loose
 connection to Tm: it offers the shared representation little useful signal and can
 bias it toward features that do not generalize to the target. Such a mismatch
 between the auxiliary and target tasks is a known source of negative transfer, in
