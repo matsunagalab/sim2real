@@ -1,27 +1,28 @@
 % abstract.tex
 
 \begin{abstract}
-Thermal stability affects how reliably a nanobody can be expressed, purified,
-and stored, but measuring melting temperature (Tm) for many sequences is costly.
-Simulations can provide stability-related data, but they cannot compute Tm
-directly. We tested whether adding one computed property to a 57-sequence Tm
-training set improves prediction. Multi-task models learned Tm and the computed
-property from ESM2 sequence representations; settings were selected with 114 Tm
-validation sequences, and final models were tested on 396 held-out sequences.
-We first compared two molecular-dynamics (MD) data sets that shared the same
-simulations and native-contact definition but covered different variants. With a
-frozen encoder, labels from single mutation scans of two fixed structures reduced
-mean absolute error (MAE) by 0.20$^\circ$C relative to the same-study Tm-only
-baseline, whereas labels from a heterogeneous set of many structures reduced it
-by 0.05$^\circ$C. We then compared these MD labels with free-energy perturbation
-(FEP), Rosetta, and ThermoMPNN labels. FEP gave the lowest test MAE with both
-frozen and fine-tuned encoders, and after fine-tuning it reduced MAE by
-0.15$^\circ$C, although the 95\% interval for the change included zero.
-Native-contact MD labels reduced error only with the frozen encoder, and Rosetta
-and ThermoMPNN labels gave little or no improvement. Whether the computed labels
-improved Tm prediction therefore depended on the variants selected and the
-physical quantity computed, not on the number of labels. Both choices should be
-made for the prediction task before the simulations are run.
+A nanobody's thermal stability governs how reliably it can be expressed,
+purified, and stored, yet measuring the melting temperature (Tm) of many
+sequences is expensive. Simulations yield stability-related quantities but
+cannot report Tm itself, leaving open which quantity, and which variants, would
+most help a data-limited Tm model. We added a single computed property to a
+57-sequence Tm training set and asked whether it improved prediction. A
+multi-task model learned Tm and the computed property together from ESM2
+sequence representations; we selected settings on 114 Tm validation sequences
+and evaluated final models on 396 held-out sequences. Two molecular-dynamics
+(MD) data sets that shared the same simulations and native-contact definition,
+but covered different variants, behaved very differently: with a frozen encoder,
+single mutation scans of two fixed structures lowered the mean absolute error
+(MAE) by 0.20$^\circ$C, while a heterogeneous set of many structures lowered it
+by only 0.05$^\circ$C. Comparing physical quantities on the same mutation scan,
+free-energy perturbation (FEP) gave the lowest test MAE with both frozen and
+fine-tuned encoders; after fine-tuning it lowered MAE by 0.15$^\circ$C, though
+the 95\% interval for this change spanned zero. The MD native-contact labels
+helped only with the frozen encoder, and Rosetta and ThermoMPNN labels helped
+little if at all. Improvement thus depended on the variants chosen and the
+quantity computed, not on the number of labels: both are fixed before any
+simulation runs, and both are best aligned with the prediction task from the
+outset.
 \end{abstract}
 
 \begin{keywords}
@@ -30,13 +31,14 @@ learning, protein language model, molecular simulation labels
 \end{keywords}
 
 \begin{significance}
-Thermal stability affects whether a nanobody can be produced, stored, and used
-reliably. Melting temperature is a common measure, but obtaining it for many
-sequences is costly. Simulations can add related stability data, but they cannot
-give the melting temperature directly. FEP mutation-free-energy labels, and MD
-native-contact labels from single mutation scans, improved Tm prediction with a
-frozen encoder, whereas several other computed data sets did not, and larger
-computed data sets were not consistently more useful. The variants to simulate
-and the physical quantity to compute should therefore be chosen for the
-melting-temperature prediction task from the start.
+Thermal stability determines whether a nanobody can be produced, stored, and
+used reliably, and the melting temperature is a common way to quantify it.
+Measuring it across many sequences is costly, while simulations can supply
+related stability data cheaply, though never the melting temperature itself. We
+find that such data helps only when it is well chosen: free-energy perturbation
+labels, and native-contact labels from focused single mutation scans, improved
+Tm prediction with a frozen encoder, while several other computed data sets,
+including larger ones, did not. What a simulation computes, and for which
+variants, matters more than how much it computes, and both are worth deciding
+with the prediction target in mind before the calculations begin.
 \end{significance}

@@ -30,9 +30,9 @@ hydrogen, and a Langevin middle integrator with 1~ps$^{-1}$ friction
 The contact calculation used all backbone heavy-atom pairs separated by more
 than three residues and within 0.45~nm in the first production frame, as for the
 single mutation scans. $Q$ was averaged over the final 30~ns of production, that is the
-last 300 frames of 100-ps output. The two MD data sets therefore used the same
-$Q$ definition, contact set, native reference, and averaging window, and
-differed only in the variants they covered.
+last 300 frames of 100-ps output. The two MD data sets thus shared one $Q$
+definition, contact set, native reference, and averaging window, and differed
+only in the variants they covered.
 
 \subsection{FEP charge-change check}
 
@@ -57,7 +57,7 @@ $T_\mathrm{m}$ MAE, and re-selecting the learning rate, dropout, and encoder
 learning rate on the 114-example validation set did not recover the backbone
 result. In the fine-tuned regime the side-chain label was significantly worse
 than the $T_\mathrm{m}$-only baseline (paired $\Delta$MAE $+0.30$~$^\circ$C,
-95\% CI $[+0.12, +0.49]$), whereas the backbone label was neutral; in the frozen
+95\% CI $[+0.12, +0.49]$), while the backbone label was neutral; in the frozen
 regime it erased the backbone label's benefit ($\Delta$MAE from $-0.20$ to
 $-0.04$~$^\circ$C). Because the mutant side chains were built without repacking
 their neighbors, side-chain contacts near each mutation carry construction noise
