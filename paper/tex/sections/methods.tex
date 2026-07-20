@@ -176,8 +176,10 @@ followed by 0.5 ns of restrained NVT dynamics at 400 K. We then ran unrestrained
 NVT production at 400 K. All dynamics stages used a 4-fs timestep, and
 production coordinates were saved every 10 ps. Every label was calculated from
 the final 30 ns of production, that is the last 3000 saved frames.
-For this data set, the reference distances came from production frame 0, and all
-backbone heavy atoms were eligible for contacts. We computed
+For this data set, each variant's native reference was its own production frame 0
+(the post-equilibration starting structure of that sequence, not the wild-type
+structure), so $Q$ measures how well each sequence retained its own initial
+contacts, and all backbone heavy atoms were eligible for contacts. We computed
 $\Delta Q=Q_{\mathrm{mutant}}-Q_{\mathrm{WT}}$ within each structure and then
 min--max scaled it. Subtracting one constant wild-type value does not change a
 min--max-scaled label, so scaled $Q$ and scaled $\Delta Q$ are identical within
@@ -194,12 +196,14 @@ water, 0.15 M salt, and OpenMM. After 300 K NVT and NPT equilibration, two
 restrained 400 K NVT stages preceded unrestrained 400 K NVT production scheduled
 for 100 ns. Requiring a usable topology and trajectory, a sequence of at least
 50 residues, and at least one contact gave 1143 samples.
-Production frame 0 supplied the reference distances, and, as for the mutation
-scans, all backbone heavy atoms were eligible for contacts and $Q$ was averaged
-over the final 30 ns of production, that is the last 300 saved frames. The label
-was min--max scaled across the data set. The two MD data sets therefore used the
-same $Q$ definition, contact set, native reference, and averaging window, and
-differed only in the variants they covered.
+As for the mutation scans, each structure's native reference was its own
+production frame 0, all backbone heavy atoms were eligible for contacts, and $Q$
+was averaged over the final 30 ns of production, that is the last 300 saved
+frames. Because each entry is a different protein with no shared wild type, we
+used the absolute $Q$ rather than a difference, and min--max scaled it across the
+data set. The two MD data sets therefore used the same $Q$ definition (each
+structure referenced to its own production frame 0), contact set, and averaging
+window, and differed only in the variants they covered.
 
 \subsection{Rosetta, ThermoMPNN, and variant-selection comparisons}
 
