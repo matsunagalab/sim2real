@@ -35,6 +35,25 @@ matches removed): scan_pool 762 (1MEL 403 + 4IDL 359), heterogeneous 686
 Heterogeneous is better in every contrast; all are significant except hot
 1MEL-vs-heterogeneous (P(heterogeneous better)=0.96).
 
+## Versus a Tm-only baseline (same harness, n = 320)
+
+A Tm-only baseline was run in the same harness (`--source none`; 8 replicates of
+3 distinct-seed ensembles). `ΔMAE = MAE_source − MAE_Tm-only`; negative helps.
+
+| source | frozen (base 7.274) | hot (base 7.066) |
+|---|---|---|
+| heterogeneous | **−0.152** [−0.235, −0.062] helps | **−0.356** [−0.614, −0.118] helps |
+| scan pool | +0.004 [−0.113, +0.137] ns | −0.093 [−0.279, +0.099] ns |
+| scan 1MEL | −0.016 ns | −0.185 [−0.423, +0.038] ns |
+| scan 4IDL | +0.110 ns | −0.156 [−0.357, +0.041] ns |
+
+So the direction of the primary contrast is "heterogeneous **helps** while the
+matched scan is **null**", not "the scan hurts": heterogeneous significantly
+lowers Tm error in both regimes, whereas no scan variant differs significantly
+from the Tm-only baseline. (This harness's generic shared-default HP gives a
+different Tm-only baseline than the manuscript's tuned per-source runs; all
+comparisons here are internally consistent against this baseline.)
+
 ## Scaling (MAE mean over 8 subsets, °C)
 
 | source | frozen n=20→320 | hot n=20→320 |
@@ -51,10 +70,13 @@ and, for 4IDL frozen, worsen from n=160 to n=320.
 
 Under a controlled comparison, the **heterogeneous nanobody panel transfers
 better than the matched single-mutation scan**, in both encoder regimes and for
-each scaffold individually. The effect is not an artefact of the 1MEL anchor
-(1MEL is ~99% identical to a NbBench training sequence): the anchored 1MEL scan
-still loses, and the unanchored 4IDL scan loses by more. Diverse-sequence labels
-keep improving with n while single-fold mutation labels saturate.
+each scaffold individually. Against a Tm-only baseline the mechanism is that
+**heterogeneous helps while the matched scan is null** -- the scan does not
+damage Tm prediction, it simply fails to transfer. The effect is not an artefact
+of the 1MEL anchor (1MEL is ~99% identical to a NbBench training sequence): the
+anchored 1MEL scan still loses to heterogeneous, and the unanchored 4IDL scan
+loses by more. Diverse-sequence labels keep improving with n while single-fold
+mutation labels saturate.
 
 **Supported claim (narrow):** for the same Q definition, channel, architecture,
 and number of trained label pairs, this two-scaffold matched mutation-scan pool

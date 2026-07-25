@@ -43,6 +43,8 @@ def load_pool(source):
             for r in csv.DictReader(fh):
                 rows.append((r["seq"], float(r["ddg_scaled01"])))
         return rows
+    if source == "none":
+        return {"strata": []}  # Tm-only baseline: no auxiliary labels
     if source == "scan_pool":
         a = read(f"{DESIGN_DIR}/scan_ownframe0_1mel.csv")
         b = read(f"{DESIGN_DIR}/scan_ownframe0_4idl.csv")
@@ -57,6 +59,8 @@ def subset_rows(pool, n, subset_seed):
     """Nested prefix subset of size n for this subset_seed. Stratified across strata."""
     strata = pool["strata"]
     k = len(strata)
+    if k == 0:  # Tm-only baseline
+        return []
     per = [n // k] * k
     for i in range(n - sum(per)):
         per[i] += 1
@@ -142,7 +146,10 @@ def run(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     pool = load_pool(args.source)
-    n_list = [int(x) for x in args.n_list.split(",")]
+    tm_only = (args.source == "none")
+    # Tm-only has no auxiliary data, so n is meaningless; its replicate variance
+    # comes only from initialisation, so use distinct model seeds per subset.
+    n_list = [0] if tm_only else [int(x) for x in args.n_list.split(",")]
     out_root = os.path.join(REPO, "results", args.exp_name)
 
     result = {"source": args.source, "encoder_mode": args.encoder_mode,
@@ -155,9 +162,10 @@ def run(args):
             tds, eds = build_datasets(aux, tokenizer, MAX_LENGTH, get_tm_scaler)
             model_dirs = []
             for m in range(1, args.n_seeds + 1):
-                os.environ["TRAIN_SEED"] = str(m)
-                os.environ["TRAIN_DATA_SEED"] = str(m)
-                set_seed(m)
+                seed = (s - 1) * args.n_seeds + m if tm_only else m
+                os.environ["TRAIN_SEED"] = str(seed)
+                os.environ["TRAIN_DATA_SEED"] = str(seed)
+                set_seed(seed)
                 point_dir = os.path.join(out_root, f"n{n}", f"subset{s}")
                 run_id = f"m{m}"
                 train_fn(tds, eds, device, run_id, point_dir, multi_task=True)
@@ -200,7 +208,7 @@ def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("run")
-    r.add_argument("--source", required=True, choices=["scan_pool", "hetero", "scan_1mel", "scan_4idl"])
+    r.add_argument("--source", required=True, choices=["none", "scan_pool", "hetero", "scan_1mel", "scan_4idl"])
     r.add_argument("--encoder-mode", required=True, choices=["frozen", "hot"])
     r.add_argument("--n-list", default="20,80,160,320")
     r.add_argument("--n-subsets", type=int, default=8)
