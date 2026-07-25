@@ -427,6 +427,10 @@ def train(train_ds, eval_ds, device, run, result_dir, multi_task):
         optim="adamw_torch",
         report_to="none",
         fp16=(device.type == "cuda"),
+        # Default 42 preserves prior behaviour; the design-comparison harness sets
+        # these so model initialisation and data ordering vary per replicate seed.
+        seed=int(os.environ.get("TRAIN_SEED", "42")),
+        data_seed=int(os.environ.get("TRAIN_DATA_SEED", os.environ.get("TRAIN_SEED", "42"))),
     )
 
     callbacks = [
