@@ -173,14 +173,19 @@ followed by 0.5 ns of restrained NVT dynamics at 400 K. We then ran unrestrained
 NVT production at 400 K. All dynamics stages used a 4-fs timestep, and
 production coordinates were saved every 10 ps. Every label was calculated from
 the final 30 ns of production, that is the last 3000 saved frames.
-For this data set, each variant's native reference was its own production frame 0
-(the post-equilibration starting structure of that sequence, not the wild-type
-structure), so $Q$ measured how well each sequence retained its own initial
-contacts. All backbone heavy atoms were eligible for contacts. We computed
-$\Delta Q=Q_{\mathrm{mutant}}-Q_{\mathrm{WT}}$ within each structure and then
-min--max scaled it. Subtracting one constant wild-type value does not change a
-min--max-scaled label, so scaled $Q$ and scaled $\Delta Q$ are identical within
-each structure.
+For this data set, every variant was referenced to the same wild-type crystal
+structure (the corresponding chain of PDB~1MEL or 4IDL), so $Q$ measured how much
+of the wild-type native fold each mutant retained rather than how well it held its
+own, possibly already distorted, starting structure. Only backbone (N, C$\alpha$,
+C, O) heavy atoms were used for contacts: backbone atoms are present in every
+amino acid, so a single wild-type reference is atom-comparable across chemically
+distinct point mutants, whereas the mutated side chains are not. We computed
+$\Delta Q=Q_{\mathrm{mutant}}-Q_{\mathrm{WT}}$ and min--max scaled it; because
+subtracting one constant baseline does not change a min--max-scaled label, scaled
+$Q$ and scaled $\Delta Q$ are identical. For comparison with the heterogeneous set
+below, we also computed a self-referenced $Q$ in which each mutant was referenced
+to its own starting structure instead of the shared wild type; the two references
+agreed closely.
 
 \textbf{Heterogeneous nanobody set.} The heterogeneous data set was built from
 SAbDab structures \citep{Dunbar2014SAbDab}, taking the first heavy-chain record
@@ -188,14 +193,14 @@ of each entry. The structures were prepared, protonated at pH 7.4, and simulated
 under the same ff19SB and OPC-water protocol as the mutation scans, with
 unrestrained 400 K production of up to 100 ns (Supplementary methods). After
 requiring a usable trajectory, a sequence of at least 50 residues, and at least
-one native contact, 1143 samples remained. As for the mutation scans, each
-structure's native reference was its own production frame 0, all backbone heavy
-atoms were eligible for contacts, and $Q$ was averaged over the final 30 ns.
-Because each entry is a different protein with no shared wild type, we used the
-absolute $Q$ rather than a difference, and min--max scaled it across the data set.
-The two MD data sets thus shared the same $Q$ definition (each structure
-referenced to its own production frame 0), contact set, and averaging window, and
-differed only in the variants they covered.
+one native contact, 1143 samples remained. Because each entry is a different protein, no shared wild type exists, so every
+structure was referenced to its own starting structure, and $Q$, computed over the
+same backbone contacts and final-30-ns window, measured retention of that
+structure's own native contacts. We used the absolute $Q$ rather than a difference
+and min--max scaled it across the data set. This own-structure reference is the
+same protocol as the self-referenced mutation-scan label, so the heterogeneous set
+and the scans are directly comparable; only the scans, which share a wild type,
+additionally admit the crystal-referenced label used as the primary scan label.
 
 \subsection{Rosetta, ThermoMPNN, and variant-selection comparisons}
 
