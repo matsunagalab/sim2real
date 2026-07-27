@@ -114,7 +114,7 @@ def build():
                     markersize=6.8, label=label, zorder=3)
         ax.set_xscale("log", base=2); ax.set_xlim(16, 560)
         ax.set_xticks(NS, [str(n) for n in NS])
-        ax.set_xlabel("Labels per structure and model, n")
+        ax.set_xlabel("Auxiliary labels per model, n")
         ax.set_ylim(6.6, 7.45)
         ax.set_title(titles[reg], fontsize=9.8, fontweight="bold", color=COL["black"], pad=4)
         polish(ax, "both", boxed=True)

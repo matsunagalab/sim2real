@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Fig 3 (features axis), fully condition-matched.
 
-All features on the same ddg-head, shared/separate architecture, the same
-matched 1MEL/4IDL variant set (431/406) sampled in the SAME order (identical
-subsets per seed), and the shared Tm-only baseline. ThermoMPNN/Rosetta/FEP/MD
-are the physical-observable panel; rosetta_random/esm (different sequence
-design) belong in the supplement, not here.
+FEP/MD/Rosetta/FoldX on the same ddg-head, shared/separate architecture, the
+identical 1MEL/4IDL variant set (421/389) sampled in the SAME order (identical
+subsets per seed), and the shared Tm-only baseline. The two Rosetta proposal-design
+rows (rosetta_esm/random, two-mutation variants) use their own native variant sets
+and vary sequence design as well as the feature.
 
 Reads results/fig3_<SRC>_<reg>/scaling.json and the shared baseline
 results/n24_tm_<reg>_shared/scaling.json, computes dMAE = source - Tm-only at
@@ -17,7 +17,7 @@ import numpy as np
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Fixed top-to-bottom order, identical in both panels (TMPNN below all Rosetta rows).
-# FEP/MD/ROS/TMPNN share the exactly-matched 1MEL/4IDL variant set; the two
+# FEP/MD/ROS/FOLDX share the identical 1MEL/4IDL variant set; the two
 # Rosetta proposal-design rows (ESM / random two-mutation variants) use their own
 # native variant sets — they vary sequence design as well as the feature (noted).
 FEATURES = [("FEP", "FEP ΔΔG"), ("MD", "MD native-contact Q"),

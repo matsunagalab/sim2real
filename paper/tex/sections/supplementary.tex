@@ -8,11 +8,9 @@ The heterogeneous data set was assembled from a SAbDab summary and the
 corresponding structures \citep{Dunbar2014SAbDab}. For each PDB identifier, we
 selected the first heavy-chain entry whose chain was present in the structure
 file. After requiring a usable sequence, topology, trajectory, and hydrophilic
-native-contact label, 763 samples remained. Some sequences occurred in more than
-one PDB entry; native-contact values were calculated separately for each
-structure and sampled individually during training, duplicate sequences were not
-collapsed, and the model did not receive the PDB identifier. Sequences exceeding
-the 158-residue model input were truncated at the end.
+native-contact label, 763 samples remained, each a distinct amino-acid sequence.
+The model did not receive the PDB identifier, and sequences exceeding the
+158-residue model input were truncated at the end.
 
 Structures were prepared and protonated at pH 7.4 with PDBFixer, pdb2pqr, and
 PROPKA \citep{Dolinsky2004PDB2PQR,Olsson2011PROPKA3}. Each protein was solvated
