@@ -7,14 +7,12 @@
 The heterogeneous data set was assembled from a SAbDab summary and the
 corresponding structures \citep{Dunbar2014SAbDab}. For each PDB identifier, we
 selected the first heavy-chain entry whose chain was present in the structure
-file. This rule yielded 1143 samples with a usable sequence, topology,
-trajectory, and native-contact label, representing 833 unique amino-acid
-sequences. Ninety-seven sequences occurred in more than one PDB entry and
-accounted for 407 samples. We calculated native-contact values separately for
-each structure and sampled them individually during training; duplicate
-sequences were not collapsed, and the model did not receive the PDB identifier.
-Eleven sequences exceeded the 158-residue model input and were truncated at the
-end.
+file. After requiring a usable sequence, topology, trajectory, and hydrophilic
+native-contact label, 763 samples remained. Some sequences occurred in more than
+one PDB entry; native-contact values were calculated separately for each
+structure and sampled individually during training, duplicate sequences were not
+collapsed, and the model did not receive the PDB identifier. Sequences exceeding
+the 158-residue model input were truncated at the end.
 
 Structures were prepared and protonated at pH 7.4 with PDBFixer, pdb2pqr, and
 PROPKA \citep{Dolinsky2004PDB2PQR,Olsson2011PROPKA3}. Each protein was solvated
@@ -27,12 +25,14 @@ OpenMM used PME electrostatics with a 1.0-nm cutoff, constraints on bonds to
 hydrogen, and a Langevin middle integrator with 1~ps$^{-1}$ friction
 \citep{Eastman2017OpenMM}.
 
-The contact calculation used all backbone heavy-atom pairs separated by more
-than three residues and within 0.45~nm in the first production frame, as for the
-single mutation scans. $Q$ was averaged over the final 30~ns of production, that is the
-last 300 frames of 100-ps output. The two MD data sets thus shared one $Q$
-definition, contact set, native reference, and averaging window, and differed
-only in the variants they covered.
+The contact calculation used backbone heavy-atom pairs separated by more than
+three residues and within 0.45~nm in the reference structure, counting a contact
+only when at least one residue was hydrophilic, as for the single mutation scans.
+Each structure was referenced to its own parent equilibration structure, and $Q$
+was averaged over the $[10, 40)$~ns production window sampled every 100~ps
+(300 frames). The two MD data sets thus shared one $Q$ definition, contact set,
+native reference, and averaging window, and differed only in the sequences they
+covered.
 
 \subsection{FEP charge-change check}
 
@@ -45,24 +45,6 @@ min--max scaling used for the training labels. Across the 284 charge-changing
 mutations the scaled labels barely moved, with a maximum shift of $0.008$ on the
 $[0,1]$ scale and a correlation of $0.99989$ with the uncorrected labels, so the
 training labels use the uncorrected $\Delta\Delta G$.
-
-\subsection{Side-chain contacts in the native-contact label}
-
-The native-contact fraction $Q$ in the main analysis uses backbone heavy atoms
-only. We also evaluated the side-chain-inclusive definition, in which all
-protein heavy atoms are eligible for contacts. On the 400~K single mutation
-scan this raised the label spread by roughly $1.4$-fold, but it did not improve
-transfer. With hyperparameters held fixed it slightly increased the held-out
-$T_\mathrm{m}$ MAE, and re-selecting the learning rate, dropout, and encoder
-learning rate on the 114-example validation set did not recover the backbone
-result. In the fine-tuned regime the side-chain label was significantly worse
-than the $T_\mathrm{m}$-only baseline (paired $\Delta$MAE $+0.30$~$^\circ$C,
-95\% CI $[+0.12, +0.49]$), while the backbone label was neutral; in the frozen
-regime it erased the backbone label's benefit ($\Delta$MAE from $-0.20$ to
-$-0.04$~$^\circ$C). Because the mutant side chains were built without repacking
-their neighbors, side-chain contacts near each mutation carry construction noise
-rather than added signal, so the main analysis retains the backbone-only
-definition.
 
 \subsection{Model-size checks}
 
