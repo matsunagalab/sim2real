@@ -11,17 +11,18 @@ multi-task model learned Tm and the computed property together from ESM2
 sequence representations; we selected settings on 114 Tm validation sequences
 and evaluated final models on 396 held-out sequences. Two molecular-dynamics
 (MD) data sets that shared the same simulations and native-contact definition,
-but covered different variants, behaved very differently: with a frozen encoder,
-single mutation scans of two fixed structures lowered the mean absolute error
-(MAE) by 0.20$^\circ$C, while a heterogeneous set of many structures lowered it
-by only 0.05$^\circ$C. Comparing physical quantities on the same mutation scan,
+but covered different sequences, behaved differently: a sequence-diverse set of
+many nanobody structures lowered the mean absolute error (MAE) by 0.30$^\circ$C
+after fine-tuning, whereas a single mutation scan of two fixed structures did not
+help in either encoder. Comparing physical quantities on the identical mutations,
 free-energy perturbation (FEP) gave the lowest test MAE with both frozen and
-fine-tuned encoders; after fine-tuning it lowered MAE by 0.15$^\circ$C
-The MD native-contact labels helped only with the frozen encoder, and Rosetta and ThermoMPNN labels helped 
-little if at all. Improvement thus depended on the variants chosen and the
-quantity computed, not on the number of labels: both are fixed before any
-simulation runs, and both are best aligned with the prediction task from the
-outset.
+fine-tuned encoders and was the only source to lower error significantly in both,
+by up to 0.37$^\circ$C. Among empirical $\Delta\Delta G$ estimators, FoldX also
+lowered frozen-encoder error and outperformed Rosetta, whereas the MD
+native-contact and Rosetta labels did not help. Improvement thus depended on the
+sequences chosen and the quantity computed, not on the number of labels: these
+are fixed before any simulation runs, and are best aligned with the prediction
+task from the outset.
 \end{abstract}
 
 \begin{keywords}
@@ -35,9 +36,10 @@ used reliably, and the melting temperature is a common way to quantify it.
 Measuring it across many sequences is costly, while simulations can supply
 related stability data cheaply, though never the melting temperature itself. We
 find that such data helps only when it is well chosen: free-energy perturbation
-labels, and native-contact labels from focused single mutation scans, improved
-Tm prediction with a frozen encoder, while several other computed data sets,
-including larger ones, did not. What a simulation computes, and for which
-variants, matters more than how much it computes, and both are worth deciding
-with the prediction target in mind before the calculations begin.
+labels improved Tm prediction with both a frozen and a fine-tuned encoder, a
+FoldX energy function helped with a frozen encoder, and a sequence-diverse
+simulation set helped once the encoder was fine-tuned, while several other
+computed data sets did not. What a simulation computes, and for which sequences,
+matters more than how much it computes, and both are worth deciding with the
+prediction target in mind before the calculations begin.
 \end{significance}
