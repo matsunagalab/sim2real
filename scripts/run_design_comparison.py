@@ -25,7 +25,8 @@ import numpy as np
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO not in sys.path:
     sys.path.insert(0, REPO)
-DESIGN_DIR = os.path.join(REPO, "data/source_labels/md_design")
+# Pool directory; overridable so the aligned-window Fig 2 pools can be used.
+DESIGN_DIR = os.path.join(REPO, os.environ.get("DESIGN_DATA_DIR", "data/source_labels/md_design"))
 
 SHARED_HP = {  # pre-specified simplest shared defaults, applied identically to both sources
     "frozen": {"MODEL_ARCH": "shared", "DDG_HEAD_MODE": "separate", "LEARNING_RATE": "0.001",
