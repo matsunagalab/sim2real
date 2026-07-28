@@ -3,7 +3,7 @@
 
 The deposit contains two kinds of trajectories:
 
-* ``md/matched_400K/{1mel,4idl}``: the first 4,000 frames used by
+* ``md/mutation_scan_400K/{1mel,4idl}``: the first 4,000 frames used by
   :mod:`scripts.extract_study_qvalue`, with trajectory frame 0 as the native
   reference; and
 * ``md/heterogeneous_{300K,400K}``: every frame already retained in the
@@ -54,8 +54,8 @@ MATCHED_N_FRAMES = 3_000
 HETEROGENEOUS_N_FRAMES = 300
 
 COMPONENT_DIRS = {
-    "matched_1mel": "md/matched_400K/1mel",
-    "matched_4idl": "md/matched_400K/4idl",
+    "scan_1mel": "md/mutation_scan_400K/1mel",
+    "scan_4idl": "md/mutation_scan_400K/4idl",
     "heterogeneous_300K": "md/heterogeneous_300K",
     "heterogeneous_400K": "md/heterogeneous_400K",
 }
@@ -212,12 +212,12 @@ def discover_matched(
     study_root: Path,
     system: str,
 ) -> tuple[list[ConversionTask], list[dict[str, object]]]:
-    component = f"matched_{system}"
+    component = f"scan_{system}"
     component_root = out_root / COMPONENT_DIRS[component]
     trajectory_root = component_root / "trajectories"
     csv_path = repo_root / "data" / "md" / f"study_qvalue_fep400k_{system}.csv"
     if not csv_path.exists():
-        raise FileNotFoundError(f"matched-label table not found: {csv_path}")
+        raise FileNotFoundError(f"mutation-scan label table not found: {csv_path}")
 
     with csv_path.open(newline="", encoding="utf-8") as handle:
         source_rows = list(csv.DictReader(handle))
@@ -244,7 +244,7 @@ def discover_matched(
         task = ConversionTask(
             component=component,
             record_id=record_id,
-            dataset_role="FEP-matched mutation scan",
+            dataset_role="single mutation scan",
             system=source_row.get("system", system),
             mutation=source_row.get("mutation", ""),
             temperature_k="400",
@@ -766,11 +766,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     out_root.mkdir(parents=True, exist_ok=True)
     discoveries: dict[str, tuple[list[ConversionTask], list[dict[str, object]]]] = {}
     for component in components:
-        if component == "matched_1mel":
+        if component == "scan_1mel":
             discoveries[component] = discover_matched(
                 repo_root, out_root, args.study_root.resolve(), "1mel"
             )
-        elif component == "matched_4idl":
+        elif component == "scan_4idl":
             discoveries[component] = discover_matched(
                 repo_root, out_root, args.study_root.resolve(), "4idl"
             )

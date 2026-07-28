@@ -30,9 +30,9 @@ COMPONENTS: tuple[PurePosixPath, ...] = (
     PurePosixPath("fep"),
     PurePosixPath("rosetta_backrub_trajectories"),
     PurePosixPath("rosetta_ddg_scans"),
-    PurePosixPath("thermompnn"),
-    PurePosixPath("md/matched_400K/1mel"),
-    PurePosixPath("md/matched_400K/4idl"),
+    PurePosixPath("foldx"),
+    PurePosixPath("md/mutation_scan_400K/1mel"),
+    PurePosixPath("md/mutation_scan_400K/4idl"),
     PurePosixPath("md/heterogeneous_300K"),
     PurePosixPath("md/heterogeneous_400K"),
 )
