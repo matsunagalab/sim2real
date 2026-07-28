@@ -96,26 +96,30 @@ def render(out_stem):
     src_color = {"FEP": COL["fep"], "MD": COL["mdq"], "ROS": COL["gray"],
                  "FOLDX": COL["gray"], "ROSESM": COL["gray"], "ROSRND": COL["gray"]}
     marker_of = {"frozen": "s", "hot": "o"}
-    titles = {"frozen": "Frozen encoder", "hot": "Fine-tuned (hot) encoder"}
+    titles = {"frozen": "Frozen encoder", "hot": "Fine-tuned encoder"}
     ypos = np.arange(len(FEATURES), dtype=float)
 
+    # Each panel has one shared Tm-only baseline, so the x-axis is absolute Tm test
+    # MAE with a dashed baseline line; whiskers are the paired (source - Tm-only) CI.
     fig, axes = plt.subplots(1, 2, figsize=(9.6, 3.6), sharey=True, layout="constrained")
     for ax, reg in zip(axes, ("frozen", "hot")):
-        _, data = rows_for(reg)                    # fixed FEATURES order, both panels
+        basemae, data = rows_for(reg)              # fixed FEATURES order, both panels
         marker = marker_of[reg]
-        ax.axvline(0.0, color=COL["baseline"], lw=1.0, ls="--", zorder=1)
+        ax.axvline(basemae, color=COL["baseline"], lw=1.1, ls="--", zorder=1)
+        ax.text(basemae, 0.90, "Tm-only", transform=ax.get_xaxis_transform(),
+                ha="center", va="bottom", fontsize=8.0, color=COL["baseline"])
         for i, (key, _label) in enumerate(FEATURES):
-            _, dm, lo, hi, *_ = data[i]
+            _, dm, lo, hi, _, _, mae = data[i]
             c = src_color[key]
             face = c if reg == "frozen" else "white"
-            ax.errorbar(dm, ypos[i], xerr=np.array([[dm - lo], [hi - dm]]), fmt=marker,
+            ax.errorbar(mae, ypos[i], xerr=np.array([[dm - lo], [hi - dm]]), fmt=marker,
                         markerfacecolor=face, markeredgecolor=c, markeredgewidth=1.3,
                         markersize=7.0, ecolor=c, elinewidth=1.5, capsize=3.8, capthick=1.2,
                         zorder=4)
         ax.set_ylim(len(FEATURES) - 0.5, -1.1)     # FEP (i=0) at top, room for guides
         ax.set_yticks(ypos)
-        ax.set_xlim(-0.62, 0.45)
-        ax.set_xlabel(r"$\Delta$MAE vs Tm-only model (°C)")
+        ax.set_xlim(basemae - 0.62, basemae + 0.45)
+        ax.set_xlabel(r"Tm test MAE (°C)")
         ax.set_title(titles[reg], fontsize=11, fontweight="bold", color=COL["black"], pad=6)
         ax.text(0.03, 0.99, "lower Tm error", transform=ax.transAxes, ha="left", va="top",
                 fontsize=8.3, color=COL["design"])
