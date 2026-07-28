@@ -33,7 +33,7 @@ COMPONENTS: tuple[PurePosixPath, ...] = (
     PurePosixPath("foldx"),
     PurePosixPath("md/mutation_scan_400K/1mel"),
     PurePosixPath("md/mutation_scan_400K/4idl"),
-    PurePosixPath("md/heterogeneous_300K"),
+    # Only the 400 K productions carry labels; the 300 K runs are not deposited.
     PurePosixPath("md/heterogeneous_400K"),
 )
 

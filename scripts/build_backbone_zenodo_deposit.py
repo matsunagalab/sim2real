@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
 """Build the backbone-only MD part of the paper's Zenodo deposit.
 
+Every deposited trajectory is the window the manuscript analysed: production
+time in [10, 40) ns sampled every 100 ps, giving 300 frames, with the parent
+equilibration structure as the native reference.  This is the window and the
+reference used by :mod:`scripts.recompute_aligned_hphil_q`, so the published Q
+labels can be recomputed from the deposited files alone.
+
 The deposit contains two kinds of trajectories:
 
-* ``md/mutation_scan_400K/{1mel,4idl}``: the first 4,000 frames used by
-  :mod:`scripts.extract_study_qvalue`, with trajectory frame 0 as the native
-  reference; and
-* ``md/heterogeneous_{300K,400K}``: every frame already retained in the
-  existing protein-only Zenodo staging directories, with their separate
-  native-reference PDB coordinates preserved.
+* ``md/mutation_scan_400K/{1mel,4idl}``: the 1MEL and 4IDL single mutation
+  scans, subsampled from their 10 ps source cadence; and
+* ``md/heterogeneous_{300K,400K}``: the heterogeneous nanobody panel, read from
+  the full production trajectories, at its native 100 ps cadence.
+
+The window is selected by time and never by frame index, because the source
+productions differ in both length and sampling interval.
 
 Only the backbone heavy atoms used by the published Q calculation (N, CA, C,
 and O; MDAnalysis selection ``backbone``) are written.  Each component gets a
@@ -34,6 +41,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
+import math
 import os
 import sys
 import tempfile
@@ -47,11 +56,14 @@ from typing import Iterable, Sequence
 
 BACKBONE_SELECTION = "backbone"
 BACKBONE_NAMES = frozenset({"N", "CA", "C", "O"})
-# Every deposited production trajectory is the final 30 ns.  Matched 400-K
-# runs were saved every 10 ps; the heterogeneous staging trajectories were
-# saved every 100 ps and retain 333 frames from that same final interval.
-MATCHED_N_FRAMES = 3_000
-HETEROGENEOUS_N_FRAMES = 300
+# The analysed production window, identical for both data designs and equal to
+# the window in scripts/recompute_aligned_hphil_q.py.  Sources are saved every
+# 10 ps (mutation scans) or 100 ps (heterogeneous panel) and run for 40 ns or
+# 100 ns, so the window is resolved from frame times rather than frame indices.
+WINDOW_LO_PS = 10_000.0
+WINDOW_HI_PS = 40_000.0
+CADENCE_PS = 100.0
+WINDOW_N_FRAMES = int(round((WINDOW_HI_PS - WINDOW_LO_PS) / CADENCE_PS))
 
 COMPONENT_DIRS = {
     "scan_1mel": "md/mutation_scan_400K/1mel",
@@ -102,7 +114,9 @@ class ConversionTask:
     native_pdb: str
     output_pdb: str
     output_dcd: str
-    max_frames: int
+    window_lo_ps: float
+    window_hi_ps: float
+    cadence_ps: float
     reference_definition: str
     repo_root: str
     component_root: str
@@ -160,9 +174,47 @@ def read_tsv_by_id(path: Path) -> dict[str, dict[str, str]]:
     return {row["record_id"]: row for row in rows if row.get("record_id")}
 
 
-def _matched_topology_candidates(variant_root: Path) -> tuple[Path, ...]:
+def _production_and_reference(
+    nodes_root: Path, want_temp: float | None
+) -> tuple[Path, Path]:
+    """Return (production trajectory, parent equilibration PDB) for one system.
+
+    Resolved from the workflow DAG exactly as
+    scripts/recompute_aligned_hphil_q.py resolves it, so the deposited
+    trajectory and its native reference are the ones the published Q labels were
+    computed from.  ``want_temp`` selects the production node by temperature;
+    the heterogeneous panel has a 300 K and a 400 K production, the mutation
+    scans a single one.
+    """
+    chosen: tuple[Path, dict] | None = None
+    for path in sorted(nodes_root.glob("prod_*/artifacts/trajectory.dcd"), key=str):
+        node = path.parent.parent.name
+        node_json = nodes_root / node / "node.json"
+        if not node_json.is_file():
+            continue
+        with node_json.open(encoding="utf-8") as handle:
+            meta = json.load(handle)
+        temperature = meta.get("conditions", {}).get("temperature_kelvin")
+        if want_temp is None or temperature == want_temp:
+            chosen = (path, meta)
+    if chosen is None:
+        raise FileNotFoundError(
+            f"no production node at {want_temp} K under {nodes_root}"
+        )
+    path, meta = chosen
+    parents = meta.get("parent_node_ids") or []
+    if not parents:
+        raise FileNotFoundError(f"production node under {nodes_root} has no parent")
+    return path, nodes_root / parents[0] / "artifacts" / "equilibrated.pdb"
+
+
+def _scan_topology_candidates(
+    variant_root: Path, reference_pdb: Path
+) -> tuple[Path, ...]:
     nodes = variant_root / "jobs" / "main" / "nodes"
     paths = [
+        # The native reference doubles as the topology, as in the Q calculation.
+        reference_pdb,
         nodes / "topo_001" / "artifacts" / "system.topology.pdb",
         nodes / "prod_001" / "artifacts" / "final_structure.pdb",
     ]
@@ -206,7 +258,7 @@ def _base_row(task: ConversionTask) -> dict[str, object]:
     }
 
 
-def discover_matched(
+def discover_scan(
     repo_root: Path,
     out_root: Path,
     study_root: Path,
@@ -230,16 +282,17 @@ def discover_matched(
     for source_row in source_rows:
         record_id = source_row["vid"]
         variant_root = study_root / record_id
-        source_dcd = (
-            variant_root
-            / "jobs"
-            / "main"
-            / "nodes"
-            / "prod_001"
-            / "artifacts"
-            / "trajectory.dcd"
-        )
-        candidates = _matched_topology_candidates(variant_root)
+        nodes_root = variant_root / "jobs" / "main" / "nodes"
+        unresolved = ""
+        try:
+            source_dcd, reference_pdb = _production_and_reference(
+                nodes_root, want_temp=None
+            )
+        except (FileNotFoundError, ValueError, KeyError) as exc:
+            source_dcd = nodes_root / "prod_001" / "artifacts" / "trajectory.dcd"
+            reference_pdb = nodes_root / "eq_003" / "artifacts" / "equilibrated.pdb"
+            unresolved = f"{type(exc).__name__}: {exc}"
+        candidates = _scan_topology_candidates(variant_root, reference_pdb)
         stem = f"{record_id}_400K_backbone"
         task = ConversionTask(
             component=component,
@@ -251,17 +304,30 @@ def discover_matched(
             sequence=source_row.get("seq", ""),
             source_dcd=str(source_dcd),
             topology_candidates=tuple(str(path) for path in candidates),
-            native_pdb="",
+            native_pdb=str(reference_pdb),
             output_pdb=str(trajectory_root / f"{stem}.pdb"),
             output_dcd=str(trajectory_root / f"{stem}.dcd"),
-            max_frames=MATCHED_N_FRAMES,
-            reference_definition="production trajectory frame 0 (native reference used for Q)",
+            window_lo_ps=WINDOW_LO_PS,
+            window_hi_ps=WINDOW_HI_PS,
+            cadence_ps=CADENCE_PS,
+            reference_definition=(
+                "parent equilibration structure, the coordinates that entered "
+                "production (native reference used for Q)"
+            ),
             repo_root=str(repo_root),
             component_root=str(component_root),
         )
         row = _base_row(task)
         if not source_dcd.is_file():
-            row.update(status="missing", reason="source trajectory.dcd not found")
+            reason = "source trajectory.dcd not found"
+            if unresolved:
+                reason += f"; production node unresolved ({unresolved})"
+            row.update(status="missing", reason=reason)
+        elif not reference_pdb.is_file():
+            reason = "parent equilibration PDB not found"
+            if unresolved:
+                reason += f"; production node unresolved ({unresolved})"
+            row.update(status="missing", reason=reason)
         elif not any(path.is_file() for path in candidates):
             row.update(status="missing", reason="no usable topology PDB candidate found")
         else:
@@ -271,74 +337,34 @@ def discover_matched(
 
 
 def _heterogeneous_entries(source_root: Path, temp: str) -> list[dict[str, str]]:
-    manifest_path = source_root / "MANIFEST.tsv"
-    entries_by_id: dict[str, dict[str, str]] = {}
-    if manifest_path.exists():
-        with manifest_path.open(newline="", encoding="utf-8") as handle:
-            rows = list(csv.DictReader(handle, delimiter="\t"))
-        for row in rows:
-            record_id = row.get("pdb_id", "")
-            if not record_id:
-                raise ValueError(f"empty pdb_id in {manifest_path}")
-            if record_id in entries_by_id:
-                raise ValueError(f"duplicate pdb_id in {manifest_path}")
-            entries_by_id[record_id] = {
-                "record_id": record_id,
-                "pdb": row.get("native_pdb", f"trajectories/{record_id}_{temp}.pdb"),
-                "dcd": row.get(
-                    "trajectory_dcd", f"trajectories/{record_id}_{temp}.dcd"
-                ),
-                "source_status": "ok",
-                "source_reason": "",
-            }
+    """One entry per ``job_nano_<pdb>`` job in the heterogeneous MD source.
 
-        # The finalized source manifest contains only successfully staged pairs.
-        # Retain failed/skipped source jobs as explicit MISSING.tsv records so a
-        # derived label without a deposited trajectory (for example 6o8d at
-        # 400 K) cannot disappear silently from the new bundle.
-        strip_manifest = source_root / "_strip_manifest.tsv"
-        if strip_manifest.exists():
-            with strip_manifest.open(newline="", encoding="utf-8") as handle:
-                strip_rows = list(csv.DictReader(handle, delimiter="\t"))
-            seen_strip: set[str] = set()
-            for row in strip_rows:
-                record_id = row.get("pdb_id", "")
-                if not record_id:
-                    raise ValueError(f"empty pdb_id in {strip_manifest}")
-                if record_id in seen_strip:
-                    raise ValueError(f"duplicate pdb_id in {strip_manifest}")
-                seen_strip.add(record_id)
-                if record_id in entries_by_id:
-                    continue
-                entries_by_id[record_id] = {
-                    "record_id": record_id,
-                    "pdb": f"trajectories/{record_id}_{temp}.pdb",
-                    "dcd": f"trajectories/{record_id}_{temp}.dcd",
-                    "source_status": row.get("status", "not staged"),
-                    "source_reason": row.get("reason", ""),
-                }
-
-        return [entries_by_id[key] for key in sorted(entries_by_id)]
-
-    # Fallback for a staging directory whose manifest has not yet been built.
-    trajectory_root = source_root / "trajectories"
-    stems = {
-        path.name.removesuffix(f"_{temp}.pdb")
-        for path in trajectory_root.glob(f"*_{temp}.pdb")
-    } | {
-        path.name.removesuffix(f"_{temp}.dcd")
-        for path in trajectory_root.glob(f"*_{temp}.dcd")
-    }
-    return [
-        {
+    The window has to come from the full productions under the study root; the
+    older protein-only staging directories keep the final 30 ns only and reset
+    their time axis, so the analysed 10 to 40 ns cannot be recovered from them.
+    """
+    want_temp = float(temp.removesuffix("K"))
+    entries: list[dict[str, str]] = []
+    for job_root in sorted(source_root.glob("job_nano_*"), key=str):
+        record_id = job_root.name.removeprefix("job_nano_")
+        entry = {
             "record_id": record_id,
-            "pdb": f"trajectories/{record_id}_{temp}.pdb",
-            "dcd": f"trajectories/{record_id}_{temp}.dcd",
+            "pdb": "",
+            "dcd": "",
             "source_status": "ok",
             "source_reason": "",
         }
-        for record_id in sorted(stems)
-    ]
+        try:
+            trajectory, reference = _production_and_reference(
+                job_root / "nodes", want_temp=want_temp
+            )
+            entry["dcd"] = str(trajectory)
+            entry["pdb"] = str(reference)
+        except (FileNotFoundError, ValueError, KeyError) as exc:
+            entry["source_status"] = "unresolved"
+            entry["source_reason"] = f"{type(exc).__name__}: {exc}"
+        entries.append(entry)
+    return entries
 
 
 def discover_heterogeneous(
@@ -355,8 +381,8 @@ def discover_heterogeneous(
     rows: list[dict[str, object]] = []
     for entry in entries:
         record_id = entry["record_id"]
-        source_pdb = source_root / entry["pdb"]
-        source_dcd = source_root / entry["dcd"]
+        source_pdb = Path(entry["pdb"]) if entry["pdb"] else source_root / "missing.pdb"
+        source_dcd = Path(entry["dcd"]) if entry["dcd"] else source_root / "missing.dcd"
         stem = f"{record_id}_{temp}_backbone"
         task = ConversionTask(
             component=component,
@@ -371,8 +397,13 @@ def discover_heterogeneous(
             native_pdb=str(source_pdb),
             output_pdb=str(trajectory_root / f"{stem}.pdb"),
             output_dcd=str(trajectory_root / f"{stem}.dcd"),
-            max_frames=HETEROGENEOUS_N_FRAMES,
-            reference_definition="production trajectory frame 0, retained in the source native-reference PDB (native reference used for Q)",
+            window_lo_ps=WINDOW_LO_PS,
+            window_hi_ps=WINDOW_HI_PS,
+            cadence_ps=CADENCE_PS,
+            reference_definition=(
+                "parent equilibration structure, the coordinates that entered "
+                "production (native reference used for Q)"
+            ),
             repo_root=str(repo_root),
             component_root=str(component_root),
         )
@@ -380,7 +411,7 @@ def discover_heterogeneous(
         source_status = entry.get("source_status", "ok")
         source_reason = entry.get("source_reason", "")
         if source_status != "ok":
-            reason = f"source staging status={source_status}"
+            reason = f"source status={source_status}"
             if source_reason:
                 reason += f": {source_reason}"
             row.update(status="missing", reason=reason)
@@ -412,6 +443,34 @@ def _select_backbone(universe: object, context: str) -> object:
             f"{context}: backbone selection contains unexpected atom names: {unexpected}"
         )
     return atoms
+
+
+def _window_frames(
+    trajectory: object, lo_ps: float, hi_ps: float, cadence_ps: float
+) -> list[int]:
+    """Frame indices with time in ``[lo_ps, hi_ps)`` at ``cadence_ps`` spacing.
+
+    Mirrors the frame selection in scripts/recompute_aligned_hphil_q.py: solve
+    for the index range from the first frame time and the source interval, so a
+    long or short production is windowed by time rather than by position.
+    """
+    trajectory[0]
+    t0 = float(trajectory.time)
+    dt = float(trajectory.dt)
+    if dt <= 0.0:
+        raise ValueError("source trajectory reports a non-positive timestep")
+    stride = max(1, int(round(cadence_ps / dt)))
+    if abs(stride * dt - cadence_ps) > 1.0e-3:
+        raise ValueError(
+            f"source interval {dt:g} ps cannot be subsampled to {cadence_ps:g} ps"
+        )
+    lo_i = max(0, math.ceil((lo_ps - t0) / dt))
+    hi_i = min(len(trajectory) - 1, math.floor((hi_ps - 1.0e-6 - t0) / dt))
+    return [
+        index
+        for index in range(lo_i, hi_i + 1, stride)
+        if lo_ps - 1.0e-6 <= t0 + index * dt < hi_ps
+    ]
 
 
 def _load_source(task: ConversionTask) -> tuple[object, object, str]:
@@ -500,23 +559,24 @@ def convert_one(task: ConversionTask) -> dict[str, object]:
         universe, atoms, topology_used = _load_source(task)
         signature = _atom_signature(atoms)
         n_source = len(universe.trajectory)
-        if task.max_frames:
-            if n_source < task.max_frames:
-                raise ValueError(
-                    f"source has {n_source} frames; {task.max_frames} are required"
-                )
-            n_kept = task.max_frames
-        else:
-            n_kept = n_source
-
-        frame_start = n_source - n_kept
-        # The deposited DCD is the final common 30-ns window.  Q itself uses
-        # production frame 0 as its native reference in both data designs.
+        frame_indices = _window_frames(
+            universe.trajectory, task.window_lo_ps, task.window_hi_ps, task.cadence_ps
+        )
+        if len(frame_indices) != WINDOW_N_FRAMES:
+            raise ValueError(
+                f"[{task.window_lo_ps:g}, {task.window_hi_ps:g}) ps at "
+                f"{task.cadence_ps:g} ps yielded {len(frame_indices)} frames of "
+                f"{n_source}; expected {WINDOW_N_FRAMES}"
+            )
+        n_kept = len(frame_indices)
+        frame_start = frame_indices[0]
         universe.trajectory[frame_start]
         start_time_ps = float(universe.trajectory.time)
-        time_step_ps = float(universe.trajectory.dt)
+        # Deposited sampling interval, not the source one: the scans are
+        # subsampled from 10 ps to the analysed 100 ps cadence.
+        time_step_ps = task.cadence_ps
         first_coordinates = atoms.positions.copy()
-        universe.trajectory[n_source - 1]
+        universe.trajectory[frame_indices[-1]]
         last_coordinates = atoms.positions.copy()
         if task.native_pdb:
             import MDAnalysis as mda
@@ -581,7 +641,8 @@ def convert_one(task: ConversionTask) -> dict[str, object]:
             nsavc=1,
             istart=istart,
         ) as writer:
-            for _ in universe.trajectory[frame_start:]:
+            for index in frame_indices:
+                universe.trajectory[index]
                 writer.write(atoms)
 
         _validate_output(tmp_pdb, tmp_dcd, *validation_args)
@@ -716,17 +777,17 @@ def build_parser(repo_root: Path) -> argparse.ArgumentParser:
         "--study-root",
         type=Path,
         default=repo_root / "mdclaw" / "studies" / "fep_md_400k_all",
-        help="matched 1MEL/4IDL MD study directory",
+        help="1MEL/4IDL single mutation scan MD study directory",
+    )
+    # Both temperatures live in the same study root; the production node is
+    # selected by temperature.  The full productions are required: the older
+    # protein-only staging directories keep the final 30 ns only.
+    heterogeneous_root = Path(os.path.expanduser("~/tmp/mdclaw_nanobodies"))
+    parser.add_argument(
+        "--heterogeneous-300k-root", type=Path, default=heterogeneous_root
     )
     parser.add_argument(
-        "--heterogeneous-300k-root",
-        type=Path,
-        default=repo_root / "zenodo" / "md_trajectories_300K",
-    )
-    parser.add_argument(
-        "--heterogeneous-400k-root",
-        type=Path,
-        default=repo_root / "zenodo" / "md_trajectories_400K",
+        "--heterogeneous-400k-root", type=Path, default=heterogeneous_root
     )
     parser.add_argument(
         "--components",
@@ -767,11 +828,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     discoveries: dict[str, tuple[list[ConversionTask], list[dict[str, object]]]] = {}
     for component in components:
         if component == "scan_1mel":
-            discoveries[component] = discover_matched(
+            discoveries[component] = discover_scan(
                 repo_root, out_root, args.study_root.resolve(), "1mel"
             )
         elif component == "scan_4idl":
-            discoveries[component] = discover_matched(
+            discoveries[component] = discover_scan(
                 repo_root, out_root, args.study_root.resolve(), "4idl"
             )
         elif component == "heterogeneous_300K":
