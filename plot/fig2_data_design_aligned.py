@@ -158,15 +158,16 @@ def build():
     polish(ax, "x", boxed=True)
     panel_label(ax, "C")
 
-    # ---- save (pdf/svg/png) to plot/ and paper/analysis/ ------------------
-    stem = "fig2_data_design_aligned"
-    outdirs = [os.path.join(REPO, "plot"), os.path.join(REPO, "paper", "analysis")]
-    for od in outdirs:
+    # ---- save (pdf/svg/png) — this is manuscript Fig 2 (fig_outline02) --------
+    targets = [(os.path.join(REPO, "plot"), "fig2_data_design_aligned"),
+               (os.path.join(REPO, "paper", "analysis"), "fig2_data_design_aligned"),
+               (os.path.join(REPO, "paper", "tex", "figures"), "fig_outline02_data_design")]
+    for od, stem in targets:
         os.makedirs(od, exist_ok=True)
         for ext in ("pdf", "svg", "png"):
             fig.savefig(os.path.join(od, f"{stem}.{ext}"), dpi=600 if ext == "png" else None)
     plt.close(fig)
-    print("wrote", os.path.join(outdirs[0], stem + ".pdf"))
+    print("wrote", os.path.join(REPO, "paper/tex/figures/fig_outline02_data_design.pdf"))
 
 
 if __name__ == "__main__":

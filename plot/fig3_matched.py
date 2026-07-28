@@ -128,13 +128,16 @@ def render(out_stem):
     panel_label(axes[0], "A")
     panel_label(axes[1], "B")
 
-    outdirs = [os.path.join(REPO, "plot"), os.path.join(REPO, "paper", "analysis")]
-    for od in outdirs:
+    # out_stem is the analysis name; also write manuscript Fig 3 (fig_outline03).
+    targets = [(os.path.join(REPO, "plot"), out_stem),
+               (os.path.join(REPO, "paper", "analysis"), out_stem),
+               (os.path.join(REPO, "paper", "tex", "figures"), "fig_outline03_physical_observable")]
+    for od, stem in targets:
         os.makedirs(od, exist_ok=True)
         for ext in ("pdf", "svg", "png"):
-            fig.savefig(os.path.join(od, f"{out_stem}.{ext}"), dpi=600 if ext == "png" else None)
+            fig.savefig(os.path.join(od, f"{stem}.{ext}"), dpi=600 if ext == "png" else None)
     plt.close(fig)
-    print("wrote", os.path.join(outdirs[1], out_stem + ".pdf"))
+    print("wrote", os.path.join(REPO, "paper/tex/figures/fig_outline03_physical_observable.pdf"))
 
 
 def main():

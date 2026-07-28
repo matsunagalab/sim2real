@@ -33,10 +33,32 @@ from matplotlib.patches import Circle, FancyArrowPatch, FancyBboxPatch, Patch
 
 REPO = Path(__file__).resolve().parents[1]
 RESULTS = REPO / "results"
+
+# MATCHED=1 draws the figures from the variant-set-matched single-mutation
+# comparison (FEP/MD/Rosetta/ThermoMPNN restricted to the same 431/406 set;
+# MD using rerun labels + re-selected HP), read from results/tuned_rep_matched
+# and the matched final_ dirs. Unset = the original full-set figures.
+MATCHED = os.environ.get("MATCHED", "").strip() not in ("", "0", "false", "False")
+TUNED_REP = RESULTS / ("tuned_rep_matched" if MATCHED else "tuned_rep")
+
+# source runkey -> matched final_ dir stem (Tm and the two-mutation Rosetta
+# sets keep their own runs).
+_MATCHED_STEM = {"fep": "fep_mdmatch", "tmpnn": "tmpnn_mdmatch", "ros": "ros_mdmatch"}
+
+
+def final_dir(stem: str, regime: str) -> Path:
+    """Resolve a final_ result dir, honoring MATCHED for the matched sources."""
+    if MATCHED and stem == "mdq":
+        return RESULTS / f"final_mdq_{regime}_hpo"
+    if MATCHED and stem in _MATCHED_STEM:
+        return RESULTS / f"final_{_MATCHED_STEM[stem]}_{regime}"
+    return RESULTS / f"final_{stem}_{regime}"
+
+
 # Tuned two-axis summaries (built by plot/build_tuned_summaries.py from the
 # final_* staged-HPO runs). HOT = encoder unfrozen; FROZEN = encoder frozen.
-SUMMARY_JSON = RESULTS / "tuned_rep" / "hot_summary.json"
-FROZEN_SUMMARY_JSON = RESULTS / "tuned_rep" / "frozen_summary.json"
+SUMMARY_JSON = TUNED_REP / "hot_summary.json"
+FROZEN_SUMMARY_JSON = TUNED_REP / "frozen_summary.json"
 DIVERSE_HOT_SUMMARY_JSON = RESULTS / "source_screen" / "final_source_screen_summary.json"
 DIVERSE_FROZEN_SUMMARY_JSON = RESULTS / "source_screen" / "final_frozen_core_summary.json"
 DATA_MD = REPO / "data" / "md"
@@ -100,10 +122,10 @@ SOURCE_COLOR = {
 #   all frozen). Tm-only shown as its tuned frozen baseline (dashed line). In the
 #   frozen regime both FEP and the FEP-matched MD label scale below the Tm-only
 #   baseline, i.e. they beat training on experimental Tm labels alone.
-FIG2A_TM_BASELINE = RESULTS / "tuned_rep" / "Tm_only_frozen" / "scaling.json"
+FIG2A_TM_BASELINE = TUNED_REP / "Tm_only_frozen" / "scaling.json"
 FIG2A_CURVES = [
-    ("FEP mutation free energy", RESULTS / "final_fep_frozen" / "scaling.json", COL["fep"], "o"),
-    ("MD native-contact (matched scan)", RESULTS / "final_mdq_frozen" / "scaling.json", COL["mdq"], "D"),
+    ("FEP mutation free energy", final_dir("fep", "frozen") / "scaling.json", COL["fep"], "o"),
+    ("MD native-contact (matched scan)", final_dir("mdq", "frozen") / "scaling.json", COL["mdq"], "D"),
 ]
 
 SIZE35_TM_JSON = RESULTS / "size35_tm_shared_drop005" / "scaling.json"
@@ -128,9 +150,9 @@ FIG3A_DIVERSE = {
 }
 FIG3A_MATCHED = {
     "title": "FEP-matched mutation scan",
-    "tm": (RESULTS / "tuned_rep" / "Tm_only_frozen" / "scaling.json", "single"),
-    "fep": (RESULTS / "tuned_rep" / "FEP_frozen" / "scaling.json", "single"),
-    "md": (RESULTS / "tuned_rep" / "MD_FEP400K_frozen" / "scaling.json", "single"),
+    "tm": (TUNED_REP / "Tm_only_frozen" / "scaling.json", "single"),
+    "fep": (TUNED_REP / "FEP_frozen" / "scaling.json", "single"),
+    "md": (TUNED_REP / "MD_FEP400K_frozen" / "scaling.json", "single"),
     "md_label": "MD native-contact\n(matched scan)",
 }
 
@@ -143,14 +165,14 @@ FIG3B_MATCHED_CSVS = [
 
 # (c) Label-count scaling of the matched-scan MD label (FROZEN) as paired
 #     ΔMAE(n) vs the tuned frozen Tm-only baseline.
-FIG3C_MD_FROZEN = RESULTS / "final_mdq_frozen" / "scaling.json"
-FIG3C_TM_FROZEN = RESULTS / "final_tm_frozen" / "scaling.json"
+FIG3C_MD_FROZEN = final_dir("mdq", "frozen") / "scaling.json"
+FIG3C_TM_FROZEN = final_dir("tm", "frozen") / "scaling.json"
 
 # Fine-tuned label-count curves used in the calculated-quantity figure.
-FIG3_HOT_TM_BASELINE = RESULTS / "final_tm_hot" / "scaling.json"
+FIG3_HOT_TM_BASELINE = final_dir("tm", "hot") / "scaling.json"
 FIG3_HOT_CURVES = [
-    ("FEP mutation free energy", RESULTS / "final_fep_hot" / "scaling.json", COL["fep"], "o"),
-    ("MD native-contact (matched scan)", RESULTS / "final_mdq_hot" / "scaling.json", COL["mdq"], "D"),
+    ("FEP mutation free energy", final_dir("fep", "hot") / "scaling.json", COL["fep"], "o"),
+    ("MD native-contact (matched scan)", final_dir("mdq", "hot") / "scaling.json", COL["mdq"], "D"),
 ]
 
 # ---------------------------------------------------------------------------
@@ -339,8 +361,8 @@ def fep_minus_md_rows() -> pd.DataFrame:
     """Direct paired FEP-minus-matched-MD contrast in each encoder regime."""
     records = []
     for encoder in ("frozen", "hot"):
-        fep = select_scaling_point(RESULTS / f"final_fep_{encoder}" / "scaling.json", "max_n")
-        md = select_scaling_point(RESULTS / f"final_mdq_{encoder}" / "scaling.json", "max_n")
+        fep = select_scaling_point(final_dir("fep", encoder) / "scaling.json", "max_n")
+        md = select_scaling_point(final_dir("mdq", encoder) / "scaling.json", "max_n")
         delta, lo, hi = paired_delta_ci(
             np.asarray(md["abs_errors"], dtype=float),
             np.asarray(fep["abs_errors"], dtype=float),
@@ -707,7 +729,7 @@ def fig01_concept_protocol(rows: pd.DataFrame) -> None:
     ax = axes[1, 0]
     hide_axes(ax)
     categories = [
-        ("mutation effects", ["FEP mutation free energy", "Rosetta mutation score", "ThermoMPNN stability score"], COL["soft_green"], COL["fep"]),
+        ("mutation effects", ["FEP mutation free energy", "Rosetta mutation score", "FoldX stability score"], COL["soft_green"], COL["fep"]),
         ("variant proposals", ["ESM2-proposed variants + Rosetta", "random variants + Rosetta"], COL["soft_blue"], COL["design"]),
         ("structural dynamics", ["MD Q-value from native contacts"], COL["soft_red"], COL["mdq"]),
     ]
@@ -1046,9 +1068,9 @@ def fig2_data_design(rows: pd.DataFrame, paired: dict) -> None:
     ax = axes[0]
     ax.axhline(0.0, color=COL["baseline"], linewidth=1.0, linestyle="--", zorder=1)
     md_series = [
-        ("frozen encoder", RESULTS / "final_mdq_frozen" / "scaling.json",
+        ("frozen encoder", final_dir("mdq", "frozen") / "scaling.json",
          FIG3C_TM_FROZEN, "s", "-", True),
-        ("fine-tuned encoder", RESULTS / "final_mdq_hot" / "scaling.json",
+        ("fine-tuned encoder", final_dir("mdq", "hot") / "scaling.json",
          FIG3_HOT_TM_BASELINE, "o", "--", False),
     ]
     for label, path, baseline, marker, linestyle, filled in md_series:
@@ -1281,12 +1303,12 @@ def main() -> None:
     configure_style()
     rows = source_rows()
     verify_abs_error_alignment(rows)
-    paired = paired_comparisons()
-    write_summary_tsv(rows, paired)
     if not args.skip_fig1:
         fig01_concept_protocol(rows)
-    fig2_data_design(rows, paired)
-    fig3_physical_observable(rows, paired)
+    # Fig 2 (fig_outline02_data_design) and Fig 3 (fig_outline03_physical_observable)
+    # are now built by plot/fig2_data_design_aligned.py and plot/fig3_matched.py,
+    # which own the current aligned-Q / FoldX manuscript versions. This script only
+    # builds the concept schematic (Fig 1), which the authors edit separately.
 
 
 if __name__ == "__main__":

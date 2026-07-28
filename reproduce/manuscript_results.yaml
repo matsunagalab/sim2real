@@ -559,11 +559,16 @@ stages:
         - results/tuned_rep/rosetta_esm_hot/scaling.json
 
   figures:
-    - name: rebuild Figs. 2 and 3
+    - name: rebuild Fig. 2 (data design, aligned Q)
       type: command
-      command: [uv, run, python, plot/make_outline_figures.py, --skip-fig1]
+      command: [uv, run, python, plot/fig2_data_design_aligned.py]
       outputs:
         - paper/tex/figures/fig_outline02_data_design.pdf
+
+    - name: rebuild Fig. 3 (physical observable, FoldX)
+      type: command
+      command: [uv, run, python, plot/fig3_matched.py]
+      outputs:
         - paper/tex/figures/fig_outline03_physical_observable.pdf
 
     - name: rebuild supplementary figures and tables
