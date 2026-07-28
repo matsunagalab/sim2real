@@ -97,11 +97,11 @@ def build():
     # ---- (a),(b) label-count scaling, ΔMAE vs Tm-only, split by encoder ---
     scaling_axes = {"frozen": axes[0], "hot": axes[1]}
     titles = {"frozen": "Frozen encoder", "hot": "Fine-tuned encoder"}
-    # Same marker style in both panels (filled circle, colour = design); the
-    # encoder regime is the panel, not the marker. No error bars (the between-design
-    # CIs live in panel (c)).
+    # Marker encodes the encoder as in Fig 3: frozen = filled square, fine-tuned =
+    # open circle; colour = design. No error bars (the between-design CIs live in (c)).
     for reg, ax in scaling_axes.items():
         base = tmonly_mae(reg)
+        marker = "s" if reg == "frozen" else "o"
         ax.axhline(base, color=COL["baseline"], lw=1.1, ls="--", zorder=1)
         ax.annotate("Tm-only", xy=(0.03, base), xycoords=ax.get_yaxis_transform(),
                     xytext=(0, -3), textcoords="offset points",
@@ -109,8 +109,11 @@ def build():
         for stem, c, label in [("scan_pool", SCAN, "Single mutation scan"),
                                ("hetero", HET, "Heterogeneous")]:
             x, y, _, _ = abs_mae(stem, reg)
-            ax.plot(x, y, marker="o", linestyle="-", color=c,
-                    markerfacecolor=c, markeredgecolor="white", markeredgewidth=0.8,
+            face = c if reg == "frozen" else "white"
+            edge = "white" if reg == "frozen" else c
+            ax.plot(x, y, marker=marker, linestyle="-", color=c,
+                    markerfacecolor=face, markeredgecolor=edge,
+                    markeredgewidth=0.8 if reg == "frozen" else 1.3,
                     markersize=6.8, label=label, zorder=3)
         ax.set_xscale("log", base=2); ax.set_xlim(16, 560)
         ax.set_xticks(NS, [str(n) for n in NS])
