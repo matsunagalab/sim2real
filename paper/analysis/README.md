@@ -16,12 +16,12 @@ The LaTeX-ready copies of rendered figures are written to
 
 ## Fixed Inputs
 
-The manuscript analysis treats raw MD, FEP, Rosetta, and ThermoMPNN
+The manuscript analysis treats raw MD, FEP, Rosetta, and FoldX
 calculations as fixed upstream inputs. The processed tables used by training are
 kept in the repository under:
 
 - `data/nbbench/`: fixed experimental Tm train, validation, and test splits.
-- `data/source_labels/`: FEP, Rosetta, and ThermoMPNN mutation-effect tables.
+- `data/source_labels/`: FEP, Rosetta, and FoldX mutation-effect tables.
 - `data/md/`: processed MD-derived Q-value and control-feature tables.
 
 `data/source_labels/MANIFEST.tsv` is the source-label catalog read by

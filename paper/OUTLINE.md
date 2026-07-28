@@ -1,6 +1,6 @@
 # Manuscript Outline — Sim2Real Nanobody Tm
 
-Last revised: 2026-07-15
+Last revised: 2026-07-28
 
 This file is the working plan for the manuscript. It records the story, the
 figures, the numerical results, and the limits of the conclusions. The paper
@@ -14,7 +14,7 @@ should use plain words wherever a technical term is not needed.
 - **Experimental split:** 57 Tm values for training, 114 for validation, and
   396 reserved for final testing.
 - **Main figures:** Fig. 1–3. Fig. 1 is being revised separately by the authors.
-- **Supplementary figures:** Fig. S1–S2.
+- **Supplementary figures:** Fig. S1 (FEP across ESM2 encoder sizes).
 - **Main statistical display:** paired change in test MAE with a 95% bootstrap
   interval over the same 396 test sequences.
 
@@ -34,13 +34,13 @@ quantities provide useful additional training labels?
 
 ### Main answer
 
-The number of calculated labels alone did not explain their value. Among the
-two complete MD plans tested, local mutation scans gave a larger observed gain
-with a frozen encoder than a heterogeneous structure panel. Among the calculated
-quantities, FEP gave the lowest observed test error with both frozen and
-fine-tuned encoders. The 95% interval for the fine-tuned FEP change included
-zero, so that result should be described as the lowest observed error, not as a
-clear improvement.
+The number of calculated labels alone did not explain their value. Among the two
+MD data designs, a sequence-diverse heterogeneous panel lowered Tm error once the
+encoder was fine-tuned, whereas a single mutation scan of two fixed structures did
+not help. Among the calculated quantities, FEP gave the lowest test error and was
+the only source significant with both a frozen and a fine-tuned encoder; among the
+empirical ΔΔG methods, FoldX transferred with a frozen encoder but Rosetta did
+not.
 
 ### Practical lesson
 
@@ -50,54 +50,46 @@ values are not automatically more useful.
 
 ## 3. What the data show
 
-### Result 1 — The two complete MD plans gave different results
+### Result 1 — Sequence-diverse data helped after fine-tuning; the single scan did not
 
-Both plans used 400 K MD and a native-contact quantity from the Best–Hummer
-family, but they differed in several other ways.
+Both data designs used 400 K MD and a hydrophilic native-contact Best–Hummer Q on
+one common protocol (same [10, 40) ns window at 100 ps, parent-equilibration
+reference, single MD head, shared architecture), so they differed only in the
+sequences covered.
 
-- The heterogeneous plan contained 1,143 PDB-derived rows representing 833
-  unique sequences. Rows differed in sequence length, contact selection, and
-  structure.
-- The matched plan used single mutations of 1MEL and 4IDL, with 837 sequence
-  rows that were also present in the 844-row FEP pool.
-- The two plans used different contact definitions, averaging windows,
-  preprocessing, and independently selected model settings.
+- The heterogeneous panel was 763 distinct nanobody sequences from SAbDab.
+- The single mutation scan was single mutations of 1MEL and 4IDL (an 810-row pool).
 
-For the frozen encoder, the heterogeneous plan changed MAE by
-−0.049 °C (95% CI, −0.092 to −0.006 °C), whereas the matched plan changed it by
-−0.195 °C (95% CI, −0.366 to −0.030 °C). Neither plan gave a clear gain after
-encoder fine-tuning.
+At the largest label count (n = 320 per model), the heterogeneous panel changed
+MAE by −0.09 °C frozen (95% CI, −0.18 to +0.02) and −0.30 °C fine-tuned (−0.56 to
+−0.07), whereas the single mutation scan changed it by +0.01 °C in both encoders.
+The direct scan-minus-heterogeneous contrast was +0.31 °C fine-tuned (95% CI,
++0.08 to +0.56). The sequence-diverse design, not the single mutation scan,
+lowered Tm error, and only after fine-tuning.
 
-This is a comparison of complete plans, not a test in which only the selected
-sequences changed. The paper must not assign the difference to one factor.
+### Result 2 — FEP was the only physical quantity significant with both encoders
 
-### Result 2 — FEP gave the lowest observed error in both encoder settings
+At n = 320, ΔMAE against the shared Tm-only baseline (frozen 7.27, fine-tuned 6.72):
 
-At the largest label count:
+- FEP: −0.245 frozen (95% CI, −0.450 to −0.036) and −0.368 fine-tuned (−0.498 to
+  −0.235); significant in both.
+- FoldX: −0.181 frozen (−0.298 to −0.065), significant; −0.120 fine-tuned (ns).
+  FoldX beat Rosetta directly (frozen −0.135; −0.223 to −0.047).
+- MD native-contact Q: −0.111 frozen, +0.010 fine-tuned; both intervals include 0.
+- Rosetta: −0.046 frozen, +0.037 fine-tuned; both intervals include 0.
+- Rosetta on random variants: significant fine-tuned (−0.162; −0.291 to −0.033).
+  Rosetta on ESM2-proposed variants was not significant.
 
-- Frozen FEP: ΔMAE = −0.221 °C (95% CI, −0.393 to −0.051 °C).
-- Frozen matched MD: ΔMAE = −0.195 °C (95% CI, −0.366 to −0.030 °C).
-- Fine-tuned FEP: ΔMAE = −0.153 °C (95% CI, −0.323 to +0.020 °C).
-- Fine-tuned matched MD: ΔMAE = +0.029 °C
-  (95% CI, −0.139 to +0.197 °C).
-
-FEP and matched MD both gave clear frozen-encoder gains. Their direct frozen
-difference was small and unresolved: FEP minus MD = −0.026 °C
-(95% CI, −0.243 to +0.192 °C). With a fine-tuned encoder, FEP had a lower
-observed error than MD by 0.182 °C, but the 95% interval still included zero
-(−0.393 to +0.024 °C).
-
-Plain Rosetta, ThermoMPNN, and Rosetta scores for random variants gave little or
-no gain. ESM2-proposed variants followed by Rosetta increased error by
-0.411 °C (95% CI, +0.140 to +0.698 °C).
+FEP is the most direct thermodynamic proxy for Tm; among the two empirical ΔΔG
+methods FoldX transferred but Rosetta did not, so the tool matters, not only the
+quantity.
 
 ### Result 3 — The amount of data did not give a simple rule
 
-For the frozen encoder, both FEP and matched MD improved between the smallest
-and largest label counts, but the four points were not monotonic enough to fit
-a scaling law. For the fine-tuned encoder, matched MD was harmful at the
-smallest count and returned near the Tm-only value at the largest count. FEP
-ended with the lowest observed error, but its 95% interval included zero.
+Data-set size did not predict transfer. The heterogeneous panel (763) and the scan
+(810) were sampled to the same n = 320, yet only the heterogeneous panel helped;
+and the 1,000-variant Rosetta sets did not beat the smaller single-point scans.
+FEP helped across the tested label counts and across ESM2 encoder sizes.
 
 Here, \(n\) is the number sampled from each scaffold table for each ensemble
 member. Eighty percent of those rows entered training and 20% were set aside
@@ -108,32 +100,21 @@ for each ensemble member.
 
 ### Sequence overlap
 
-The heterogeneous MD table had exact full-sequence matches to 2 Tm-training,
-4 Tm-validation, and 8 Tm-test sequences. The model could see calculated
-\(Q\) values for these sequences, but never their reserved test Tm values.
-Removing the eight test matches from the error calculation left the main
-contrast almost unchanged:
-
-- frozen encoder: −0.049 °C, 95% CI −0.094 to −0.005 °C;
-- fine-tuned encoder: +0.122 °C, 95% CI −0.005 to +0.248 °C.
-
-This check shows that the test errors of the eight matches did not drive the
-result. We did not retrain after removing overlapping calculated-label rows, so
-the check does not rule out an effect on training or model selection.
+The aligned heterogeneous MD table (763 distinct sequences) had no exact
+full-sequence match to any NbBench training, validation, or test sequence, so no
+reserved target sequence appeared among the calculated labels.
 
 ### Repeated structures and sequence length
 
-Ninety-seven sequences account for 407 of the 1,143 heterogeneous rows. The
-model did not receive PDB identifiers, but row sampling gives repeated
-sequences more weight. The heterogeneous \(Q\) value also has a weak positive
-correlation with sequence length (Pearson \(r=+0.13\)). Eleven rows are longer
-than the 158-residue input limit and are truncated. These observations are
-possible explanations or sources of bias, not proof of a cause.
+The aligned heterogeneous set is 763 distinct sequences, and the model did not
+receive PDB identifiers. A weak dependence of the heterogeneous \(Q\) on sequence
+length and truncation of the few sequences longer than the 158-residue input
+remain possible sources of bias, not proof of a cause.
 
 ### Limits on the conclusions
 
 - The Tm training set contains only 57 nanobodies.
-- The matched calculations cover only 1MEL and 4IDL.
+- The single-mutation calculations cover only 1MEL and 4IDL.
 - The two MD plans differ in more than one part of their setup.
 - The selected FEP and MD models do not always use the same regression form.
 - Bootstrap intervals resample the fixed test proteins after averaging trained
@@ -153,10 +134,10 @@ Use one paragraph of at most 250 words.
 2. Explain that stability calculations can add data but do not measure Tm.
 3. Each calculated quantity and encoder setting was selected using Tm validation
    only, then compared using the same 396 test Tm values.
-4. The local mutation-scan MD plan gave a larger frozen-encoder gain than the
-   heterogeneous plan, while the plans differed in several ways.
-5. FEP gave the lowest observed error in both encoder settings; the fine-tuned
-   95% interval included zero.
+4. A sequence-diverse heterogeneous MD panel lowered Tm error after fine-tuning,
+   while a single mutation scan of two fixed structures did not.
+5. FEP gave the lowest error and was the only source significant with both encoder
+   settings; FoldX also helped with a frozen encoder.
 6. Simulations should be planned around both the systems and the reported
    quantity, rather than data count alone.
 
@@ -175,7 +156,7 @@ are meant to support. Do not open with the study design or model results.
 1. Explain why low-data Tm prediction matters for nanobody engineering.
 2. Explain why calculated labels may help but should not be called Tm data.
 3. Distinguish Tm, mutation free energy, native-contact persistence, Rosetta
-   scores, and ThermoMPNN predictions.
+   scores, and FoldX predictions.
 4. Present multi-task transfer learning as the way these labels are tested.
 5. State the two questions: which simulation plan, and which calculated
    quantity?
@@ -192,7 +173,7 @@ Describe enough detail to reproduce every plotted comparison:
   variant, and per-structure scaling.
 - Heterogeneous 400 K MD, 1,143 rows/833 unique sequences, row sampling,
   repeated sequences, and the input-length limit.
-- Rosetta, ThermoMPNN, random variants, and ESM2-proposed variants.
+- Rosetta, FoldX, random variants, and ESM2-proposed variants.
 - The 8M ESM2 model, regression heads, frozen and fine-tuned settings, losses,
   two-stage model search, and experimental-Tm-only selection.
 - The meaning of \(n\), the 80/20 split of sampled calculated rows, and the
@@ -212,7 +193,7 @@ Keep Results and Discussion together.
 2. Compare the two complete MD plans in Fig. 2.
 3. Report the sequence-overlap check and possible effects of length and
    repeated structures without assigning cause.
-4. Compare FEP, matched MD, Rosetta, and ThermoMPNN in Fig. 3.
+4. Compare FEP, MD, Rosetta, and FoldX in Fig. 3.
 5. Explain why FEP may be more closely related to folding stability, while
    making clear that the molecular reason was not tested.
 6. Cite the group’s mechanistic preprint as a future question about learned
@@ -294,19 +275,19 @@ question raised by the main text.
 
 | Encoder | Test MAE (°C) |
 |---|---:|
-| Frozen | 7.229 |
-| Fine-tuned | 6.548 |
+| Frozen | 7.27 |
+| Fine-tuned | 6.72 |
 
 ### Largest label count
 
 | Calculated label | Frozen MAE | Frozen ΔMAE | Fine-tuned MAE | Fine-tuned ΔMAE |
 |---|---:|---:|---:|---:|
-| FEP | 7.008 | −0.221 | 6.395 | −0.153 |
-| Matched MD \(Q\) | 7.034 | −0.195 | 6.577 | +0.029 |
-| ThermoMPNN | 7.089 | −0.141 | 6.621 | +0.073 |
-| Rosetta | 7.231 | +0.002 | 6.625 | +0.078 |
-| Random variants + Rosetta | 7.216 | −0.013 | 6.692 | +0.144 |
-| ESM2 proposals + Rosetta | 7.312 | +0.083 | 6.959 | +0.411 |
+| FEP | 7.03 | −0.245 | 6.35 | −0.368 |
+| MD native-contact \(Q\) | 7.16 | −0.111 | 6.73 | +0.010 |
+| Rosetta | 7.23 | −0.046 | 6.76 | +0.037 |
+| FoldX | 7.09 | −0.181 | 6.60 | −0.120 |
+| Random variants + Rosetta | 7.25 | −0.026 | 6.56 | −0.162 |
+| ESM2 proposals + Rosetta | 7.33 | +0.056 | 6.60 | −0.116 |
 
 The displayed points and intervals are calculated from the saved 396
 per-sequence absolute errors. Use the paired 95% intervals (2.5th to 97.5th

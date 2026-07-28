@@ -1,62 +1,8 @@
 % supplementary.tex
 
-\section{Supplementary methods}
-
-\subsection{Details of the heterogeneous MD data set}
-
-The heterogeneous data set was assembled from a SAbDab summary and the
-corresponding structures \citep{Dunbar2014SAbDab}. For each PDB identifier, we
-selected the first heavy-chain entry whose chain was present in the structure
-file. After requiring a usable sequence, topology, trajectory, and hydrophilic
-native-contact label, 763 samples remained, each a distinct amino-acid sequence.
-The model did not receive the PDB identifier, and sequences exceeding the
-158-residue model input were truncated at the end.
-
-Structures were prepared and protonated at pH 7.4 with PDBFixer, pdb2pqr, and
-PROPKA \citep{Dolinsky2004PDB2PQR,Olsson2011PROPKA3}. Each protein was solvated
-in OPC water with 15~\r{A} padding and 0.15~M NaCl and described with ff19SB
-\citep{Tian2020ff19SB,Izadi2014OPC}. Equilibration at 300~K used 1~ns NVT and
-1~ns NPT with a 2-fs timestep, after which two 1-ns restrained NVT stages at
-400~K preceded 100~ns of unrestrained 400-K NVT production. Production used
-hydrogen-mass repartitioning to 4~amu, a 4-fs timestep, and output every 100~ps.
-OpenMM used PME electrostatics with a 1.0-nm cutoff, constraints on bonds to
-hydrogen, and a Langevin middle integrator with 1~ps$^{-1}$ friction
-\citep{Eastman2017OpenMM}.
-
-The contact calculation used backbone heavy-atom pairs separated by more than
-three residues and within 0.45~nm in the reference structure, counting a contact
-only when at least one residue was hydrophilic, as for the single mutation scans.
-Each structure was referenced to its own parent equilibration structure, and $Q$
-was averaged over the $[10, 40)$~ns production window sampled every 100~ps
-(300 frames). The two MD data sets thus shared one $Q$ definition, contact set,
-native reference, and averaging window, and differed only in the sequences they
-covered.
-
-\subsection{FEP charge-change check}
-
-For charge-changing mutations in a cubic 70-\r{A} box and a
-solvent dielectric constant of 78, we tested the leading analytical periodic
-net-charge (Ewald self-energy) correction \citep{Rocklin2013ChargeFEP},
-$0.086(\Delta q)^2$ kcal mol$^{-1}$. We applied it and repeated the sign
-reversal, robust scaling, Yeo--Johnson transform with standardization, and
-min--max scaling used for the training labels. Across the 284 charge-changing
-mutations the scaled labels barely moved, with a maximum shift of $0.008$ on the
-$[0,1]$ scale and a correlation of $0.99989$ with the uncorrected labels, so the
-training labels use the uncorrected $\Delta\Delta G$.
-
-\subsection{Model-size checks}
-
-We fine-tuned the 35M- and 650M-parameter ESM2 encoders without size-specific
-hyperparameter searches. For both sizes, the Tm-only model used the shared
-architecture, dropout 0.05, and an encoder learning rate of $1\times10^{-4}$.
-The FEP model used the shared architecture with separate 1MEL and 4IDL heads,
-$n=320$ samples per structure, dropout 0.15, and an encoder learning rate of
-$3\times10^{-5}$. Both conditions used a non-encoder learning rate of
-$3\times10^{-4}$, weight decay 0.04, and ten training seeds.
-
 \renewcommand{\thefigure}{S\arabic{figure}}
 
-\begin{figure}[p]
+\begin{figure}[h]
 \centering
 \includegraphics[width=0.62\textwidth]{supp_fig02_transfer_controls}
 \caption{The FEP result held across ESM2 encoder sizes. FEP-minus-Tm-only MAE
