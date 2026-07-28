@@ -19,9 +19,9 @@ free-energy perturbation (FEP) gave the lowest test MAE with both frozen and
 fine-tuned encoders and was the only source to lower error significantly in both,
 by up to 0.37$^\circ$C. Among empirical $\Delta\Delta G$ estimators, FoldX also
 lowered frozen-encoder error and outperformed Rosetta. Improvement thus depended on the
-sequences chosen and the quantity computed, not on the number of labels: these
-are fixed before any simulation runs, and are best aligned with the prediction
-task from the outset.
+sequences chosen and the quantity computed, not on the number of labels. Both
+choices are fixed before any simulation runs, and are best aligned with the
+prediction task from the outset.
 \end{abstract}
 
 \begin{keywords}
@@ -34,7 +34,7 @@ Thermal stability determines whether a nanobody can be produced, stored, and
 used reliably, and the melting temperature is a common way to quantify it.
 Measuring it across many sequences is costly, while simulations can supply
 related stability data cheaply, though never the melting temperature itself. We
-find that such data helps only when it is well chosen: free-energy perturbation
+find that such data helps only when it is well chosen. Free-energy perturbation
 labels improved Tm prediction with both a frozen and a fine-tuned encoder, a
 FoldX energy function helped with a frozen encoder, and a sequence-diverse
 simulation set helped once the encoder was fine-tuned, while several other
