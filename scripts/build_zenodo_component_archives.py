@@ -25,10 +25,9 @@ ARCHIVES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("fep", ("fep",)),
     ("rosetta_backrub_trajectories", ("rosetta_backrub_trajectories",)),
     ("rosetta_ddg_scans", ("rosetta_ddg_scans",)),
-    ("thermompnn", ("thermompnn",)),
-    ("md_matched_400K_1mel", ("md/matched_400K/1mel",)),
-    ("md_matched_400K_4idl", ("md/matched_400K/4idl",)),
-    ("md_heterogeneous_300K", ("md/heterogeneous_300K",)),
+    ("foldx", ("foldx",)),
+    ("md_mutation_scan_400K_1mel", ("md/mutation_scan_400K/1mel",)),
+    ("md_mutation_scan_400K_4idl", ("md/mutation_scan_400K/4idl",)),
     ("md_heterogeneous_400K", ("md/heterogeneous_400K",)),
 )
 
