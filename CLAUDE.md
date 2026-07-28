@@ -7,7 +7,7 @@ stability data for nanobody melting-temperature prediction.”** It tests whethe
 computational mutation labels improve nanobody Tm prediction with an ESM-2
 encoder.
 
-The current comparison includes Tm-only training and auxiliary labels from FEP, a matched 400 K MD native-contact mutation scan, Rosetta, ThermoMPNN, random variants scored by Rosetta, and ESM2-proposed variants scored by Rosetta. Results must be reported separately for frozen and fine-tuned encoders.
+The current comparison includes Tm-only training and auxiliary labels from FEP, a 400 K MD native-contact mutation scan and a heterogeneous nanobody MD panel, Rosetta, FoldX, random variants scored by Rosetta, and ESM2-proposed variants scored by Rosetta. Results must be reported separately for frozen and fine-tuned encoders.
 
 ## Experimental split
 
@@ -49,7 +49,7 @@ uv run python scripts/reproduce_paper_results.py \
   --stage all --gpus 0 --force
 ```
 
-This reruns the 14 selected final configurations. It does not repeat every candidate search or regenerate raw MD, FEP, Rosetta, or ThermoMPNN calculations.
+This reruns the 14 selected final configurations. It does not repeat every candidate search or regenerate raw MD, FEP, Rosetta, or FoldX calculations.
 
 ## Reporting rules
 

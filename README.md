@@ -8,30 +8,29 @@ melting temperature (Tm) when experimental data are scarce. Using an ESM-2
 encoder, we train on experimental Tm together with one computed auxiliary label
 at a time: mutation free energies from FEP, MD native-contact Q from either a
 local mutation scan or a heterogeneous panel of nanobodies, Rosetta
-`ddg_monomer` scores, ThermoMPNN predictions, and Rosetta scores for random or
+`ddg_monomer` scores, FoldX predictions, and Rosetta scores for random or
 ESM2-proposed variants.
 
-Whether the computed labels lower the Tm error depends on how the data are
-built, not on how many labels there are. Among the computed quantities, FEP gave
-the lowest held-out test MAE with both frozen and fine-tuned encoders (the
-fine-tuned change has a 95% interval that includes zero), while MD native-contact
-Q helped only with the frozen encoder and Rosetta and ThermoMPNN gave little or
-no improvement. Among two ways of choosing MD variants that share one Q
-definition and differ only in the variants they cover, a local mutation scan of
-two fixed structures reduced Tm error more than a heterogeneous panel of many
-nanobodies, whose Q also reflects whole-protein differences such as length — a
-form of negative transfer. Results are reported separately for frozen and
-fine-tuned encoders.
+Whether the computed labels lower the Tm error depends on how the data are built
+and which quantity is computed, not on how many labels there are. Among the
+computed quantities, FEP gave the lowest held-out test MAE and was the only source
+significant with both a frozen and a fine-tuned encoder; FoldX also helped with a
+frozen encoder and outperformed Rosetta, while MD native-contact Q and Rosetta
+gave little or no improvement. Among two ways of choosing MD variants that share
+one Q definition and differ only in the sequences they cover, a sequence-diverse
+heterogeneous panel lowered Tm error after fine-tuning, whereas a local mutation
+scan of two fixed structures did not. Results are reported separately for frozen
+and fine-tuned encoders.
 
-| Encoder | Tm labels only | + FEP | + mutation-scan MD Q |
+| Encoder | Tm labels only | + FEP | + FoldX |
 |---|---:|---:|---:|
-| Frozen | 7.229 °C | 7.008 °C (−0.221) | 7.034 °C (−0.195) |
-| Fine-tuned | 6.548 °C | 6.395 °C (−0.153) | 6.577 °C (+0.029) |
+| Frozen | 7.27 °C | 7.03 °C (−0.245) | 7.09 °C (−0.181) |
+| Fine-tuned | 6.72 °C | 6.35 °C (−0.368) | 6.60 °C (−0.120) |
 
 Values in parentheses are the change in held-out test MAE relative to the Tm-only
-model with the same encoder. All conditions are in
-`results/final_*_{frozen,hot}/scaling.json` and
-`results/tuned_rep/{frozen,hot}_summary.json`.
+model with the same encoder. Conditions are in
+`results/fig3_*_{frozen,hot}/scaling.json` (physical-observable comparison) and
+`results/design_aligned_*_{frozen,hot}/design.json` (data-design comparison).
 
 ## Experimental Tm split
 
@@ -105,7 +104,7 @@ does not repeat the full candidate search. The candidates and the selected
 settings are in `paper/analysis/supplementary/tables/candidate_validation.tsv`
 and `selected_settings.tsv`.
 
-The raw MD, FEP, Rosetta, and ThermoMPNN calculations are not run here; their
+The raw MD, FEP, Rosetta, and FoldX calculations are not run here; their
 processed CSVs are fixed inputs. The steps are defined in
 `reproduce/manuscript_results.yaml` and driven by
 `scripts/reproduce_paper_results.py`; see `REPRODUCE.md` for details.
