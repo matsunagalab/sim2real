@@ -5,11 +5,11 @@
 \subsection{The prediction target and the Tm-only baseline}
 
 Every model predicted experimental Tm for the same 396 held-out sequences, and
-every model's architecture, hyperparameters, and checkpoint were chosen on the Tm
+every model's hyperparameters and checkpoint were chosen on the Tm
 validation set (Fig.~\ref{fig:learning_framework}); the computed labels entered
 only as auxiliary training targets. We report each computed-label model against a
 baseline trained on Tm alone under the same conditions (the same regression
-architecture family, encoder setting, and training budget), the Tm-only model, so
+architecture, encoder setting, and training protocol), the Tm-only model, so
 that a change in MAE ($\Delta$MAE) below zero means the computed labels lowered the
 Tm error.
 We ran two comparisons, each with its own Tm-only baseline. In the
