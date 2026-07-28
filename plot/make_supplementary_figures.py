@@ -267,7 +267,7 @@ def effect_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
             direct.append({"regime": regime, "n": n, "fep_minus_md": d, "ci_lo": lo, "ci_hi": hi})
     sizes = []
     specs = [
-        ("8M", RESULTS / "final_tm_hot/scaling.json", RESULTS / "final_fep_hot/scaling.json", "staged-selected"),
+        ("8M", RESULTS / "n24_tm_hot_shared/scaling.json", RESULTS / "fig3_FEP_hot/scaling.json", "matched, 24-model"),
         ("35M", RESULTS / "size35_tm_shared_drop005/scaling.json",
          RESULTS / "size35_ddg_fep_enc3e-5/scaling.json", "exploratory fixed configuration"),
         ("650M", RESULTS / "size650_tm_shared_drop005/scaling.json",
