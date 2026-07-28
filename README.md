@@ -86,9 +86,10 @@ uv run python scripts/reproduce_paper_results.py --stage figures --force
 Building the PDFs needs `pdflatex` and `bibtex` (or `tectonic`); set
 `TECTONIC=/path/to/tectonic` to point at a specific Tectonic binary.
 
-To retrain the 14 selected final configurations (Tm-only and six computed-label
-conditions, each frozen and fine-tuned) from the fixed CSVs and then rebuild the
-summaries, figures, and PDFs:
+To retrain the selected final configurations (the Tm-only baseline and the
+computed-label conditions of the physical-observable and data-design comparisons,
+each frozen and fine-tuned) from the fixed CSVs and then rebuild the summaries,
+figures, and PDFs:
 
 ```bash
 uv run python scripts/reproduce_paper_results.py \
@@ -100,9 +101,9 @@ Use `--gpus` to pick a different device and add `--dry-run` to print the command
 without running them.
 
 This compact workflow retrains only the settings adopted in the manuscript; it
-does not repeat the full candidate search. The candidates and the selected
-settings are in `paper/analysis/supplementary/tables/candidate_validation.tsv`
-and `selected_settings.tsv`.
+does not repeat the full candidate search. The selected settings for each
+condition are recorded in the `config` block of the corresponding
+`results/*/scaling.json`.
 
 The raw MD, FEP, Rosetta, and FoldX calculations are not run here; their
 processed CSVs are fixed inputs. The steps are defined in
@@ -111,15 +112,16 @@ processed CSVs are fixed inputs. The steps are defined in
 
 ## Run one selected configuration
 
-For example, the final fine-tuned-encoder condition with FEP labels is:
+For example, the fine-tuned-encoder FEP condition of the physical-observable
+comparison (Fig. 3) is:
 
 ```bash
 DETACH_AUX_ENCODER=true CUDA_VISIBLE_DEVICES=0 uv run python prepare.py \
   --train-mode mtl --selection-scope tm --final-eval-split test \
-  --encoder-mode hot --ddg-source FEP --n-ddg-list 20,80,160,320 \
-  --model-arch shared --ddg-head-mode separate --encoder-lr 3e-5 \
-  --dropout-rate 0.15 --weight-decay 0.1 --n-runs 5 \
-  --exp-name final_fep_hot
+  --encoder-mode hot --ddg-source FIG3_FEP --n-ddg-list 20,80,160,320 \
+  --model-arch shared --ddg-head-mode separate \
+  --learning-rate 3e-4 --encoder-lr 1e-5 --dropout-rate 0.15 --weight-decay 0.1 \
+  --n-runs 24 --exp-name fig3_FEP_hot
 ```
 
 Run `uv run python prepare.py --help` for the available arguments. Older named
@@ -134,8 +136,8 @@ train.py                           ESM-2 multitask model and training loop
 data/nbbench/                      fixed 57/114/396 experimental Tm split
 data/source_labels/                processed mutation-label tables
 data/md/                           processed MD-derived quantities
-results/final_*/scaling.json       selected held-out test results
-results/tuned_rep/                 compact summaries used by main figures
+results/fig3_*/scaling.json        physical-observable comparison (Fig 3)
+results/design_aligned_*/design.json   data-design comparison (Fig 2)
 plot/                              manuscript figure and table builders
 paper/tex/                         main and supplementary LaTeX sources
 reproduce/manuscript_results.yaml  current reproduction steps
