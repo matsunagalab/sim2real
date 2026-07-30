@@ -39,6 +39,9 @@ results/_smoke_*/
 .idea/
 .claude/
 
-# Reference material for drafting (third-party PDFs, internal slides): local only
+# Drafting material kept out of the public repository: third-party PDFs and
+# internal slides, journal correspondence, and the local authoring notes.
 paper/refs/
 paper/cover_letter.md
+paper/README.md
+paper/CLAUDE.md
