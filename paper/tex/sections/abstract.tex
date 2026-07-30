@@ -4,19 +4,19 @@
 A nanobody's thermal stability governs how reliably it can be expressed,
 purified, and stored, yet measuring the melting temperature (Tm) of many
 sequences is expensive. Simulations yield stability-related quantities but
-cannot report Tm, leaving open which quantity, and which variants, would
+cannot report Tm, leaving open which quantity, and which sequences, would
 most help a data-limited Tm model. We added a single computed property to a
-57-sequence Tm training set. A multi-task model learned Tm and the computed property together from ESM2
-sequence representations; we selected hyperparameters on 114 Tm validation sequences
-and evaluated final models on 396 held-out sequences. Two molecular-dynamics
-(MD) data sets that used the same 400~K production and native-contact definition,
-but covered different sequences, behaved differently. A sequence-diverse set of
-many nanobody structures lowered the mean absolute error (MAE) by 0.30$^\circ$C
-after fine-tuning, whereas a single mutation scan of two fixed structures did not
-help in either encoder. Comparing physical quantities on the identical mutations,
-free-energy perturbation (FEP) gave the lowest test MAE with both encoders and
-was the only computed label to lower error significantly in both, by up to
-0.37$^\circ$C. Among empirical $\Delta\Delta G$ estimators, FoldX also
+57-sequence Tm training set. A multi-task model predicted Tm and the computed
+property from a shared ESM2 encoder, kept frozen or fine-tuned, and was selected
+and evaluated on separate held-out sequences. With the quantity fixed, two
+molecular-dynamics (MD) data sets sharing one 400~K protocol and native-contact
+definition but covering different sequences behaved differently. A
+sequence-diverse set of many nanobody structures lowered the mean absolute error
+(MAE) by 0.30$^\circ$C after fine-tuning, whereas a single mutation scan of two
+fixed structures did not help in either encoder. With the sequences fixed to one
+identical set of mutations, free-energy perturbation (FEP) gave the lowest test
+MAE with both encoders. It was the only computed label to lower error
+significantly in both, by up to 0.37$^\circ$C. Among empirical $\Delta\Delta G$ estimators, FoldX also
 lowered frozen-encoder error and outperformed Rosetta. No computed label is Tm, yet a
 relative $\Delta\Delta G$ improved an absolute Tm prediction when supplied as an
 auxiliary task. Improvement thus depended on the
