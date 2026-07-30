@@ -148,9 +148,18 @@ reproduce/manuscript_results.yaml  current reproduction steps
 Authors: Taihei Murakami, Kentaro Sasaki, Soichiro Oda, Kazuma Okada, and Yasuhiro Matsunaga.
 
 The public repository is <https://github.com/matsunagalab/sim2real>. The
-large-data deposit is described in `zenodo/README.md`; its DOI is intentionally
-left as a placeholder until the record is created.
+trajectories, calculation inputs, and processed labels are deposited at
+<https://doi.org/10.5281/zenodo.21637705>, which carries its own README
+describing the deposited files.
 
 ## License
 
-MIT License
+The code and derived data written for this study are released under the MIT
+license (`LICENSE`).
+
+Some files come from elsewhere and keep their own terms: the measured melting
+temperatures are from the NbBench `thermo-tm` dataset (CC BY 4.0), the starting
+structures are PDB entries 1MEL and 4IDL, the encoder is ESM-2 (MIT), and the
+manuscript template belongs to *Biophysics and Physicobiology*. FoldX, Rosetta,
+and the MD force fields are not redistributed here and require their own
+licenses. See `THIRD_PARTY_NOTICES.md`.

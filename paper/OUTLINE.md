@@ -326,7 +326,7 @@ percentiles) throughout.
 - Conflict of interest, author contributions, data availability, and
   acknowledgements follow the BPPB order.
 - GitHub: `https://github.com/matsunagalab/sim2real`.
-- Zenodo DOI remains a placeholder until deposition.
+- Zenodo DOI is 10.5281/zenodo.21637705 (record published on submission).
 
 ## 11. Items still open
 

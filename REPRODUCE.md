@@ -98,7 +98,7 @@ These steps repeat the selected final configurations. They do not repeat every a
 
 The main figures also retain a heterogeneous-nanobody MD comparison and 35M/650M model-size controls as tracked result inputs. These older controls are checked for availability but are not retrained by these steps.
 
-Raw simulation data are not needed to rebuild model summaries, figures, or PDFs. They are needed only to regenerate processed computational labels. The planned large-data deposit and its present limitations are described in `zenodo/README.md`; the DOI remains an explicit placeholder until a Zenodo record is created.
+Raw simulation data are not needed to rebuild model summaries, figures, or PDFs. They are needed only to regenerate processed computational labels. The trajectories, calculation inputs, and processed labels are deposited at <https://doi.org/10.5281/zenodo.21637705>, which carries its own README describing the deposited files and how to recompute a label from them.
 
 ## Outputs used by the paper
 
