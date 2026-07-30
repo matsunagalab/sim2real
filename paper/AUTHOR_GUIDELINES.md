@@ -101,6 +101,10 @@ are not appended to the main manuscript and are not part of SECTION_ORDER.
 
 ## Length
 
+- **Abstract: no more than 250 words** (Instructions for Authors and Quick Guide; re-checked
+  2026-07-30). This is a hard limit — check it after every abstract edit.
+- **Significance statement: no more than 100 words.**
+- **Keywords: up to five.**
 - The Instructions specify **no maximum word or page count** for Regular Articles.
 - Working target for this paper: 4 main figures + 1 graphical abstract; compact main text
   (~5,000–8,000 words excluding references/legends/supplementary); reproducibility detail in

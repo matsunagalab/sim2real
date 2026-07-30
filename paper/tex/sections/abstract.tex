@@ -4,10 +4,9 @@
 A nanobody's thermal stability governs how reliably it can be expressed,
 purified, and stored, yet measuring the melting temperature (Tm) of many
 sequences is expensive. Simulations yield stability-related quantities but
-cannot report Tm itself, leaving open which quantity, and which variants, would
+cannot report Tm, leaving open which quantity, and which variants, would
 most help a data-limited Tm model. We added a single computed property to a
-57-sequence Tm training set and asked whether it improved prediction. A
-multi-task model learned Tm and the computed property together from ESM2
+57-sequence Tm training set. A multi-task model learned Tm and the computed property together from ESM2
 sequence representations; we selected hyperparameters on 114 Tm validation sequences
 and evaluated final models on 396 held-out sequences. Two molecular-dynamics
 (MD) data sets that used the same 400~K production and native-contact definition,
@@ -15,10 +14,12 @@ but covered different sequences, behaved differently. A sequence-diverse set of
 many nanobody structures lowered the mean absolute error (MAE) by 0.30$^\circ$C
 after fine-tuning, whereas a single mutation scan of two fixed structures did not
 help in either encoder. Comparing physical quantities on the identical mutations,
-free-energy perturbation (FEP) gave the lowest test MAE with both frozen and
-fine-tuned encoders and was the only computed label to lower error significantly in both,
-by up to 0.37$^\circ$C. Among empirical $\Delta\Delta G$ estimators, FoldX also
-lowered frozen-encoder error and outperformed Rosetta. Improvement thus depended on the
+free-energy perturbation (FEP) gave the lowest test MAE with both encoders and
+was the only computed label to lower error significantly in both, by up to
+0.37$^\circ$C. Among empirical $\Delta\Delta G$ estimators, FoldX also
+lowered frozen-encoder error and outperformed Rosetta. No computed label is Tm, yet a
+relative $\Delta\Delta G$ improved an absolute Tm prediction when supplied as an
+auxiliary task. Improvement thus depended on the
 sequences chosen and the quantity computed, not on the number of labels. Both
 choices are fixed before any simulation runs, and are best aligned with the
 prediction task from the outset.
@@ -31,14 +32,12 @@ learning, protein language model, molecular simulation labels
 
 \begin{significance}
 Thermal stability determines whether a nanobody can be produced, stored, and
-used reliably, and the melting temperature is a common way to quantify it.
-Measuring it across many sequences is costly, while simulations can supply
-related stability data cheaply, though never the melting temperature itself. We
-find that such data helps only when it is well chosen. Free-energy perturbation
-labels improved Tm prediction with both a frozen and a fine-tuned encoder, a
-FoldX energy function helped with a frozen encoder, and a sequence-diverse
-simulation set helped once the encoder was fine-tuned, while several other
-computed data sets did not. What a simulation computes, and for which sequences,
-matters more than how much it computes, and both are worth deciding with the
-prediction target in mind before the calculations begin.
+used reliably, and the melting temperature (Tm) quantifies it. Measuring Tm
+across many sequences is costly, while simulations supply related stability data
+cheaply but never Tm itself. Such data helps only when it is well chosen.
+Free-energy perturbation labels improved Tm prediction with both a frozen and a
+fine-tuned encoder, a FoldX energy function helped with a frozen encoder, and a
+sequence-diverse simulation set helped once the encoder was fine-tuned. What a
+simulation computes, and for which sequences, matters more than how much it
+computes.
 \end{significance}
