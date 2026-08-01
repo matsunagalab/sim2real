@@ -47,7 +47,9 @@ used to select candidate settings.
 
 ## Setup
 
-Dependencies are managed with [uv](https://docs.astral.sh/uv/).
+Dependencies are managed with [uv](https://docs.astral.sh/uv/), which creates the
+virtual environment and installs the exact versions in `uv.lock`. Python 3.10 or
+newer is required.
 
 ```bash
 git clone https://github.com/matsunagalab/sim2real.git
@@ -55,11 +57,33 @@ cd sim2real
 uv sync
 ```
 
+Then prefix commands with `uv run`, for example
+`uv run python scripts/reproduce_paper_results.py --check-only`. There is no need
+to activate the environment by hand.
+
 Install the extra dependencies only if you need the notebooks:
 
 ```bash
 uv sync --extra notebooks
 ```
+
+On Linux x86-64, `uv sync` installs a CUDA 12.4 build of PyTorch from the index
+declared in `pyproject.toml`; the environment used for the manuscript was
+Python 3.11 with torch 2.6.0+cu124, transformers 5.4.0, and MDAnalysis 2.10.0.
+Training needs a GPU, but checking the results, rebuilding the figures, and
+building the PDFs run on CPU. Confirm the installation with:
+
+```bash
+uv run python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+uv run python scripts/reproduce_paper_results.py --check-only
+```
+
+The second command is read-only and should report that the fixed source-label
+inputs and the manuscript-facing outputs are present.
+
+Building the PDFs additionally needs a LaTeX installation providing `pdflatex`
+and `bibtex`, or Tectonic (`TECTONIC=/path/to/tectonic`). It is not installed by
+`uv sync`.
 
 ## Reproduce the current manuscript
 
@@ -110,6 +134,137 @@ processed CSVs are fixed inputs. The steps are defined in
 `reproduce/manuscript_results.yaml` and driven by
 `scripts/reproduce_paper_results.py`; see `REPRODUCE.md` for details.
 
+## Where each manuscript number comes from
+
+Every number in the paper is read from a tracked JSON file, so a claim can be
+checked without retraining anything.
+
+| Manuscript item | File |
+|---|---|
+| Fig. 2, data-design comparison | `results/design_aligned_{scan_pool,hetero}_{frozen,hot}/design.json` |
+| Fig. 2 baseline | `results/design_tmonly_{frozen,hot}/design.json` |
+| Fig. 3, physical-observable comparison | `results/fig3_{FEP,MD,ROS,FOLDX,ROSESM,ROSRND}_{frozen,hot}/scaling.json` |
+| Fig. 3 baseline | `results/n24_tm_{frozen,hot}_shared/scaling.json` |
+| Supp. Fig. S1, encoder-size control | `results/size{35,650}_tm_shared_drop005/` and `results/size{35,650}_ddg_fep_enc3e-5/` |
+| Selected hyperparameters of any run | the `config` block inside that run's JSON |
+
+Each `scaling.json` stores the 396 per-protein absolute errors, so a paired
+bootstrap can be recomputed from the files alone. `plot/fig3_matched.py` and
+`plot/fig2_data_design_aligned.py` do exactly that and write the figures.
+
+## Next round: recalculating and answering reviewers
+
+Read `EXTENDING.md` before adding a calculation; it states the protocol that
+keeps a new result comparable with the published ones. The points that most often
+go wrong here:
+
+- **Match the ensemble size of the published conditions.** Fig. 3 uses
+  `--n-runs 24`; Fig. 2 uses 8 subset draws x 3 model-initialization seeds. A
+  smaller ensemble gives a noisier estimate that is not comparable with the
+  reported values.
+- **Compare against the Tm-only baseline of the same comparison and the same
+  encoder.** The two comparisons have different baselines (7.27/6.72 °C for
+  Fig. 3, 7.27/7.07 °C for Fig. 2) because Fig. 2 fixes one pre-specified
+  protocol for both sources instead of tuning per source.
+- **Never select on `data/nbbench/test.csv`.** Model selection uses
+  `val.csv` (114) only.
+- **Fig. 1 is drawn by hand**, not generated. `paper/tex/figures/figure_1_concept_protocol_v2.png`
+  is replaced by editing the drawing, and the reproduction pipeline leaves it
+  alone.
+- **Fig. 2 and Fig. 3 are owned by their own scripts.** `plot/fig2_data_design_aligned.py`
+  and `plot/fig3_matched.py` write `paper/tex/figures/fig_outline0{2,3}_*` directly.
+  Do not regenerate those figures from `plot/make_outline_figures.py`.
+
+### Rerun the data-design comparison (Fig. 2)
+
+This comparison does not go through `prepare.py`. It has its own harness, and it
+reads the aligned label pools, which are selected with an environment variable:
+
+```bash
+DESIGN_DATA_DIR=data/source_labels/md_design_aligned \
+uv run python scripts/run_design_comparison.py run \
+  --source hetero --encoder-mode hot --exp-name design_aligned_hetero_hot
+```
+
+`--source` is one of `scan_pool`, `hetero`, or `none` (the Tm-only reference).
+Defaults are the manuscript's: `--n-list 20,80,160,320 --n-subsets 8 --n-seeds 3`.
+Without `DESIGN_DATA_DIR` the script falls back to the older, non-aligned pools
+under `data/source_labels/md_design/` and will not reproduce the paper.
+
+### Recompute the MD native-contact labels
+
+If a reviewer asks about the MD protocol, the labels are regenerated from
+trajectories with:
+
+```bash
+uv run python scripts/recompute_aligned_hphil_q.py \
+  --source hetero --out data/md/aligned_hphil_q/hetero.csv --workers 8
+```
+
+`--source` is `hetero`, `scan_1mel`, or `scan_4idl`. Both data designs use one
+protocol: hydrophilic-contact Best--Hummer Q over backbone heavy atoms, the
+production window from 10 to 40 ns sampled every 100 ps (300 frames), referenced
+to the parent equilibration structure. The window is selected by frame time, not
+by frame index, because the source productions differ in length and sampling
+interval.
+
+The script expects the raw solvated trajectories, which are not in this
+repository. Use the deposited backbone trajectories instead, as described next.
+
+## Getting the deposited data
+
+The trajectories, calculation inputs, and raw calculation output are deposited at
+<https://doi.org/10.5281/zenodo.21637705> (CC BY 4.0, 8.7 GB in eight ZIP files).
+The repository does not need them to rebuild figures or PDFs; they are needed to
+recompute a computed label from the underlying calculation.
+
+Download only the component you need:
+
+| Archive | Size | Contents |
+|---|---:|---|
+| `bundle_metadata.zip` | 1.8 MB | README, file manifest, SHA-256 checksums |
+| `foldx.zip` | 3.1 MB | FoldX structures, raw `Dif_*.fxout`, labels, code |
+| `fep.zip` | 168 MB | FEP labels, annotated structures, calculation inputs |
+| `rosetta_ddg_scans.zip` | 184 MB | Rosetta scan inputs and score tables |
+| `md_mutation_scan_400K_4idl.zip` | 715 MB | 389 4IDL variant trajectories |
+| `md_mutation_scan_400K_1mel.zip` | 829 MB | 421 1MEL variant trajectories |
+| `md_heterogeneous_400K.zip` | 2.0 GB | 1,072 heterogeneous panel trajectories |
+| `rosetta_backrub_trajectories.zip` | 4.8 GB | Thinned backrub ensembles |
+
+Extracting every archive into one empty directory recreates the deposit tree.
+Verify a download before using it:
+
+```bash
+unzip -q md_mutation_scan_400K_1mel.zip -d sim2real_deposit
+unzip -q bundle_metadata.zip -d sim2real_deposit
+cd sim2real_deposit && sha256sum --check --ignore-missing CHECKSUMS.sha256
+```
+
+Each MD record is a PDB and DCD pair. The PDB is the native reference (the parent
+equilibration structure) and the DCD holds the 300 analysed frames. Recompute a
+published Q value by averaging over **all** frames of the DCD:
+
+```python
+import MDAnalysis as mda
+
+stem = "sim2real_deposit/md/mutation_scan_400K/1mel/trajectories/1mel_A14D_400K_backbone"
+reference = mda.Universe(f"{stem}.pdb")           # native reference for the contacts
+u = mda.Universe(f"{stem}.pdb", f"{stem}.dcd")    # the 300 analysed frames
+print(len(u.trajectory))                          # 300
+```
+
+Do not apply a further time filter to the deposited DCD. It already is the
+analysis window, and the DCD format stores its sampling interval in single
+precision, so the first frame reads as 9999.9998 ps rather than 10000 ps and a
+strict `t >= 10000` test would drop it. Averaging the hydrophilic-contact Q over
+all 300 frames, against the companion PDB, reproduces the value in
+`data/md/aligned_hphil_q/` exactly; this was checked on twelve records spanning
+both mutation scans and the heterogeneous panel.
+
+A pair whose identifier appears in a label table but has no deposited trajectory
+is listed in that component's `MISSING.tsv` with the reason, rather than being
+omitted silently.
+
 ## Run one selected configuration
 
 For example, the fine-tuned-encoder FEP condition of the physical-observable
@@ -131,17 +286,29 @@ be distinguished from the current manuscript results.
 ## Repository layout
 
 ```text
-prepare.py                         data loading, training driver, evaluation
-train.py                           ESM-2 multitask model and training loop
-data/nbbench/                      fixed 57/114/396 experimental Tm split
-data/source_labels/                processed mutation-label tables
-data/md/                           processed MD-derived quantities
-results/fig3_*/scaling.json        physical-observable comparison (Fig 3)
+prepare.py                             data loading, training driver, evaluation
+train.py                               ESM-2 multitask model and training loop
+scripts/run_design_comparison.py       the Fig. 2 harness (not via prepare.py)
+scripts/recompute_aligned_hphil_q.py   MD native-contact labels from trajectories
+scripts/reproduce_paper_results.py     driver for the reproduction stages
+data/nbbench/                          fixed 57/114/396 experimental Tm split
+data/source_labels/                    processed mutation-label tables
+data/source_labels/md_design_aligned/  the Fig. 2 label pools (via DESIGN_DATA_DIR)
+data/source_labels/MANIFEST.tsv        provenance of every processed label table
+data/md/aligned_hphil_q/               per-variant Q behind the Fig. 2 pools
+results/fig3_*/scaling.json            physical-observable comparison (Fig 3)
 results/design_aligned_*/design.json   data-design comparison (Fig 2)
-plot/                              manuscript figure and table builders
-paper/tex/                         main and supplementary LaTeX sources
-reproduce/manuscript_results.yaml  current reproduction steps
+plot/fig2_data_design_aligned.py       builds Fig. 2 and owns its output file
+plot/fig3_matched.py                   builds Fig. 3 and owns its output file
+paper/tex/                             main and supplementary LaTeX sources
+reproduce/manuscript_results.yaml      current reproduction steps
 ```
+
+Further reading: `REPRODUCE.md` for the reproduction stages in detail,
+`EXTENDING.md` for the protocol a new calculation has to follow, and
+`data/source_labels/MANIFEST.tsv` for where each label table came from.
+`EXPERIMENTS.md` and `experiments.yaml` record older named experiments and should
+not be read as current results.
 
 ## Manuscript
 
