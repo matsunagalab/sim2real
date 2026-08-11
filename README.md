@@ -94,12 +94,6 @@ manuscript refers to are present:
 uv run python scripts/reproduce_paper_results.py --check-only
 ```
 
-Rebuild the compact summaries from the existing final results:
-
-```bash
-uv run python scripts/reproduce_paper_results.py --stage summaries --force
-```
-
 Rebuild Fig. 2 and Fig. 3, the supplementary figure and tables, and the main and
 supplementary PDFs (the author-edited Fig. 1 is left unchanged):
 
@@ -110,10 +104,15 @@ uv run python scripts/reproduce_paper_results.py --stage figures --force
 Building the PDFs needs `pdflatex` and `bibtex` (or `tectonic`); set
 `TECTONIC=/path/to/tectonic` to point at a specific Tectonic binary.
 
-To retrain the selected final configurations (the Tm-only baseline and the
-computed-label conditions of the physical-observable and data-design comparisons,
-each frozen and fine-tuned) from the fixed CSVs and then rebuild the summaries,
-figures, and PDFs:
+The workflow has three stages, in this order:
+
+| Stage | What it retrains | Outputs |
+|---|---|---|
+| `physical-observable` | Fig. 3: the two Tm-only baselines and the six computed observables, each frozen and fine-tuned (14 runs of 24 models) | `results/n24_tm_*_shared/`, `results/fig3_*/` |
+| `data-design` | Fig. 2: the two Tm-only baselines and the two data designs, each frozen and fine-tuned (6 runs of 8 subsets x 3 seeds) | `results/design_tmonly_*/`, `results/design_aligned_*/` |
+| `figures` | nothing; replots the figures and typesets the PDFs | `paper/tex/figures/`, `paper/tex/*.pdf` |
+
+To retrain everything from the fixed CSVs and then rebuild the figures and PDFs:
 
 ```bash
 uv run python scripts/reproduce_paper_results.py \
@@ -121,13 +120,21 @@ uv run python scripts/reproduce_paper_results.py \
 ```
 
 This is a long GPU run that executes the selected configurations in sequence.
-Use `--gpus` to pick a different device and add `--dry-run` to print the commands
-without running them.
+Use `--gpus` to pick a different device, `--stage physical-observable` or
+`--stage data-design` to retrain one comparison, and `--dry-run` to print the
+commands without running them.
 
 This compact workflow retrains only the settings adopted in the manuscript; it
 does not repeat the full candidate search. The selected settings for each
 condition are recorded in the `config` block of the corresponding
 `results/*/scaling.json`.
+
+Result families the manuscript no longer reports are kept in the repository for
+history but are deliberately outside this workflow: `results/final_*`,
+`results/tuned_rep/*`, and the ThermoMPNN label condition (`FIG3_TMPNN`,
+`results/fig3_TMPNN_*`). Retraining those does not reproduce the paper; the
+ThermoMPNN rows in `data/source_labels/MANIFEST.tsv` are marked
+`used_in_current_manuscript = no` for the same reason.
 
 The raw MD, FEP, Rosetta, and FoldX calculations are not run here; their
 processed CSVs are fixed inputs. The steps are defined in
@@ -177,19 +184,25 @@ go wrong here:
 
 ### Rerun the data-design comparison (Fig. 2)
 
-This comparison does not go through `prepare.py`. It has its own harness, and it
-reads the aligned label pools, which are selected with an environment variable:
+This comparison does not go through `prepare.py`. It has its own harness:
 
 ```bash
-DESIGN_DATA_DIR=data/source_labels/md_design_aligned \
 uv run python scripts/run_design_comparison.py run \
   --source hetero --encoder-mode hot --exp-name design_aligned_hetero_hot
 ```
 
 `--source` is one of `scan_pool`, `hetero`, or `none` (the Tm-only reference).
-Defaults are the manuscript's: `--n-list 20,80,160,320 --n-subsets 8 --n-seeds 3`.
-Without `DESIGN_DATA_DIR` the script falls back to the older, non-aligned pools
-under `data/source_labels/md_design/` and will not reproduce the paper.
+Defaults are the manuscript's: `--n-list 20,80,160,320 --n-subsets 8 --n-seeds 3`
+and the aligned label pools in `data/source_labels/md_design_aligned/`.
+
+`DESIGN_DATA_DIR` overrides the pool directory. Set it only on purpose. The older
+pools under `data/source_labels/md_design/` use the same file names but a
+pre-alignment window, with fewer variants (403/359/686 instead of 421/389/763) and
+different Q values, so pointing the harness at them shifts every MAE by up to
+about 0.1 °C instead of failing. The pool directory, the row count, and a digest
+of each file read are printed at start-up and stored in the `pool_dir` and
+`pool_files` fields of the resulting `design.json`; check those first if a rerun
+does not match the published numbers.
 
 ### Recompute the MD native-contact labels
 

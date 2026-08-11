@@ -1,7 +1,23 @@
 # Reproduce the selected configurations reported in the current manuscript.
-# Raw MD, FEP, Rosetta, and ThermoMPNN calculations are not launched here;
-# their processed tables are fixed inputs. The earlier candidate searches are
+#
+# The manuscript has two comparisons and they are produced by two different
+# harnesses:
+#
+#   Fig. 3 (physical observable)  prepare.py, 24-model ensembles, results are
+#                                 results/fig3_<SRC>_<regime>/scaling.json with
+#                                 the shared baseline results/n24_tm_<regime>_shared
+#   Fig. 2 (data design)          scripts/run_design_comparison.py, 8 subset draws
+#                                 x 3 seeds, results are
+#                                 results/design_{aligned_*,tmonly_*}/design.json
+#
+# Raw MD, FEP, Rosetta, and FoldX calculations are not launched here; their
+# processed tables are fixed inputs. The earlier candidate searches are
 # documented in the tracked supplementary tables and are not repeated here.
+#
+# Older result families that the current manuscript no longer reports
+# (results/final_*, results/tuned_rep/*, and the ThermoMPNN label condition) are
+# kept in the repository for history but are deliberately NOT part of this
+# workflow. Do not add them back: reproducing them does not reproduce the paper.
 
 fixed_inputs:
   # Experimental target split used in this study: 57 train / 114 validation /
@@ -10,73 +26,79 @@ fixed_inputs:
   - data/nbbench/val.csv
   - data/nbbench/test.csv
 
-  # Processed source labels used by the selected final runs.
+  # Provenance of every processed label table.
   - data/source_labels/MANIFEST.tsv
-  - data/source_labels/fep/fep1mel_435_processed.csv
-  - data/source_labels/fep/fep4idl_409_processed.csv
   - data/source_labels/fep/PROVENANCE.tsv
-  - data/source_labels/md_fep400k/1mel_mdq_processed.csv
-  - data/source_labels/md_fep400k/4idl_mdq_processed.csv
-  - data/source_labels/rosetta/measured/1mel_rosettaddg_processed.csv
-  - data/source_labels/rosetta/measured/4idl_rosettaddg_processed.csv
-  - data/source_labels/thermompnn/1melMPNN2_processed.csv
-  - data/source_labels/thermompnn/4idlMPNN2_processed.csv
+
+  # Fig. 3: the six physical observables on the identical 1MEL/4IDL variant set
+  # (421/389), in a common sequence order so every source sees the same subsets.
+  - data/source_labels/fig3_matched/FEP_1mel.csv
+  - data/source_labels/fig3_matched/FEP_4idl.csv
+  - data/source_labels/fig3_matched/MD_1mel.csv
+  - data/source_labels/fig3_matched/MD_4idl.csv
+  - data/source_labels/fig3_matched/ROS_1mel.csv
+  - data/source_labels/fig3_matched/ROS_4idl.csv
+  - data/source_labels/fig3_matched/FOLDX_1mel.csv
+  - data/source_labels/fig3_matched/FOLDX_4idl.csv
+
+  # Fig. 3: the two Rosetta proposal-design rows use their own native
+  # two-mutation variant sets.
   - data/source_labels/rosetta/random1000/random_2mut_1mel_1000_with_ddg_processed.csv
   - data/source_labels/rosetta/random1000/random_2mut_4idl_1000_with_ddg_processed.csv
   - data/source_labels/rosetta/esm1000/esm2_650M_2muts_1mel_100000_top1pct_with_ddg_processed.csv
   - data/source_labels/rosetta/esm1000/esm2_650M_2muts_4idl_100000_top1pct_with_ddg_processed.csv
 
-  # Data used for the matched-versus-heterogeneous MD comparison and controls.
+  # Fig. 2: the aligned-window label pools. run_design_comparison.py reads these
+  # through DESIGN_DATA_DIR; the older non-aligned pools under
+  # data/source_labels/md_design/ do not reproduce the paper.
+  - data/source_labels/md_design_aligned/scan_ownframe0_1mel.csv
+  - data/source_labels/md_design_aligned/scan_ownframe0_4idl.csv
+  - data/source_labels/md_design_aligned/hetero_backbone_qc.csv
+
+  # Per-variant Q behind the Fig. 2 pools, and the source tables the earlier
+  # supporting analyses were built from.
+  - data/source_labels/fep/fep1mel_435_processed.csv
+  - data/source_labels/fep/fep4idl_409_processed.csv
+  - data/source_labels/md_fep400k/1mel_mdq_processed.csv
+  - data/source_labels/md_fep400k/4idl_mdq_processed.csv
+  - data/source_labels/rosetta/measured/1mel_rosettaddg_processed.csv
+  - data/source_labels/rosetta/measured/4idl_rosettaddg_processed.csv
   - data/md/nanobody_qvalue_400K.csv
   - data/md/nanobody_qvalue_hphil_400K.csv
   - data/md/study_qvalue_fep400k_1mel.csv
   - data/md/study_qvalue_fep400k_4idl.csv
-  - paper/analysis/supplementary/tables/candidate_validation.tsv
-  - results/source_screen/final_source_screen_summary.json
-  - results/source_screen/final_frozen_core_summary.json
-  - results/tm_ref_hot_mtl_tmselect/scaling.json
-  - results/fep_hot_tmselect_enc3e-5/scaling.json
-  - results/final_residual_q_hphil_400k/scaling.json
-  - results/sourcefinal_tm_shared_drop0.05/scaling.json
-  - results/sourcefinal_md_q-hphil-400k_lr1e-4_enc3e-5/scaling.json
-  - results/sourcefinal_frozen_tm_shared_drop0.30/scaling.json
-  - results/sourcefinal_frozen_md_q-hphil-400k_drop0.30/scaling.json
+
+  # Supplementary encoder-size control (exploratory fixed configuration).
   - results/size35_tm_shared_drop005/scaling.json
   - results/size35_ddg_fep_enc3e-5/scaling.json
   - results/size650_tm_shared_drop005/scaling.json
   - results/size650_ddg_fep_enc3e-5/scaling.json
+  - paper/analysis/supplementary/tables/candidate_validation.tsv
 
 expected_outputs:
-  - results/final_tm_frozen/scaling.json
-  - results/final_tm_hot/scaling.json
-  - results/final_fep_frozen/scaling.json
-  - results/final_fep_hot/scaling.json
-  - results/final_mdq_frozen/scaling.json
-  - results/final_mdq_hot/scaling.json
-  - results/final_tmpnn_frozen/scaling.json
-  - results/final_tmpnn_hot/scaling.json
-  - results/final_ros_frozen/scaling.json
-  - results/final_ros_hot/scaling.json
-  - results/final_rosrnd_frozen/scaling.json
-  - results/final_rosrnd_hot/scaling.json
-  - results/final_rosesm_frozen/scaling.json
-  - results/final_rosesm_hot/scaling.json
-  - results/tuned_rep/frozen_summary.json
-  - results/tuned_rep/hot_summary.json
-  - results/tuned_rep/Tm_only_frozen/scaling.json
-  - results/tuned_rep/Tm_only_hot/scaling.json
-  - results/tuned_rep/FEP_frozen/scaling.json
-  - results/tuned_rep/FEP_hot/scaling.json
-  - results/tuned_rep/MD_FEP400K_frozen/scaling.json
-  - results/tuned_rep/MD_FEP400K_hot/scaling.json
-  - results/tuned_rep/thermoMPNN_frozen/scaling.json
-  - results/tuned_rep/thermoMPNN_hot/scaling.json
-  - results/tuned_rep/rosetta_frozen/scaling.json
-  - results/tuned_rep/rosetta_hot/scaling.json
-  - results/tuned_rep/rosetta_random_frozen/scaling.json
-  - results/tuned_rep/rosetta_random_hot/scaling.json
-  - results/tuned_rep/rosetta_esm_frozen/scaling.json
-  - results/tuned_rep/rosetta_esm_hot/scaling.json
+  # Fig. 3 baseline and the six physical observables, both encoder regimes.
+  - results/n24_tm_frozen_shared/scaling.json
+  - results/n24_tm_hot_shared/scaling.json
+  - results/fig3_FEP_frozen/scaling.json
+  - results/fig3_FEP_hot/scaling.json
+  - results/fig3_MD_frozen/scaling.json
+  - results/fig3_MD_hot/scaling.json
+  - results/fig3_ROS_frozen/scaling.json
+  - results/fig3_ROS_hot/scaling.json
+  - results/fig3_FOLDX_frozen/scaling.json
+  - results/fig3_FOLDX_hot/scaling.json
+  - results/fig3_ROSESM_frozen/scaling.json
+  - results/fig3_ROSESM_hot/scaling.json
+  - results/fig3_ROSRND_frozen/scaling.json
+  - results/fig3_ROSRND_hot/scaling.json
+  # Fig. 2 baseline and the two data designs, both encoder regimes.
+  - results/design_tmonly_frozen/design.json
+  - results/design_tmonly_hot/design.json
+  - results/design_aligned_scan_pool_frozen/design.json
+  - results/design_aligned_scan_pool_hot/design.json
+  - results/design_aligned_hetero_frozen/design.json
+  - results/design_aligned_hetero_hot/design.json
+  # Figures and typeset PDFs.
   - paper/tex/figures/figure_1_concept_protocol_v2.png
   - paper/tex/figures/fig_outline02_data_design.pdf
   - paper/tex/figures/fig_outline03_physical_observable.pdf
@@ -86,16 +108,20 @@ expected_outputs:
   - paper/tex/supplementary_main.pdf
 
 stage_order:
-  - reported-results
-  - summaries
+  - physical-observable
+  - data-design
   - figures
 
 stages:
-  reported-results:
-    - name: frozen encoder, Tm labels only
+  # ---------------------------------------------------------------- Fig. 3 ---
+  # All rows share --model-arch shared --ddg-head-mode separate --n-runs 24 and
+  # the same 20,80,160,320 label counts; only the source and the selected
+  # hyperparameters differ. Selection used the 114-example validation set only.
+  physical-observable:
+    - name: Fig. 3 baseline, frozen encoder, Tm labels only
       type: prepare
       env: {DETACH_AUX_ENCODER: "true"}
-      outputs: [results/final_tm_frozen/scaling.json]
+      outputs: [results/n24_tm_frozen_shared/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -110,7 +136,9 @@ stages:
         - --n-ddg-list
         - 20
         - --model-arch
-        - latent
+        - shared
+        - --ddg-head-mode
+        - separate
         - --learning-rate
         - 0.001
         - --dropout-rate
@@ -118,14 +146,14 @@ stages:
         - --weight-decay
         - 0.1
         - --n-runs
-        - 5
+        - 24
         - --exp-name
-        - final_tm_frozen
+        - n24_tm_frozen_shared
 
-    - name: fine-tuned encoder, Tm labels only
+    - name: Fig. 3 baseline, fine-tuned encoder, Tm labels only
       type: prepare
       env: {DETACH_AUX_ENCODER: "true"}
-      outputs: [results/final_tm_hot/scaling.json]
+      outputs: [results/n24_tm_hot_shared/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -140,7 +168,11 @@ stages:
         - --n-ddg-list
         - 20
         - --model-arch
-        - residual
+        - shared
+        - --ddg-head-mode
+        - separate
+        - --learning-rate
+        - 3e-4
         - --encoder-lr
         - 5e-5
         - --dropout-rate
@@ -148,14 +180,14 @@ stages:
         - --weight-decay
         - 0.02
         - --n-runs
-        - 5
+        - 24
         - --exp-name
-        - final_tm_hot
+        - n24_tm_hot_shared
 
     - name: frozen encoder with FEP labels
       type: prepare
       env: {DETACH_AUX_ENCODER: "true"}
-      outputs: [results/final_fep_frozen/scaling.json]
+      outputs: [results/fig3_FEP_frozen/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -166,7 +198,7 @@ stages:
         - --encoder-mode
         - frozen
         - --ddg-source
-        - FEP
+        - FIG3_FEP
         - --n-ddg-list
         - 20,80,160,320
         - --model-arch
@@ -180,14 +212,14 @@ stages:
         - --weight-decay
         - 0.02
         - --n-runs
-        - 5
+        - 24
         - --exp-name
-        - final_fep_frozen
+        - fig3_FEP_frozen
 
     - name: fine-tuned encoder with FEP labels
       type: prepare
       env: {DETACH_AUX_ENCODER: "true"}
-      outputs: [results/final_fep_hot/scaling.json]
+      outputs: [results/fig3_FEP_hot/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -198,13 +230,15 @@ stages:
         - --encoder-mode
         - hot
         - --ddg-source
-        - FEP
+        - FIG3_FEP
         - --n-ddg-list
         - 20,80,160,320
         - --model-arch
         - shared
         - --ddg-head-mode
         - separate
+        - --learning-rate
+        - 3e-4
         - --encoder-lr
         - 3e-5
         - --dropout-rate
@@ -212,14 +246,14 @@ stages:
         - --weight-decay
         - 0.1
         - --n-runs
-        - 5
+        - 24
         - --exp-name
-        - final_fep_hot
+        - fig3_FEP_hot
 
-    - name: frozen encoder with matched MD native-contact labels
+    - name: frozen encoder with MD native-contact labels
       type: prepare
       env: {DETACH_AUX_ENCODER: "true"}
-      outputs: [results/final_mdq_frozen/scaling.json]
+      outputs: [results/fig3_MD_frozen/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -230,7 +264,7 @@ stages:
         - --encoder-mode
         - frozen
         - --ddg-source
-        - MD_FEP400K
+        - FIG3_MD
         - --n-ddg-list
         - 20,80,160,320
         - --model-arch
@@ -244,14 +278,14 @@ stages:
         - --weight-decay
         - 0.02
         - --n-runs
-        - 5
+        - 24
         - --exp-name
-        - final_mdq_frozen
+        - fig3_MD_frozen
 
-    - name: fine-tuned encoder with matched MD native-contact labels
+    - name: fine-tuned encoder with MD native-contact labels
       type: prepare
       env: {DETACH_AUX_ENCODER: "true"}
-      outputs: [results/final_mdq_hot/scaling.json]
+      outputs: [results/fig3_MD_hot/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -262,39 +296,7 @@ stages:
         - --encoder-mode
         - hot
         - --ddg-source
-        - MD_FEP400K
-        - --n-ddg-list
-        - 20,80,160,320
-        - --model-arch
-        - latent
-        - --ddg-head-mode
-        - context
-        - --encoder-lr
-        - 1e-5
-        - --dropout-rate
-        - 0.15
-        - --weight-decay
-        - 0.02
-        - --n-runs
-        - 5
-        - --exp-name
-        - final_mdq_hot
-
-    - name: frozen encoder with ThermoMPNN labels
-      type: prepare
-      env: {DETACH_AUX_ENCODER: "true"}
-      outputs: [results/final_tmpnn_frozen/scaling.json]
-      args:
-        - --train-mode
-        - mtl
-        - --selection-scope
-        - tm
-        - --final-eval-split
-        - test
-        - --encoder-mode
-        - frozen
-        - --ddg-source
-        - thermoMPNN
+        - FIG3_MD
         - --n-ddg-list
         - 20,80,160,320
         - --model-arch
@@ -302,52 +304,22 @@ stages:
         - --ddg-head-mode
         - separate
         - --learning-rate
-        - 0.0005
-        - --dropout-rate
-        - 0.30
-        - --weight-decay
-        - 0.02
-        - --n-runs
-        - 5
-        - --exp-name
-        - final_tmpnn_frozen
-
-    - name: fine-tuned encoder with ThermoMPNN labels
-      type: prepare
-      env: {DETACH_AUX_ENCODER: "true"}
-      outputs: [results/final_tmpnn_hot/scaling.json]
-      args:
-        - --train-mode
-        - mtl
-        - --selection-scope
-        - tm
-        - --final-eval-split
-        - test
-        - --encoder-mode
-        - hot
-        - --ddg-source
-        - thermoMPNN
-        - --n-ddg-list
-        - 20,80,160,320
-        - --model-arch
-        - latent
-        - --ddg-head-mode
-        - context
+        - 3e-4
         - --encoder-lr
         - 1e-5
         - --dropout-rate
         - 0.15
         - --weight-decay
-        - 0.1
+        - 0.02
         - --n-runs
-        - 5
+        - 24
         - --exp-name
-        - final_tmpnn_hot
+        - fig3_MD_hot
 
     - name: frozen encoder with Rosetta labels
       type: prepare
       env: {DETACH_AUX_ENCODER: "true"}
-      outputs: [results/final_ros_frozen/scaling.json]
+      outputs: [results/fig3_ROS_frozen/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -358,7 +330,7 @@ stages:
         - --encoder-mode
         - frozen
         - --ddg-source
-        - rosetta
+        - FIG3_ROS
         - --n-ddg-list
         - 20,80,160,320
         - --model-arch
@@ -366,20 +338,20 @@ stages:
         - --ddg-head-mode
         - separate
         - --learning-rate
-        - 0.0005
+        - 5e-4
         - --dropout-rate
         - 0.30
         - --weight-decay
         - 0.02
         - --n-runs
-        - 5
+        - 24
         - --exp-name
-        - final_ros_frozen
+        - fig3_ROS_frozen
 
     - name: fine-tuned encoder with Rosetta labels
       type: prepare
       env: {DETACH_AUX_ENCODER: "true"}
-      outputs: [results/final_ros_hot/scaling.json]
+      outputs: [results/fig3_ROS_hot/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -390,13 +362,15 @@ stages:
         - --encoder-mode
         - hot
         - --ddg-source
-        - rosetta
+        - FIG3_ROS
         - --n-ddg-list
         - 20,80,160,320
         - --model-arch
-        - latent
+        - shared
         - --ddg-head-mode
         - separate
+        - --learning-rate
+        - 3e-4
         - --encoder-lr
         - 1e-5
         - --dropout-rate
@@ -404,14 +378,14 @@ stages:
         - --weight-decay
         - 0.1
         - --n-runs
-        - 5
+        - 24
         - --exp-name
-        - final_ros_hot
+        - fig3_ROS_hot
 
-    - name: frozen encoder with random-variant Rosetta labels
+    - name: frozen encoder with FoldX labels
       type: prepare
       env: {DETACH_AUX_ENCODER: "true"}
-      outputs: [results/final_rosrnd_frozen/scaling.json]
+      outputs: [results/fig3_FOLDX_frozen/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -422,7 +396,7 @@ stages:
         - --encoder-mode
         - frozen
         - --ddg-source
-        - rosetta_random
+        - FIG3_FOLDX
         - --n-ddg-list
         - 20,80,160,320
         - --model-arch
@@ -430,20 +404,20 @@ stages:
         - --ddg-head-mode
         - separate
         - --learning-rate
-        - 0.001
+        - 5e-4
         - --dropout-rate
-        - 0.15
+        - 0.30
         - --weight-decay
-        - 0.1
+        - 0.02
         - --n-runs
-        - 5
+        - 24
         - --exp-name
-        - final_rosrnd_frozen
+        - fig3_FOLDX_frozen
 
-    - name: fine-tuned encoder with random-variant Rosetta labels
+    - name: fine-tuned encoder with FoldX labels
       type: prepare
       env: {DETACH_AUX_ENCODER: "true"}
-      outputs: [results/final_rosrnd_hot/scaling.json]
+      outputs: [results/fig3_FOLDX_hot/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -454,28 +428,30 @@ stages:
         - --encoder-mode
         - hot
         - --ddg-source
-        - rosetta_random
+        - FIG3_FOLDX
         - --n-ddg-list
         - 20,80,160,320
         - --model-arch
-        - residual
+        - shared
         - --ddg-head-mode
         - separate
+        - --learning-rate
+        - 3e-4
         - --encoder-lr
         - 1e-5
         - --dropout-rate
-        - 0.30
+        - 0.15
         - --weight-decay
         - 0.1
         - --n-runs
-        - 5
+        - 24
         - --exp-name
-        - final_rosrnd_hot
+        - fig3_FOLDX_hot
 
     - name: frozen encoder with ESM2-proposed Rosetta labels
       type: prepare
       env: {DETACH_AUX_ENCODER: "true"}
-      outputs: [results/final_rosesm_frozen/scaling.json]
+      outputs: [results/fig3_ROSESM_frozen/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -500,14 +476,14 @@ stages:
         - --weight-decay
         - 0.02
         - --n-runs
-        - 5
+        - 24
         - --exp-name
-        - final_rosesm_frozen
+        - fig3_ROSESM_frozen
 
     - name: fine-tuned encoder with ESM2-proposed Rosetta labels
       type: prepare
       env: {DETACH_AUX_ENCODER: "true"}
-      outputs: [results/final_rosesm_hot/scaling.json]
+      outputs: [results/fig3_ROSESM_hot/scaling.json]
       args:
         - --train-mode
         - mtl
@@ -525,6 +501,8 @@ stages:
         - shared
         - --ddg-head-mode
         - separate
+        - --learning-rate
+        - 3e-4
         - --encoder-lr
         - 1e-5
         - --dropout-rate
@@ -532,31 +510,141 @@ stages:
         - --weight-decay
         - 0.1
         - --n-runs
-        - 5
+        - 24
         - --exp-name
-        - final_rosesm_hot
+        - fig3_ROSESM_hot
 
-  summaries:
-    - name: rebuild selected-result summaries
+    - name: frozen encoder with random-variant Rosetta labels
+      type: prepare
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/fig3_ROSRND_frozen/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - frozen
+        - --ddg-source
+        - rosetta_random
+        - --n-ddg-list
+        - 20,80,160,320
+        - --model-arch
+        - shared
+        - --ddg-head-mode
+        - separate
+        - --learning-rate
+        - 0.001
+        - --dropout-rate
+        - 0.15
+        - --weight-decay
+        - 0.1
+        - --n-runs
+        - 24
+        - --exp-name
+        - fig3_ROSRND_frozen
+
+    - name: fine-tuned encoder with random-variant Rosetta labels
+      type: prepare
+      env: {DETACH_AUX_ENCODER: "true"}
+      outputs: [results/fig3_ROSRND_hot/scaling.json]
+      args:
+        - --train-mode
+        - mtl
+        - --selection-scope
+        - tm
+        - --final-eval-split
+        - test
+        - --encoder-mode
+        - hot
+        - --ddg-source
+        - rosetta_random
+        - --n-ddg-list
+        - 20,80,160,320
+        - --model-arch
+        - shared
+        - --ddg-head-mode
+        - separate
+        - --learning-rate
+        - 3e-4
+        - --encoder-lr
+        - 3e-5
+        - --dropout-rate
+        - 0.15
+        - --weight-decay
+        - 0.04
+        - --n-runs
+        - 24
+        - --exp-name
+        - fig3_ROSRND_hot
+
+  # ---------------------------------------------------------------- Fig. 2 ---
+  # One pre-specified protocol shared by both designs (no per-source tuning):
+  # 8 subset draws x 3 model-initialization seeds, label counts 20,80,160,320.
+  # DESIGN_DATA_DIR must point at the aligned pools; without it the harness falls
+  # back to the older non-aligned pools and the MAEs move by up to ~0.1 degree.
+  data-design:
+    - name: Fig. 2 baseline, frozen encoder, Tm labels only
       type: command
-      command: [uv, run, python, plot/build_tuned_summaries.py]
-      outputs:
-        - results/tuned_rep/frozen_summary.json
-        - results/tuned_rep/hot_summary.json
-        - results/tuned_rep/Tm_only_frozen/scaling.json
-        - results/tuned_rep/Tm_only_hot/scaling.json
-        - results/tuned_rep/FEP_frozen/scaling.json
-        - results/tuned_rep/FEP_hot/scaling.json
-        - results/tuned_rep/MD_FEP400K_frozen/scaling.json
-        - results/tuned_rep/MD_FEP400K_hot/scaling.json
-        - results/tuned_rep/thermoMPNN_frozen/scaling.json
-        - results/tuned_rep/thermoMPNN_hot/scaling.json
-        - results/tuned_rep/rosetta_frozen/scaling.json
-        - results/tuned_rep/rosetta_hot/scaling.json
-        - results/tuned_rep/rosetta_random_frozen/scaling.json
-        - results/tuned_rep/rosetta_random_hot/scaling.json
-        - results/tuned_rep/rosetta_esm_frozen/scaling.json
-        - results/tuned_rep/rosetta_esm_hot/scaling.json
+      env:
+        DESIGN_DATA_DIR: data/source_labels/md_design_aligned
+        CUDA_VISIBLE_DEVICES: "{first_gpu}"
+      command: [uv, run, python, scripts/run_design_comparison.py, run,
+                --source, none, --encoder-mode, frozen,
+                --exp-name, design_tmonly_frozen]
+      outputs: [results/design_tmonly_frozen/design.json]
+
+    - name: Fig. 2 baseline, fine-tuned encoder, Tm labels only
+      type: command
+      env:
+        DESIGN_DATA_DIR: data/source_labels/md_design_aligned
+        CUDA_VISIBLE_DEVICES: "{first_gpu}"
+      command: [uv, run, python, scripts/run_design_comparison.py, run,
+                --source, none, --encoder-mode, hot,
+                --exp-name, design_tmonly_hot]
+      outputs: [results/design_tmonly_hot/design.json]
+
+    - name: frozen encoder, single mutation scan design
+      type: command
+      env:
+        DESIGN_DATA_DIR: data/source_labels/md_design_aligned
+        CUDA_VISIBLE_DEVICES: "{first_gpu}"
+      command: [uv, run, python, scripts/run_design_comparison.py, run,
+                --source, scan_pool, --encoder-mode, frozen,
+                --exp-name, design_aligned_scan_pool_frozen]
+      outputs: [results/design_aligned_scan_pool_frozen/design.json]
+
+    - name: fine-tuned encoder, single mutation scan design
+      type: command
+      env:
+        DESIGN_DATA_DIR: data/source_labels/md_design_aligned
+        CUDA_VISIBLE_DEVICES: "{first_gpu}"
+      command: [uv, run, python, scripts/run_design_comparison.py, run,
+                --source, scan_pool, --encoder-mode, hot,
+                --exp-name, design_aligned_scan_pool_hot]
+      outputs: [results/design_aligned_scan_pool_hot/design.json]
+
+    - name: frozen encoder, heterogeneous design
+      type: command
+      env:
+        DESIGN_DATA_DIR: data/source_labels/md_design_aligned
+        CUDA_VISIBLE_DEVICES: "{first_gpu}"
+      command: [uv, run, python, scripts/run_design_comparison.py, run,
+                --source, hetero, --encoder-mode, frozen,
+                --exp-name, design_aligned_hetero_frozen]
+      outputs: [results/design_aligned_hetero_frozen/design.json]
+
+    - name: fine-tuned encoder, heterogeneous design
+      type: command
+      env:
+        DESIGN_DATA_DIR: data/source_labels/md_design_aligned
+        CUDA_VISIBLE_DEVICES: "{first_gpu}"
+      command: [uv, run, python, scripts/run_design_comparison.py, run,
+                --source, hetero, --encoder-mode, hot,
+                --exp-name, design_aligned_hetero_hot]
+      outputs: [results/design_aligned_hetero_hot/design.json]
 
   figures:
     - name: rebuild Fig. 2 (data design, aligned Q)
@@ -565,7 +653,7 @@ stages:
       outputs:
         - paper/tex/figures/fig_outline02_data_design.pdf
 
-    - name: rebuild Fig. 3 (physical observable, FoldX)
+    - name: rebuild Fig. 3 (physical observable)
       type: command
       command: [uv, run, python, plot/fig3_matched.py]
       outputs:

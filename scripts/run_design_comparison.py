@@ -19,14 +19,20 @@ the 8 subset residual vectors over the NbBench test proteins. Compare two source
 JSONs with the companion analysis at the bottom of this file (--analyze).
 """
 from __future__ import annotations
-import argparse, csv, json, os, sys
+import argparse, csv, hashlib, json, os, sys
 import numpy as np
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO not in sys.path:
     sys.path.insert(0, REPO)
-# Pool directory; overridable so the aligned-window Fig 2 pools can be used.
-DESIGN_DIR = os.path.join(REPO, os.environ.get("DESIGN_DATA_DIR", "data/source_labels/md_design"))
+# Pool directory. The default is the aligned-window pool the manuscript reports;
+# DESIGN_DATA_DIR overrides it. The two pool directories hold files with the SAME
+# names but different variants and Q values, so pointing this at the older
+# data/source_labels/md_design/ silently shifts every MAE by up to ~0.1 degree
+# instead of failing. The resolved directory and per-file digests are written
+# into design.json so a result can always be traced back to its pool.
+DESIGN_DIR_REL = os.environ.get("DESIGN_DATA_DIR", "data/source_labels/md_design_aligned")
+DESIGN_DIR = os.path.join(REPO, DESIGN_DIR_REL)
 
 SHARED_HP = {  # pre-specified simplest shared defaults, applied identically to both sources
     "frozen": {"MODEL_ARCH": "shared", "DDG_HEAD_MODE": "separate", "LEARNING_RATE": "0.001",
@@ -37,23 +43,35 @@ SHARED_HP = {  # pre-specified simplest shared defaults, applied identically to 
 
 
 def load_pool(source):
-    """Return list of (seq, label) and, for scan_pool, the per-scaffold index split."""
-    def read(path):
+    """Return list of (seq, label) and, for scan_pool, the per-scaffold index split.
+
+    Also returns the pool files actually read, with row counts and digests, so the
+    result JSON records which label pool produced it.
+    """
+    used = []
+
+    def read(name):
+        path = os.path.join(DESIGN_DIR, name)
         rows = []
         with open(path) as fh:
             for r in csv.DictReader(fh):
                 rows.append((r["seq"], float(r["ddg_scaled01"])))
+        with open(path, "rb") as fh:
+            digest = hashlib.sha256(fh.read()).hexdigest()[:16]
+        used.append({"file": os.path.join(DESIGN_DIR_REL, name),
+                     "n_rows": len(rows), "sha256_16": digest})
         return rows
-    if source == "none":
-        return {"strata": []}  # Tm-only baseline: no auxiliary labels
-    if source == "scan_pool":
-        a = read(f"{DESIGN_DIR}/scan_ownframe0_1mel.csv")
-        b = read(f"{DESIGN_DIR}/scan_ownframe0_4idl.csv")
-        return {"strata": [a, b]}
-    fname = {"hetero": "hetero_backbone_qc.csv",
-             "scan_1mel": "scan_ownframe0_1mel.csv",
-             "scan_4idl": "scan_ownframe0_4idl.csv"}[source]
-    return {"strata": [read(f"{DESIGN_DIR}/{fname}")]}
+
+    if source == "none":  # Tm-only baseline: no auxiliary labels
+        strata = []
+    elif source == "scan_pool":
+        strata = [read("scan_ownframe0_1mel.csv"), read("scan_ownframe0_4idl.csv")]
+    else:
+        fname = {"hetero": "hetero_backbone_qc.csv",
+                 "scan_1mel": "scan_ownframe0_1mel.csv",
+                 "scan_4idl": "scan_ownframe0_4idl.csv"}[source]
+        strata = [read(fname)]
+    return {"strata": strata, "files": used}
 
 
 def subset_rows(pool, n, subset_seed):
@@ -153,9 +171,14 @@ def run(args):
     n_list = [0] if tm_only else [int(x) for x in args.n_list.split(",")]
     out_root = os.path.join(REPO, "results", args.exp_name)
 
+    print(f"[design] label pool: {DESIGN_DIR_REL}", flush=True)
+    for f in pool["files"]:
+        print(f"[design]   {f['file']}  n_rows={f['n_rows']}  sha256={f['sha256_16']}", flush=True)
+
     result = {"source": args.source, "encoder_mode": args.encoder_mode,
               "md_weight": args.md_weight, "hp": SHARED_HP[args.encoder_mode],
-              "n_subsets": args.n_subsets, "n_seeds": args.n_seeds, "per_n": {}}
+              "n_subsets": args.n_subsets, "n_seeds": args.n_seeds,
+              "pool_dir": DESIGN_DIR_REL, "pool_files": pool["files"], "per_n": {}}
     for n in n_list:
         subsets = []
         for s in range(1, args.n_subsets + 1):

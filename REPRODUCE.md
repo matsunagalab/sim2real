@@ -34,15 +34,7 @@ The experimental Tm split is fixed as follows:
 
 `data/nbbench/download.py` recreates this deliberate reassignment.
 
-## Rebuild summaries, figures, and PDFs
-
-Rebuild compact result summaries from the tracked final `scaling.json` files:
-
-```bash
-uv run python scripts/reproduce_paper_results.py --stage summaries --force
-```
-
-This step also checks the selected representative results against the reference values stored in `plot/build_tuned_summaries.py`.
+## Rebuild figures and PDFs
 
 Rebuild Figs. 2 and 3, the supplementary figures and tables, and both PDFs:
 
@@ -62,27 +54,30 @@ Typesetting uses `tectonic` from `PATH` or from the `TECTONIC` environment varia
 
 ## Rerun the reported model results
 
-The `reported-results` stage reruns the selected final conditions for seven source-label settings under both frozen and fine-tuned encoders:
+The two comparisons of the paper are produced by two different harnesses and have their own stages.
+
+The `physical-observable` stage reruns Fig. 3: the two Tm-only baselines and the six computed observables (FEP, MD native contacts, Rosetta, FoldX, and the two Rosetta proposal-design controls), each with a frozen and a fine-tuned encoder, as 24-model ensembles:
 
 ```bash
 uv run python scripts/reproduce_paper_results.py \
-  --stage reported-results --gpus 0 --force
+  --stage physical-observable --gpus 0 --force
 ```
 
-Each result uses five training seeds, the 114-example validation set for setting selection, and the 396-example test set for final evaluation. The selected conditions run sequentially on the first GPU ID supplied to `--gpus`. To use another device, replace `0` with its ID. To inspect the planned commands without running them:
+The `data-design` stage reruns Fig. 2: the two Tm-only baselines and the single mutation scan and heterogeneous designs, each with a frozen and a fine-tuned encoder, as 8 subset draws x 3 model-initialization seeds under one pre-specified protocol shared by both designs:
 
 ```bash
 uv run python scripts/reproduce_paper_results.py \
-  --stage reported-results --gpus 0 --force --dry-run
+  --stage data-design --gpus 0 --force
 ```
 
-After training, rebuild summaries and paper outputs:
+Every result uses the 114-example validation set for selection and the 396-example test set for final evaluation. The conditions run sequentially on the first GPU ID supplied to `--gpus`. To use another device, replace `0` with its ID. To inspect the planned commands without running them:
 
 ```bash
-uv run python scripts/reproduce_paper_results.py --stage summaries,figures --force
+uv run python scripts/reproduce_paper_results.py \
+  --stage all --gpus 0 --force --dry-run
 ```
 
-To run the full sequence in one command:
+To run training and the paper outputs in one command:
 
 ```bash
 uv run python scripts/reproduce_paper_results.py \
@@ -96,14 +91,16 @@ These steps repeat the selected final configurations. They do not repeat every a
 - `paper/analysis/supplementary/tables/candidate_validation.tsv`
 - `paper/analysis/supplementary/tables/selected_settings.tsv`
 
-The main figures also retain a heterogeneous-nanobody MD comparison and 35M/650M model-size controls as tracked result inputs. These older controls are checked for availability but are not retrained by these steps.
+The 35M/650M model-size controls of the supplementary material are checked for availability but are not retrained by these steps.
+
+`results/final_*`, `results/tuned_rep/*`, and the ThermoMPNN label condition come from an earlier version of this study. They are kept for history and are deliberately not part of this workflow; rerunning them does not reproduce the current paper.
 
 Raw simulation data are not needed to rebuild model summaries, figures, or PDFs. They are needed only to regenerate processed computational labels. The trajectories, calculation inputs, and processed labels are deposited at <https://doi.org/10.5281/zenodo.21637705>, which carries its own README describing the deposited files and how to recompute a label from them.
 
 ## Outputs used by the paper
 
-- Selected results: `results/final_*_{frozen,hot}/scaling.json`
-- Compact main-figure summaries: `results/tuned_rep/`
+- Fig. 3 results: `results/fig3_*_{frozen,hot}/scaling.json`, with the baseline in `results/n24_tm_{frozen,hot}_shared/scaling.json`
+- Fig. 2 results: `results/design_aligned_*_{frozen,hot}/design.json`, with the baseline in `results/design_tmonly_{frozen,hot}/design.json`
 - Main figures: `paper/tex/figures/fig_outline*.{pdf,png,svg}`
 - Supplementary tables and figures: `paper/analysis/supplementary/`
 - Main and supplementary PDFs: `paper/tex/main.pdf`, `paper/tex/supplementary_main.pdf`
