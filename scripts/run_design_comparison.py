@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Controlled data-design comparison: matched mutation scan vs heterogeneous panel.
+"""Controlled data-design comparison: single mutation scan vs heterogeneous panel.
 
 Isolated from prepare.py so existing manuscript results are untouched. Implements
 the protocol from paper/analysis/md_data_design_review.md (valid-minimal scope):
@@ -156,8 +156,13 @@ def run(args):
     os.environ["MTL_WEIGHT_MODE"] = "fixed"
     os.environ["MD_WEIGHT"] = str(args.md_weight)
     os.environ["DETACH_AUX_ENCODER"] = "true"
+    # --epochs is a smoke-test override. Without it the protocol must use train.py's
+    # own default, so an inherited NUM_TRAIN_EPOCHS from the calling shell is cleared
+    # rather than silently shortening or lengthening training.
     if args.epochs:
         os.environ["NUM_TRAIN_EPOCHS"] = str(args.epochs)
+    else:
+        os.environ.pop("NUM_TRAIN_EPOCHS", None)
     import torch
     from transformers import AutoTokenizer
     from prepare import MODEL_NAME, MAX_LENGTH, get_tm_scaler, set_seed

@@ -39,8 +39,10 @@ model-initialization seeds. Held-out test MAE at 320 labels:
 
 The two comparisons have different Tm-only baselines because Fig. 2 fixes one
 protocol for both sources instead of tuning per source; never compare a Fig. 2
-number with a Fig. 3 baseline. Each `design.json` also records the label pool it
-read, in its `pool_dir` and `pool_files` fields.
+number with a Fig. 3 baseline. Runs made after August 2026 also record the label
+pool they read, in the `pool_dir` and `pool_files` fields of `design.json`; the
+files tracked here predate that and identify their pool by subset size instead
+(421 + 389 for the scan, 763 for the heterogeneous panel).
 
 ### Earlier result families
 

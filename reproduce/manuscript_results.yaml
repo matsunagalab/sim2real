@@ -30,6 +30,14 @@ fixed_inputs:
   - data/source_labels/MANIFEST.tsv
   - data/source_labels/fep/PROVENANCE.tsv
 
+  # prepare.py validates every manifest row marked used_in_current_manuscript=yes
+  # at import time and refuses to start if one of those tables is missing, so the
+  # active rows that no reported condition trains on still have to be listed here.
+  - data/source_labels/fep/fep1mel_mdmatch_processed.csv
+  - data/source_labels/fep/fep4idl_mdmatch_processed.csv
+  - data/source_labels/rosetta/measured/1mel_rosettaddg_mdmatch_processed.csv
+  - data/source_labels/rosetta/measured/4idl_rosettaddg_mdmatch_processed.csv
+
   # Fig. 3: the six physical observables on the identical 1MEL/4IDL variant set
   # (421/389), in a common sequence order so every source sees the same subsets.
   - data/source_labels/fig3_matched/FEP_1mel.csv
@@ -583,8 +591,10 @@ stages:
   # ---------------------------------------------------------------- Fig. 2 ---
   # One pre-specified protocol shared by both designs (no per-source tuning):
   # 8 subset draws x 3 model-initialization seeds, label counts 20,80,160,320.
-  # DESIGN_DATA_DIR must point at the aligned pools; without it the harness falls
-  # back to the older non-aligned pools and the MAEs move by up to ~0.1 degree.
+  # DESIGN_DATA_DIR is set explicitly here even though it is also the harness
+  # default, so the pool these results come from is visible in this file. Pointing
+  # it at the older data/source_labels/md_design/ moves the MAEs by up to ~0.1
+  # degree without any error, because both directories use the same file names.
   data-design:
     - name: Fig. 2 baseline, frozen encoder, Tm labels only
       type: command

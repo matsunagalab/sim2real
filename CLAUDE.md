@@ -52,7 +52,7 @@ uv run python scripts/reproduce_paper_results.py \
 
 This reruns the 14 selected configurations of Fig. 3 (`physical-observable` stage) and the 6 of Fig. 2 (`data-design` stage). It does not repeat every candidate search or regenerate raw MD, FEP, Rosetta, or FoldX calculations.
 
-The Fig. 2 harness reads its label pools from `data/source_labels/md_design_aligned/`. `DESIGN_DATA_DIR` overrides that directory; the older `data/source_labels/md_design/` holds files with the same names but different variants and Q values, so an accidental override shifts the MAEs silently. Each `design.json` records the pool it used.
+The Fig. 2 harness reads its label pools from `data/source_labels/md_design_aligned/`. `DESIGN_DATA_DIR` overrides that directory; the older `data/source_labels/md_design/` holds files with the same names but different variants and Q values, so an accidental override shifts the MAEs silently. `design.json` files written from August 2026 record the pool in `pool_dir` and `pool_files`; the tracked ones predate that and identify their pool by subset size (421 + 389 and 763).
 
 ## Reporting rules
 

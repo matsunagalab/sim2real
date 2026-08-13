@@ -181,6 +181,18 @@ go wrong here:
 - **Fig. 2 and Fig. 3 are owned by their own scripts.** `plot/fig2_data_design_aligned.py`
   and `plot/fig3_matched.py` write `paper/tex/figures/fig_outline0{2,3}_*` directly.
   Do not regenerate those figures from `plot/make_outline_figures.py`.
+- **`--check-only` tests existence, not correctness.** It does not compare numbers
+  and cannot tell a complete result from a run that was interrupted partway, since
+  `run_design_comparison.py` rewrites `design.json` after every label count. Confirm
+  that a `design.json` has all four counts (20, 80, 160, 320) with 8 subsets each,
+  and that a `scaling.json` has 396 absolute errors per point.
+- **The `git_commit` field of older result JSONs no longer resolves.** The history
+  was rewritten before publication to remove `paper/refs/`, so hashes recorded
+  before July 2026 (for example `60ac32c` in `results/fig3_*`) are dead. Use the
+  `timestamp` and `env` blocks instead; the settings they record are unaffected.
+- **`scaling.json` also carries a `best` block, chosen by the lowest test MAE.**
+  It is descriptive output, and no current figure reads it. Never quote it as a
+  selected result: selection is on the 114-example validation set.
 
 ### Rerun the data-design comparison (Fig. 2)
 
@@ -202,7 +214,9 @@ different Q values, so pointing the harness at them shifts every MAE by up to
 about 0.1 °C instead of failing. The pool directory, the row count, and a digest
 of each file read are printed at start-up and stored in the `pool_dir` and
 `pool_files` fields of the resulting `design.json`; check those first if a rerun
-does not match the published numbers.
+does not match the published numbers. The tracked `design.json` files predate that
+recording and therefore have no `pool_dir` field; they were produced with the
+aligned pool, which their subset sizes (421 + 389 and 763) confirm.
 
 ### Recompute the MD native-contact labels
 
